@@ -14,6 +14,7 @@
 
 import base64
 import json
+import argparse
 
 from google import genai
 from google.genai import types
@@ -31,16 +32,23 @@ def chunk_text(text, chunk_size=1000, overlap=200):
     return chunks
 
 
-def create_embeddings():
+def create_embeddings(
+    input_file: str,
+    output_file: str,
+    chunk_size: int = 1000,
+    overlap: int = 200,
+    model: str = "gemini-embedding-001",
+):
+    """Create embeddings from an input text file and write JSON to output_file."""
     client = genai.Client()
 
-    # Read walkthrough
-    with open("walkthrough.txt", "r") as f:
+    # Read corpus
+    with open(input_file, "r") as f:
         text = f.read()
 
     # Split into chunks
-    chunks = chunk_text(text)
-    print(f"Created {len(chunks)} chunks")
+    chunks = chunk_text(text, chunk_size=chunk_size, overlap=overlap)
+    print(f"Created {len(chunks)} chunks (chunk_size={chunk_size}, overlap={overlap})")
 
     # Create embeddings
     embeddings_data = []
@@ -48,19 +56,60 @@ def create_embeddings():
         print(f"Processing chunk {i+1}/{len(chunks)}")
 
         response = client.models.embed_content(
-            model="gemini-embedding-001",
+            model=model,
             contents=chunk,
             config=types.EmbedContentConfig(task_type="retrieval_document"),
         )
 
-        embeddings_data.append({"chunk_id": i, "text": chunk, "embedding": response.embeddings[0].values})
+        embeddings_data.append(
+            {"chunk_id": i, "text": chunk, "embedding": response.embeddings[0].values}
+        )
 
     # Save to file
-    with open("walkthrough_embeddings.json", "w") as f:
+    with open(output_file, "w") as f:
         json.dump(embeddings_data, f)
 
-    print("Embeddings saved!")
+    print(f"Embeddings saved to {output_file}!")
 
 
 if __name__ == "__main__":
-    create_embeddings()
+    parser = argparse.ArgumentParser(description="Create embeddings for a text corpus")
+    parser.add_argument(
+        "--input",
+        "-i",
+        default="walkthrough.txt",
+        help="Input text file (default: walkthrough.txt)",
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        default="walkthrough_embeddings.json",
+        help="Output JSON file (default: walkthrough_embeddings.json)",
+    )
+    parser.add_argument(
+        "--chunk-size",
+        type=int,
+        default=1000,
+        help="Chunk size in characters (default: 1000)",
+    )
+    parser.add_argument(
+        "--overlap",
+        type=int,
+        default=200,
+        help="Overlap between chunks in characters (default: 200)",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="gemini-embedding-001",
+        help="Embedding model name (default: gemini-embedding-001)",
+    )
+    args = parser.parse_args()
+
+    create_embeddings(
+        input_file=args.input,
+        output_file=args.output,
+        chunk_size=args.chunk_size,
+        overlap=args.overlap,
+        model=args.model,
+    )

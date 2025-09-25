@@ -64,6 +64,43 @@ from google import genai
 from google.genai import types
 from mem0 import MemoryClient
 
+# Game profile support
+def _resolve_default_profile_path(game_name: str) -> str | None:
+    try:
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        candidate = os.path.join(base_dir, "game_companion", "plugins", game_name, "profile.json")
+        return candidate if os.path.isfile(candidate) else None
+    except Exception:
+        return None
+
+def load_game_profile() -> dict | None:
+    """
+    Load a game profile JSON if available.
+    Priority:
+    - VOICE_PROFILE absolute/relative path to a JSON file
+    - VOICE_GAME name (e.g., 'eu4') -> uses game_companion/plugins/<name>/profile.json
+    Returns dict or None if not found/failed.
+    """
+    profile_path = os.getenv("VOICE_PROFILE")
+    if profile_path and os.path.isfile(profile_path):
+        try:
+            with open(profile_path, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"⚠️  Failed to load VOICE_PROFILE '{profile_path}': {e}")
+
+    game_name = os.getenv("VOICE_GAME")
+    if game_name:
+        candidate = _resolve_default_profile_path(game_name)
+        if candidate:
+            try:
+                with open(candidate, "r") as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"⚠️  Failed to load VOICE_GAME profile '{candidate}': {e}")
+
+    return None
+
 # Suppress ALL warnings - nuclear option but necessary
 warnings.filterwarnings("ignore")
 # Also suppress via logging
@@ -275,6 +312,7 @@ class WindWakerVoiceChat:
         self.audio_stream = None
         self.pya = None
         self.client = None
+        self.profile = load_game_profile()
         self.memory_client = self._init_memory_client()
         self.conversation_context = []  # Track conversation flow
         self.sailing_task = None
@@ -297,6 +335,24 @@ class WindWakerVoiceChat:
         except Exception as e:
             print(f"⚠️  Failed to initialize memory: {e}")
             return None
+
+    def build_config(self):
+        """
+        Build the Live API config dynamically from a game profile if available,
+        otherwise fall back to the default CONFIG constant.
+        """
+        if self.profile and isinstance(self.profile, dict):
+            system_instruction = (
+                self.profile.get("model", {}).get("system_instruction")
+                or CONFIG.get("system_instruction")
+            )
+            tools = self.profile.get("tools") or CONFIG.get("tools")
+            return {
+                "response_modalities": ["AUDIO"],
+                "system_instruction": system_instruction,
+                "tools": tools,
+            }
+        return CONFIG
 
     async def _store_memory_async(self, context):
         """Store memory asynchronously to avoid blocking audio"""
@@ -433,10 +489,10 @@ class WindWakerVoiceChat:
                         "vision_analysis": {"error": "Failed to capture screenshot"},
                         "screenshot_captured": False,
                     }
-            elif fc.name == "search_walkthrough":
+            elif fc.name in ("search_walkthrough", "search_guide"):
                 query = fc.args.get("query", "")
-                print(f"📚 Searching walkthrough for: {query}")
-                search_results = self.search_walkthrough(query)
+                print(f"📚 Searching guide for: {query}")
+                search_results = self.search_guide(query)
                 result = {"query": query, "results": search_results}
 
             elif fc.name == "search_user_history":
@@ -554,8 +610,18 @@ class WindWakerVoiceChat:
             image_bytes = base64.b64decode(screenshot_data["data"])
             print(f"🔍 Decoded image: {len(image_bytes)} bytes")
 
-            # Create the prompt
-            prompt = f"""
+            # Create the prompt (profile-aware)
+            profile_prompt = None
+            if getattr(self, "profile", None):
+                profile_prompt = (
+                    self.profile.get("prompts", {}).get("visual_analysis")
+                    if isinstance(self.profile.get("prompts"), dict)
+                    else None
+                )
+            if profile_prompt:
+                prompt = f"{profile_prompt}\n\nUser query: {user_query if user_query else 'General game status'}"
+            else:
+                prompt = f"""
             Analyze this Wind Waker screenshot and provide detailed observations about the current game state.
 
             User query: {user_query if user_query else "General game status"}
@@ -604,30 +670,47 @@ class WindWakerVoiceChat:
             }
 
     def search_walkthrough(self, query, top_k=3):
-        """Search walkthrough using embeddings"""
+        """Search walkthrough using embeddings (deprecated – uses search_guide)"""
+        return self.search_guide(query=query, top_k=top_k)
+
+    def search_guide(self, query, top_k=None):
+        """Generic guide search using embeddings configured by game profile"""
         try:
-            print(f"🔍 Searching walkthrough for: '{query}'")
+            print(f"🔍 Searching guide for: '{query}'")
+
+            # Determine embeddings file and parameters
+            embeddings_file = "walkthrough_embeddings.json"
+            default_top_k = 3
+            embed_model = "gemini-embedding-001"
+            if getattr(self, "profile", None):
+                rag_cfg = self.profile.get("rag", {})
+                embeddings_file = rag_cfg.get("embeddings_file", embeddings_file)
+                default_top_k = rag_cfg.get("top_k", default_top_k)
+                embed_model = rag_cfg.get("embed_model", embed_model)
+
+            if top_k is None:
+                top_k = default_top_k
 
             # Load embeddings
-            with open("walkthrough_embeddings.json", "r") as f:
+            with open(embeddings_file, "r") as f:
                 embeddings_data = json.load(f)
 
-            print(f"🔍 Loaded {len(embeddings_data)} chunks")
+            print(f"🔍 Loaded {len(embeddings_data)} chunks from {embeddings_file}")
 
             # Get query embedding
             client = genai.Client()
             query_response = client.models.embed_content(
-                model="gemini-embedding-001",
+                model=embed_model,
                 contents=query,
                 config=types.EmbedContentConfig(task_type="retrieval_query"),
             )
             query_embedding = query_response.embeddings[0].values
 
-            # Calculate similarities
+            # Calculate similarities (cosine approximation via dot if vectors are normalized)
             similarities = []
             for item in embeddings_data:
                 similarity = np.dot(query_embedding, item["embedding"])
-                similarities.append((similarity, item["text"], item["chunk_id"]))
+                similarities.append((similarity, item["text"], item.get("chunk_id", -1)))
 
             # Get top results
             similarities.sort(reverse=True)
@@ -639,8 +722,11 @@ class WindWakerVoiceChat:
 
             return "\n\n---\n\n".join(results)
 
+        except FileNotFoundError as e:
+            print(f"🔍 Guide embeddings not found: {e}")
+            return f"Guide search unavailable: {e}"
         except Exception as e:
-            print(f"🔍 Walkthrough search error: {e}")
+            print(f"🔍 Guide search error: {e}")
             traceback.print_exc()
             return f"Search failed: {e}"
 
@@ -1111,7 +1197,7 @@ class WindWakerVoiceChat:
             print("✓ Connected to Gemini")
 
             async with (
-                self.client.aio.live.connect(model=MODEL, config=CONFIG) as session,
+                self.client.aio.live.connect(model=MODEL, config=self.build_config()) as session,
                 asyncio.TaskGroup() as tg,
             ):
                 self.session = session
