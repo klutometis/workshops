@@ -183,6 +183,19 @@ jobs:
           mkdir -pv root
           cp -frv ./waker/slides/dist ./root/waker
 
+      # Build slides for agents
+      - name: Build slides for agents
+        id: build_agents
+        working-directory: ./agents/slides
+        run: |
+          npm install
+          npm run build -- --base /workshops/agents
+
+      - name: Create deployment root for agents
+        run: |
+          mkdir -pv root
+          cp -frv ./agents/slides/dist ./root/agents
+
       # Deploy to GitHub Pages
       - uses: actions/configure-pages@v4
 
