@@ -76,11 +76,11 @@ const drawRoughCircle = () => {
 </script>
 
 <template>
-  <div class="relative w-full h-full flex items-center justify-center">
+  <div class="relative w-full h-full">
     <img 
       ref="imgRef"
       :src="src" 
-      class="max-w-full max-h-full object-contain"
+      class="w-full h-full object-contain"
       @load="onImageLoad"
     />
     <svg 

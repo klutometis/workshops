@@ -18,7 +18,28 @@ duration: 10min
 layout: image
 image: ./agent-frameworks-cropped.png
 backgroundSize: contain
+transition: fade
 ---
+
+---
+layout: full
+---
+
+<style scoped>
+.slidev-layout {
+  padding: 0 !important;
+}
+</style>
+
+<RoughCircleImage 
+  src="/agent-frameworks-cropped.png" 
+  :circle-x="150" 
+  :circle-y="450"
+  :circle-width="650"
+  :circle-height="200"
+  stroke-color="red"
+  :stroke-width="5"
+/>
 
 ---
 layout: image
@@ -103,15 +124,4 @@ graph LR
     style Task4 fill:#1ABC9C,stroke:#333,stroke-width:2px,color:#fff
 ```
 
-</div>
-
----
-layout: center
-class: text-center
----
-
-# Questions?
-
-<div class="opacity-50">
-Thank you
 </div>
