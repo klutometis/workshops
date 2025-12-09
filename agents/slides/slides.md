@@ -18,28 +18,7 @@ duration: 10min
 layout: image
 image: ./agent-frameworks-cropped.png
 backgroundSize: contain
-transition: fade
 ---
-
----
-layout: full
----
-
-<style scoped>
-.slidev-layout {
-  padding: 0 !important;
-}
-</style>
-
-<RoughCircleImage 
-  src="/agent-frameworks-cropped.png" 
-  :circle-x="150" 
-  :circle-y="450"
-  :circle-width="650"
-  :circle-height="200"
-  stroke-color="red"
-  :stroke-width="5"
-/>
 
 ---
 layout: image
