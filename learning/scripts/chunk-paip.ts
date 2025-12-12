@@ -349,6 +349,7 @@ async function chunkDocument(inputPath: string, outputPath?: string) {
       // Add provenance metadata and ensure unique IDs
       result.chunks.forEach(chunk => {
         chunk.chunk_id = `chunk-${chunkIdCounter++}-${chunk.chunk_id}`;
+        chunk.section = section.header;
         chunk.source_file = sourceFileName;
         chunk.heading_path = section.headingPath;
         chunk.markdown_anchor = section.anchor;

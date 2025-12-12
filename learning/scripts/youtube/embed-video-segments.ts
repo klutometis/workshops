@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { GoogleGenAI } from "@google/genai";
 import fs from 'fs/promises';
 import path from 'path';
+import { generateEmbeddings, type TextSegment, type EmbeddingResult as LibEmbeddingResult } from '../../lib/embeddings.js';
 
-// Types
+// YouTube-specific types
 interface VideoSegment {
   segment_index: number;
   timestamp: number;
@@ -69,7 +69,12 @@ interface EmbeddingResult {
   };
 }
 
-// Create rich text for embedding from all available content
+/**
+ * Create rich embedding text from all available video segment content
+ * 
+ * Combines: audio transcript + visual description + code + slides + concepts
+ * This domain-specific enrichment happens before calling the shared embedding library
+ */
 function createEmbeddingText(segment: VideoSegment, conceptName?: string): string {
   const parts: string[] = [];
   
@@ -106,56 +111,34 @@ function createEmbeddingText(segment: VideoSegment, conceptName?: string): strin
   return parts.join('\n\n');
 }
 
-// Embed a single video segment using REST API directly
-async function embedSegment(
-  apiKey: string,
-  segment: VideoSegment,
-  videoId: string,
-  modelName: string,
-  conceptName?: string
-): Promise<EmbeddedVideoSegment> {
-  const embeddingText = createEmbeddingText(segment, conceptName);
-  
-  if (!embeddingText.trim()) {
-    throw new Error(`Segment ${segment.segment_index} has no content to embed`);
-  }
-  
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:embedContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: modelName,
-        content: { parts: [{ text: embeddingText }] },
-        outputDimensionality: 1536
-      })
-    }
-  );
-  
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Embedding API failed: ${errorText}`);
-  }
-  
-  const data = await response.json();
-  
-  if (!data.embedding || !data.embedding.values) {
-    throw new Error(`Failed to generate embedding for segment: ${segment.segment_index}`);
-  }
-  
-  // Normalize embedding (required for 1536D per Gemini docs)
-  const embedding = data.embedding.values;
-  const magnitude = Math.sqrt(embedding.reduce((sum: number, val: number) => sum + val * val, 0));
-  const normalizedEmbedding = embedding.map((val: number) => val / magnitude);
-  
-  return {
-    ...segment,
-    video_id: videoId,
-    embedding: normalizedEmbedding,
-    embedding_model: modelName,
-    embedding_text: embeddingText,
-  };
+/**
+ * Transform video segments into generic text segments for embedding
+ */
+function videoSegmentsToTextSegments(
+  segments: VideoSegment[],
+  conceptNames: Map<string, string>
+): TextSegment[] {
+  return segments.map(segment => {
+    const conceptName = segment.concept_mapping?.concept_id
+      ? conceptNames.get(segment.concept_mapping.concept_id)
+      : undefined;
+    
+    const embeddingText = createEmbeddingText(segment, conceptName);
+    
+    return {
+      id: `segment-${segment.segment_index}`,
+      text: embeddingText,
+      metadata: {
+        segment_index: segment.segment_index,
+        timestamp: segment.timestamp,
+        audio_start: segment.audio_start,
+        audio_end: segment.audio_end,
+        frame_path: segment.frame_path,
+        concept_mapping: segment.concept_mapping,
+        analysis: segment.analysis,
+      },
+    };
+  });
 }
 
 // Load concept graph to get human-readable concept names
@@ -169,7 +152,7 @@ async function loadConceptNames(videoId: string): Promise<Map<string, string>> {
     const data = JSON.parse(await fs.readFile(conceptGraphPath, 'utf-8'));
     const conceptMap = new Map<string, string>();
     
-    for (const concept of data.concepts || []) {
+    for (const concept of data.nodes || []) {
       conceptMap.set(concept.id, concept.name);
     }
     
@@ -207,85 +190,38 @@ async function embedVideoSegments(videoId: string, outputPath?: string) {
   const conceptNames = await loadConceptNames(segmentData.video_id);
   console.log(`   Found ${conceptNames.size} concept names\n`);
   
-  // Get API key
-  const apiKey = process.env.GOOGLE_API_KEY;
-  if (!apiKey) {
-    console.error('❌ GOOGLE_API_KEY not found in environment!');
-    process.exit(1);
-  }
-  
   const modelName = 'gemini-embedding-001';
-  
   console.log(`🔢 Using model: ${modelName}`);
   console.log(`📊 Processing ${segmentData.segments.length} segments...\n`);
   
-  // Process segments with progress tracking
-  const embeddedSegments: EmbeddedVideoSegment[] = [];
-  const batchSize = 10; // Video segments can be larger, so smaller batches
-  const totalSegments = segmentData.segments.length;
+  // Transform video segments into generic text segments
+  const textSegments = videoSegmentsToTextSegments(segmentData.segments, conceptNames);
   
-  for (let i = 0; i < totalSegments; i += batchSize) {
-    const batch = segmentData.segments.slice(i, Math.min(i + batchSize, totalSegments));
-    const batchNum = Math.floor(i / batchSize) + 1;
-    const totalBatches = Math.ceil(totalSegments / batchSize);
+  // Generate embeddings using shared library
+  console.log(`🔮 Generating embeddings using shared library...\n`);
+  const result = await generateEmbeddings({
+    segments: textSegments,
+    model: modelName,
+    batchSize: 10, // Video segments can be rich, so use smaller batches
+  });
+  
+  console.log(`\n✅ Successfully embedded ${result.segments.length}/${segmentData.segments.length} segments\n`);
+  
+  // Transform results back to YouTube format (preserve all video metadata)
+  const embeddedSegments: EmbeddedVideoSegment[] = result.segments.map(embeddedSeg => {
+    const originalSegment = segmentData.segments[embeddedSeg.metadata.segment_index];
     
-    console.log(`   [Batch ${batchNum}/${totalBatches}] Processing segments ${i + 1}-${Math.min(i + batchSize, totalSegments)}...`);
-    
-    try {
-      // Process batch in parallel
-      const batchPromises = batch.map(segment => {
-        const conceptName = segment.concept_mapping?.concept_id
-          ? conceptNames.get(segment.concept_mapping.concept_id)
-          : undefined;
-        return embedSegment(apiKey, segment, segmentData.video_id, modelName, conceptName);
-      });
-      const batchResults = await Promise.all(batchPromises);
-      
-      embeddedSegments.push(...batchResults);
-      console.log(`      ✅ Embedded ${batchResults.length} segments`);
-      
-      // Rate limiting - be nice to the API
-      if (i + batchSize < totalSegments) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-      
-    } catch (error) {
-      console.log(`      ❌ Batch failed: ${error}`);
-      console.log(`      Retrying segments individually...`);
-      
-      // Fallback: try each segment individually
-      for (const segment of batch) {
-        try {
-          const conceptName = segment.concept_mapping?.concept_id
-            ? conceptNames.get(segment.concept_mapping.concept_id)
-            : undefined;
-          const embedded = await embedSegment(apiKey, segment, segmentData.video_id, modelName, conceptName);
-          embeddedSegments.push(embedded);
-          console.log(`      ✅ Embedded segment ${segment.segment_index}`);
-          await new Promise(resolve => setTimeout(resolve, 500));
-        } catch (segmentError) {
-          console.log(`      ❌ Failed segment ${segment.segment_index}: ${segmentError}`);
-        }
-      }
-    }
-  }
+    return {
+      ...originalSegment,
+      video_id: segmentData.video_id,
+      embedding: embeddedSeg.embedding,
+      embedding_model: result.metadata.embedding_model,
+      embedding_text: embeddedSeg.text, // What was actually embedded
+    };
+  });
   
-  console.log(`\n✅ Successfully embedded ${embeddedSegments.length}/${totalSegments} segments\n`);
-  
-  // Validation
-  if (embeddedSegments.length === 0) {
-    console.error('❌ No embeddings generated!');
-    process.exit(1);
-  }
-  
-  const embeddingDimensions = embeddedSegments[0].embedding.length;
+  const embeddingDimensions = result.metadata.embedding_dimensions;
   console.log(`🔍 Embedding dimensions: ${embeddingDimensions}`);
-  
-  // Verify all embeddings have same dimensions
-  const dimensionMismatch = embeddedSegments.filter(s => s.embedding.length !== embeddingDimensions);
-  if (dimensionMismatch.length > 0) {
-    console.log(`⚠️  Warning: ${dimensionMismatch.length} segments have mismatched dimensions`);
-  }
   
   // Create output
   const output: EmbeddingResult = {

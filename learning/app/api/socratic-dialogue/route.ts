@@ -81,7 +81,7 @@ async function loadConceptContext(
     console.log(`   🧮 Querying database with ${conceptEmbedding.length}-dim embedding...`);
     
     // Search database using pgvector similarity
-    const segments = await searchSegments(
+    let segments = await searchSegments(
       conceptEmbedding,
       library.id,
       0.5, // similarity threshold
@@ -100,74 +100,141 @@ async function loadConceptContext(
       return {text: '(No textbook sections found for this concept)', chunks: []};
     }
     
-    console.log(`   ✅ Found ${segments.length} segments by similarity:`);
-    segments.forEach((seg: any, i: number) => {
-      const label = seg.audio_text?.substring(0, 60) || 'Untitled';
+    console.log(`   ✅ Found ${segments.length} segments by similarity`);
+    
+    // Deduplicate sources by section + line range for markdown chunks
+    const dedupedSegments = segments.reduce((acc: any[], seg: any) => {
+      if (seg.content_type === 'text_chunk') {
+        const key = `${seg.metadata.section}-${seg.metadata.start_line}-${seg.metadata.end_line}`;
+        const existing = acc.find(s => 
+          s.content_type === 'text_chunk' &&
+          `${s.metadata.section}-${s.metadata.start_line}-${s.metadata.end_line}` === key
+        );
+        if (!existing) {
+          acc.push(seg);
+        }
+      } else {
+        acc.push(seg); // Keep all video segments
+      }
+      return acc;
+    }, []);
+    
+    console.log(`   📦 Deduplicated to ${dedupedSegments.length} unique sources`);
+    dedupedSegments.forEach((seg: any, i: number) => {
+      const label = seg.content_text?.substring(0, 60) || seg.metadata?.title || 'Untitled';
       console.log(`      ${i + 1}. [${seg.similarity.toFixed(3)}] ${label}`);
-      if (seg.key_concepts) {
-        console.log(`         Key concepts: ${seg.key_concepts.join(', ')}`);
+      if (seg.metadata?.key_concepts) {
+        console.log(`         Key concepts: ${seg.metadata.key_concepts.join(', ')}`);
       }
     });
+    
+    segments = dedupedSegments;
     
     // Format the most relevant segments for LLM with rich multimodal content
     const formattedText = segments
       .map((seg: any) => {
-        // Use segment_timestamp (not timestamp which doesn't exist)
-        const timestamp = seg.segment_timestamp || 0;
-        const minutes = Math.floor(timestamp / 60);
-        const seconds = Math.floor(timestamp % 60);
-        const title = `Timestamp ${minutes}:${String(seconds).padStart(2, '0')}`;
-        
-        // Build rich content from all available fields
-        const parts: string[] = [];
-        
-        if (seg.audio_text && seg.audio_text.trim()) {
-          parts.push(`**Transcript:** ${seg.audio_text}`);
+        if (seg.content_type === 'video_segment') {
+          // VIDEO FORMATTING
+          const timestamp = seg.metadata.segment_timestamp || 0;
+          const minutes = Math.floor(timestamp / 60);
+          const seconds = Math.floor(timestamp % 60);
+          const title = `Timestamp ${minutes}:${String(seconds).padStart(2, '0')}`;
+          
+          const parts: string[] = [];
+          
+          if (seg.content_text && seg.content_text.trim()) {
+            parts.push(`**Transcript:** ${seg.content_text}`);
+          }
+          
+          if (seg.metadata.visual_description && seg.metadata.visual_description.trim()) {
+            parts.push(`**Visual:** ${seg.metadata.visual_description}`);
+          }
+          
+          if (seg.metadata.code_content && seg.metadata.code_content.trim()) {
+            parts.push(`**Code:**\n\`\`\`\n${seg.metadata.code_content}\n\`\`\``);
+          }
+          
+          if (seg.metadata.slide_content && seg.metadata.slide_content.trim()) {
+            parts.push(`**Slides:** ${seg.metadata.slide_content}`);
+          }
+          
+          if (seg.metadata.key_concepts && seg.metadata.key_concepts.length > 0) {
+            parts.push(`**Key Concepts:** ${seg.metadata.key_concepts.join(', ')}`);
+          }
+          
+          const content = parts.length > 0 ? parts.join('\n\n') : '(no content)';
+          
+          return `**[VIDEO] ${title}** (similarity: ${(seg.similarity * 100).toFixed(1)}%)\n\n${content}`;
+          
+        } else if (seg.content_type === 'text_chunk') {
+          // TEXT CHUNK FORMATTING
+          const section = seg.metadata.section || 'Section';
+          const title = seg.metadata.title || section;
+          const lines = seg.metadata.start_line && seg.metadata.end_line
+            ? ` (lines ${seg.metadata.start_line}-${seg.metadata.end_line})`
+            : '';
+          
+          return `**[TEXT] ${title}${lines}** (similarity: ${(seg.similarity * 100).toFixed(1)}%)\n\n${seg.content_text}`;
+          
+        } else {
+          // Fallback for unknown types
+          return `**[UNKNOWN]** (similarity: ${(seg.similarity * 100).toFixed(1)}%)\n\n${seg.content_text || '(no content)'}`;
         }
-        
-        if (seg.visual_description && seg.visual_description.trim()) {
-          parts.push(`**Visual:** ${seg.visual_description}`);
-        }
-        
-        if (seg.code_content && seg.code_content.trim()) {
-          parts.push(`**Code:**\n\`\`\`\n${seg.code_content}\n\`\`\``);
-        }
-        
-        if (seg.slide_content && seg.slide_content.trim()) {
-          parts.push(`**Slides:** ${seg.slide_content}`);
-        }
-        
-        if (seg.key_concepts && seg.key_concepts.length > 0) {
-          parts.push(`**Key Concepts:** ${seg.key_concepts.join(', ')}`);
-        }
-        
-        const content = parts.length > 0 ? parts.join('\n\n') : '(no content)';
-        
-        return `**[VIDEO] ${title}** (similarity: ${(seg.similarity * 100).toFixed(1)}%)\n\n${content}`;
       })
       .join('\n\n---\n\n');
     
     // Return BOTH formatted text AND raw chunks with provenance
     return {
       text: formattedText,
-      chunks: segments.map((seg: any) => ({
-        text: seg.audio_text,
-        topic: null,
-        chunk_type: 'video',
-        similarity: seg.similarity,
-        
-        // Video metadata (use correct field names from database)
-        video_id: library.video_id,
-        timestamp: seg.segment_timestamp,
-        segment_index: seg.segment_index,
-        audio_text: seg.audio_text,
-        audio_start: seg.audio_start,
-        audio_end: seg.audio_end,
-        visual_description: seg.visual_description,
-        code_content: seg.code_content,
-        slide_content: seg.slide_content,
-        key_concepts: seg.key_concepts,
-      }))
+      chunks: segments.map((seg: any) => {
+        if (seg.content_type === 'video_segment') {
+          return {
+            text: seg.content_text,
+            topic: null,
+            chunk_type: 'video',
+            similarity: seg.similarity,
+            
+            // Video metadata
+            video_id: library.video_id,
+            timestamp: seg.metadata.segment_timestamp,
+            segment_index: seg.index_num,
+            audio_start: seg.metadata.audio_start,
+            audio_end: seg.metadata.audio_end,
+            visual_description: seg.metadata.visual_description,
+            code_content: seg.metadata.code_content,
+            slide_content: seg.metadata.slide_content,
+            key_concepts: seg.metadata.key_concepts,
+          };
+        } else if (seg.content_type === 'text_chunk') {
+          return {
+            text: seg.content_text,
+            topic: seg.metadata.section,
+            chunk_type: 'text',
+            similarity: seg.similarity,
+            
+            // Text chunk metadata
+            chunk_id: seg.metadata.chunk_id,
+            chunk_index: seg.index_num,
+            title: seg.metadata.title,
+            section: seg.metadata.section,
+            start_line: seg.metadata.start_line,
+            end_line: seg.metadata.end_line,
+            
+            // Source viewing - just anchor, not entire document
+            markdown_anchor: (() => {
+              const anchor = generateMarkdownAnchor(seg.metadata.section);
+              console.log(`🔗 Section: "${seg.metadata.section}" → Anchor: "${anchor}"`);
+              return anchor;
+            })(),
+          };
+        } else {
+          return {
+            text: seg.content_text,
+            chunk_type: 'unknown',
+            similarity: seg.similarity,
+          };
+        }
+      })
     };
       
   } catch (error) {
@@ -372,11 +439,19 @@ export async function POST(request: NextRequest) {
 
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
+    // Fetch library to get markdown_content (only if we have sources to display)
+    let markdownContent = null;
+    if (sourceChunks.length > 0) {
+      const library = await getLibraryBySlug(libraryId);
+      markdownContent = library?.markdown_content || null;
+    }
+
     return NextResponse.json({
       message: parsedResponse.message,
       mastery_assessment: parsedResponse.mastery_assessment,
       textbookContext: textbookSections,
       sources: sourceChunks,
+      markdown_content: markdownContent, // Send once at response level
       usage: data.usageMetadata,
     });
 
@@ -427,6 +502,16 @@ function convertToGeminiFormat(systemPrompt: string, conversationHistory: Messag
   }
 
   return contents;
+}
+
+// Helper: Generate markdown anchor from section name (matching how markdown renderers work)
+function generateMarkdownAnchor(section: string | null | undefined): string | undefined {
+  if (!section) return undefined;
+  return section
+    .toLowerCase()
+    .replace(/[^a-z0-9\s_-]/g, '')  // Remove special chars (but keep underscores)
+    .replace(/\s+/g, '-')            // Spaces to hyphens
+    .replace(/^-+|-+$/g, '');        // Trim hyphens
 }
 
 // Build a Socratic teaching prompt using the concept's pedagogical data

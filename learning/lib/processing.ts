@@ -1,6 +1,7 @@
 import { execSync } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
+import { chunkMarkdownFile, MarkdownChunk } from './markdown-chunker';
 
 /**
  * Progress callback for tracking processing stages
@@ -337,9 +338,10 @@ export async function processYouTubeVideo(
  * 
  * Pipeline stages:
  * 1. Chunk markdown (20%)
- * 2. Extract concepts (50%)
- * 3. Generate embeddings (80%)
- * 4. Import to database (100%)
+ * 2. Extract concepts (40%)
+ * 3. Enrich concepts (60%)
+ * 4. Generate embeddings (80%)
+ * 5. Import to database (100%)
  * 
  * @param filePath - Path to markdown file
  * @param onProgress - Optional progress callback
@@ -358,46 +360,386 @@ export async function processMarkdownFile(
     );
   }
   
-  // TODO: Implement markdown processing pipeline
-  // For now, throw not implemented error
-  throw new ProcessingError(
-    'Markdown processing not yet implemented',
-    'not-implemented',
-    new Error('See Phase 1b Task 3')
-  );
+  // Generate slug and work directory
+  const fileName = path.basename(filePath, '.md');
+  const slug = fileName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const workDir = path.join(process.cwd(), 'markdown', slug);
+  
+  try {
+    // Create work directory
+    if (!fs.existsSync(workDir)) {
+      fs.mkdirSync(workDir, { recursive: true });
+    }
+    
+    // Stage 1: Extract concepts from full markdown (20%)
+    const conceptGraphPath = path.join(workDir, 'concept-graph.json');
+    if (fs.existsSync(conceptGraphPath)) {
+      onProgress?.('Extracting concepts', 20, 'Already extracted (skipping)');
+    } else {
+      onProgress?.('Extracting concepts', 20);
+      try {
+        runScript('scripts/markdown/extract-concepts.ts', [filePath]);
+      } catch (error: any) {
+        throw new ProcessingError(
+          'Failed to extract concepts',
+          'extract-concepts',
+          error
+        );
+      }
+    }
+    
+    // Stage 2: Chunk markdown into segments (40%)
+    const chunksPath = path.join(workDir, 'chunks.json');
+    if (fs.existsSync(chunksPath)) {
+      onProgress?.('Chunking markdown', 40, 'Already chunked (skipping)');
+    } else {
+      onProgress?.('Chunking markdown', 40, `Processing ${fileName}`);
+      try {
+        runScript('scripts/markdown/chunk-markdown.ts', [filePath]);
+      } catch (error: any) {
+        throw new ProcessingError(
+          'Failed to chunk markdown',
+          'chunk-markdown',
+          error
+        );
+      }
+    }
+    
+    // Stage 3: Enrich concepts with pedagogy (60%)
+    const enrichedConceptPath = path.join(workDir, 'concept-graph-enriched.json');
+    if (fs.existsSync(enrichedConceptPath)) {
+      onProgress?.('Enriching concepts', 60, 'Already enriched (skipping)');
+    } else {
+      onProgress?.('Enriching concepts', 60);
+      try {
+        runScript('scripts/markdown/enrich-concepts.ts', [filePath]);
+      } catch (error: any) {
+        throw new ProcessingError(
+          'Failed to enrich concepts',
+          'enrich-concepts',
+          error
+        );
+      }
+    }
+    
+    // Stage 4: Map chunks to concepts (70%)
+    const mappingsPath = path.join(workDir, 'chunk-concept-mappings.json');
+    if (fs.existsSync(mappingsPath)) {
+      onProgress?.('Mapping chunks to concepts', 70, 'Already mapped (skipping)');
+    } else {
+      onProgress?.('Mapping chunks to concepts', 70);
+      try {
+        runScript('scripts/markdown/map-chunks-to-concepts.ts', [filePath]);
+      } catch (error: any) {
+        throw new ProcessingError(
+          'Failed to map chunks to concepts',
+          'map-chunks-to-concepts',
+          error
+        );
+      }
+    }
+    
+    // Stage 5: Generate embeddings (80%)
+    const embeddingsPath = path.join(workDir, 'chunk-embeddings.json');
+    if (fs.existsSync(embeddingsPath)) {
+      onProgress?.('Generating embeddings', 80, 'Already embedded (skipping)');
+    } else {
+      onProgress?.('Generating embeddings', 80);
+      try {
+        runScript('scripts/markdown/embed-chunks.ts', [filePath]);
+      } catch (error: any) {
+        throw new ProcessingError(
+          'Failed to generate embeddings',
+          'embed-chunks',
+          error
+        );
+      }
+    }
+    
+    // Stage 6: Import to database (100%)
+    onProgress?.('Importing to database', 95);
+    try {
+      runScript('scripts/markdown/import-markdown-to-db.ts', [filePath]);
+    } catch (error: any) {
+      throw new ProcessingError(
+        'Failed to import to database',
+        'import-markdown-to-db',
+        error
+      );
+    }
+    
+    onProgress?.('Complete', 100, 'Processing finished successfully');
+    
+    // Read results
+    const enrichedPath = path.join(workDir, 'concept-graph-enriched.json');
+    // embeddingsPath already declared in Stage 5 above
+    
+    const conceptGraph = JSON.parse(fs.readFileSync(enrichedPath, 'utf-8'));
+    const embeddings = JSON.parse(fs.readFileSync(embeddingsPath, 'utf-8'));
+    
+    return {
+      libraryId: slug,
+      title: conceptGraph.metadata.title || fileName,
+      slug,
+      contentType: 'markdown',
+      stats: {
+        conceptCount: conceptGraph.nodes?.length || 0,
+        segmentCount: embeddings.chunks?.length || 0,
+        embeddingCount: embeddings.chunks?.length || 0,
+      },
+      metadata: {
+        sourceFile: filePath,
+        processedAt: new Date().toISOString(),
+      },
+    };
+    
+  } catch (error: any) {
+    if (error instanceof ProcessingError) {
+      throw error;
+    }
+    throw new ProcessingError(
+      `Markdown processing failed: ${error.message}`,
+      'unknown',
+      error
+    );
+  }
+}
+
+/**
+ * Extract code blocks from markdown text
+ */
+function extractCodeBlocks(text: string): string {
+  const codeBlockRegex = /```[\s\S]*?```/g;
+  const matches = text.match(codeBlockRegex);
+  return matches ? matches.join('\n\n') : '';
+}
+
+/**
+ * Convert GitHub blob URL to raw URL
+ */
+function githubBlobToRaw(url: string): string {
+  return url
+    .replace('github.com', 'raw.githubusercontent.com')
+    .replace('/blob/', '/');
+}
+
+/**
+ * Download file from URL
+ */
+async function downloadFile(url: string, outputPath: string): Promise<void> {
+  const https = await import('https');
+  const actualUrl = url.includes('github.com/') ? githubBlobToRaw(url) : url;
+  
+  return new Promise((resolve, reject) => {
+    https.get(actualUrl, (response) => {
+      if (response.statusCode === 302 || response.statusCode === 301) {
+        // Follow redirect
+        const redirectUrl = response.headers.location;
+        if (!redirectUrl) {
+          reject(new Error('Redirect without location'));
+          return;
+        }
+        downloadFile(redirectUrl, outputPath).then(resolve).catch(reject);
+        return;
+      }
+      
+      if (response.statusCode !== 200) {
+        reject(new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`));
+        return;
+      }
+      
+      const file = fs.createWriteStream(outputPath);
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close();
+        resolve();
+      });
+      file.on('error', reject);
+    }).on('error', reject);
+  });
+}
+
+/**
+ * Convert Jupyter notebook to markdown
+ */
+function convertNotebookToMarkdown(notebookPath: string): string {
+  const notebook = JSON.parse(fs.readFileSync(notebookPath, 'utf-8'));
+  const cells = notebook.cells || [];
+  
+  const markdownParts: string[] = [];
+  
+  // Add title from metadata if available
+  if (notebook.metadata?.title) {
+    markdownParts.push(`# ${notebook.metadata.title}\n`);
+  }
+  
+  for (const cell of cells) {
+    const source = Array.isArray(cell.source) ? cell.source.join('') : cell.source;
+    
+    if (cell.cell_type === 'markdown') {
+      markdownParts.push(source);
+      markdownParts.push('\n');
+    } else if (cell.cell_type === 'code') {
+      // Add code cells as fenced code blocks
+      markdownParts.push('```python');
+      markdownParts.push(source);
+      markdownParts.push('```\n');
+      
+      // Add outputs if present (converted to text)
+      if (cell.outputs && cell.outputs.length > 0) {
+        for (const output of cell.outputs) {
+          if (output.output_type === 'stream' && output.text) {
+            const text = Array.isArray(output.text) ? output.text.join('') : output.text;
+            markdownParts.push('```');
+            markdownParts.push(text);
+            markdownParts.push('```\n');
+          } else if (output.output_type === 'execute_result' || output.output_type === 'display_data') {
+            if (output.data && output.data['text/plain']) {
+              const text = Array.isArray(output.data['text/plain']) 
+                ? output.data['text/plain'].join('') 
+                : output.data['text/plain'];
+              markdownParts.push('```');
+              markdownParts.push(text);
+              markdownParts.push('```\n');
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  return markdownParts.join('\n');
 }
 
 /**
  * Process a Jupyter notebook through the pipeline
  * 
  * Pipeline stages:
- * 1. Parse notebook (20%)
- * 2. Extract concepts from markdown + code cells (50%)
- * 3. Generate embeddings (80%)
- * 4. Import to database (100%)
+ * 1. Download notebook (if URL) (10%)
+ * 2. Convert to markdown (20%)
+ * 3. Process as markdown (20-100%)
  * 
- * @param filePath - Path to .ipynb file
+ * @param urlOrPath - GitHub URL or local path to .ipynb file
  * @param onProgress - Optional progress callback
  * @returns Processing result with library ID and stats
  */
 export async function processJupyterNotebook(
-  filePath: string,
+  urlOrPath: string,
   onProgress?: ProgressCallback
 ): Promise<ProcessingResult> {
-  // Validate file exists
-  if (!fs.existsSync(filePath)) {
+  const isUrl = urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://');
+  
+  let notebookPath: string;
+  let fileName: string;
+  
+  try {
+    // Stage 1: Download notebook if URL
+    if (isUrl) {
+      onProgress?.('Downloading notebook', 10, urlOrPath);
+      
+      // Extract filename from URL
+      const urlParts = urlOrPath.split('/');
+      fileName = decodeURIComponent(urlParts[urlParts.length - 1]);
+      if (!fileName.endsWith('.ipynb')) {
+        throw new ProcessingError(
+          'URL must point to a .ipynb file',
+          'validation',
+          new Error(`Invalid file: ${fileName}`)
+        );
+      }
+      
+      // Create temp directory
+      const tempDir = path.join(process.cwd(), 'temp', 'notebooks');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      
+      notebookPath = path.join(tempDir, fileName);
+      
+      try {
+        await downloadFile(urlOrPath, notebookPath);
+      } catch (error: any) {
+        throw new ProcessingError(
+          `Failed to download notebook: ${error.message}`,
+          'download-notebook',
+          error
+        );
+      }
+    } else {
+      // Local path
+      notebookPath = path.resolve(urlOrPath);
+      fileName = path.basename(notebookPath);
+      
+      if (!fs.existsSync(notebookPath)) {
+        throw new ProcessingError(
+          `Notebook file not found: ${notebookPath}`,
+          'validation',
+          new Error('File does not exist')
+        );
+      }
+    }
+    
+    // Stage 2: Convert to markdown
+    onProgress?.('Converting to markdown', 20, fileName);
+    
+    let markdownContent: string;
+    try {
+      markdownContent = convertNotebookToMarkdown(notebookPath);
+    } catch (error: any) {
+      throw new ProcessingError(
+        `Failed to convert notebook to markdown: ${error.message}`,
+        'convert-notebook',
+        error
+      );
+    }
+    
+    // Save markdown to work directory
+    const slug = path.basename(fileName, '.ipynb')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-');
+    const workDir = path.join(process.cwd(), 'markdown', slug);
+    
+    if (!fs.existsSync(workDir)) {
+      fs.mkdirSync(workDir, { recursive: true });
+    }
+    
+    const markdownPath = path.join(workDir, `${slug}.md`);
+    fs.writeFileSync(markdownPath, markdownContent, 'utf-8');
+    
+    onProgress?.('Markdown saved', 25, markdownPath);
+    
+    // Stage 3: Process as markdown (delegates to markdown pipeline)
+    onProgress?.('Processing as markdown', 30);
+    
+    // Wrap the markdown progress callback to offset percentages
+    const wrappedProgress: ProgressCallback = (stage, percent, message) => {
+      // Map 0-100 from markdown processing to 30-100 in notebook processing
+      const adjustedPercent = 30 + Math.floor(percent * 0.7);
+      onProgress?.(stage, adjustedPercent, message);
+    };
+    
+    const result = await processMarkdownFile(markdownPath, wrappedProgress);
+    
+    // Update result to reflect notebook source
+    return {
+      ...result,
+      contentType: 'notebook',
+      metadata: {
+        ...result.metadata,
+        sourceUrl: isUrl ? urlOrPath : undefined,
+        sourceFile: notebookPath,
+        convertedMarkdown: markdownPath,
+      },
+    };
+    
+  } catch (error: any) {
+    if (error instanceof ProcessingError) {
+      throw error;
+    }
     throw new ProcessingError(
-      `Notebook file not found: ${filePath}`,
-      'validation',
-      new Error('File does not exist')
+      `Notebook processing failed: ${error.message}`,
+      'unknown',
+      error
     );
   }
-  
-  // TODO: Implement notebook processing pipeline
-  // For now, throw not implemented error
-  throw new ProcessingError(
-    'Jupyter notebook processing not yet implemented',
-    'not-implemented',
-    new Error('See Phase 1b Task 4')
-  );
 }

@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS libraries (
   -- Source information
   source_url TEXT,
   video_id TEXT UNIQUE,  -- YouTube video ID (if type='youtube') - UNIQUE for ON CONFLICT
+  markdown_content TEXT,  -- Full markdown content (for type='markdown')
   
   -- Stats
   total_duration INTEGER,  -- seconds (for videos)
@@ -118,25 +119,25 @@ CREATE INDEX IF NOT EXISTS idx_prerequisites_to ON prerequisites(library_id, to_
 CREATE INDEX IF NOT EXISTS idx_prerequisites_from ON prerequisites(library_id, from_concept_id);
 
 -- ============================================================================
--- 4. SEGMENTS TABLE
+-- 4. VIDEO_SEGMENTS TABLE
 -- ============================================================================
--- Represents video segments or text chunks with multimodal analysis
+-- Represents video segments with multimodal analysis
 
-CREATE TABLE IF NOT EXISTS segments (
+CREATE TABLE IF NOT EXISTS video_segments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   library_id UUID NOT NULL REFERENCES libraries(id) ON DELETE CASCADE,
   
   -- Segment identity
   segment_index INTEGER NOT NULL,
   
-  -- Video timing (NULL for non-video sources)
-  segment_timestamp REAL,  -- seconds
-  audio_start REAL,
-  audio_end REAL,
+  -- Video timing
+  segment_timestamp REAL NOT NULL,  -- seconds
+  audio_start REAL NOT NULL,
+  audio_end REAL NOT NULL,
   
   -- Content
-  audio_text TEXT,  -- Transcript or text content
-  frame_path TEXT,  -- Path to video frame (if applicable)
+  audio_text TEXT NOT NULL,  -- Transcript
+  frame_path TEXT,  -- Path to video frame
   
   -- Multimodal analysis
   visual_description TEXT,
@@ -160,35 +161,79 @@ CREATE TABLE IF NOT EXISTS segments (
   UNIQUE(library_id, segment_index)
 );
 
-CREATE INDEX IF NOT EXISTS idx_segments_library ON segments(library_id);
-CREATE INDEX IF NOT EXISTS idx_segments_concept ON segments(library_id, mapped_concept_id) WHERE mapped_concept_id IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_segments_timestamp ON segments(library_id, segment_timestamp) WHERE segment_timestamp IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_video_segments_library ON video_segments(library_id);
+CREATE INDEX IF NOT EXISTS idx_video_segments_concept ON video_segments(library_id, mapped_concept_id) WHERE mapped_concept_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_video_segments_timestamp ON video_segments(library_id, segment_timestamp);
 
 -- ============================================================================
--- 5. EMBEDDINGS TABLE
+-- 5. TEXT_CHUNKS TABLE
 -- ============================================================================
--- Stores vector embeddings for semantic search
+-- Represents text chunks from markdown/documents
+
+CREATE TABLE IF NOT EXISTS text_chunks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  library_id UUID NOT NULL REFERENCES libraries(id) ON DELETE CASCADE,
+  
+  -- Chunk identity
+  chunk_index INTEGER NOT NULL,
+  chunk_id TEXT NOT NULL,  -- e.g., "chunk-1-introduction"
+  
+  -- Content
+  content TEXT NOT NULL,
+  title TEXT,
+  type TEXT,  -- e.g., "paragraph", "code_block", "heading"
+  
+  -- Document structure
+  section TEXT,
+  start_line INTEGER,
+  end_line INTEGER,
+  
+  -- Concept mapping
+  mapped_concept_id TEXT,
+  mapping_confidence REAL CHECK (mapping_confidence IS NULL OR (mapping_confidence >= 0 AND mapping_confidence <= 1)),
+  secondary_concepts JSONB DEFAULT '[]'::jsonb,
+  mapping_reasoning TEXT,
+  
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  
+  UNIQUE(library_id, chunk_index),
+  UNIQUE(library_id, chunk_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_text_chunks_library ON text_chunks(library_id);
+CREATE INDEX IF NOT EXISTS idx_text_chunks_concept ON text_chunks(library_id, mapped_concept_id) WHERE mapped_concept_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_text_chunks_section ON text_chunks(library_id, section) WHERE section IS NOT NULL;
+
+-- ============================================================================
+-- 6. EMBEDDINGS TABLE
+-- ============================================================================
+-- Stores vector embeddings for semantic search (references either video_segments OR text_chunks)
 
 CREATE TABLE IF NOT EXISTS embeddings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   library_id UUID NOT NULL REFERENCES libraries(id) ON DELETE CASCADE,
-  segment_id UUID NOT NULL REFERENCES segments(id) ON DELETE CASCADE,
+  
+  -- Reference to source content (exactly one must be set)
+  video_segment_id UUID REFERENCES video_segments(id) ON DELETE CASCADE,
+  text_chunk_id UUID REFERENCES text_chunks(id) ON DELETE CASCADE,
   
   -- Embedding data
   embedding vector(1536),  -- Gemini embedding dimension (reduced to 1536 for pgvector compatibility)
   embedding_model TEXT NOT NULL,  -- e.g., "gemini-embedding-001"
   embedding_text TEXT NOT NULL,  -- What was actually embedded (for debugging)
-  content_type TEXT NOT NULL DEFAULT 'video_segment' CHECK (
-    content_type IN ('video_segment', 'text_chunk', 'code_example')
-  ),
   
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   
-  UNIQUE(segment_id)  -- One embedding per segment
+  -- Constraint: exactly one source must be set
+  CONSTRAINT embeddings_source_check CHECK (
+    (video_segment_id IS NOT NULL AND text_chunk_id IS NULL) OR
+    (video_segment_id IS NULL AND text_chunk_id IS NOT NULL)
+  )
 );
 
 CREATE INDEX IF NOT EXISTS idx_embeddings_library ON embeddings(library_id);
-CREATE INDEX IF NOT EXISTS idx_embeddings_segment ON embeddings(segment_id);
+CREATE INDEX IF NOT EXISTS idx_embeddings_video_segment ON embeddings(video_segment_id) WHERE video_segment_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_embeddings_text_chunk ON embeddings(text_chunk_id) WHERE text_chunk_id IS NOT NULL;
 
 -- Vector similarity index (HNSW for fast approximate nearest neighbor search)
 -- Note: HNSW has a 2000 dimension limit, so we use 1536 dimensions
@@ -200,8 +245,8 @@ USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
 -- HELPER FUNCTIONS
 -- ============================================================================
 
--- Search for similar segments using cosine similarity
--- Returns rich multimodal content for context assembly
+-- Search for similar content using cosine similarity
+-- Returns unified results from both video segments and text chunks
 CREATE OR REPLACE FUNCTION search_segments(
   query_embedding vector(1536),
   search_library_id UUID DEFAULT NULL,
@@ -209,44 +254,73 @@ CREATE OR REPLACE FUNCTION search_segments(
   match_count INT DEFAULT 10
 )
 RETURNS TABLE (
-  segment_id UUID,
+  id UUID,
   library_id UUID,
-  segment_index INTEGER,
-  audio_text TEXT,
-  segment_timestamp REAL,
-  audio_start REAL,
-  audio_end REAL,
-  visual_description TEXT,
-  code_content TEXT,
-  slide_content TEXT,
-  key_concepts JSONB,
+  content_type TEXT,
+  index_num INTEGER,
+  content_text TEXT,
   mapped_concept_id TEXT,
-  similarity FLOAT
+  similarity FLOAT,
+  metadata JSONB
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
   RETURN QUERY
-  SELECT 
-    s.id,
-    s.library_id,
-    s.segment_index,
-    s.audio_text,
-    s.segment_timestamp,
-    s.audio_start,
-    s.audio_end,
-    s.visual_description,
-    s.code_content,
-    s.slide_content,
-    s.key_concepts,
-    s.mapped_concept_id,
-    1 - (e.embedding <=> query_embedding) as similarity
-  FROM embeddings e
-  JOIN segments s ON e.segment_id = s.id
-  WHERE 
-    (search_library_id IS NULL OR e.library_id = search_library_id)
-    AND 1 - (e.embedding <=> query_embedding) > match_threshold
-  ORDER BY e.embedding <=> query_embedding
+  WITH ranked_results AS (
+    -- Video segments
+    SELECT 
+      vs.id,
+      vs.library_id,
+      'video_segment'::TEXT as content_type,
+      vs.segment_index as index_num,
+      vs.audio_text as content_text,
+      vs.mapped_concept_id,
+      1 - (e.embedding <=> query_embedding) as similarity,
+      jsonb_build_object(
+        'segment_timestamp', vs.segment_timestamp,
+        'audio_start', vs.audio_start,
+        'audio_end', vs.audio_end,
+        'frame_path', vs.frame_path,
+        'visual_description', vs.visual_description,
+        'code_content', vs.code_content,
+        'slide_content', vs.slide_content,
+        'key_concepts', vs.key_concepts
+      ) as metadata
+    FROM embeddings e
+    JOIN video_segments vs ON e.video_segment_id = vs.id
+    WHERE 
+      (search_library_id IS NULL OR e.library_id = search_library_id)
+      AND 1 - (e.embedding <=> query_embedding) > match_threshold
+    
+    UNION ALL
+    
+    -- Text chunks
+    SELECT 
+      tc.id,
+      tc.library_id,
+      'text_chunk'::TEXT as content_type,
+      tc.chunk_index as index_num,
+      tc.content as content_text,
+      tc.mapped_concept_id,
+      1 - (e.embedding <=> query_embedding) as similarity,
+      jsonb_build_object(
+        'chunk_id', tc.chunk_id,
+        'title', tc.title,
+        'type', tc.type,
+        'section', tc.section,
+        'start_line', tc.start_line,
+        'end_line', tc.end_line
+      ) as metadata
+    FROM embeddings e
+    JOIN text_chunks tc ON e.text_chunk_id = tc.id
+    WHERE 
+      (search_library_id IS NULL OR e.library_id = search_library_id)
+      AND 1 - (e.embedding <=> query_embedding) > match_threshold
+  )
+  SELECT *
+  FROM ranked_results
+  ORDER BY similarity DESC
   LIMIT match_count;
 END;
 $$;

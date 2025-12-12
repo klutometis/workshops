@@ -1,54 +1,53 @@
 import * as fs from "fs";
 import * as path from "path";
 import { extractConcepts } from "../../lib/concept-extractor.js";
-import {
-  audioTranscriptSchema,
-  type AudioTranscript,
-  type ConceptGraph,
-} from "./types.js";
 
 // ============================================================================
 // Main Extraction Logic
 // ============================================================================
 
-async function extractConceptsFromVideo(videoId: string): Promise<void> {
+async function extractConceptsFromMarkdown(markdownPath: string): Promise<void> {
   console.log(`\n🎓 CONCEPT EXTRACTION`);
   console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
-  console.log(`📹 Video ID: ${videoId}\n`);
+  console.log(`📄 Markdown file: ${markdownPath}\n`);
 
-  // Paths
-  const videoDir = path.join(process.cwd(), "youtube", videoId);
-  const transcriptPath = path.join(videoDir, "audio-transcript.json");
-  const outputPath = path.join(videoDir, "concept-graph.json");
-
-  // Check if transcript exists
-  if (!fs.existsSync(transcriptPath)) {
-    throw new Error(`❌ Transcript not found: ${transcriptPath}`);
+  // Check if markdown file exists
+  if (!fs.existsSync(markdownPath)) {
+    throw new Error(`❌ Markdown file not found: ${markdownPath}`);
   }
 
-  console.log(`📖 Reading transcript...`);
-  const raw = JSON.parse(fs.readFileSync(transcriptPath, "utf-8"));
-  const transcriptData = audioTranscriptSchema.parse(raw);
+  // Paths
+  const basename = path.basename(markdownPath, '.md');
+  const markdownDir = path.join(process.cwd(), "markdown", basename);
+  const outputPath = path.join(markdownDir, "concept-graph.json");
 
-  console.log(`   Duration: ${Math.floor(transcriptData.total_duration / 60)} minutes`);
-  console.log(`   Segments: ${transcriptData.segments.length}`);
-  console.log(`   Transcript length: ${transcriptData.full_transcript.length} characters\n`);
+  // Create output directory
+  if (!fs.existsSync(markdownDir)) {
+    fs.mkdirSync(markdownDir, { recursive: true });
+  }
+
+  // Read the full markdown file
+  console.log(`📖 Reading markdown file...`);
+  const fullText = fs.readFileSync(markdownPath, "utf-8");
+
+  console.log(`   File length: ${fullText.length} characters\n`);
 
   // Extract concepts using shared library
   console.log(`🔮 Extracting concepts using shared library...`);
-  console.log(`   (This may take 30-60 seconds for a long transcript)\n`);
+  console.log(`   (This may take 30-60 seconds for a long document)\n`);
 
   const startTime = Date.now();
 
+  // Derive title from filename (convert tsp → TSP, etc.)
+  const title = basename.toUpperCase();
+  
   const conceptGraph = await extractConcepts({
-    text: transcriptData.full_transcript,
-    title: "Let's build GPT: from scratch, in code, spelled out",
-    author: "Andrej Karpathy",
-    sourceType: 'youtube',
+    text: fullText,
+    title: title,
+    author: "Unknown", // Could parse from markdown frontmatter later
+    sourceType: 'markdown',
     metadata: {
-      video_id: videoId,
-      source: `https://www.youtube.com/watch?v=${videoId}`,
-      total_duration: transcriptData.total_duration,
+      source_file: markdownPath,
     }
   });
 
@@ -78,15 +77,15 @@ async function extractConceptsFromVideo(videoId: string): Promise<void> {
 // CLI Interface
 // ============================================================================
 
-const videoId = process.argv[2];
+const markdownPath = process.argv[2];
 
-if (!videoId) {
-  console.error(`Usage: tsx extract-concepts.ts <video_id>`);
-  console.error(`Example: tsx extract-concepts.ts kCc8FmEb1nY`);
+if (!markdownPath) {
+  console.error(`Usage: tsx extract-concepts.ts <markdown_file>`);
+  console.error(`Example: tsx extract-concepts.ts public/data/pytudes/tsp.md`);
   process.exit(1);
 }
 
-extractConceptsFromVideo(videoId).catch((error) => {
+extractConceptsFromMarkdown(markdownPath).catch((error) => {
   console.error(`\n❌ Error extracting concepts:`, error);
   process.exit(1);
 });

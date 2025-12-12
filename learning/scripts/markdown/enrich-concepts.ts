@@ -9,29 +9,21 @@ import { pedagogicalEnrichmentSchema, type PedagogicalEnrichment } from "../../l
 // Schemas
 // ============================================================================
 
-// Final enriched concept structure (what we save to disk)
 const enrichedConceptSchema = z.object({
-  // Original concept metadata
   id: z.string(),
   name: z.string(),
   description: z.string(),
   prerequisites: z.array(z.string()),
   difficulty: z.enum(["beginner", "intermediate", "advanced"]),
-  time_ranges: z.array(z.object({
-    start: z.number(),
-    end: z.number(),
+  
+  // Markdown-specific: relevant chunks instead of time_ranges
+  relevant_chunks: z.array(z.object({
+    chunk_id: z.string(),
+    heading_path: z.array(z.string()),
+    excerpt: z.string(),
   })),
   
-  // Code examples (merged deterministically)
-  code_examples: z.array(z.object({
-    segment_index: z.number(),
-    timestamp: z.number(),
-    code: z.string(),
-    rationale: z.string(),
-    teaching_context: z.string(),
-  })),
-  
-  // Pedagogical enrichment (from Gemini)
+  // Pedagogical enrichment
   learning_objectives: z.array(z.string()),
   mastery_indicators: z.array(z.object({
     skill: z.string(),
@@ -56,57 +48,46 @@ type EnrichedConcept = z.infer<typeof enrichedConceptSchema>;
 // Load Input Data
 // ============================================================================
 
-function loadConceptGraph(videoId: string): any {
+function loadConceptGraph(slug: string): any {
   const conceptPath = path.join(
     process.cwd(),
-    `youtube/${videoId}/concept-graph.json`
+    `markdown/${slug}/concept-graph.json`
   );
   return JSON.parse(fs.readFileSync(conceptPath, "utf-8"));
 }
 
-function loadCodeMappings(videoId: string): any {
-  const mappingsPath = path.join(
+function loadChunks(slug: string): any {
+  const chunksPath = path.join(
     process.cwd(),
-    `youtube/${videoId}/code-concept-mappings.json`
+    `markdown/${slug}/chunks.json`
   );
-  return JSON.parse(fs.readFileSync(mappingsPath, "utf-8"));
+  return JSON.parse(fs.readFileSync(chunksPath, "utf-8"));
 }
 
-function loadTranscript(videoId: string): any {
-  const transcriptPath = path.join(
-    process.cwd(),
-    `youtube/${videoId}/audio-transcript.json`
-  );
-  return JSON.parse(fs.readFileSync(transcriptPath, "utf-8"));
+function loadMarkdown(markdownPath: string): string {
+  return fs.readFileSync(markdownPath, "utf-8");
 }
 
 // ============================================================================
 // Helper Functions
 // ============================================================================
 
-function formatTime(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
+function getRelevantChunksForConcept(conceptId: string, conceptName: string, chunks: any): any[] {
+  // Find chunks that mention this concept (by ID in concepts array or by name in text)
+  const relevantChunks = chunks.chunks.filter((chunk: any) => {
+    // Both scripts now use kebab-case, so direct ID comparison works
+    const conceptsMatch = chunk.concepts && chunk.concepts.includes(conceptId);
+    const textMatch = chunk.text.toLowerCase().includes(conceptName.toLowerCase());
+    return conceptsMatch || textMatch;
+  });
   
-  if (h > 0) {
-    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  }
-  return `${m}:${s.toString().padStart(2, '0')}`;
+  return relevantChunks.map((chunk: any) => ({
+    chunk_id: chunk.chunk_id,
+    heading_path: chunk.heading_path,
+    text: chunk.text,
+    chunk_type: chunk.chunk_type,
+  }));
 }
-
-function getCodeExamplesForConcept(conceptId: string, codeMappings: any): any[] {
-  return codeMappings.unique_snippets
-    .filter((snippet: any) => snippet.concepts.includes(conceptId))
-    .map((snippet: any) => ({
-      segment_index: snippet.primary_segment,
-      timestamp: snippet.timestamp,
-      code: snippet.code,
-      rationale: snippet.rationale,
-      teaching_context: snippet.teaching_context,
-    }));
-}
-
 
 // ============================================================================
 // Build Enrichment Prompt
@@ -114,8 +95,8 @@ function getCodeExamplesForConcept(conceptId: string, codeMappings: any): any[] 
 
 function buildEnrichmentPrompt(
   concept: any,
-  codeExamples: any[],
-  fullTranscript: string,
+  relevantChunks: any[],
+  fullMarkdown: string,
   prerequisites: any[]
 ): string {
   const prerequisiteNames = prerequisites
@@ -123,21 +104,17 @@ function buildEnrichmentPrompt(
     .map(p => p.name)
     .join(", ");
   
-  const codeExamplesText = codeExamples.length > 0
-    ? codeExamples
-        .map(ex => `
-[${formatTime(ex.timestamp)}] ${ex.teaching_context}
+  const chunksText = relevantChunks.length > 0
+    ? relevantChunks
+        .map(chunk => `
+**Section: ${chunk.heading_path.join(" → ")}** (${chunk.chunk_type})
 
-\`\`\`python
-${ex.code}
-\`\`\`
-
-Why this matters: ${ex.rationale}
+${chunk.text}
 `)
         .join("\n---\n")
-    : "No code examples identified for this concept.";
+    : "No specific sections identified for this concept.";
 
-  return `You are designing comprehensive pedagogical metadata for a programming concept from Andrej Karpathy's GPT tutorial video.
+  return `You are designing comprehensive pedagogical metadata for a programming concept from a technical tutorial document.
 
 **Concept:**
 ${concept.name}
@@ -145,18 +122,18 @@ Description: ${concept.description}
 Difficulty Level: ${concept.difficulty}
 Prerequisites: ${prerequisiteNames || "None"}
 
-**Full video transcript:**
-${fullTranscript}
+**Full document context:**
+${fullMarkdown.substring(0, 50000)} ${fullMarkdown.length > 50000 ? '...(truncated)' : ''}
 
-**Code examples related to this concept:**
-${codeExamplesText}
+**Sections most relevant to this concept:**
+${chunksText}
 
 **Your task:**
 Generate comprehensive pedagogical enrichment that will power an interactive Socratic learning system.
 
 1. **Learning Objectives** (3-5 specific, measurable goals)
    - Start with action verbs: "Explain...", "Implement...", "Identify...", "Debug...", "Apply..."
-   - Make them specific to what Karpathy actually teaches
+   - Make them specific to what the document actually teaches
    - Progress from understanding → application → mastery
 
 2. **Mastery Indicators** (3-6 assessable skills)
@@ -169,12 +146,12 @@ Generate comprehensive pedagogical enrichment that will power an interactive Soc
 3. **Common Misconceptions** (2-4 realistic errors)
    - What do beginners actually get wrong about this?
    - Include: the misconception, the reality, and how to correct it
-   - Ground in actual transcript if Karpathy addresses these
+   - Ground in actual content if the document addresses these
 
 4. **Key Insights** (2-4 fundamental truths)
    - The "aha moments" that make this concept click
    - Memorable, foundational understanding
-   - Often things Karpathy explicitly emphasizes
+   - Often things the author explicitly emphasizes
 
 **Optional enrichment (add if relevant):**
 - practical_applications: Real-world uses beyond this tutorial
@@ -182,10 +159,10 @@ Generate comprehensive pedagogical enrichment that will power an interactive Soc
 - debugging_tips: How to diagnose and fix issues with this concept
 
 **Guidelines:**
-- Be authentic to Karpathy's teaching style and this video's content
-- Reference actual code examples when relevant (use timestamps)
+- Be authentic to the document's teaching approach and content
+- Reference actual examples when relevant (use section headings)
 - Make mastery indicators TESTABLE via dialogue (not vague)
-- Misconceptions should be realistic for someone learning transformers/GPT
+- Misconceptions should be realistic for someone learning this topic
 - Balance rigor with accessibility
 
 Return valid JSON matching the schema.`.trim();
@@ -197,16 +174,16 @@ Return valid JSON matching the schema.`.trim();
 
 async function enrichConcept(
   concept: any,
-  codeMappings: any,
-  transcript: any,
+  chunks: any,
+  fullMarkdown: string,
   conceptGraph: any,
   ai: any
 ): Promise<EnrichedConcept> {
   console.log(`\n📚 Enriching: ${concept.name}`);
   
-  // 1. Find code examples for this concept
-  const codeExamples = getCodeExamplesForConcept(concept.id, codeMappings);
-  console.log(`   📝 Found ${codeExamples.length} code examples`);
+  // 1. Find relevant chunks for this concept
+  const relevantChunks = getRelevantChunksForConcept(concept.id, concept.name, chunks);
+  console.log(`   📝 Found ${relevantChunks.length} relevant chunks`);
   
   // 2. Get prerequisite concepts for context
   const prerequisites = concept.prerequisites.map((preqId: string) =>
@@ -216,12 +193,12 @@ async function enrichConcept(
   // 3. Build prompt with all context
   const prompt = buildEnrichmentPrompt(
     concept,
-    codeExamples,
-    transcript.full_transcript,
+    relevantChunks,
+    fullMarkdown,
     prerequisites
   );
   
-  // 4. Call Gemini with structured output (ONLY pedagogical enrichment)
+  // 4. Call Gemini with structured output
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: prompt,
@@ -238,15 +215,18 @@ async function enrichConcept(
   console.log(`   ✅ ${pedagogicalEnrichment.misconceptions.length} misconceptions`);
   console.log(`   ✅ ${pedagogicalEnrichment.key_insights.length} key insights`);
   
-  // 5. Merge deterministically: original metadata + code examples + pedagogical enrichment
+  // 5. Merge: original metadata + relevant chunks + pedagogical enrichment
   const enriched: EnrichedConcept = {
     id: concept.id,
     name: concept.name,
     description: concept.description,
     prerequisites: concept.prerequisites,
     difficulty: concept.difficulty,
-    time_ranges: concept.time_ranges || [],
-    code_examples: codeExamples,
+    relevant_chunks: relevantChunks.map(chunk => ({
+      chunk_id: chunk.chunk_id,
+      heading_path: chunk.heading_path,
+      excerpt: chunk.text.substring(0, 200) + (chunk.text.length > 200 ? '...' : ''),
+    })),
     ...pedagogicalEnrichment,
   };
   
@@ -257,7 +237,7 @@ async function enrichConcept(
 // Main Processing Loop
 // ============================================================================
 
-async function enrichConcepts(videoId: string): Promise<void> {
+async function enrichConcepts(slug: string, markdownPath: string): Promise<void> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY environment variable not set");
@@ -265,17 +245,17 @@ async function enrichConcepts(videoId: string): Promise<void> {
   
   const ai = new GoogleGenAI({ apiKey });
   
-  console.log(`🎓 Enriching concepts for video: ${videoId}\n`);
+  console.log(`🎓 Enriching concepts for: ${slug}\n`);
   
   // Load all inputs
-  const conceptGraph = loadConceptGraph(videoId);
-  const codeMappings = loadCodeMappings(videoId);
-  const transcript = loadTranscript(videoId);
+  const conceptGraph = loadConceptGraph(slug);
+  const chunks = loadChunks(slug);
+  const fullMarkdown = loadMarkdown(markdownPath);
   
   console.log(`📊 Loaded:`);
   console.log(`   - ${conceptGraph.nodes.length} concepts`);
-  console.log(`   - ${codeMappings.unique_snippets.length} code snippets`);
-  console.log(`   - Full transcript (${Math.round(transcript.full_transcript.length / 1000)}k chars)`);
+  console.log(`   - ${chunks.chunks.length} chunks`);
+  console.log(`   - Full markdown (${Math.round(fullMarkdown.length / 1000)}k chars)`);
   
   const enrichedConcepts: EnrichedConcept[] = [];
   
@@ -284,8 +264,8 @@ async function enrichConcepts(videoId: string): Promise<void> {
     try {
       const enriched = await enrichConcept(
         concept,
-        codeMappings,
-        transcript,
+        chunks,
+        fullMarkdown,
         conceptGraph,
         ai
       );
@@ -304,7 +284,7 @@ async function enrichConcepts(videoId: string): Promise<void> {
   // Save enriched concept graph
   const outputPath = path.join(
     process.cwd(),
-    `youtube/${videoId}/concept-graph-enriched.json`
+    `markdown/${slug}/concept-graph-enriched.json`
   );
   
   const enrichedGraph = {
@@ -333,15 +313,18 @@ async function enrichConcepts(videoId: string): Promise<void> {
 // ============================================================================
 
 async function main() {
-  const videoId = process.argv[2];
+  const markdownPath = process.argv[2];
   
-  if (!videoId) {
-    console.error("Usage: npx tsx enrich-concepts.ts <video-id>");
-    console.error("\nExample: npx tsx enrich-concepts.ts kCc8FmEb1nY");
+  if (!markdownPath) {
+    console.error("Usage: npx tsx scripts/markdown/enrich-concepts.ts <markdown-path>");
+    console.error("\nExample: npx tsx scripts/markdown/enrich-concepts.ts public/data/pytudes/tsp.md");
     process.exit(1);
   }
   
-  await enrichConcepts(videoId);
+  // Extract slug from filename
+  const slug = path.basename(markdownPath, '.md');
+  
+  await enrichConcepts(slug, markdownPath);
 }
 
 main().catch(console.error);

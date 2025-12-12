@@ -195,7 +195,7 @@ async function importLibrary(pool: Pool, conceptGraph: ConceptGraph): Promise<st
       slug,
       conceptGraph.metadata.source,
       conceptGraph.metadata.video_id,
-      conceptGraph.metadata.total_duration,
+      Math.round(conceptGraph.metadata.total_duration),
       conceptGraph.metadata.total_concepts,
       'ready',
       conceptGraph.metadata.enriched_at || conceptGraph.metadata.extracted_at,
@@ -277,14 +277,14 @@ async function importSegments(
 ): Promise<Map<number, string>> {
   console.log(`📹 Importing ${segmentMappings.segments.length} segments...`);
   
-  // Delete existing segments (cascade will handle embeddings)
-  await pool.query('DELETE FROM segments WHERE library_id = $1', [libraryId]);
+  // Delete existing video segments (cascade will handle embeddings)
+  await pool.query('DELETE FROM video_segments WHERE library_id = $1', [libraryId]);
   
   const segmentIndexToId = new Map<number, string>();
   
   for (const segment of segmentMappings.segments) {
     const result = await pool.query(
-      `INSERT INTO segments (
+      `INSERT INTO video_segments (
         library_id, segment_index, segment_timestamp, audio_start, audio_end,
         audio_text, frame_path, visual_description, code_content, slide_content,
         visual_audio_alignment, key_concepts, is_code_readable,
@@ -294,9 +294,9 @@ async function importSegments(
       [
         libraryId,
         segment.segment_index,
-        segment.timestamp,
-        segment.audio_start,
-        segment.audio_end,
+        Math.round(segment.timestamp),
+        Math.round(segment.audio_start),
+        Math.round(segment.audio_end),
         segment.audio_text,
         segment.frame_path,
         segment.analysis?.visual_description || null,
@@ -348,15 +348,14 @@ async function importEmbeddings(
     
     await pool.query(
       `INSERT INTO embeddings (
-        library_id, segment_id, embedding, embedding_model, embedding_text, content_type
-      ) VALUES ($1, $2, $3::vector, $4, $5, $6)`,
+        library_id, video_segment_id, embedding, embedding_model, embedding_text
+      ) VALUES ($1, $2, $3::vector, $4, $5)`,
       [
         libraryId,
         segmentId,
         vectorString,
         embSeg.embedding_model,
         embSeg.embedding_text,
-        'video_segment',
       ]
     );
     
@@ -413,29 +412,29 @@ async function importYoutubeVideo(videoId: string): Promise<void> {
       `SELECT 
         (SELECT COUNT(*) FROM concepts WHERE library_id = $1) as concepts,
         (SELECT COUNT(*) FROM prerequisites WHERE library_id = $1) as prerequisites,
-        (SELECT COUNT(*) FROM segments WHERE library_id = $1) as segments,
+        (SELECT COUNT(*) FROM video_segments WHERE library_id = $1) as video_segments,
         (SELECT COUNT(*) FROM embeddings WHERE library_id = $1) as embeddings`,
       [libraryId]
     );
     
     console.log(`   Concepts: ${counts.rows[0].concepts}`);
     console.log(`   Prerequisites: ${counts.rows[0].prerequisites}`);
-    console.log(`   Segments: ${counts.rows[0].segments}`);
+    console.log(`   Video Segments: ${counts.rows[0].video_segments}`);
     console.log(`   Embeddings: ${counts.rows[0].embeddings}\n`);
     
     // Test vector search
     console.log(`🔍 Testing vector search...`);
     const searchTest = await pool.query(
       `SELECT 
-        s.segment_index,
-        s.segment_timestamp,
-        s.audio_text,
-        s.mapped_concept_id,
-        1 - (e.embedding <=> (SELECT embedding FROM embeddings LIMIT 1)) as similarity
+        vs.segment_index,
+        vs.segment_timestamp,
+        vs.audio_text,
+        vs.mapped_concept_id,
+        1 - (e.embedding <=> (SELECT embedding FROM embeddings WHERE library_id = $1 LIMIT 1)) as similarity
       FROM embeddings e
-      JOIN segments s ON e.segment_id = s.id
+      JOIN video_segments vs ON e.video_segment_id = vs.id
       WHERE e.library_id = $1
-      ORDER BY e.embedding <=> (SELECT embedding FROM embeddings LIMIT 1)
+      ORDER BY e.embedding <=> (SELECT embedding FROM embeddings WHERE library_id = $1 LIMIT 1)
       LIMIT 5`,
       [libraryId]
     );

@@ -11,36 +11,14 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 type MarkdownViewerProps = {
-  sourceFile: string;  // e.g., '/data/pytudes/tsp.md'
+  markdownContent: string;  // The markdown content to display
   scrollToAnchor?: string;  // e.g., 'nearest-neighbor-algorithm'
 };
 
-export function MarkdownViewer({ sourceFile, scrollToAnchor }: MarkdownViewerProps) {
-  const [content, setContent] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+export function MarkdownViewer({ markdownContent, scrollToAnchor }: MarkdownViewerProps) {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Fetch markdown content
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    
-    fetch(sourceFile)
-      .then(res => {
-        if (!res.ok) throw new Error(`Failed to load source: ${res.statusText}`);
-        return res.text();
-      })
-      .then(text => {
-        setContent(text);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to load source:', err);
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [sourceFile]);
 
   // Scroll to anchor after content loads
   useEffect(() => {
@@ -57,14 +35,6 @@ export function MarkdownViewer({ sourceFile, scrollToAnchor }: MarkdownViewerPro
       }, 100);
     }
   }, [loading, scrollToAnchor]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full p-4">
-        <div className="text-slate-600">Loading source material...</div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -118,7 +88,7 @@ export function MarkdownViewer({ sourceFile, scrollToAnchor }: MarkdownViewerPro
             },
           }}
         >
-          {content}
+          {markdownContent}
         </ReactMarkdown>
       </div>
     </div>

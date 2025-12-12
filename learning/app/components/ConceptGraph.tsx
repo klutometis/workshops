@@ -134,10 +134,26 @@ export default function ConceptGraph({
       }))
     );
 
+    // Filter out edges that reference non-existent nodes
+    const nodeIds = new Set(nodes.map(n => n.data.id));
+    const validEdges = edges.filter(edge => {
+      const hasSource = nodeIds.has(edge.data.source);
+      const hasTarget = nodeIds.has(edge.data.target);
+      
+      if (!hasSource || !hasTarget) {
+        console.warn(
+          `Skipping edge: ${edge.data.source} -> ${edge.data.target} ` +
+          `(${!hasSource ? 'missing source' : 'missing target'})`
+        );
+      }
+      
+      return hasSource && hasTarget;
+    });
+
     // Initialize Cytoscape
     const cy = cytoscape({
       container: containerRef.current,
-      elements: [...nodes, ...edges],
+      elements: [...nodes, ...validEdges],
       style: [
         {
           selector: 'node',

@@ -43,8 +43,9 @@ type ChunkSource = {
   similarity: number;
   
   // Markdown metadata
-  source_file?: string;
-  heading_path?: string[];
+  title?: string;
+  section?: string;
+  markdown_content?: string;
   markdown_anchor?: string;
   start_line?: number;
   end_line?: number;
@@ -114,10 +115,11 @@ export default function SocraticDialogue({
   const [mobileActiveTab, setMobileActiveTab] = useState<'chat' | 'workspace'>('chat');
   const [objectivesExpanded, setObjectivesExpanded] = useState(false);
   const [sourceAnchor, setSourceAnchor] = useState<string | undefined>();
-  const [sourceFile, setSourceFile] = useState<string | undefined>();
+  const [sourceMarkdownContent, setSourceMarkdownContent] = useState<string | undefined>();
   const [sourceVideoId, setSourceVideoId] = useState<string | undefined>();
   const [sourceTimestamp, setSourceTimestamp] = useState<number | undefined>();
   const [videoAutoplay, setVideoAutoplay] = useState<boolean>(false);
+  const [cachedMarkdownContent, setCachedMarkdownContent] = useState<string | undefined>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -136,12 +138,28 @@ export default function SocraticDialogue({
           setSourceVideoId(firstVideoSource.video_id);
           setSourceTimestamp(firstVideoSource.audio_start);
           setVideoAutoplay(false); // Don't autoplay on auto-load
-          setSourceFile(undefined);
+          setSourceMarkdownContent(undefined);
           setSourceAnchor(undefined);
         }
       }
     }
   }, [messages, libraryType]);
+
+  // Auto-load markdown source for markdown libraries
+  useEffect(() => {
+    if (libraryType === 'markdown' && cachedMarkdownContent && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'assistant' && lastMessage.sources) {
+        const firstMarkdownSource = lastMessage.sources.find(s => s.markdown_anchor);
+        if (firstMarkdownSource) {
+          setSourceMarkdownContent(cachedMarkdownContent);
+          setSourceAnchor(undefined); // Don't jump to anchor yet
+          setSourceVideoId(undefined);
+          setSourceTimestamp(undefined);
+        }
+      }
+    }
+  }, [messages, libraryType, cachedMarkdownContent]);
 
   // Auto-focus textarea when loading completes
   useEffect(() => {
@@ -172,10 +190,11 @@ export default function SocraticDialogue({
       setLastSentEvaluation(null);
       setActiveTab('python');
       setSourceAnchor(undefined);
-      setSourceFile(undefined);
+      setSourceMarkdownContent(undefined);
       setSourceVideoId(undefined);
       setSourceTimestamp(undefined);
       setVideoAutoplay(false);
+      setCachedMarkdownContent(undefined);
     }
   }, [open]);
 
@@ -207,6 +226,12 @@ export default function SocraticDialogue({
       if (data.textbookContext) {
         setTextbookContext(data.textbookContext);
         console.log('📦 Cached textbook context:', data.textbookContext.length, 'characters');
+      }
+      
+      // Cache markdown content if provided (sent once per dialogue)
+      if (data.markdown_content) {
+        setCachedMarkdownContent(data.markdown_content);
+        console.log('📦 Cached markdown content:', data.markdown_content.length, 'characters');
       }
       
       // Update demonstrated skills if assessment provided
@@ -324,6 +349,12 @@ export default function SocraticDialogue({
       }
 
       const data = await response.json();
+      
+      // Cache markdown content if provided
+      if (data.markdown_content && !cachedMarkdownContent) {
+        setCachedMarkdownContent(data.markdown_content);
+        console.log('📦 Cached markdown content:', data.markdown_content.length, 'characters');
+      }
       
       // Update demonstrated skills if assessment provided
       if (data.mastery_assessment) {
@@ -577,63 +608,62 @@ export default function SocraticDialogue({
                     <div className="mt-2 pl-4 space-y-2 border-l-2 border-slate-200">
                       {msg.sources.map((source, sourceIdx) => (
                         <div key={sourceIdx} className="bg-slate-50 rounded p-2 space-y-1">
+                          {/* Header: show title or section */}
                           <div className="font-medium text-slate-700">
-                            {source.topic}
+                            {source.chunk_type === 'text' && (source.title || source.section || 'Text Source')}
+                            {source.chunk_type === 'video' && source.video_id && `Video Segment`}
+                            {!source.chunk_type && (source.topic || 'Source')}
                           </div>
                           
-                          {source.heading_path && source.heading_path.length > 0 && (
-                            <div className="text-slate-500 text-xs">
-                              📍 {source.heading_path.join(' › ')}
-                            </div>
-                          )}
-                          
-                          {/* Video source */}
-                          {source.video_id && source.audio_start !== undefined && (
-                            <div className="flex items-center gap-2 text-xs">
-                              <span className="text-slate-400">
-                                📹 Video @ {Math.floor(source.audio_start / 60)}:{String(Math.floor(source.audio_start % 60)).padStart(2, '0')}
-                                {source.audio_text && ` - "${source.audio_text.substring(0, 50)}..."`}
-                              </span>
-                              <button
-                                className="text-blue-500 hover:text-blue-700 underline text-left"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setSourceVideoId(source.video_id);
-                                  setSourceTimestamp(source.audio_start);
-                                  setVideoAutoplay(true); // Autoplay when user explicitly clicks
-                                  setSourceAnchor(undefined); // Clear markdown state
-                                  setSourceFile(undefined);
-                                  setActiveTab('source');
-                                }}
-                              >
-                                View in context →
-                              </button>
-                            </div>
-                          )}
-                          
-                          {/* Markdown source */}
-                          {source.source_file && (
-                            <div className="flex items-center gap-2 text-xs">
-                              <span className="text-slate-400">
-                                {source.source_file}
-                                {source.start_line && ` (lines ${source.start_line}-${source.end_line})`}
-                              </span>
+                          {/* Text chunk: show line info only (section already in header) */}
+                          {source.chunk_type === 'text' && (
+                            <div className="space-y-1">
+                              {source.start_line && source.end_line && (
+                                <div className="text-slate-400 text-xs">
+                                  Lines {source.start_line}–{source.end_line}
+                                </div>
+                              )}
                               {source.markdown_anchor && (
                                 <button
-                                  className="text-blue-500 hover:text-blue-700 underline text-left"
+                                  className="text-blue-500 hover:text-blue-700 underline text-xs mt-1"
                                   onClick={(e) => {
                                     e.preventDefault();
+                                    setSourceMarkdownContent(cachedMarkdownContent);
                                     setSourceAnchor(source.markdown_anchor);
-                                    setSourceFile(source.source_file);
-                                    setSourceVideoId(undefined); // Clear video state
+                                    setSourceVideoId(undefined);
                                     setSourceTimestamp(undefined);
-                                    setVideoAutoplay(false);
                                     setActiveTab('source');
                                   }}
                                 >
-                                  View in context →
+                                  View in Source tab →
                                 </button>
                               )}
+                            </div>
+                          )}
+                          
+                          {/* Video chunk: show timestamp and transcript */}
+                          {source.chunk_type === 'video' && source.video_id && source.timestamp !== undefined && (
+                            <div className="space-y-1">
+                              <div className="text-slate-500 text-xs">
+                                📹 {Math.floor(source.timestamp / 60)}:{String(Math.floor(source.timestamp % 60)).padStart(2, '0')}
+                              </div>
+                              {source.text && (
+                                <div className="text-slate-600 text-xs line-clamp-2">
+                                  "{source.text.substring(0, 100)}..."
+                                </div>
+                              )}
+                              <button
+                                className="text-blue-500 hover:text-blue-700 underline text-xs"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setSourceVideoId(source.video_id);
+                                  setSourceTimestamp(source.audio_start || source.timestamp);
+                                  setVideoAutoplay(true);
+                                  setActiveTab('source');
+                                }}
+                              >
+                                Watch in Video tab →
+                              </button>
                             </div>
                           )}
                         </div>
@@ -800,9 +830,9 @@ export default function SocraticDialogue({
                       </a>
                     </div>
                   </div>
-                ) : sourceFile ? (
+                ) : sourceMarkdownContent ? (
                   <MarkdownViewer 
-                    sourceFile={sourceFile}
+                    markdownContent={sourceMarkdownContent}
                     scrollToAnchor={sourceAnchor}
                   />
                 ) : (

@@ -3,9 +3,13 @@
  * CLI tool to process Jupyter notebooks into learning modules
  * 
  * Usage:
- *   npx tsx scripts/process-notebook.ts <notebook-file-path>
+ *   npx tsx scripts/process-notebook.ts <notebook-url-or-path>
  * 
  * Examples:
+ *   # From GitHub
+ *   npx tsx scripts/process-notebook.ts https://github.com/norvig/pytudes/blob/main/ipynb/Sudoku.ipynb
+ *   
+ *   # Local file
  *   npx tsx scripts/process-notebook.ts ../pytudes/ipynb/Advent-2020.ipynb
  *   npx tsx scripts/process-notebook.ts ./notebooks/tutorial.ipynb
  */
@@ -17,24 +21,31 @@ async function main() {
   const args = process.argv.slice(2);
   
   if (args.length === 0) {
-    console.error('❌ Error: Jupyter notebook file path required\n');
-    console.error('Usage: npx tsx scripts/process-notebook.ts <notebook-file-path>\n');
+    console.error('❌ Error: Jupyter notebook URL or file path required\n');
+    console.error('Usage: npx tsx scripts/process-notebook.ts <notebook-url-or-path>\n');
     console.error('Examples:');
+    console.error('  # From GitHub');
+    console.error('  npx tsx scripts/process-notebook.ts https://github.com/norvig/pytudes/blob/main/ipynb/Sudoku.ipynb');
+    console.error('  ');
+    console.error('  # Local file');
     console.error('  npx tsx scripts/process-notebook.ts ../pytudes/ipynb/Advent-2020.ipynb');
     console.error('  npx tsx scripts/process-notebook.ts ./notebooks/tutorial.ipynb');
     process.exit(1);
   }
   
-  const filePath = path.resolve(args[0]);
+  const urlOrPath = args[0];
+  const isUrl = urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://');
+  const displayPath = isUrl ? urlOrPath : path.resolve(urlOrPath);
   
   console.log('📓 Jupyter Notebook Processor');
   console.log('━'.repeat(50));
-  console.log(`📄 Input: ${filePath}\n`);
+  console.log(`📄 Input: ${displayPath}`);
+  console.log(`📍 Type: ${isUrl ? 'URL' : 'Local file'}\n`);
   
   const startTime = Date.now();
   
   try {
-    const result = await processJupyterNotebook(filePath, (stage, percent, message) => {
+    const result = await processJupyterNotebook(urlOrPath, (stage, percent, message) => {
       const bar = '█'.repeat(Math.floor(percent / 5)) + '░'.repeat(20 - Math.floor(percent / 5));
       const msg = message ? ` - ${message}` : '';
       console.log(`[${bar}] ${percent}% ${stage}${msg}`);

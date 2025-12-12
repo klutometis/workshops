@@ -2,159 +2,94 @@
   "metadata": {
     "title": "Let's build GPT: from scratch, in code, spelled out",
     "author": "Andrej Karpathy",
-    "source": "YouTube",
+    "source": "https://www.youtube.com/watch?v=kCc8FmEb1nY",
     "video_id": "kCc8FmEb1nY",
-    "total_duration": 6979,
-    "total_concepts": 29,
-    "extracted_at": "2025-11-18T21:11:51.818Z"
+    "total_duration": 6979.46,
+    "total_concepts": 30,
+    "extracted_at": "2025-12-12T11:21:31.442Z"
   },
   "nodes": [
     {
-      "id": "language_modeling",
-      "name": "Language Modeling",
-      "description": "The task of predicting the next word or character in a sequence given the preceding context, used by models like ChatGPT to generate human-like text by understanding how words or characters follow each other in a language.",
+      "id": "language_model",
+      "name": "Language Model",
+      "description": "A probabilistic system that models the sequence of words, characters, or tokens, predicting what comes next in a sequence given previous context.",
       "prerequisites": [],
       "difficulty": "basic"
     },
     {
-      "id": "transformer_architecture",
-      "name": "Transformer Architecture",
-      "description": "A neural network architecture introduced in 2017, foundational to modern large language models like GPT, which efficiently processes sequential data using self-attention mechanisms without relying on recurrence or convolutions.",
+      "id": "character_level_language_model",
+      "name": "Character-Level Language Model",
+      "description": "A specific type of language model that operates on individual characters as its fundamental units, predicting the next character in a sequence.",
       "prerequisites": [
-        "language_modeling"
-      ],
-      "difficulty": "intermediate"
-    },
-    {
-      "id": "character_level_language_modeling",
-      "name": "Character-level Language Modeling",
-      "description": "A simplified approach to language modeling where the model predicts the next character in a sequence rather than words or sub-word units, often used for educational purposes due to its direct mapping from raw text to integers.",
-      "prerequisites": [
-        "language_modeling"
+        "language_model"
       ],
       "difficulty": "basic"
     },
     {
       "id": "tokenization",
       "name": "Tokenization",
-      "description": "The process of converting raw text into sequences of numerical representations (tokens or integers) based on a defined vocabulary, enabling neural networks to process and understand human language.",
-      "prerequisites": [],
-      "difficulty": "basic"
-    },
-    {
-      "id": "pytorch_tensors",
-      "name": "PyTorch Tensors",
-      "description": "Fundamental data structures in the PyTorch library, multi-dimensional arrays that are central to deep learning operations, used to store and manipulate numerical data efficiently, especially on GPUs.",
-      "prerequisites": [],
-      "difficulty": "basic"
-    },
-    {
-      "id": "train_validation_split",
-      "name": "Train/Validation Split",
-      "description": "The practice of dividing a dataset into distinct subsets for training a model and evaluating its performance on unseen data (validation set), primarily to monitor for overfitting and ensure the model generalizes well.",
-      "prerequisites": [],
-      "difficulty": "basic"
-    },
-    {
-      "id": "data_batching",
-      "name": "Data Batching",
-      "description": "The technique of grouping multiple independent data samples (e.g., chunks of text) into a single tensor (a \"batch\") to efficiently feed them into a neural network, leveraging parallel processing capabilities of hardware like GPUs.",
+      "description": "The process of converting raw text (string) into a sequence of numerical identifiers (integers) based on a defined vocabulary. This can be at character, sub-word, or word level.",
       "prerequisites": [
-        "pytorch_tensors"
+        "language_model"
       ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "vocabulary",
+      "name": "Vocabulary",
+      "description": "The complete set of unique characters, sub-words, or words that a language model can recognize and generate, each mapped to a unique integer ID.",
+      "prerequisites": [
+        "tokenization"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "data_splits",
+      "name": "Data Splits (Train/Validation)",
+      "description": "The practice of dividing a dataset into distinct subsets: a training set for model learning and a validation set for evaluating generalization and detecting overfitting.",
+      "prerequisites": [],
       "difficulty": "basic"
     },
     {
       "id": "context_window",
       "name": "Context Window (Block Size)",
-      "description": "The fixed-length sequence of preceding tokens (characters or words) that a language model considers as context when predicting the next token, also known as block size or context length.",
+      "description": "The maximum fixed number of previous tokens (or characters) that a language model considers as context when predicting the next token in a sequence.",
       "prerequisites": [
-        "data_batching",
-        "tokenization"
+        "language_model"
       ],
       "difficulty": "basic"
     },
     {
-      "id": "bigram_language_model",
-      "name": "Bigram Language Model",
-      "description": "A foundational statistical language model (and simple neural network implementation) that predicts the probability of the next token based solely on the immediately preceding token, serving as a basic baseline for more complex language models.",
+      "id": "batch_processing",
+      "name": "Batch Processing",
+      "description": "The technique of grouping multiple independent input sequences (or data samples) into a single tensor (a \"batch\") to enable efficient parallel computation on hardware like GPUs.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "input_target_pairing",
+      "name": "Input-Target Pairing for Language Modeling",
+      "description": "The method of creating training examples from a sequence where the input (X) is a segment of the sequence and the target (Y) is the same segment shifted one position to the right, used to predict the next element at each position.",
       "prerequisites": [
-        "language_modeling",
-        "pytorch_tensors",
-        "tokenization"
+        "language_model",
+        "context_window"
       ],
       "difficulty": "basic"
     },
     {
       "id": "token_embeddings",
       "name": "Token Embeddings",
-      "description": "Numerical representations where each discrete token (like a character or word) is mapped to a unique, dense vector in a continuous space, allowing the model to capture semantic relationships between tokens.",
+      "description": "Dense, low-dimensional vector representations for discrete tokens (characters, words) that capture their semantic meaning, learned during training.",
       "prerequisites": [
-        "pytorch_tensors",
-        "tokenization"
-      ],
-      "difficulty": "basic"
-    },
-    {
-      "id": "cross_entropy_loss",
-      "name": "Cross-Entropy Loss",
-      "description": "A commonly used loss function in classification tasks, particularly for language models, that quantifies the difference between the predicted probability distribution of the next token and the true distribution (the actual next token), aiming to maximize the likelihood of correct predictions.",
-      "prerequisites": [
-        "pytorch_tensors"
-      ],
-      "difficulty": "basic"
-    },
-    {
-      "id": "text_generation_sampling",
-      "name": "Text Generation (Sampling)",
-      "description": "The process of using a trained language model to produce new text by iteratively predicting the next token, often involving converting raw output scores (logits) into probabilities via softmax and then stochastically selecting the next token using methods like multinomial sampling.",
-      "prerequisites": [
-        "bigram_language_model",
-        "cross_entropy_loss"
-      ],
-      "difficulty": "basic"
-    },
-    {
-      "id": "adamw_optimizer",
-      "name": "AdamW Optimizer",
-      "description": "An advanced optimization algorithm widely used in deep learning, based on adaptive estimation of first-order and second-order moments of gradients, and an improvement over Adam, designed to effectively update neural network parameters during training to minimize the loss function.",
-      "prerequisites": [
-        "pytorch_tensors",
-        "cross_entropy_loss"
-      ],
-      "difficulty": "intermediate"
-    },
-    {
-      "id": "gpu_acceleration",
-      "name": "GPU Acceleration",
-      "description": "The technique of utilizing Graphics Processing Units (GPUs) for parallel computation in deep learning, significantly speeding up training and inference of neural networks by performing many calculations simultaneously on specialized hardware (e.g., via CUDA).",
-      "prerequisites": [
-        "pytorch_tensors"
-      ],
-      "difficulty": "basic"
-    },
-    {
-      "id": "model_evaluation_practices",
-      "name": "Model Evaluation Practices",
-      "description": "Standard practices for evaluating neural network performance, including setting the model to evaluation mode (`model.eval()`) to ensure consistent behavior of layers like Dropout and BatchNorm, and using `torch.no_grad()` to disable gradient calculations for memory and speed efficiency during inference.",
-      "prerequisites": [
-        "adamw_optimizer"
-      ],
-      "difficulty": "basic"
-    },
-    {
-      "id": "weighted_aggregation",
-      "name": "Weighted Aggregation using Matrix Multiplication",
-      "description": "A technique for combining information from multiple input elements (e.g., previous tokens) by assigning different \"weights\" or importance to each element and then computing a sum or average, efficiently implemented using matrix multiplication with a specifically structured weight matrix.",
-      "prerequisites": [
-        "pytorch_tensors"
+        "tokenization",
+        "vocabulary"
       ],
       "difficulty": "intermediate"
     },
     {
       "id": "positional_embeddings",
       "name": "Positional Embeddings",
-      "description": "Vectors added to token embeddings that provide information about the relative or absolute position of each token within a sequence, crucial for Transformers to understand the order of words as they lack inherent sequential processing.",
+      "description": "Vectors added to token embeddings to inject information about the absolute or relative position of each token within a sequence, as attention mechanisms are inherently permutation-invariant.",
       "prerequisites": [
         "token_embeddings",
         "context_window"
@@ -162,38 +97,102 @@
       "difficulty": "intermediate"
     },
     {
-      "id": "self_attention_mechanism",
-      "name": "Self-Attention Mechanism (Single Head)",
-      "description": "A core component of the Transformer architecture where each token in a sequence dynamically weighs the importance of all other tokens (including itself) to compute an output representation, allowing tokens to \"attend\" to relevant parts of the input in a data-dependent manner using Query, Key, and Value vectors.",
+      "id": "logits_and_softmax",
+      "name": "Logits and Softmax",
+      "description": "Logits are the raw, unnormalized scores output by a neural network for each possible next token. Softmax is an activation function that converts these logits into a probability distribution over the vocabulary.",
       "prerequisites": [
-        "weighted_aggregation",
-        "positional_embeddings",
         "token_embeddings"
       ],
-      "difficulty": "advanced"
+      "difficulty": "basic"
     },
     {
-      "id": "scaled_dot_product_attention",
-      "name": "Scaled Dot-Product Attention",
-      "description": "A variant of the self-attention mechanism where the dot product of queries and keys is scaled by the inverse square root of the key dimension (head size) before applying the softmax function, which helps stabilize gradients and prevent the softmax output from becoming too sharp, especially with large dimensions.",
+      "id": "cross_entropy_loss",
+      "name": "Cross-Entropy Loss",
+      "description": "A commonly used loss function in classification and language modeling tasks that measures the difference between the predicted probability distribution (from softmax) and the true probability distribution (one-hot encoded target).",
       "prerequisites": [
-        "self_attention_mechanism"
+        "logits_and_softmax",
+        "input_target_pairing"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "model_generation_sampling",
+      "name": "Model Generation (Sampling)",
+      "description": "The process of iteratively predicting and appending new tokens to a sequence using a trained language model's probability distribution (e.g., via multinomial sampling) to produce novel text.",
+      "prerequisites": [
+        "language_model",
+        "logits_and_softmax"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "gradient_descent_optimization",
+      "name": "Gradient Descent Optimization",
+      "description": "A general class of iterative algorithms used to minimize a loss function by adjusting model parameters in the direction opposite to the gradient of the loss with respect to those parameters.",
+      "prerequisites": [
+        "cross_entropy_loss"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "weighted_aggregation",
+      "name": "Weighted Aggregation",
+      "description": "A mathematical technique where a summary vector is formed by taking a weighted sum of multiple input vectors, with weights indicating the importance or relevance of each input. This is a foundational concept for attention.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "causal_masking",
+      "name": "Causal Masking (Lower Triangular Matrix)",
+      "description": "A technique used in auto-regressive models like decoder-only Transformers where a lower triangular matrix is applied to attention scores to prevent tokens from attending to (gaining information from) future tokens in the sequence.",
+      "prerequisites": [
+        "weighted_aggregation"
       ],
       "difficulty": "intermediate"
     },
     {
-      "id": "multi_head_attention",
-      "name": "Multi-Head Attention",
-      "description": "An extension of self-attention that processes information from different \"representation subspaces\" by running multiple independent attention mechanisms (heads) in parallel, concatenating their individual outputs, and then linearly transforming the combined result, allowing the model to focus on different aspects of the input simultaneously.",
+      "id": "query_key_value_vectors",
+      "name": "Query, Key, and Value Vectors",
+      "description": "In attention mechanisms, each token generates three vectors: a Query (what am I looking for?), a Key (what information do I contain?), and a Value (what information would I communicate if found interesting?).",
+      "prerequisites": [
+        "token_embeddings"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "scaled_dot_product_attention",
+      "name": "Scaled Dot-Product Attention",
+      "description": "The fundamental attention mechanism that calculates attention scores by taking the dot product of Queries with Keys, scaling them by the square root of the head size, applying a softmax to get weights, and then performing a weighted aggregation of Values.",
+      "prerequisites": [
+        "query_key_value_vectors",
+        "weighted_aggregation",
+        "causal_masking",
+        "logits_and_softmax"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "self_attention",
+      "name": "Self-Attention",
+      "description": "An attention mechanism where the Query, Key, and Value vectors for all tokens originate from the same input sequence, allowing tokens within that sequence to attend to each other.",
       "prerequisites": [
         "scaled_dot_product_attention"
       ],
       "difficulty": "intermediate"
     },
     {
-      "id": "position_wise_feed_forward_network",
-      "name": "Position-wise Feed-Forward Network",
-      "description": "A simple, fully connected neural network (typically a two-layer MLP) applied identically and independently to each token's representation after the attention mechanism, allowing the model to process the aggregated information locally for each position.",
+      "id": "multi_head_attention",
+      "name": "Multi-Head Attention",
+      "description": "An extension of self-attention that runs multiple self-attention mechanisms (heads) in parallel, each learning different relationships. Their outputs are then concatenated and linearly transformed.",
+      "prerequisites": [
+        "self_attention"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "feed_forward_network_transformer",
+      "name": "Feed-Forward Network (Transformer Component)",
+      "description": "A simple multi-layer perceptron applied independently to each token's representation after the attention mechanism within a Transformer block, allowing the model to perform per-token computation.",
       "prerequisites": [
         "multi_head_attention"
       ],
@@ -202,80 +201,86 @@
     {
       "id": "residual_connections",
       "name": "Residual Connections (Skip Connections)",
-      "description": "A technique in deep neural networks where the input of a layer or block is added directly to its output, bypassing some intermediate computations. This creates \"skip connections\" that facilitate better gradient flow during training, enabling the training of much deeper networks.",
+      "description": "Architectural elements that add the input of a layer (or block) directly to its output, creating a \"skip\" pathway for gradients and enabling the training of very deep neural networks.",
       "prerequisites": [
-        "position_wise_feed_forward_network"
+        "gradient_descent_optimization"
       ],
       "difficulty": "intermediate"
-    },
-    {
-      "id": "transformer_decoder_block",
-      "name": "Transformer Decoder Block",
-      "description": "A fundamental building block of a Transformer decoder, typically comprising a masked multi-head self-attention layer, a position-wise feed-forward network, residual connections, and layer normalization, designed to process sequential inputs and generate outputs auto-regressively by preventing attention to future tokens.",
-      "prerequisites": [
-        "multi_head_attention",
-        "position_wise_feed_forward_network",
-        "residual_connections"
-      ],
-      "difficulty": "advanced"
     },
     {
       "id": "layer_normalization",
       "name": "Layer Normalization",
-      "description": "A normalization technique applied across the feature dimension for each individual input example in a batch (normalizing rows instead of columns), helping to stabilize and accelerate the training of deep neural networks by normalizing the inputs to each sub-layer.",
+      "description": "A normalization technique applied across the features of each individual sample (rather than across the batch) to stabilize activations and improve training dynamics in deep neural networks, particularly in Transformers.",
       "prerequisites": [
         "residual_connections"
       ],
       "difficulty": "intermediate"
     },
     {
-      "id": "dropout_regularization",
-      "name": "Dropout Regularization",
-      "description": "A regularization technique for neural networks that randomly sets a fraction of neuron outputs to zero during each training iteration, preventing complex co-adaptations between neurons and effectively training an ensemble of sub-networks to reduce overfitting.",
+      "id": "transformer_block",
+      "name": "Transformer Block",
+      "description": "The fundamental repeating unit of the Transformer architecture, combining multi-head attention, a feed-forward network, residual connections, and layer normalization to process sequences effectively.",
       "prerequisites": [
+        "multi_head_attention",
+        "feed_forward_network_transformer",
+        "residual_connections",
         "layer_normalization"
       ],
-      "difficulty": "intermediate"
+      "difficulty": "advanced"
     },
     {
-      "id": "encoder_decoder_transformer_architectures",
-      "name": "Encoder-Decoder Transformer Architectures",
-      "description": "Different configurations of the Transformer architecture: decoder-only (like GPT) for generative tasks with masked self-attention; encoder-only for understanding tasks without masking; and encoder-decoder (original Transformer) for sequence-to-sequence tasks like translation, incorporating both encoder and decoder blocks with cross-attention.",
+      "id": "decoder_only_transformer",
+      "name": "Decoder-Only Transformer",
+      "description": "A Transformer architecture (like GPT) consisting solely of decoder blocks (with causal masking), designed for auto-regressive language modeling and unconditional text generation.",
       "prerequisites": [
-        "transformer_decoder_block",
-        "self_attention_mechanism"
+        "transformer_block",
+        "causal_masking"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "encoder_decoder_transformer",
+      "name": "Encoder-Decoder Transformer",
+      "description": "A Transformer architecture used for sequence-to-sequence tasks (e.g., machine translation), comprising an encoder (which processes the input sequence) and a decoder (which generates the output sequence, conditioned on the encoder's output).",
+      "prerequisites": [
+        "transformer_block"
       ],
       "difficulty": "advanced"
     },
     {
       "id": "cross_attention",
       "name": "Cross-Attention",
-      "description": "An attention mechanism used primarily in encoder-decoder Transformer architectures where the Query vectors are derived from the decoder's current state, while the Key and Value vectors originate from the encoder's output, allowing the decoder to attend to relevant parts of the encoder's representation of the input.",
+      "description": "An attention mechanism where the Query vectors come from one sequence (e.g., the decoder's current state) and the Key and Value vectors come from a different, external sequence (e.g., the encoder's output).",
       "prerequisites": [
-        "self_attention_mechanism",
-        "encoder_decoder_transformer_architectures"
+        "scaled_dot_product_attention",
+        "encoder_decoder_transformer"
       ],
       "difficulty": "advanced"
     },
     {
-      "id": "gpt_pretraining",
-      "name": "GPT Pre-training",
-      "description": "The initial stage of training large language models like GPT, where a decoder-only Transformer is trained on an enormous dataset of diverse text (e.g., the entire internet) to learn general language patterns by predicting the next token in a sequence, resulting in a powerful but unaligned text completer.",
+      "id": "pre_training_llm",
+      "name": "Pre-training Large Language Models",
+      "description": "The initial, unsupervised training stage for large language models on massive text corpora, where the model learns to predict the next token, resulting in a general-purpose text generator.",
       "prerequisites": [
-        "transformer_decoder_block",
-        "language_modeling",
-        "adamw_optimizer",
-        "gpu_acceleration",
-        "dropout_regularization"
+        "decoder_only_transformer"
       ],
       "difficulty": "advanced"
     },
     {
-      "id": "gpt_fine_tuning",
-      "name": "GPT Fine-tuning (Alignment)",
-      "description": "The subsequent stage after pre-training, where a large language model is further trained on smaller, task-specific datasets to align its behavior with desired objectives (e.g., acting as an assistant, answering questions), often involving techniques like supervised fine-tuning and Reinforcement Learning from Human Feedback (RLHF) with reward models.",
+      "id": "fine_tuning_llm",
+      "name": "Fine-tuning Large Language Models",
+      "description": "The subsequent supervised training stage where a pre-trained language model is adapted to specific downstream tasks (e.g., question answering, summarization) using smaller, task-specific datasets.",
       "prerequisites": [
-        "gpt_pretraining"
+        "pre_training_llm"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "reinforcement_learning_human_feedback",
+      "name": "Reinforcement Learning from Human Feedback (RLHF)",
+      "description": "An advanced fine-tuning technique used to align large language models with human preferences, involving training a reward model from human rankings and then optimizing the language model using reinforcement learning (e.g., PPO) to maximize the predicted reward.",
+      "prerequisites": [
+        "fine_tuning_llm"
       ],
       "difficulty": "advanced"
     }
