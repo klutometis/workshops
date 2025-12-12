@@ -1,20 +1,5 @@
 # Little PAIPer - TODO
 
-## Overview
-
-Migrate from static file-based content to database-backed system to support:
-1. **Workshop use case** - Users can upload content during live sessions
-2. **User authentication** - GitHub OAuth for content ownership
-3. **Dynamic content** - No git commits required to add new learning materials
-
-## Technical Stack
-
-- **Database:** Supabase (PostgreSQL + pgvector)
-- **Vector Search:** pgvector extension for semantic similarity
-- **Auth:** Supabase GitHub OAuth (built-in)
-- **Storage:** Supabase Storage for source files (videos, markdown)
-- **Processing:** Next.js API routes (with potential background worker later)
-
 ---
 
 ## Phase 1: YouTube + Database ✅ COMPLETE
@@ -80,73 +65,85 @@ All core infrastructure is in place. The system successfully:
 
 ---
 
-## Phase 1b: Upload & Processing UI (Next Up)
+## Phase 1b: CLI Pipeline (PRIORITY)
 
 ### Goal
-Add UI for workshop attendees to upload YouTube videos and trigger processing.
+Build command-line tools to process arbitrary YouTube videos and text sources.
 
 ### Tasks
 
-#### 1. Upload Interface
-- [ ] Create `/upload` page with YouTube URL input
-- [ ] Add validation (valid YouTube URL, not already processed)
-- [ ] Submit creates library record and returns processing ID
-- [ ] Redirect to status page after upload
+#### 1. Core Processing Functions (Reusable)
+- [ ] Create `lib/processing.ts` with core logic:
+  - `processYouTubeVideo(url, onProgress?)` 
+  - `processMarkdownFile(path, onProgress?)`
+  - `processJupyterNotebook(path, onProgress?)`
+- [ ] Progress callbacks for stage updates (works for CLI + web)
+- [ ] Proper error handling (throw, don't exit)
+- [ ] Return structured results (libraryId, stats, etc.)
 
-#### 2. Processing Pipeline API
-- [ ] `POST /api/libraries/upload` - Accept YouTube URL, create library record
-- [ ] `POST /api/libraries/[id]/process` - Trigger pipeline (async if possible)
-- [ ] `GET /api/libraries/[id]/status` - Return processing progress
-  - Status: pending, downloading, transcribing, extracting_concepts, embedding, complete, error
-  - Progress percentage (0-100)
-  - ETA if available
+#### 2. YouTube Video Processing
+- [ ] Create `scripts/process-youtube.sh` - CLI entry point
+- [ ] Call `processYouTubeVideo()` with URL from args
+- [ ] Sequence: download → extract concepts → enrich → embed → import
+- [ ] Handle errors gracefully (log + exit code)
+- [ ] Test with short video first (<5 min)
+- [ ] Verify database import works
 
-#### 3. Status Monitoring
-- [ ] Create `/libraries/[id]/status` page
-- [ ] Poll API every 2-3 seconds for updates
-- [ ] Show progress bar with current stage
-- [ ] Display logs/errors if processing fails
-- [ ] Auto-redirect to concept graph on completion
-
-#### 4. Pipeline Orchestration
-- [ ] Create `scripts/process-youtube-video.ts` - single entry point
-- [ ] Sequence: download → transcribe → analyze frames → extract concepts → enrich → embed → import
-- [ ] Write status updates to database during processing
-- [ ] Handle errors gracefully (store error state, allow retry)
-- [ ] Consider timeout limits (long videos may take 30+ minutes)
-
-#### 5. Testing
-- [ ] Test upload flow end-to-end
-- [ ] Test status polling and progress updates
-- [ ] Test error handling (invalid URL, processing failure)
-- [ ] Test with short video (<5 min) for fast iteration
-
----
-
-## Phase 2: Text Sources (Post-Workshop)
-
-### Goal
-Support markdown files and Jupyter notebooks as learning content sources.
-
-### Tasks
-
-#### 1. Markdown Pipeline
+#### 3. Markdown File Processing
+- [ ] Create `scripts/process-markdown.sh` - CLI entry point
 - [ ] Adapt `chunk-paip.ts` for arbitrary markdown files
-- [ ] Create concept extraction for text-only content (no video/frames)
+- [ ] Extract concepts from text-only content (no video/frames)
 - [ ] Generate embeddings for text chunks
-- [ ] Store in same DB schema (type="markdown")
+- [ ] Store in DB with type="markdown"
+- [ ] Test with pytudes TSP markdown
 
-#### 2. Jupyter Notebook Support
+#### 4. Jupyter Notebook Processing
+- [ ] Create `scripts/process-notebook.sh` - CLI entry point
 - [ ] Parse `.ipynb` format → extract markdown + code cells
 - [ ] Treat code cells as examples/demonstrations
 - [ ] Link code to concepts (similar to video code extraction)
 - [ ] Store in DB with type="notebook"
+- [ ] Test with sample notebook
 
-#### 3. UI Updates
-- [ ] Handle text sources in upload form (file upload vs URL)
-- [ ] Adapt visualization for text-only content (no timestamps/frames)
-- [ ] Show code cells in scratchpad for notebooks
+#### 5. Testing
+- [ ] Test YouTube processing with new video (not Karpathy)
+- [ ] Test markdown processing with new file
+- [ ] Test notebook processing
+- [ ] Verify all three types appear in library selector
+- [ ] Confirm Socratic dialogue works with each type
+
+---
+
+## Phase 1c: Web Upload UI (Optional - After CLI Works)
+
+### Goal
+Wrap CLI scripts with web interface for non-technical users.
+
+### Tasks
+
+#### 1. Upload Form
+- [ ] Create `/upload` page
+- [ ] Input: YouTube URL or file upload (markdown, ipynb)
+- [ ] Validation: check format, not already processed
+- [ ] Submit triggers processing via API
+
+#### 2. API Routes
+- [ ] `POST /api/libraries/upload` - Accepts URL/file
+- [ ] Calls appropriate `process*()` function from `lib/processing.ts`
+- [ ] Returns processing result or error
+- [ ] Optional: async with status polling (can be sync initially)
+
+#### 3. Status Display
+- [ ] Show processing stage during upload
+- [ ] Display success/error after completion
+- [ ] Redirect to concept graph on success
+- [ ] Log output visible in dev mode
+
+#### 4. UI Polish
+- [ ] Handle different source types (YouTube, markdown, notebook)
 - [ ] Add source type indicator in library list
+- [ ] Show appropriate metadata per type
+- [ ] Adapt visualization for text-only content
 
 ---
 
@@ -216,48 +213,81 @@ Scale from workshop prototype to production learning platform.
 
 ---
 
-## Open Questions / Decisions Needed
+## Open Questions
 
-### Processing Architecture
-- **Sync vs Async:** Run pipeline in API route (simple, might timeout) or background worker?
-- **Recommendation:** Start sync for workshop (simpler), move to async post-workshop
-
-### Storage Strategy
-- **Frames/Videos:** Store in Supabase Storage or reference YouTube directly?
-- **Recommendation:** Reference YouTube URLs, only store extracted frames in Storage
-
-### Public vs Private Default
-- **Question:** Should uploaded libraries be public by default (workshop) or private?
-- **Recommendation:** Public for workshop (no auth yet), add privacy controls in Phase 3
-
-### Video Length Limits
-- **Question:** Max video duration for workshop uploads? (processing time constraint)
-- **Recommendation:** 3 hours max (Karpathy GPT length), warn users about processing time
+- **Sync vs Async processing:** API route (simple, might timeout) or background worker?
+- **Storage strategy:** Store frames in Supabase Storage or reference YouTube directly?
+- **Public vs private default:** Public for workshop (no auth) or private by default?
+- **Video length limits:** Max 3 hours (Karpathy GPT length)?
 
 ---
 
-## Current Status
+---
 
-**Phase 1 Complete (2024-12-11):**
-- ✅ Database schema with multimodal content support
-- ✅ YouTube pipeline (Karpathy GPT video fully processed)
-- ✅ Database import script with enriched pedagogical metadata
-- ✅ RAG retrieval with pgvector semantic search
-- ✅ Socratic dialogue with rich teaching material
-- ✅ API routes serving database-backed content
-- ✅ Concept graph visualization reading from database
-- ✅ Python scratchpad with Pyodide
+## Phase 5: Embedding Quality Improvements (Post-MVP)
 
-**Next Phase (1b - Upload UI):**
-- 🎯 Build upload form for workshop attendees
-- 🎯 Add processing status monitoring
-- 🎯 Create orchestration script for end-to-end pipeline
-- 🎯 Handle async processing (or document sync processing limits)
+### Goal
+Optimize semantic search and RAG retrieval quality based on production usage patterns.
 
-**Ready for:**
-- Workshop demonstrations with Karpathy GPT video
-- Additional video imports using existing pipeline
-- Further UI refinement based on user testing
+### Context
+Current embedding system uses Gemini-based semantic segmentation (concept-driven, not time-based). This means:
+- **Dense videos** (e.g., Karpathy lectures) → Many short segments (high concept density)
+- **Tutorial videos** (e.g., MCP walkthrough) → Fewer long segments (verbose explanations)
+
+This is working as intended, but there are opportunities to improve retrieval precision.
+
+### Observations from Testing
+- Similarity scores moderate (0.5-0.6 range) for tutorial-style videos
+- Top results are relevant but not always the most specific
+- Generic intro/outro segments rank highly despite low information value
+- 12 segments for 10-min tutorial vs. potentially 50+ for dense lecture
+
+### Tasks
+
+#### 1. Query Strategy Improvements
+- [ ] **Enhance query construction** - Use concept description + learning objectives instead of just concept name
+- [ ] **Multi-query approach** - Generate multiple query variations and merge results
+- [ ] **Query expansion** - Include related concepts and prerequisites in search
+- [ ] **Test query impact** - Compare retrieval quality with enhanced queries
+
+#### 2. Segment Quality Filtering
+- [ ] **Score segment information density** - Detect and de-prioritize generic intro/outro segments
+- [ ] **Filter by key_concepts count** - Prioritize segments with more specific concepts
+- [ ] **Detect transitional segments** - Identify "next we'll..." type segments and rank lower
+- [ ] **Add segment quality scores** - Store metadata for filtering during retrieval
+
+#### 3. Embedding Model Evaluation
+- [ ] **Benchmark text-embedding-004** - Compare against current model
+- [ ] **Test domain-specific models** - Evaluate code-aware or educational embeddings
+- [ ] **Fine-tune on educational content** - If dataset is large enough
+- [ ] **A/B test retrieval quality** - Measure improvement with different models
+
+#### 4. Concept-Aware Embeddings
+- [ ] **Include concept IDs in embedding text** - Help model understand semantic relationships
+- [ ] **Embed prerequisite chains** - Improve retrieval for foundational concepts
+- [ ] **Add learning objective context** - Embed segments with their teaching goals
+- [ ] **Test concept-augmented retrieval** - Measure precision improvement
+
+#### 5. Adaptive Segmentation (Future)
+- [ ] **Analyze video information density** - Detect dense vs. tutorial-style content
+- [ ] **Dynamic segment length** - Shorter segments for dense videos, longer for tutorials
+- [ ] **Concept-boundary detection** - Let Gemini suggest segment splits more granularly
+- [ ] **Balance segment count** - Target 20-50 segments regardless of video length
+
+#### 6. Retrieval Metrics & Monitoring
+- [ ] **Track similarity score distributions** - Alert if scores drop below threshold
+- [ ] **Log retrieval quality feedback** - Let tutors mark "good" vs "poor" context
+- [ ] **A/B test improvements** - Measure impact on learning outcomes
+- [ ] **Create embedding quality dashboard** - Visualize retrieval patterns
+
+### Priority
+**Low** - Current system is functional for workshop. These are optimization opportunities based on real usage data.
+
+### Success Metrics
+- Average similarity scores increase from 0.5-0.6 to 0.7-0.8
+- Fewer generic segments in top-3 results
+- Improved student engagement in Socratic dialogues
+- Reduced need for fallback context
 
 ---
 
@@ -267,3 +297,4 @@ Scale from workshop prototype to production learning platform.
 - Workshop deadline drives Phase 1 timeline
 - Auth (Phase 3) can wait until post-workshop
 - Focus on reliability over features for workshop MVP
+- **Semantic segmentation is working as designed** - Video style affects segment density

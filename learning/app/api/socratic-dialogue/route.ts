@@ -88,6 +88,13 @@ async function loadConceptContext(
       topK
     );
     
+    // For video libraries: re-sort chronologically (not by similarity)
+    // This ensures video starts from the beginning, not jumping around
+    if (library.type === 'youtube' && segments.length > 0) {
+      segments.sort((a, b) => (a.audio_start || 0) - (b.audio_start || 0));
+      console.log('   📹 Re-sorted video segments chronologically');
+    }
+    
     if (segments.length === 0) {
       console.log('   ⚠️ No matching segments found');
       return {text: '(No textbook sections found for this concept)', chunks: []};

@@ -24,7 +24,7 @@ echo ""
 # Download audio in background
 echo "🎵 Starting audio download..."
 (
-    yt-dlp \
+    uvx --from yt-dlp yt-dlp \
         -x \
         --audio-format mp3 \
         --audio-quality 0 \
@@ -42,7 +42,7 @@ AUDIO_PID=$!
 # Download video (no audio) in background
 echo "🎬 Starting video download (no audio)..."
 (
-    yt-dlp \
+    uvx --from yt-dlp yt-dlp \
         -f "bestvideo[height<=720]" \
         --no-audio \
         "${VIDEO_URL}" \

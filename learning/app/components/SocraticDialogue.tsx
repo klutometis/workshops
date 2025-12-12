@@ -128,7 +128,7 @@ export default function SocraticDialogue({
 
   // Auto-load first video source for video libraries (but don't autoplay)
   useEffect(() => {
-    if (libraryType === 'video' && messages.length > 0) {
+    if (libraryType === 'youtube' && messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage.role === 'assistant' && lastMessage.sources) {
         const firstVideoSource = lastMessage.sources.find(s => s.video_id);
@@ -412,8 +412,8 @@ export default function SocraticDialogue({
   const canSend = !isLoading && (input.trim().length > 0 || code.trim().length > 0);
 
   // Dynamic source tab label based on library type
-  const sourceTabLabel = libraryType === 'video' ? '🎥 Video' : 
-                         libraryType === 'book' ? '📚 Source' : 
+  const sourceTabLabel = libraryType === 'youtube' ? '🎥 Video' : 
+                         libraryType === 'markdown' ? '📚 Source' : 
                          '📖 Reference';
 
   return (

@@ -7022,6 +7022,81 @@ def greedy_tsp(cities):
 
 ---
 
+## Database Migration Strategy (2024-12-11)
+
+### Overview
+
+We're migrating from static file-based content to a database-backed system to support:
+1. **Workshop use case** - Users can upload content during live sessions
+2. **User authentication** - GitHub OAuth for content ownership
+3. **Dynamic content** - No git commits required to add new learning materials
+
+### Technical Stack
+
+- **Database:** Google Cloud SQL (PostgreSQL 15 + pgvector)
+- **Vector Search:** pgvector extension for semantic similarity
+- **Auth:** Supabase GitHub OAuth (planned for Phase 3)
+- **Storage:** Supabase Storage for source files (videos, markdown)
+- **Processing:** Next.js API routes (with potential background worker later)
+
+### Database Details
+
+- **Instance:** `learning-db` (gen-lang-client-0615388941:us-central1:learning-db)
+- **Connection:** 136.111.249.110:5432
+- **Schema:** 5 tables (libraries, concepts, prerequisites, segments, embeddings)
+- **Extensions:** pgvector for vector similarity search
+- **Status:** Fully migrated with multimodal content support ✅
+
+### Processing Architecture Philosophy
+
+**Dual Interfaces Approach:**
+- **CLI** - Core implementation, reusable, scriptable, batch processing
+- **Web** - Thin wrapper over CLI for accessibility, added later
+- Both call same underlying functions in `lib/processing.ts` (zero duplication)
+
+**Why CLI First:**
+- Prove the pipeline works before building UI
+- Enables batch processing and automation
+- Easier to debug and test
+- Can be wrapped with web UI later without rewriting logic
+
+### Processing Pipeline Design
+
+All processing functions follow this pattern:
+
+```typescript
+// lib/processing.ts
+export async function processYouTubeVideo(
+  url: string,
+  onProgress?: (stage: string, percent: number, message: string) => void
+): Promise<ProcessingResult> {
+  // 1. Download media
+  onProgress?.('Downloading video', 10, 'Fetching audio and video');
+  
+  // 2. Extract concepts
+  onProgress?.('Extracting concepts', 40, 'Analyzing content');
+  
+  // 3. Enrich pedagogy
+  onProgress?.('Enriching concepts', 70, 'Adding learning objectives');
+  
+  // 4. Generate embeddings
+  onProgress?.('Generating embeddings', 85, 'Creating vector representations');
+  
+  // 5. Import to database
+  onProgress?.('Importing to database', 95, 'Saving to database');
+  
+  return { libraryId, stats, sourceUrl };
+}
+```
+
+**Progress callbacks** enable:
+- CLI progress bars
+- Web UI status updates
+- Background job tracking
+- Same code, different UIs
+
+---
+
 *Last updated: 2025-01-17*
 *See CONTEXT.md for complete project design document*
 
