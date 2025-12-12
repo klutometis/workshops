@@ -62,7 +62,7 @@ function HomeContent() {
 
   // Load libraries on mount
   useEffect(() => {
-    fetch('/data/libraries.json')
+    fetch('/api/libraries')
       .then(res => res.json())
       .then(data => {
         setLibraries(data.libraries);
@@ -182,13 +182,13 @@ function HomeContent() {
   // Ready concepts: all prerequisites mastered, but not yet mastered itself
   const readyConcepts = concepts.filter(c => 
     !masteredConcepts.has(c.id) &&
-    c.prerequisites.every((p: string) => masteredConcepts.has(p))
+    (c.prerequisites || []).every((p: string) => masteredConcepts.has(p))
   );
 
   // Locked concepts: missing at least one prerequisite
   const lockedConcepts = concepts.filter(c =>
     !masteredConcepts.has(c.id) &&
-    c.prerequisites.some((p: string) => !masteredConcepts.has(p))
+    (c.prerequisites || []).some((p: string) => !masteredConcepts.has(p))
   );
 
   // Recommended concepts: Top 3-5 ready concepts, prioritized by:
@@ -202,7 +202,7 @@ function HomeContent() {
 
   const countUnlocks = (conceptId: string): number => {
     return concepts.filter(c =>
-      c.prerequisites.includes(conceptId)
+      (c.prerequisites || []).includes(conceptId)
     ).length;
   };
 
@@ -348,7 +348,7 @@ function HomeContent() {
           open={dialogueOpen}
           onOpenChange={setDialogueOpen}
           conceptData={selectedConcept}
-          embeddingsPath={selectedLibrary.embeddingsPath}
+          libraryId={selectedLibraryId}
           libraryType={selectedLibrary.type}
           onMasteryAchieved={handleMasteryAchieved}
         />

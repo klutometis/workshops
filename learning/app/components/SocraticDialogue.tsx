@@ -77,7 +77,7 @@ type SocraticDialogueProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   conceptData: any;
-  embeddingsPath: string;
+  libraryId: string;
   libraryType?: string;
   onMasteryAchieved?: (conceptId: string) => void;
 };
@@ -86,7 +86,7 @@ export default function SocraticDialogue({
   open,
   onOpenChange,
   conceptData,
-  embeddingsPath,
+  libraryId,
   libraryType,
   onMasteryAchieved,
 }: SocraticDialogueProps) {
@@ -192,7 +192,7 @@ export default function SocraticDialogue({
           conversationHistory: [],
           conceptData,
           textbookContext: null, // Signal: please do semantic search
-          embeddingsPath,
+          libraryId,
         }),
       });
 
@@ -314,7 +314,7 @@ export default function SocraticDialogue({
           conversationHistory,
           conceptData,
           textbookContext,
-          embeddingsPath,
+          libraryId,
         }),
       });
 

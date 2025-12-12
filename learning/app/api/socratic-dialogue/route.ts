@@ -15,32 +15,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { getLibraryBySlug, searchSegments } from '@/lib/db';
 
 type Message = {
   role: 'system' | 'user' | 'assistant';
   content: string;
 };
-
-// Compute cosine similarity between two vectors
-function cosineSimilarity(a: number[], b: number[]): number {
-  if (a.length !== b.length) {
-    throw new Error(`Vector dimension mismatch: ${a.length} vs ${b.length}`);
-  }
-  
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
-  
-  for (let i = 0; i < a.length; i++) {
-    dotProduct += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
-  }
-  
-  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-}
 
 // Generate embedding for a concept query
 async function embedConceptQuery(conceptName: string, apiKey: string): Promise<number[]> {
@@ -58,7 +38,8 @@ async function embedConceptQuery(conceptName: string, apiKey: string): Promise<n
         model: 'gemini-embedding-001',
         content: {
           parts: [{ text: queryText }]
-        }
+        },
+        outputDimensionality: 1536
       })
     }
   );
@@ -72,110 +53,113 @@ async function embedConceptQuery(conceptName: string, apiKey: string): Promise<n
   return data.embedding.values;
 }
 
-// Load textbook sections using semantic search
+// Load textbook sections using database semantic search
 async function loadConceptContext(
   conceptId: string, 
   conceptData: any,
   apiKey: string,
-  embeddingsPath: string,
+  libraryId: string,
   topK: number = 5
 ): Promise<{text: string; chunks: any[]}> {
   try {
-    // Load embeddings from dynamic path
-    const embeddingsFile = path.join(
-      process.cwd(), 
-      'public',
-      embeddingsPath.replace(/^\/data\//, '') // Remove /data/ prefix
-    );
+    console.log(`   🔍 Looking up library by slug: ${libraryId}`);
     
-    const embeddingsData = JSON.parse(
-      await fs.readFile(embeddingsFile, 'utf-8')
-    );
-    const embeddings = embeddingsData;
-    
-    // Support both markdown embeddings (chunks) and video embeddings (segments)
-    const items = embeddings.chunks || embeddings.segments;
-    const itemType = embeddings.chunks ? 'chunks' : 'segments';
-    
-    if (!items || items.length === 0) {
-      console.log(`   ⚠️ No ${itemType} found in embeddings file`);
+    // Get library from database using human-readable slug
+    const library = await getLibraryBySlug(libraryId);
+    if (!library) {
+      console.log(`   ⚠️ Library not found in database: ${libraryId}`);
       return {text: '(No textbook sections found for this concept)', chunks: []};
     }
     
-    console.log(`   📊 Searching ${items.length} ${itemType} using semantic similarity...`);
+    console.log(`   📚 Found in database: ${library.title}`);
+    console.log(`   🗄️  Type: ${library.type}, Video ID: ${library.video_id || 'N/A'}`);
+    console.log(`   ✅ USING DATABASE (not disk files)`);
     
     // Get embedding for the concept query
     const conceptEmbedding = await embedConceptQuery(conceptData.name, apiKey);
     
-    console.log(`   🧮 Computing similarities (embedding dims: ${conceptEmbedding.length})...`);
+    console.log(`   🧮 Querying database with ${conceptEmbedding.length}-dim embedding...`);
     
-    // Compute similarity scores for all items
-    const rankedChunks = items
-      .map((chunk: any) => ({
-        chunk,
-        similarity: cosineSimilarity(conceptEmbedding, chunk.embedding)
-      }))
-      .sort((a: any, b: any) => b.similarity - a.similarity)
-      .slice(0, topK);
+    // Search database using pgvector similarity
+    const segments = await searchSegments(
+      conceptEmbedding,
+      library.id,
+      0.5, // similarity threshold
+      topK
+    );
     
-    // Re-sort chronologically for natural learning flow (video segments)
-    if (rankedChunks.length > 0 && rankedChunks[0].chunk.timestamp !== undefined) {
-      rankedChunks.sort((a: any, b: any) => a.chunk.timestamp - b.chunk.timestamp);
-    }
-    
-    if (rankedChunks.length === 0) {
+    if (segments.length === 0) {
+      console.log('   ⚠️ No matching segments found');
       return {text: '(No textbook sections found for this concept)', chunks: []};
     }
     
-    console.log(`   ✅ Top ${rankedChunks.length} ${itemType} by similarity:`);
-    rankedChunks.forEach((item: any, i: number) => {
-      const label = item.chunk.topic || item.chunk.audio_text?.substring(0, 60) || 'Untitled';
-      console.log(`      ${i + 1}. [${item.similarity.toFixed(3)}] ${label}`);
-      if (item.chunk.concepts) {
-        console.log(`         Tags: ${item.chunk.concepts.join(', ')}`);
-      } else if (item.chunk.key_concepts) {
-        console.log(`         Key concepts: ${item.chunk.analysis?.key_concepts?.join(', ') || 'N/A'}`);
+    console.log(`   ✅ Found ${segments.length} segments by similarity:`);
+    segments.forEach((seg: any, i: number) => {
+      const label = seg.audio_text?.substring(0, 60) || 'Untitled';
+      console.log(`      ${i + 1}. [${seg.similarity.toFixed(3)}] ${label}`);
+      if (seg.key_concepts) {
+        console.log(`         Key concepts: ${seg.key_concepts.join(', ')}`);
       }
     });
     
-    // Format the most relevant chunks for LLM
-    const formattedText = rankedChunks
-      .map((item: any) => {
-        const chunk = item.chunk;
+    // Format the most relevant segments for LLM with rich multimodal content
+    const formattedText = segments
+      .map((seg: any) => {
+        // Use segment_timestamp (not timestamp which doesn't exist)
+        const timestamp = seg.segment_timestamp || 0;
+        const minutes = Math.floor(timestamp / 60);
+        const seconds = Math.floor(timestamp % 60);
+        const title = `Timestamp ${minutes}:${String(seconds).padStart(2, '0')}`;
         
-        // Handle both markdown chunks and video segments
-        const chunkType = chunk.chunk_type || 'VIDEO';
-        const title = chunk.topic || `Timestamp ${Math.floor(chunk.timestamp / 60)}:${String(Math.floor(chunk.timestamp % 60)).padStart(2, '0')}`;
-        const content = chunk.text || chunk.audio_text || '(no content)';
+        // Build rich content from all available fields
+        const parts: string[] = [];
         
-        return `**[${chunkType.toUpperCase()}] ${title}** (similarity: ${(item.similarity * 100).toFixed(1)}%)\n${content}`;
+        if (seg.audio_text && seg.audio_text.trim()) {
+          parts.push(`**Transcript:** ${seg.audio_text}`);
+        }
+        
+        if (seg.visual_description && seg.visual_description.trim()) {
+          parts.push(`**Visual:** ${seg.visual_description}`);
+        }
+        
+        if (seg.code_content && seg.code_content.trim()) {
+          parts.push(`**Code:**\n\`\`\`\n${seg.code_content}\n\`\`\``);
+        }
+        
+        if (seg.slide_content && seg.slide_content.trim()) {
+          parts.push(`**Slides:** ${seg.slide_content}`);
+        }
+        
+        if (seg.key_concepts && seg.key_concepts.length > 0) {
+          parts.push(`**Key Concepts:** ${seg.key_concepts.join(', ')}`);
+        }
+        
+        const content = parts.length > 0 ? parts.join('\n\n') : '(no content)';
+        
+        return `**[VIDEO] ${title}** (similarity: ${(seg.similarity * 100).toFixed(1)}%)\n\n${content}`;
       })
       .join('\n\n---\n\n');
     
     // Return BOTH formatted text AND raw chunks with provenance
     return {
       text: formattedText,
-      chunks: rankedChunks.map((item: any) => ({
-        text: item.chunk.text,
-        topic: item.chunk.topic,
-        chunk_type: item.chunk.chunk_type,
-        similarity: item.similarity,
+      chunks: segments.map((seg: any) => ({
+        text: seg.audio_text,
+        topic: null,
+        chunk_type: 'video',
+        similarity: seg.similarity,
         
-        // Markdown metadata (if present)
-        source_file: item.chunk.source_file,
-        heading_path: item.chunk.heading_path,
-        markdown_anchor: item.chunk.markdown_anchor,
-        start_line: item.chunk.start_line,
-        end_line: item.chunk.end_line,
-        
-        // Video metadata (if present)
-        video_id: item.chunk.video_id,
-        timestamp: item.chunk.timestamp,
-        segment_index: item.chunk.segment_index,
-        frame_path: item.chunk.frame_path,
-        audio_text: item.chunk.audio_text,
-        audio_start: item.chunk.audio_start,
-        audio_end: item.chunk.audio_end,
+        // Video metadata (use correct field names from database)
+        video_id: library.video_id,
+        timestamp: seg.segment_timestamp,
+        segment_index: seg.segment_index,
+        audio_text: seg.audio_text,
+        audio_start: seg.audio_start,
+        audio_end: seg.audio_end,
+        visual_description: seg.visual_description,
+        code_content: seg.code_content,
+        slide_content: seg.slide_content,
+        key_concepts: seg.key_concepts,
       }))
     };
       
@@ -187,7 +171,7 @@ async function loadConceptContext(
 
 export async function POST(request: NextRequest) {
   try {
-    const { conceptId, conversationHistory, conceptData, textbookContext, embeddingsPath } = await request.json();
+    const { conceptId, conversationHistory, conceptData, textbookContext, libraryId } = await request.json();
 
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('🎓 NEW SOCRATIC DIALOGUE REQUEST');
@@ -213,7 +197,7 @@ export async function POST(request: NextRequest) {
     
     if (!textbookSections) {
       console.log('\n📚 SEMANTIC SEARCH (first turn):');
-      const result = await loadConceptContext(conceptId, conceptData, apiKey, embeddingsPath, 5);
+      const result = await loadConceptContext(conceptId, conceptData, apiKey, libraryId, 5);
       textbookSections = result.text;
       sourceChunks = result.chunks;
     } else {

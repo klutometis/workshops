@@ -53,27 +53,47 @@ interface EmbeddingResult {
   };
 }
 
-// Embed a single chunk
+// Embed a single chunk using REST API directly
 async function embedChunk(
-  ai: GoogleGenAI,
+  apiKey: string,
   chunk: Chunk,
   modelName: string
 ): Promise<EmbeddedChunk> {
   // Create rich text for embedding - includes topic and concepts for better semantic matching
   const textToEmbed = `${chunk.topic}\n\n${chunk.text}\n\nConcepts: ${chunk.concepts.join(', ')}`;
   
-  const result = await ai.models.embedContent({
-    model: modelName,
-    contents: [textToEmbed],
-  } as any); // Type assertion - SDK types may be incomplete
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:embedContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: modelName,
+        content: { parts: [{ text: textToEmbed }] },
+        outputDimensionality: 1536
+      })
+    }
+  );
   
-  if (!result.embeddings || !result.embeddings[0] || !result.embeddings[0].values) {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Embedding API failed: ${errorText}`);
+  }
+  
+  const data = await response.json();
+  
+  if (!data.embedding || !data.embedding.values) {
     throw new Error(`Failed to generate embedding for chunk: ${chunk.chunk_id}`);
   }
   
+  // Normalize embedding (required for 1536D per Gemini docs)
+  const embedding = data.embedding.values;
+  const magnitude = Math.sqrt(embedding.reduce((sum: number, val: number) => sum + val * val, 0));
+  const normalizedEmbedding = embedding.map((val: number) => val / magnitude);
+  
   return {
     ...chunk,
-    embedding: result.embeddings[0].values,
+    embedding: normalizedEmbedding,
     embedding_model: modelName,
   };
 }
@@ -95,14 +115,13 @@ async function embedChunks(inputPath: string, outputPath?: string) {
     process.exit(1);
   }
   
-  // Initialize Gemini
+  // Get API key
   const apiKey = process.env.GOOGLE_API_KEY;
   if (!apiKey) {
     console.error('❌ GOOGLE_API_KEY not found in environment!');
     process.exit(1);
   }
   
-  const ai = new GoogleGenAI({ apiKey });
   const modelName = 'gemini-embedding-001'; // Latest Google embedding model
   
   console.log(`🔢 Using model: ${modelName}`);
@@ -122,7 +141,7 @@ async function embedChunks(inputPath: string, outputPath?: string) {
     
     try {
       // Process batch in parallel
-      const batchPromises = batch.map(chunk => embedChunk(ai, chunk, modelName));
+      const batchPromises = batch.map(chunk => embedChunk(apiKey, chunk, modelName));
       const batchResults = await Promise.all(batchPromises);
       
       embeddedChunks.push(...batchResults);
@@ -140,7 +159,7 @@ async function embedChunks(inputPath: string, outputPath?: string) {
       // Fallback: try each chunk individually
       for (const chunk of batch) {
         try {
-          const embedded = await embedChunk(ai, chunk, modelName);
+          const embedded = await embedChunk(apiKey, chunk, modelName);
           embeddedChunks.push(embedded);
           console.log(`      ✅ Embedded: ${chunk.chunk_id}`);
           await new Promise(resolve => setTimeout(resolve, 500));

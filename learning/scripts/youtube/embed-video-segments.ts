@@ -106,9 +106,9 @@ function createEmbeddingText(segment: VideoSegment, conceptName?: string): strin
   return parts.join('\n\n');
 }
 
-// Embed a single video segment
+// Embed a single video segment using REST API directly
 async function embedSegment(
-  ai: GoogleGenAI,
+  apiKey: string,
   segment: VideoSegment,
   videoId: string,
   modelName: string,
@@ -120,19 +120,39 @@ async function embedSegment(
     throw new Error(`Segment ${segment.segment_index} has no content to embed`);
   }
   
-  const result = await ai.models.embedContent({
-    model: modelName,
-    contents: [embeddingText],
-  } as any);
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:embedContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: modelName,
+        content: { parts: [{ text: embeddingText }] },
+        outputDimensionality: 1536
+      })
+    }
+  );
   
-  if (!result.embeddings || !result.embeddings[0] || !result.embeddings[0].values) {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Embedding API failed: ${errorText}`);
+  }
+  
+  const data = await response.json();
+  
+  if (!data.embedding || !data.embedding.values) {
     throw new Error(`Failed to generate embedding for segment: ${segment.segment_index}`);
   }
+  
+  // Normalize embedding (required for 1536D per Gemini docs)
+  const embedding = data.embedding.values;
+  const magnitude = Math.sqrt(embedding.reduce((sum: number, val: number) => sum + val * val, 0));
+  const normalizedEmbedding = embedding.map((val: number) => val / magnitude);
   
   return {
     ...segment,
     video_id: videoId,
-    embedding: result.embeddings[0].values,
+    embedding: normalizedEmbedding,
     embedding_model: modelName,
     embedding_text: embeddingText,
   };
@@ -187,14 +207,13 @@ async function embedVideoSegments(videoId: string, outputPath?: string) {
   const conceptNames = await loadConceptNames(segmentData.video_id);
   console.log(`   Found ${conceptNames.size} concept names\n`);
   
-  // Initialize Gemini
+  // Get API key
   const apiKey = process.env.GOOGLE_API_KEY;
   if (!apiKey) {
     console.error('❌ GOOGLE_API_KEY not found in environment!');
     process.exit(1);
   }
   
-  const ai = new GoogleGenAI({ apiKey });
   const modelName = 'gemini-embedding-001';
   
   console.log(`🔢 Using model: ${modelName}`);
@@ -218,7 +237,7 @@ async function embedVideoSegments(videoId: string, outputPath?: string) {
         const conceptName = segment.concept_mapping?.concept_id
           ? conceptNames.get(segment.concept_mapping.concept_id)
           : undefined;
-        return embedSegment(ai, segment, segmentData.video_id, modelName, conceptName);
+        return embedSegment(apiKey, segment, segmentData.video_id, modelName, conceptName);
       });
       const batchResults = await Promise.all(batchPromises);
       
@@ -240,7 +259,7 @@ async function embedVideoSegments(videoId: string, outputPath?: string) {
           const conceptName = segment.concept_mapping?.concept_id
             ? conceptNames.get(segment.concept_mapping.concept_id)
             : undefined;
-          const embedded = await embedSegment(ai, segment, segmentData.video_id, modelName, conceptName);
+          const embedded = await embedSegment(apiKey, segment, segmentData.video_id, modelName, conceptName);
           embeddedSegments.push(embedded);
           console.log(`      ✅ Embedded segment ${segment.segment_index}`);
           await new Promise(resolve => setTimeout(resolve, 500));

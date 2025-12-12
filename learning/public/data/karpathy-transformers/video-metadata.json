@@ -1,0 +1,16 @@
+{
+  "video_id": "kCc8FmEb1nY",
+  "title": "Let's build GPT: from scratch, in code, spelled out",
+  "author": "Andrej Karpathy",
+  "url": "https://www.youtube.com/watch?v=kCc8FmEb1nY",
+  "duration_seconds": 7364,
+  "duration_formatted": "2h 2m 44s",
+  "published_date": "2023-01-17",
+  "description": "Build a Generatively Pretrained Transformer (GPT) from scratch, implementing the attention mechanism, transformer blocks, and training loop in PyTorch.",
+  "thumbnail": "https://i.ytimg.com/vi/kCc8FmEb1nY/maxresdefault.jpg",
+  "stats": {
+    "total_segments": 859,
+    "total_concepts": 29,
+    "estimated_hours": 2.5
+  }
+}

@@ -125,7 +125,7 @@ export default function ConceptGraph({
     // Generate edges from prerequisites (single source of truth)
     // FLIP arrow direction for visual learning flow
     const edges: EdgeDefinition[] = concepts.flatMap((concept) =>
-      concept.prerequisites.map((prereq) => ({
+      (concept.prerequisites || []).map((prereq) => ({
         data: {
           source: prereq,      // prerequisite as source
           target: concept.id,  // dependent concept as target
