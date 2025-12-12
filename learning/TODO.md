@@ -53,6 +53,8 @@ All core infrastructure is in place. The system successfully:
 - [x] **Multimodal content display** - Shows timestamps, code, visual descriptions in teaching context
 - [x] **Library selector working** - Can switch between learning modules
 - [x] **Concept graph reads from API** - No more static JSON dependencies
+- [x] **Clean URL routing** - Home page shows selector, libraries at `/library/{slug}`
+- [x] **Dynamic routes with Next.js 15+** - Proper `params` Promise handling with `React.use()`
 - [ ] Create upload form component *(deferred to Phase 1b - workshop upload UI)*
 - [ ] Add processing status indicator *(deferred to Phase 1b)*
 

@@ -8,6 +8,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2024-12-12 - Clean URLs with Dynamic Routes
+
+**Progress:** Refactored routing to use Next.js dynamic routes with clean URLs. Home page now shows library selector, individual libraries accessible at `/library/{slug}`.
+
+#### Changed
+- **Simplified home page** (`app/page.tsx`):
+  - Removed all library detail view logic
+  - Now only renders `LibrarySelector` component
+  - Navigates to `/library/{id}` on selection
+- **Created dynamic route** (`app/library/[slug]/page.tsx`):
+  - Moved all library detail view logic from home page
+  - Uses Next.js 15+ `params` Promise with `React.use()`
+  - Handles invalid library IDs with redirect to home
+  - Maintains localStorage sync for recent library
+
+#### Fixed
+- **Next.js 15+ params handling**: Properly unwrap `params` Promise with `React.use()` hook
+- **URL structure**: Changed from `/?library=sudoku` to `/library/sudoku`
+
+#### Architecture
+```
+Before: /?library=sudoku (query param)
+After:  /library/sudoku (clean URL)
+
+Routes:
+  /                    → LibrarySelector
+  /library/[slug]      → ConceptGraph + Details + Socratic Dialogue
+```
+
+#### Status
+- ✅ Clean semantic URLs working
+- ✅ Direct linking to libraries functional
+- ✅ Back button navigates correctly
+- ✅ Ready for shareable library links
+
+---
+
 ### 2024-12-12 - Jupyter Notebook Pipeline & API Optimizations
 
 **Progress:** Jupyter notebooks can now be processed from GitHub URLs! Full pipeline converts notebooks to markdown and processes through existing markdown pipeline. Also fixed critical API performance issue with markdown content duplication.
