@@ -42,6 +42,20 @@ build() {
 
 # Function to run the container
 run() {
+  # Load environment from ~/.env-secrets if it exists
+  if [ -f "$HOME/.env-secrets" ]; then
+    echo -e "${BLUE}📝 Loading secrets from ~/.env-secrets${NC}"
+    set -a
+    source "$HOME/.env-secrets"
+    set +a
+  fi
+
+  # Map dev credentials to generic env vars (testing Docker build locally)
+  GITHUB_CLIENT_ID="${LILPAIPER_GITHUB_CLIENT_ID_DEV:-}"
+  GITHUB_CLIENT_SECRET="${LILPAIPER_GITHUB_CLIENT_SECRET_DEV:-}"
+  NEXTAUTH_SECRET="${LILPAIPER_NEXTAUTH_SECRET:-}"
+  NEXTAUTH_URL="http://localhost:${PORT}"  # Local testing with dev OAuth callback
+
   # Stop any existing container
   if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     echo -e "${YELLOW}🛑 Stopping existing container...${NC}"
@@ -59,6 +73,10 @@ run() {
     -e NODE_ENV=production \
     -e DATABASE_URL="${LEARNING_DATABASE_URL}" \
     -e GOOGLE_API_KEY="${GOOGLE_API_KEY}" \
+    -e GITHUB_CLIENT_ID="${GITHUB_CLIENT_ID}" \
+    -e GITHUB_CLIENT_SECRET="${GITHUB_CLIENT_SECRET}" \
+    -e NEXTAUTH_SECRET="${NEXTAUTH_SECRET}" \
+    -e NEXTAUTH_URL="${NEXTAUTH_URL}" \
     "${IMAGE_NAME}:${IMAGE_TAG}"
 }
 

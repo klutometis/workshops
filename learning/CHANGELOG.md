@@ -8,6 +8,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2024-12-15 - GitHub Authentication System Complete
+
+**Progress:** Implemented GitHub OAuth authentication with NextAuth v4 and database-backed user persistence.
+
+#### Added
+- **GitHub OAuth provider** configured with NextAuth v4
+- **User database persistence** (`lib/auth.ts`):
+  - Saves GitHub profile data on sign-in
+  - Updates user info and `last_login_at` on subsequent logins
+  - Graceful error handling (OAuth works even if DB save fails)
+- **Users table** already existed in schema from earlier migration
+- **Authentication API routes** (`app/api/auth/[...nextauth]/route.ts`):
+  - `GET /api/auth/signin` - Built-in NextAuth sign-in page
+  - `POST /api/auth/signin/github` - GitHub OAuth initiation
+  - `GET /api/auth/callback/github` - OAuth callback handler
+
+#### Fixed
+- **NextAuth v4 vs v5 API confusion**:
+  - Was using v5 syntax (`handlers` export) but had v4 installed
+  - Corrected to v4 API (`authOptions` export + `NextAuth(authOptions)`)
+- **Custom sign-in page 404**: Removed non-existent `/auth/signin` reference
+- **OAuth state cookie errors**: Fixed by using default NextAuth sign-in page
+
+#### Testing
+- ✅ Full OAuth flow working (GitHub → callback → session)
+- ✅ User `klutometis` authenticated and saved to database
+- ✅ Database record verified: `github_login`, `github_name`, `created_at` all correct
+- ✅ No more OAuth errors or state cookie issues
+
+#### Status
+**Phase 1a (OAuth):** ✅ Complete
+- ✅ GitHub authentication working
+- ✅ User persistence in database
+- 🚧 Next: Personal library pages at `/users/{username}/{library}`
+
+---
+
 ### 2024-12-15 - Notebook Processing Path Fixes and Title Extraction
 
 **Progress:** Fixed critical path derivation bug in notebook processing and improved title extraction to use markdown headers instead of filenames.

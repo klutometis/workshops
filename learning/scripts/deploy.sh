@@ -28,11 +28,24 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Check for required API key
+# Load environment from ~/.env-secrets if it exists
+if [ -f "$HOME/.env-secrets" ]; then
+  echo -e "${BLUE}📝 Loading secrets from ~/.env-secrets${NC}"
+  set -a
+  source "$HOME/.env-secrets"
+  set +a
+fi
+
+# Map production credentials to generic env vars
+GITHUB_CLIENT_ID="${LILPAIPER_GITHUB_CLIENT_ID_PROD:-}"
+GITHUB_CLIENT_SECRET="${LILPAIPER_GITHUB_CLIENT_SECRET_PROD:-}"
+NEXTAUTH_SECRET="${LILPAIPER_NEXTAUTH_SECRET:-}"
+NEXTAUTH_URL="https://lilpaiper.ai"
+
+# Check for required credentials
 if [ -z "${GOOGLE_API_KEY}" ]; then
   echo -e "${YELLOW}⚠️  Warning: GOOGLE_API_KEY not set${NC}"
-  echo "Export it before deploying:"
-  echo "  export GOOGLE_API_KEY='your-key-here'"
+  echo "Export it before deploying or add to ~/.env-secrets"
   echo ""
   read -p "Continue anyway? (y/N) " -n 1 -r
   echo
@@ -41,11 +54,16 @@ if [ -z "${GOOGLE_API_KEY}" ]; then
   fi
 fi
 
+if [ -z "${GITHUB_CLIENT_ID}" ] || [ -z "${GITHUB_CLIENT_SECRET}" ]; then
+  echo -e "${YELLOW}⚠️  Warning: GitHub OAuth not configured${NC}"
+  echo "Set LILPAIPER_GITHUB_CLIENT_ID_PROD and LILPAIPER_GITHUB_CLIENT_SECRET_PROD in ~/.env-secrets"
+  echo ""
+fi
+
 # Check for database connection
 if [ -z "${LEARNING_DATABASE_URL}" ]; then
   echo -e "${YELLOW}⚠️  Warning: LEARNING_DATABASE_URL not set${NC}"
-  echo "Export it before deploying:"
-  echo "  export LEARNING_DATABASE_URL='postgresql://user:pass@host:5432/learning'"
+  echo "Export it before deploying or add to ~/.env-secrets"
   echo ""
 fi
 
@@ -100,7 +118,7 @@ gcloud run deploy "${SERVICE_NAME}" \
   --min-instances=0 \
   --max-instances=10 \
   --timeout=300 \
-  --set-env-vars="NODE_ENV=production,GOOGLE_API_KEY=${GOOGLE_API_KEY},DATABASE_URL=${LEARNING_DATABASE_URL}" \
+  --set-env-vars="NODE_ENV=production,GOOGLE_API_KEY=${GOOGLE_API_KEY},DATABASE_URL=${LEARNING_DATABASE_URL},GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID},GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET},NEXTAUTH_SECRET=${NEXTAUTH_SECRET},NEXTAUTH_URL=${NEXTAUTH_URL}" \
   --project="${PROJECT_ID}"
 
 # Get the service URL

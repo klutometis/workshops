@@ -67,7 +67,7 @@ All core infrastructure is in place. The system successfully:
 
 ---
 
-## Phase 1a: GitHub Authentication & Personal Libraries ⚡ **TOP PRIORITY**
+## Phase 1a: GitHub Authentication & Personal Libraries ⚡ **IN PROGRESS**
 
 ### Goal
 Establish GitHub as the identity layer and enable personal libraries from day one.
@@ -80,34 +80,27 @@ Establish GitHub as the identity layer and enable personal libraries from day on
 - ✅ **Social discovery** - Browse by creator
 - ✅ **Private repo access** - Import from private GitHub repositories
 
+### Status: **OAuth Complete** ✅ (2024-12-15)
+
+Authentication is working end-to-end:
+- ✅ GitHub OAuth flow functional
+- ✅ Users saved to database on sign-in
+- ✅ Profile data (name, avatar, login) persisted
+- ✅ `last_login_at` updates on subsequent logins
+- ✅ Tested with user `klutometis` successfully
+
 ### Tasks
 
-#### 1. Setup GitHub OAuth ⚡ **IMMEDIATE**
-- [ ] Install NextAuth.js: `npm install next-auth`
-- [ ] Configure GitHub OAuth provider
-- [ ] Register OAuth app at github.com/settings/developers:
-  - Homepage: `https://lilpaiper.ai`
-  - Callback: `https://lilpaiper.ai/api/auth/callback/github`
-  - Scopes: `read:user`, `repo` (for private repos)
-- [ ] Store credentials in `.env.local`:
-  ```
-  GITHUB_ID=...
-  GITHUB_SECRET=...
-  NEXTAUTH_SECRET=...
-  ```
+#### 1. Setup GitHub OAuth ✅ **COMPLETE** (2024-12-15)
+- [x] Install NextAuth.js: `npm install next-auth` (was already v4.24.13)
+- [x] Configure GitHub OAuth provider (`lib/auth.ts`)
+- [x] Register OAuth app at github.com/settings/developers
+- [x] Store credentials in environment (loaded via `scripts/dev.sh`)
+- [x] Create NextAuth API routes (`app/api/auth/[...nextauth]/route.ts`)
+- [x] Test OAuth flow and verify database persistence
 
-#### 2. Database Schema Updates ⚡ **IMMEDIATE**
-- [ ] Create `users` table:
-  ```sql
-  CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    github_id TEXT UNIQUE NOT NULL,
-    github_login TEXT UNIQUE NOT NULL,  -- "pnorvig"
-    github_name TEXT,                   -- "Peter Norvig"
-    github_avatar TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
-  );
-  ```
+#### 2. Database Schema Updates ✅ **COMPLETE** (Already existed)
+- [x] `users` table already created in schema migrations
 - [ ] Add `user_id` foreign key to `libraries` table:
   ```sql
   ALTER TABLE libraries 
@@ -117,13 +110,15 @@ Establish GitHub as the identity layer and enable personal libraries from day on
   ```
 - [ ] Add index: `CREATE INDEX idx_libraries_user_id ON libraries(user_id);`
 
-#### 3. Authentication UI Components 🎯 **HIGH PRIORITY**
-- [ ] Create `app/api/auth/[...nextauth]/route.ts` (NextAuth handler)
+#### 3. Authentication UI Components 🎯 **NEXT PRIORITY**
+- [x] Create `app/api/auth/[...nextauth]/route.ts` (NextAuth handler) ✅
 - [ ] Add `useAuth()` hook wrapper
 - [ ] Create `<SignInButton>` component: "🚀 Sign in with GitHub"
 - [ ] Create `<UserMenu>` component (avatar, profile link, sign out)
 - [ ] Add auth UI to app layout header
 - [ ] Protected route wrapper for `/publish`
+
+**Note:** Currently using NextAuth's default sign-in page at `/api/auth/signin`. Custom UI components are next step.
 
 #### 4. Personal Library Pages 🎯 **HIGH PRIORITY**
 - [ ] Create `/users/[username]/page.tsx` - List user's public libraries
@@ -142,10 +137,12 @@ Establish GitHub as the identity layer and enable personal libraries from day on
 - [ ] Browse by creator
 
 #### 6. Testing
-- [ ] Test OAuth flow (sign in → callback → session)
-- [ ] Verify user record created on first login
-- [ ] Test personal library page displays correctly
-- [ ] Confirm protected routes redirect to sign-in
+- [x] Test OAuth flow (sign in → callback → session) ✅
+- [x] Verify user record created on first login ✅
+  - User `klutometis` (Peter Danenberg) saved successfully
+  - Timestamp: 2025-12-15 23:25:43.369512+00
+- [ ] Test personal library page displays correctly (not yet implemented)
+- [ ] Confirm protected routes redirect to sign-in (not yet implemented)
 - [ ] Test sign out and session expiry
 
 ### Success Criteria

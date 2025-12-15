@@ -24,18 +24,41 @@ DROP FUNCTION IF EXISTS get_concept_graph(UUID);
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- ============================================================================
--- 1. LIBRARIES TABLE
+-- 1. USERS TABLE
+-- ============================================================================
+-- Represents authenticated users (via GitHub OAuth)
+
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  github_id TEXT UNIQUE NOT NULL,
+  github_login TEXT UNIQUE NOT NULL,  -- e.g., "pnorvig"
+  github_name TEXT,                   -- e.g., "Peter Norvig"
+  github_avatar TEXT,
+  github_email TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_login_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_github_login ON users(github_login);
+CREATE INDEX IF NOT EXISTS idx_users_github_id ON users(github_id);
+
+-- ============================================================================
+-- 2. LIBRARIES TABLE
 -- ============================================================================
 -- Represents a learning module (YouTube video, book, notebook, etc.)
 
 CREATE TABLE IF NOT EXISTS libraries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   
+  -- Ownership
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  is_public BOOLEAN NOT NULL DEFAULT true,
+  
   -- Basic metadata
   title TEXT NOT NULL,
   author TEXT NOT NULL,
   type TEXT NOT NULL CHECK (type IN ('youtube', 'markdown', 'notebook')),
-  slug TEXT UNIQUE NOT NULL,  -- Human-readable identifier for URLs (e.g., 'karpathy-transformers')
+  slug TEXT NOT NULL,  -- Human-readable identifier for URLs (e.g., 'karpathy-transformers')
   
   -- Source information
   source_url TEXT,
@@ -59,7 +82,10 @@ CREATE TABLE IF NOT EXISTS libraries (
   processed_at TIMESTAMPTZ,
   
   -- Optional metadata (JSONB for flexibility)
-  metadata JSONB DEFAULT '{}'::jsonb
+  metadata JSONB DEFAULT '{}'::jsonb,
+  
+  -- Constraint: slug must be unique per user (allows different users to have same slug)
+  CONSTRAINT unique_user_slug UNIQUE (user_id, slug)
 );
 
 CREATE INDEX IF NOT EXISTS idx_libraries_status ON libraries(status);
@@ -67,9 +93,12 @@ CREATE INDEX IF NOT EXISTS idx_libraries_type ON libraries(type);
 CREATE INDEX IF NOT EXISTS idx_libraries_video_id ON libraries(video_id) WHERE video_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_libraries_slug ON libraries(slug);
 CREATE INDEX IF NOT EXISTS idx_libraries_source_type ON libraries(source_type);
+CREATE INDEX IF NOT EXISTS idx_libraries_user_id ON libraries(user_id);
+CREATE INDEX IF NOT EXISTS idx_libraries_public ON libraries(is_public);
+CREATE INDEX IF NOT EXISTS idx_libraries_user_public ON libraries(user_id, is_public);
 
 -- ============================================================================
--- 2. CONCEPTS TABLE
+-- 3. CONCEPTS TABLE
 -- ============================================================================
 -- Represents a single concept/topic within a library
 
@@ -101,7 +130,7 @@ CREATE INDEX IF NOT EXISTS idx_concepts_library ON concepts(library_id);
 CREATE INDEX IF NOT EXISTS idx_concepts_concept_id ON concepts(library_id, concept_id);
 
 -- ============================================================================
--- 3. PREREQUISITES TABLE
+-- 4. PREREQUISITES TABLE
 -- ============================================================================
 -- Represents prerequisite relationships between concepts (directed edges)
 
@@ -124,7 +153,7 @@ CREATE INDEX IF NOT EXISTS idx_prerequisites_to ON prerequisites(library_id, to_
 CREATE INDEX IF NOT EXISTS idx_prerequisites_from ON prerequisites(library_id, from_concept_id);
 
 -- ============================================================================
--- 4. VIDEO_SEGMENTS TABLE
+-- 5. VIDEO_SEGMENTS TABLE
 -- ============================================================================
 -- Represents video segments with multimodal analysis
 
@@ -171,7 +200,7 @@ CREATE INDEX IF NOT EXISTS idx_video_segments_concept ON video_segments(library_
 CREATE INDEX IF NOT EXISTS idx_video_segments_timestamp ON video_segments(library_id, segment_timestamp);
 
 -- ============================================================================
--- 5. TEXT_CHUNKS TABLE
+-- 6. TEXT_CHUNKS TABLE
 -- ============================================================================
 -- Represents text chunks from markdown/documents
 
@@ -210,7 +239,7 @@ CREATE INDEX IF NOT EXISTS idx_text_chunks_concept ON text_chunks(library_id, ma
 CREATE INDEX IF NOT EXISTS idx_text_chunks_section ON text_chunks(library_id, section) WHERE section IS NOT NULL;
 
 -- ============================================================================
--- 6. EMBEDDINGS TABLE
+-- 7. EMBEDDINGS TABLE
 -- ============================================================================
 -- Stores vector embeddings for semantic search (references either video_segments OR text_chunks)
 
