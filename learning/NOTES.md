@@ -7097,6 +7097,645 @@ export async function processYouTubeVideo(
 
 ---
 
+## 🌐 GitHub as Source of Truth: Content Publishing Architecture (2024-12-12)
+
+### The Vision
+
+**Core principle:** GitHub repositories are the canonical source for all learning content. Little PAIPer derives pedagogical artifacts (concept graphs, embeddings) as ephemeral, computed views of that content.
+
+### Why This Architecture
+
+#### 1. GitHub as Source of Truth
+- ✅ **Version control built-in** - Every change tracked with git history
+- ✅ **Content ownership** - Creators maintain full control over their work
+- ✅ **Provenance & trust** - Clear attribution, verifiable sources
+- ✅ **Familiar workflow** - Educators already use GitHub for code/notebooks
+- ✅ **Free CDN** - GitHub serves static content at scale
+
+#### 2. The "Publish" Button Philosophy
+
+The key insight: **Publishing is an intentional, curatorial act.**
+
+```
+GitHub Repo (private/WIP)
+    ↓
+Creator clicks "Publish" ← intentional curation
+    ↓
+Little PAIPer Pipeline:
+  1. Download .ipynb/.md from GitHub
+  2. Extract concepts with LLM
+  3. Generate embeddings
+  4. Store in creator's personal library
+    ↓
+Optionally: Feature on public front page
+```
+
+**Benefits:**
+- **Quality control** - No accidental publishing of work-in-progress
+- **Clear mental model** - "Ready to teach" vs "still iterating"
+- **Private iteration** - Work on content until it's polished
+- **Intentional sharing** - Publishing is a deliberate decision
+
+#### 3. Personal Libraries → Public Curation
+
+Like **Medium or Substack, but for learning content:**
+
+```
+┌─────────────────────────────────────┐
+│  lilpaiper.ai Front Page            │
+│  ├─ Featured: Norvig's TSP          │ ← Curated by admins
+│  ├─ Featured: Karpathy on GPT       │
+│  └─ New: Your Algorithm X           │
+└─────────────────────────────────────┘
+         ↑
+    Curated from
+         ↓
+┌─────────────────────────────────────┐
+│  @norvig's Personal Library         │
+│  ├─ TSP.ipynb (public)              │
+│  ├─ Sudoku.ipynb (public)           │
+│  └─ NewIdea.ipynb (private draft)   │
+└─────────────────────────────────────┘
+         ↑
+    Published from
+         ↓
+┌─────────────────────────────────────┐
+│  github.com/norvig/pytudes          │
+│  ├─ ipynb/TSP.ipynb                 │
+│  └─ ipynb/Sudoku.ipynb              │
+└─────────────────────────────────────┘
+```
+
+### Content Pipeline Architecture
+
+```
+GitHub .ipynb (source of truth)
+    ↓
+    ├─→ Convert to markdown → LLM extracts concepts/embeddings
+    │                         (ephemeral, internal processing)
+    │
+    └─→ Store raw .ipynb cell JSON → Client-side rendering
+                                      (full fidelity, embedded images)
+```
+
+**Key insight:** Markdown is an **ephemeral artifact** for LLM processing, not the viewing format.
+
+**For user viewing:** Render original `.ipynb` cells with React components like `@nteract/notebook-render`:
+- Images work automatically (base64 embedded in JSON)
+- Full Jupyter fidelity (code highlighting, outputs)
+- Professional appearance like GitHub's viewer
+- No external image hosting needed
+
+### Phased Implementation
+
+#### Phase 1: MVP (No Authentication)
+**Goal:** Prove the pipeline works
+
+- **Publish interface:** Paste GitHub URL → pipeline runs
+- **Everything public** by default
+- **Single shared library** 
+- **Manual curation** for front page
+
+**Flow:**
+```
+1. User pastes: github.com/norvig/pytudes/blob/main/ipynb/TSP.ipynb
+2. Pipeline downloads .ipynb from GitHub
+3. Extract concepts, generate embeddings
+4. Store in database with GitHub URL as provenance
+5. Notebook appears in library, ready to learn
+```
+
+#### Phase 2: Personal Libraries
+**Goal:** Support multiple creators
+
+- **GitHub OAuth** login
+- **Per-user libraries:** `/users/norvig/libraries`
+- **Browse by creator**
+- Still all public
+
+#### Phase 3: Privacy & Curation
+**Goal:** Publishing control
+
+- **Private vs public** libraries
+- **"Publish to my library"** vs "Keep private"
+- **Admin curation** for front page featured content
+- **Visibility settings** per notebook
+
+#### Phase 4: Social Features
+**Goal:** Community learning
+
+- **Fork/remix** learning paths
+- **Comments** on concepts
+- **"I learned this!"** badges
+- **Collaborative** concept graph improvements
+
+### Why Jupyter Notebooks Are 2MB
+
+Jupyter `.ipynb` files are large because they **embed images as base64 data URIs** directly in the JSON:
+
+```json
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "iVBORw0KGgoAAAANSUhEUgAAA... [thousands of characters]"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+**This is actually perfect for our architecture:**
+- ✅ Self-contained (no external image hosting)
+- ✅ Version controlled with content
+- ✅ Works offline
+- ✅ No broken image links
+
+**When we store cells in database:**
+```sql
+CREATE TABLE segments (
+  id SERIAL PRIMARY KEY,
+  library_id INTEGER REFERENCES libraries(id),
+  notebook_cell JSONB,  -- Raw .ipynb cell with embedded images
+  markdown TEXT,         -- Ephemeral, for LLM processing only
+  embedding vector(3072) -- For semantic search
+);
+```
+
+### Implementation: Simple Publish Endpoint
+
+#### Frontend (`/publish` page)
+```tsx
+function PublishNotebook() {
+  const [githubUrl, setGithubUrl] = useState('');
+  const [status, setStatus] = useState<'idle' | 'processing' | 'done'>('idle');
+  
+  async function handlePublish() {
+    setStatus('processing');
+    
+    const response = await fetch('/api/publish', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        githubUrl,
+        author: 'norvig', // Hardcoded for MVP, OAuth later
+      })
+    });
+    
+    const result = await response.json();
+    setStatus('done');
+    
+    // Redirect to newly published library
+    router.push(`/libraries/${result.libraryId}`);
+  }
+  
+  return (
+    <div>
+      <input 
+        placeholder="https://github.com/norvig/pytudes/blob/main/ipynb/TSP.ipynb"
+        value={githubUrl}
+        onChange={(e) => setGithubUrl(e.target.value)}
+      />
+      <button onClick={handlePublish}>
+        🚀 Publish to Little PAIPer
+      </button>
+      
+      {status === 'processing' && <ProgressIndicator />}
+    </div>
+  );
+}
+```
+
+#### Backend (`/api/publish`)
+```typescript
+export async function POST(request: NextRequest) {
+  const { githubUrl, author } = await request.json();
+  
+  // 1. Parse GitHub URL
+  const { owner, repo, path } = parseGitHubUrl(githubUrl);
+  
+  // 2. Download raw .ipynb from GitHub
+  const notebookJson = await downloadFromGitHub(owner, repo, path);
+  
+  // 3. Convert to markdown (ephemeral, for LLM only)
+  const markdown = convertNotebookToMarkdown(notebookJson);
+  
+  // 4. Extract concepts with Gemini
+  const concepts = await extractConcepts(markdown);
+  
+  // 5. Generate embeddings
+  const embeddings = await generateEmbeddings(concepts, markdown);
+  
+  // 6. Store in database
+  const libraryId = await db.libraries.create({
+    title: notebookJson.metadata.title || 'Untitled',
+    author: author,
+    source_type: 'jupyter',
+    github_url: githubUrl,
+    published_at: new Date(),
+  });
+  
+  // Store raw notebook cells (with embedded images)
+  await db.segments.createMany(
+    notebookJson.cells.map((cell, idx) => ({
+      library_id: libraryId,
+      segment_index: idx,
+      notebook_cell: cell,  // JSONB with base64 images
+      markdown: convertCellToMarkdown(cell), // For embeddings
+    }))
+  );
+  
+  await db.concepts.createMany(concepts);
+  await db.embeddings.createMany(embeddings);
+  
+  return NextResponse.json({ 
+    libraryId, 
+    status: 'published',
+    conceptCount: concepts.length 
+  });
+}
+```
+
+### Why This Beats Alternatives
+
+**vs. File Upload Interface:**
+- ❌ Content gets stale immediately (no automatic updates)
+- ❌ No version control
+- ❌ Fragmentation across systems
+
+**vs. Copy/Paste Content:**
+- ❌ Loses provenance and attribution
+- ❌ Manual syncing nightmare
+- ❌ No canonical source
+
+**vs. GitHub-Only Approach:**
+- ❌ No semantic search across concepts
+- ❌ No pedagogical concept graphs
+- ❌ No guided learning paths
+- ❌ No Socratic dialogue
+
+**This GitHub + Little PAIPer Architecture:**
+- ✅ **GitHub** for content storage + version control
+- ✅ **Little PAIPer** for learning superpowers (concepts, embeddings, guided paths)
+- ✅ Best of both worlds
+
+### Next Steps
+
+**Immediate (MVP):**
+1. Build `/publish` page with URL input
+2. Implement `/api/publish` endpoint
+3. Add progress UI: "Downloading... Extracting concepts... Embedding... Done!"
+4. Test with Peter's TSP notebook
+
+**Near-term:**
+1. Client-side notebook rendering with `@nteract/notebook-render`
+2. Display raw .ipynb cells instead of markdown in Source tab
+3. Proper error handling (invalid URLs, private repos)
+
+**Future:**
+1. GitHub OAuth authentication
+2. Personal library pages (`/users/:username`)
+3. Private/public visibility settings
+4. Admin curation interface for front page
+
+### Key Insights
+
+1. **Intentional curation matters** - "Publish" button creates quality bar
+2. **Notebooks are self-contained** - Embedded images solve hosting problem
+3. **Markdown is ephemeral** - Use for LLM processing, not viewing
+4. **GitHub as platform** - Leverages existing infrastructure and workflows
+5. **Start simple** - No auth needed for MVP, add complexity incrementally
+
+---
+
+## 🏗️ Long-Running Processing Architecture (Cloud Run Jobs)
+
+### The Problem: Heavy Processing Tasks
+
+**Reality:** Notebook/video processing takes 10-30+ minutes:
+- Concept extraction: 5-10 min
+- Embedding generation: 5-15 min
+- Frame analysis: 10-20 min
+- Risk of timeout at 59 minutes (lost work!)
+
+**Cloud Run timeout:** 60 minutes maximum
+**Cloud Run Functions:** Even shorter timeouts
+
+### Architecture: Queue + Worker + Real-time Status
+
+```
+┌─────────────┐         ┌──────────────┐         ┌─────────────────┐
+│   Next.js   │ POST    │  Cloud Run   │ enqueue │  Cloud Run Jobs │
+│  (frontend) │────────>│  (API)       │────────>│  (worker)       │
+└─────────────┘         └──────────────┘         └─────────────────┘
+       │                       │                          │
+       │ Firestore listener    │ poll status              │ update status
+       └───────────────────────┴──────────────────────────┤
+                                                   ┌──────▼──────┐
+                                                   │  Firestore  │
+                                                   │  (status)   │
+                                                   └─────────────┘
+```
+
+### Components
+
+#### 1. Cloud Run Service (API)
+**Purpose:** Accept requests, enqueue jobs, serve status updates
+
+```typescript
+// app/api/process-notebook/route.ts
+export async function POST(request: Request) {
+  const { notebookUrl } = await request.json();
+  
+  // Create job document in Firestore
+  const jobRef = await addDoc(collection(db, 'processing-jobs'), {
+    status: 'queued',
+    notebookUrl,
+    stage: 'queued',
+    percent: 0,
+    createdAt: serverTimestamp(),
+  });
+  
+  // Trigger Cloud Run Job
+  await fetch('https://REGION-run.googleapis.com/apis/run.googleapis.com/v1/...', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${serviceAccountToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ 
+      jobId: jobRef.id, 
+      notebookUrl 
+    }),
+  });
+  
+  return Response.json({ jobId: jobRef.id });
+}
+```
+
+#### 2. Cloud Run Job (Worker)
+**Purpose:** Execute long-running processing pipeline
+
+**Dockerfile:**
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+CMD ["node", "worker/process-job.js"]
+```
+
+**Worker script:**
+```typescript
+// worker/process-job.ts
+import { processJupyterNotebook } from '../lib/processing';
+import { doc, updateDoc } from 'firebase/firestore';
+
+async function processJob(jobId: string, notebookUrl: string) {
+  const jobRef = doc(db, 'processing-jobs', jobId);
+  
+  try {
+    // Update Firestore as processing progresses
+    const result = await processJupyterNotebook(
+      notebookUrl,
+      async (stage, percent, message) => {
+        await updateDoc(jobRef, {
+          stage,
+          percent,
+          message,
+          lastUpdated: serverTimestamp(),
+        });
+      }
+    );
+    
+    // Mark complete
+    await updateDoc(jobRef, {
+      status: 'completed',
+      result,
+      completedAt: serverTimestamp(),
+    });
+    
+  } catch (error) {
+    await updateDoc(jobRef, {
+      status: 'failed',
+      error: error.message,
+      failedAt: serverTimestamp(),
+    });
+  }
+}
+
+// Entry point
+const { jobId, notebookUrl } = JSON.parse(process.env.JOB_PARAMS);
+processJob(jobId, notebookUrl);
+```
+
+#### 3. Firestore (Status Store)
+**Purpose:** Persistent job state with real-time updates
+
+**Schema:**
+```typescript
+type ProcessingJob = {
+  status: 'queued' | 'processing' | 'completed' | 'failed';
+  notebookUrl: string;
+  stage: string;           // "Downloading notebook", "Extracting concepts"
+  percent: number;         // 0-100
+  message?: string;        // Optional detailed message
+  result?: ProcessingResult;
+  error?: string;
+  createdAt: Timestamp;
+  lastUpdated: Timestamp;
+  completedAt?: Timestamp;
+  failedAt?: Timestamp;
+};
+```
+
+#### 4. Frontend (Real-time UI)
+**Purpose:** Subscribe to job status, show progress
+
+```typescript
+// app/components/ProcessingStatus.tsx
+'use client';
+
+import { doc, onSnapshot } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+
+export function ProcessingStatus({ jobId }: { jobId: string }) {
+  const [job, setJob] = useState<ProcessingJob | null>(null);
+  
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      doc(db, 'processing-jobs', jobId),
+      (snapshot) => {
+        setJob(snapshot.data() as ProcessingJob);
+      }
+    );
+    
+    return unsubscribe;
+  }, [jobId]);
+  
+  if (!job) return <div>Loading...</div>;
+  
+  return (
+    <div>
+      <h2>{job.stage}</h2>
+      <ProgressBar percent={job.percent} />
+      {job.message && <p>{job.message}</p>}
+      
+      {job.status === 'completed' && (
+        <a href={`/libraries/${job.result.libraryId}`}>
+          View Library →
+        </a>
+      )}
+      
+      {job.status === 'failed' && (
+        <div className="error">{job.error}</div>
+      )}
+    </div>
+  );
+}
+```
+
+### Why This Architecture Works
+
+**Benefits:**
+- ✅ **No timeouts:** Cloud Run Jobs can run for hours
+- ✅ **Decoupled:** API responds immediately, work happens async
+- ✅ **Real-time updates:** Firestore listeners push status to UI
+- ✅ **Persistent:** Job status survives crashes/restarts
+- ✅ **Retryable:** Can re-run failed jobs
+- ✅ **Scalable:** Auto-scales to zero when idle
+- ✅ **Observable:** Full job history in Firestore
+
+**vs. Cloud Run Functions:**
+- ❌ Functions timeout after 9 min (too short)
+- ❌ No persistent state across retries
+- ❌ Harder to stream status updates
+
+**vs. Long-lived Cloud Run containers:**
+- ❌ Request timeout still applies (60 min max)
+- ❌ Wastes resources if kept warm
+- ❌ More complex to manage WebSocket connections
+
+### Configuration
+
+**Cloud Run Job:**
+```yaml
+# job.yaml
+apiVersion: run.googleapis.com/v1
+kind: Job
+metadata:
+  name: notebook-processor
+spec:
+  template:
+    spec:
+      template:
+        spec:
+          containers:
+          - image: gcr.io/PROJECT_ID/notebook-processor
+            resources:
+              limits:
+                memory: 4Gi
+                cpu: 2000m
+            env:
+            - name: FIRESTORE_PROJECT_ID
+              value: PROJECT_ID
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gemini-api-key
+                  key: key
+          timeoutSeconds: 3600  # 1 hour max
+```
+
+**Deploy:**
+```bash
+# Build worker image
+docker build -t gcr.io/PROJECT_ID/notebook-processor -f Dockerfile.worker .
+docker push gcr.io/PROJECT_ID/notebook-processor
+
+# Create Cloud Run Job
+gcloud run jobs create notebook-processor \
+  --image gcr.io/PROJECT_ID/notebook-processor \
+  --region us-central1 \
+  --memory 4Gi \
+  --cpu 2 \
+  --max-retries 2 \
+  --task-timeout 1h
+```
+
+### Implementation Phases
+
+**Phase 1: Synchronous (Current)**
+- Process in API route (works for small notebooks)
+- Simple, no infrastructure
+- Limited by 60-min timeout
+
+**Phase 2: Queue + Jobs (Recommended)**
+- Implement job queue in Firestore
+- Deploy Cloud Run Job worker
+- Add real-time status UI
+- Handles any notebook size
+
+**Phase 3: Enhancements (Future)**
+- Job prioritization
+- Parallel processing (multiple workers)
+- Automatic retries with exponential backoff
+- Job cancellation
+- Batch processing (multiple notebooks at once)
+
+### Alternative: Simpler Patterns
+
+**If you want something simpler initially:**
+
+**Option A: Background Cloud Run with streaming response**
+```typescript
+// Still risky with timeout, but works for <30 min jobs
+export async function POST(request: Request) {
+  const encoder = new TextEncoder();
+  const stream = new TransformStream();
+  const writer = stream.writable.getWriter();
+  
+  // Start processing in background
+  processJupyterNotebook(url, (stage, percent, msg) => {
+    writer.write(encoder.encode(`data: ${JSON.stringify({stage, percent, msg})}\n\n`));
+  }).then(result => {
+    writer.write(encoder.encode(`data: ${JSON.stringify({done: true, result})}\n\n`));
+    writer.close();
+  });
+  
+  return new Response(stream.readable, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+    },
+  });
+}
+```
+
+**Option B: Polling (simplest)**
+```typescript
+// Store job status in database, poll every 2 seconds
+setInterval(async () => {
+  const job = await fetch(`/api/job-status/${jobId}`).then(r => r.json());
+  updateUI(job.stage, job.percent);
+  if (job.status === 'completed') clearInterval();
+}, 2000);
+```
+
+### Status: Discussion Phase
+
+This is recommended architecture for production. For MVP/testing, synchronous processing in API routes may be sufficient for smaller notebooks (<10 min processing time).
+
+**Next decision:** When to implement job queue vs. keep it simple?
+
+---
+
 *Last updated: 2025-01-17*
 *See CONTEXT.md for complete project design document*
 

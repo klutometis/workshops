@@ -305,7 +305,7 @@ export default function SocraticDialogue({
     // Display clean version in UI
     const userMessage: Message = { role: 'user', content: displayContent };
     const updatedMessages = retryData 
-      ? [...messages.slice(0, -1), userMessage] // Replace error message
+      ? [...messages.slice(0, -2), userMessage] // Remove BOTH failed user message AND error message
       : [...messages, userMessage];
     setMessages(updatedMessages);
     

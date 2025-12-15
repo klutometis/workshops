@@ -459,11 +459,11 @@ export async function processMarkdownFile(
     // Stage 6: Import to database (100%)
     onProgress?.('Importing to database', 95);
     try {
-      runScript('scripts/markdown/import-markdown-to-db.ts', [filePath]);
+      runScript('scripts/import-to-db.ts', ['--type', 'markdown', '--markdown-path', filePath]);
     } catch (error: any) {
       throw new ProcessingError(
         'Failed to import to database',
-        'import-markdown-to-db',
+        'import-to-db',
         error
       );
     }
@@ -560,55 +560,51 @@ async function downloadFile(url: string, outputPath: string): Promise<void> {
 }
 
 /**
- * Convert Jupyter notebook to markdown
+ * Clean markdown for LLM processing
+ * Removes images and HTML tags while preserving structure (headers, code blocks, etc.)
+ */
+function cleanMarkdownForLLM(markdown: string): string {
+  // Remove markdown image syntax: ![alt](url)
+  markdown = markdown.replace(/!\[.*?\]\(.*?\)/g, '');
+  
+  // Remove HTML img tags: <img src="..." />
+  markdown = markdown.replace(/<img[^>]*>/gi, '');
+  
+  // Strip HTML tags but keep their text content
+  // (e.g., <strong>text</strong> → text)
+  markdown = markdown.replace(/<[^>]+>/g, '');
+  
+  // Clean up multiple consecutive newlines (left by removed images/HTML)
+  markdown = markdown.replace(/\n{3,}/g, '\n\n');
+  
+  return markdown;
+}
+
+/**
+ * Convert Jupyter notebook to markdown using nbconvert
+ * This handles all edge cases: LaTeX math, HTML outputs, tables, widgets, etc.
  */
 function convertNotebookToMarkdown(notebookPath: string): string {
-  const notebook = JSON.parse(fs.readFileSync(notebookPath, 'utf-8'));
-  const cells = notebook.cells || [];
-  
-  const markdownParts: string[] = [];
-  
-  // Add title from metadata if available
-  if (notebook.metadata?.title) {
-    markdownParts.push(`# ${notebook.metadata.title}\n`);
-  }
-  
-  for (const cell of cells) {
-    const source = Array.isArray(cell.source) ? cell.source.join('') : cell.source;
-    
-    if (cell.cell_type === 'markdown') {
-      markdownParts.push(source);
-      markdownParts.push('\n');
-    } else if (cell.cell_type === 'code') {
-      // Add code cells as fenced code blocks
-      markdownParts.push('```python');
-      markdownParts.push(source);
-      markdownParts.push('```\n');
-      
-      // Add outputs if present (converted to text)
-      if (cell.outputs && cell.outputs.length > 0) {
-        for (const output of cell.outputs) {
-          if (output.output_type === 'stream' && output.text) {
-            const text = Array.isArray(output.text) ? output.text.join('') : output.text;
-            markdownParts.push('```');
-            markdownParts.push(text);
-            markdownParts.push('```\n');
-          } else if (output.output_type === 'execute_result' || output.output_type === 'display_data') {
-            if (output.data && output.data['text/plain']) {
-              const text = Array.isArray(output.data['text/plain']) 
-                ? output.data['text/plain'].join('') 
-                : output.data['text/plain'];
-              markdownParts.push('```');
-              markdownParts.push(text);
-              markdownParts.push('```\n');
-            }
-          }
-        }
+  try {
+    // Use uvx with jupyter-core for robust conversion (no global install needed)
+    const rawMarkdown = execSync(
+      `uvx --from jupyter-core jupyter nbconvert --to markdown --stdout --no-prompt "${notebookPath}"`,
+      { 
+        encoding: 'utf-8',
+        maxBuffer: 50 * 1024 * 1024 // 50MB buffer for large notebooks
       }
-    }
+    );
+    
+    // Clean the markdown for LLM processing
+    // (removes images/HTML but preserves structure)
+    return cleanMarkdownForLLM(rawMarkdown);
+    
+  } catch (error: any) {
+    throw new Error(
+      `Failed to convert notebook with nbconvert: ${error.message}\n` +
+      `Make sure uv is installed: https://docs.astral.sh/uv/getting-started/installation/`
+    );
   }
-  
-  return markdownParts.join('\n');
 }
 
 /**
@@ -708,27 +704,104 @@ export async function processJupyterNotebook(
     
     onProgress?.('Markdown saved', 25, markdownPath);
     
-    // Stage 3: Process as markdown (delegates to markdown pipeline)
+    // Stage 3: Process markdown through pipeline (30-95%)
     onProgress?.('Processing as markdown', 30);
     
-    // Wrap the markdown progress callback to offset percentages
+    // Wrap the markdown progress callback to offset percentages (30-90%)
     const wrappedProgress: ProgressCallback = (stage, percent, message) => {
-      // Map 0-100 from markdown processing to 30-100 in notebook processing
-      const adjustedPercent = 30 + Math.floor(percent * 0.7);
+      // Map 0-95 from markdown processing to 30-90 in notebook processing
+      const adjustedPercent = 30 + Math.floor(percent * 0.63);
       onProgress?.(stage, adjustedPercent, message);
     };
     
-    const result = await processMarkdownFile(markdownPath, wrappedProgress);
+    // Run markdown pipeline WITHOUT final import (we'll do custom notebook import)
+    // This processes through embedding generation but stops before database import
+    // (slug and workDir already declared above)
     
-    // Update result to reflect notebook source
+    // Run all markdown processing steps except import
+    try {
+      // Extract concepts
+      const conceptGraphPath = path.join(workDir, 'concept-graph.json');
+      if (!fs.existsSync(conceptGraphPath)) {
+        wrappedProgress('Extracting concepts', 20);
+        runScript('scripts/markdown/extract-concepts.ts', [markdownPath]);
+      }
+      
+      // Chunk markdown
+      const chunksPath = path.join(workDir, 'chunks.json');
+      if (!fs.existsSync(chunksPath)) {
+        wrappedProgress('Chunking markdown', 40);
+        runScript('scripts/markdown/chunk-markdown.ts', [markdownPath]);
+      }
+      
+      // Enrich concepts
+      const enrichedConceptPath = path.join(workDir, 'concept-graph-enriched.json');
+      if (!fs.existsSync(enrichedConceptPath)) {
+        wrappedProgress('Enriching concepts', 60);
+        runScript('scripts/markdown/enrich-concepts.ts', [markdownPath]);
+      }
+      
+      // Map chunks to concepts
+      const mappingsPath = path.join(workDir, 'chunk-concept-mappings.json');
+      if (!fs.existsSync(mappingsPath)) {
+        wrappedProgress('Mapping chunks to concepts', 70);
+        runScript('scripts/markdown/map-chunks-to-concepts.ts', [markdownPath]);
+      }
+      
+      // Generate embeddings
+      const embeddingsPath = path.join(workDir, 'chunk-embeddings.json');
+      if (!fs.existsSync(embeddingsPath)) {
+        wrappedProgress('Generating embeddings', 80);
+        runScript('scripts/markdown/embed-chunks.ts', [markdownPath]);
+      }
+    } catch (error: any) {
+      throw new ProcessingError(
+        'Failed during markdown processing',
+        'markdown-pipeline',
+        error
+      );
+    }
+    
+    // Stage 4: Import as notebook (90-100%)
+    onProgress?.('Importing to database', 95);
+    try {
+      runScript('scripts/import-to-db.ts', [
+        '--type', 'notebook',
+        '--notebook-path', notebookPath,
+        '--markdown-path', markdownPath
+      ]);
+    } catch (error: any) {
+      throw new ProcessingError(
+        'Failed to import to database',
+        'import-to-db',
+        error
+      );
+    }
+    
+    // Read results
+    const enrichedPath = path.join(workDir, 'concept-graph-enriched.json');
+    const embeddingsPath = path.join(workDir, 'chunk-embeddings.json');
+    
+    const conceptGraph = JSON.parse(fs.readFileSync(enrichedPath, 'utf-8'));
+    const embeddings = JSON.parse(fs.readFileSync(embeddingsPath, 'utf-8'));
+    
+    onProgress?.('Complete', 100, 'Processing finished successfully');
+    
     return {
-      ...result,
+      libraryId: slug,
+      title: conceptGraph.metadata?.title || fileName,
+      slug,
       contentType: 'notebook',
+      stats: {
+        conceptCount: conceptGraph.nodes?.length || 0,
+        segmentCount: embeddings.chunks?.length || 0,
+        embeddingCount: embeddings.chunks?.length || 0,
+      },
       metadata: {
-        ...result.metadata,
         sourceUrl: isUrl ? urlOrPath : undefined,
         sourceFile: notebookPath,
         convertedMarkdown: markdownPath,
+        processedAt: new Date().toISOString(),
       },
     };
     

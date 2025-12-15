@@ -33,8 +33,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build Next.js with standalone output for minimal image
-# Skip ESLint during Docker builds (lint separately in CI/CD)
+# Skip ESLint and TypeScript during Docker builds (lint separately in CI/CD)
 ENV ESLINT_IGNORE_DURING_BUILDS=1
+ENV SKIP_TYPE_CHECK=1
 RUN npm run build
 
 # Production image - minimal and fast

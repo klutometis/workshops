@@ -55,8 +55,10 @@ run() {
   echo ""
   docker run --rm \
     --name "${CONTAINER_NAME}" \
-    -p "${PORT}:3000" \
+    --network=host \
     -e NODE_ENV=production \
+    -e DATABASE_URL="${LEARNING_DATABASE_URL}" \
+    -e GOOGLE_API_KEY="${GOOGLE_API_KEY}" \
     "${IMAGE_NAME}:${IMAGE_TAG}"
 }
 

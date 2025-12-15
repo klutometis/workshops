@@ -41,6 +41,14 @@ if [ -z "${GOOGLE_API_KEY}" ]; then
   fi
 fi
 
+# Check for database connection
+if [ -z "${LEARNING_DATABASE_URL}" ]; then
+  echo -e "${YELLOW}⚠️  Warning: LEARNING_DATABASE_URL not set${NC}"
+  echo "Export it before deploying:"
+  echo "  export LEARNING_DATABASE_URL='postgresql://user:pass@host:5432/learning'"
+  echo ""
+fi
+
 echo -e "${BLUE}🚀 Deploying learning app to Cloud Run${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "  Project: ${PROJECT_ID}"
@@ -87,12 +95,12 @@ gcloud run deploy "${SERVICE_NAME}" \
   --region="${REGION}" \
   --platform=managed \
   --allow-unauthenticated \
-  --memory=512Mi \
+  --memory=1Gi \
   --cpu=1 \
   --min-instances=0 \
   --max-instances=10 \
   --timeout=300 \
-  --set-env-vars="NODE_ENV=production,GOOGLE_API_KEY=${GOOGLE_API_KEY}" \
+  --set-env-vars="NODE_ENV=production,GOOGLE_API_KEY=${GOOGLE_API_KEY},DATABASE_URL=${LEARNING_DATABASE_URL}" \
   --project="${PROJECT_ID}"
 
 # Get the service URL

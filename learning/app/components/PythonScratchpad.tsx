@@ -36,7 +36,9 @@ export default function PythonScratchpad({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
+  const [activeTab, setActiveTab] = useState<'console' | 'graphics'>('console');
   const pyodideRef = useRef<any>(null);
+  const outputRef = useRef<HTMLDivElement>(null);
 
   // Initialize Pyodide on mount
   useEffect(() => {
@@ -44,10 +46,10 @@ export default function PythonScratchpad({
       try {
         // @ts-ignore - Pyodide loads from CDN
         const pyodide = await window.loadPyodide({
-          indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/',
+          indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.29.0/full/',
         });
         
-        // Load commonly used packages for math/algorithms
+        // Load commonly used packages
         await pyodide.loadPackage(['numpy', 'micropip']);
         
         pyodideRef.current = pyodide;
@@ -89,8 +91,16 @@ sys.stdout = StringIO()
       // Get captured output
       const stdout = pyodide.runPython('sys.stdout.getvalue()');
       
-      setOutput(stdout || '(no output)');
-      onExecute?.(code, stdout, null);
+      const finalOutput = stdout || '(no output)';
+      setOutput(finalOutput);
+      onExecute?.(code, finalOutput, null);
+      
+      // Auto-scroll to bottom after a brief delay
+      setTimeout(() => {
+        if (outputRef.current) {
+          outputRef.current.scrollTop = outputRef.current.scrollHeight;
+        }
+      }, 50);
       
     } catch (err: any) {
       const errorMsg = err.message || 'Execution error';
@@ -140,7 +150,7 @@ sys.stdout = StringIO()
           </Button>
           <Button
             onClick={() => {
-              setCode(starterCode);
+              setCode('');
               setOutput('');
               setError(null);
             }}
@@ -148,45 +158,68 @@ sys.stdout = StringIO()
             variant="outline"
             className="text-slate-300 border-slate-600 hover:bg-slate-700"
           >
-            🔄 Reset
+            🔄 Clear
           </Button>
         </div>
       </div>
 
       {/* Code editor */}
-      <div className="flex-1 p-3">
+      <div className="flex-1 p-3 overflow-hidden">
         <Textarea
           value={code}
           onChange={(e) => {
-            const newCode = e.target.value;
-            // If current code is still the starter code and user is typing,
-            // clear it and use only what they typed (like placeholder behavior)
-            if (code === starterCode && newCode.length > code.length) {
-              const typedChar = newCode.charAt(newCode.length - 1);
-              setCode(typedChar);
-              onCodeChange?.(typedChar);
-            } else {
-              setCode(newCode);
-              onCodeChange?.(newCode);
-            }
+            setCode(e.target.value);
+            onCodeChange?.(e.target.value);
           }}
           onKeyDown={handleKeyDown}
           placeholder={isLoading ? "Loading Python..." : starterCode}
           disabled={isLoading}
-          className="font-mono text-sm h-full resize-none bg-white"
+          className="font-mono text-sm h-full resize-none bg-white overflow-y-auto"
           style={{ minHeight: '200px' }}
         />
       </div>
 
       {/* Output area */}
       {(output || error) && (
-        <div className="border-t p-3 bg-slate-900 text-white rounded-b-lg">
-          <div className="text-xs font-medium mb-1 text-slate-400">OUTPUT:</div>
-          {error ? (
-            <pre className="text-xs text-red-400 font-mono whitespace-pre-wrap">{error}</pre>
-          ) : (
-            <pre className="text-xs text-green-400 font-mono whitespace-pre-wrap">{output || '(no output)'}</pre>
-          )}
+        <div className="border-t bg-slate-900 text-white rounded-b-lg">
+          {/* Tabs */}
+          <div className="flex border-b border-slate-700">
+            <button
+              onClick={() => setActiveTab('console')}
+              className={`px-4 py-2 text-xs font-medium transition-colors ${
+                activeTab === 'console'
+                  ? 'bg-slate-800 text-white border-b-2 border-blue-400'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+              }`}
+            >
+              📝 Console
+            </button>
+            <button
+              disabled
+              className="px-4 py-2 text-xs font-medium text-slate-600 cursor-not-allowed opacity-50"
+            >
+              📊 Graphics
+            </button>
+            <div className="flex-1" />
+            <button
+              onClick={() => {
+                setOutput('');
+                setError(null);
+              }}
+              className="px-4 py-2 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+            >
+              Clear
+            </button>
+          </div>
+
+          {/* Output content */}
+          <div ref={outputRef} className="p-3 overflow-y-auto" style={{ maxHeight: '300px' }}>
+            {error ? (
+              <pre className="text-xs text-red-400 font-mono whitespace-pre-wrap">{error}</pre>
+            ) : (
+              <pre className="text-xs text-green-400 font-mono whitespace-pre-wrap">{output || '(no output)'}</pre>
+            )}
+          </div>
         </div>
       )}
 

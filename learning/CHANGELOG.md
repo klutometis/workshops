@@ -8,6 +8,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2024-12-14 - Bug Fixes and Zero-Install Notebook Processing
+
+**Progress:** Fixed critical bugs in notebook processing pipeline and Socratic dialogue retry logic. Switched to `uvx` for zero-install Jupyter notebook conversion.
+
+#### Fixed
+- **Duplicate variable declarations** (`lib/processing.ts`):
+  - Removed duplicate `slug` and `workDir` declarations in `processJupyterNotebook()`
+  - Variables were declared twice causing esbuild transform errors
+- **Retry logic bug** (`app/components/SocraticDialogue.tsx`):
+  - Fixed duplicate messages appearing when retrying after API errors
+  - Changed from removing 1 message to removing both failed message and error message
+  - Users can now cleanly retry failed requests
+- **Undefined variable reference** (`lib/processing.ts`):
+  - Fixed `markdownPath` → `filePath` in `processMarkdownFile()`
+  - Variable was not in function scope
+
+#### Changed
+- **Zero-install notebook conversion** (`lib/processing.ts`):
+  - Changed from `jupyter nbconvert` to `uvx --from jupyter-core jupyter nbconvert`
+  - No longer requires global Jupyter installation
+  - Uses `uv` package runner (Python equivalent of `npx`)
+  - Consistent with modern Python tooling
+  - Updated error message to point to uv installation docs
+  
+#### Testing
+- ✅ Verified notebook download and conversion pipeline works end-to-end
+- ✅ Tested retry button with simulated API failures (30% random failure rate)
+- ✅ Confirmed duplicate messages no longer appear on retry
+- ✅ Validated error handling provides clear feedback
+
+#### Architecture Notes
+- **Assumes `uv` available in deployment environment** - Will be added to Dockerfile/Cloud Run config
+- **Notebooks still convert via markdown** - Correct approach for semantic segmentation
+- **Retry logic now production-ready** - Properly handles failed API requests
+
+---
+
 ### 2024-12-12 - Clean URLs with Dynamic Routes
 
 **Progress:** Refactored routing to use Next.js dynamic routes with clean URLs. Home page now shows library selector, individual libraries accessible at `/library/{slug}`.
@@ -110,6 +147,17 @@ Routes:
 2. Create `scripts/markdown/map-segments-to-concepts.ts`
 3. Adapt embedding script for markdown chunks
 4. Create `scripts/import-markdown-to-db.ts`
+
+---
+
+### 2024-12-14 - Socratic Dialogue UX Improvements
+
+**Progress:** Fixed critical retry logic bug and tested error handling flow end-to-end.
+
+#### Fixed
+- [x] **Retry button duplicate messages bug** - Changed slice logic from `-1` to `-2` to remove both failed user message and error message ✅
+- [x] **Tested error handling with simulated failures** - Verified retry flow works correctly with random 30% failure rate ✅
+- [x] **Production-ready retry logic** - Users can now cleanly retry failed API requests without UI artifacts ✅
 
 ---
 

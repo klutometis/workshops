@@ -29,6 +29,3 @@ Thumbs.db
 
 # Test data
 test-data/
-
-# Scripts (not needed at runtime)
-scripts/

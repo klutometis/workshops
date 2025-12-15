@@ -42,6 +42,10 @@ CREATE TABLE IF NOT EXISTS libraries (
   video_id TEXT UNIQUE,  -- YouTube video ID (if type='youtube') - UNIQUE for ON CONFLICT
   markdown_content TEXT,  -- Full markdown content (for type='markdown')
   
+  -- Notebook support
+  source_type TEXT DEFAULT 'markdown' CHECK (source_type IN ('markdown', 'youtube', 'notebook')),
+  notebook_data JSONB,  -- Original .ipynb content (for type='notebook')
+  
   -- Stats
   total_duration INTEGER,  -- seconds (for videos)
   total_concepts INTEGER DEFAULT 0,
@@ -62,6 +66,7 @@ CREATE INDEX IF NOT EXISTS idx_libraries_status ON libraries(status);
 CREATE INDEX IF NOT EXISTS idx_libraries_type ON libraries(type);
 CREATE INDEX IF NOT EXISTS idx_libraries_video_id ON libraries(video_id) WHERE video_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_libraries_slug ON libraries(slug);
+CREATE INDEX IF NOT EXISTS idx_libraries_source_type ON libraries(source_type);
 
 -- ============================================================================
 -- 2. CONCEPTS TABLE

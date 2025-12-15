@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: 'standalone', // Enable standalone build for Docker/Cloud Run
+  output: 'standalone',
+  typescript: {
+    // Skip type checking during Docker builds (check in CI/CD instead)
+    ignoreBuildErrors: process.env.SKIP_TYPE_CHECK === '1',
+  },
 };
 
 export default nextConfig;
