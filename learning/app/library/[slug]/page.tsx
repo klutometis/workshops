@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation';
 import ConceptGraph from '../../components/ConceptGraph';
 import ConceptDetails from '../../components/ConceptDetails';
 import SocraticDialogue from '../../components/SocraticDialogue';
+import NotebookViewer from '../../components/NotebookViewer';
 
 type Library = {
   id: string;
@@ -137,6 +138,10 @@ export default function LibraryPage({ params }: { params: Promise<{ slug: string
   // Accept both 'concepts' and 'nodes' field names
   const concepts = conceptGraphData.concepts || conceptGraphData.nodes || [];
   
+  // Check if this is a notebook (has notebook_data)
+  const sourceType = conceptGraphData.source_type || 'markdown';
+  const notebookData = conceptGraphData.notebook_data;
+  
   const selectedConcept = selectedConceptId
     ? concepts.find((c) => c.id === selectedConceptId) || null
     : null;
@@ -246,7 +251,7 @@ export default function LibraryPage({ params }: { params: Promise<{ slug: string
         {/* On mobile: full-screen overlay when concept selected */}
         {/* On desktop: fixed sidebar */}
         <div className={`
-          flex-[3] p-4 overflow-auto
+          flex-[3] overflow-auto
           md:relative md:block
           ${selectedConcept 
             ? 'fixed inset-0 z-50 w-full bg-white' 
@@ -338,6 +343,7 @@ export default function LibraryPage({ params }: { params: Promise<{ slug: string
           conceptData={selectedConcept}
           libraryId={libraryId}
           libraryType={library.type}
+          notebookData={sourceType === 'notebook' ? notebookData : undefined}
           onMasteryAchieved={handleMasteryAchieved}
         />
       )}

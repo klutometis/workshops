@@ -88,6 +88,25 @@ function parseArgs(argv: string[]): ImportArgs {
 }
 
 // ============================================================================
+// Title Extraction
+// ============================================================================
+
+/**
+ * Extract title from markdown file (first # header)
+ */
+function extractMarkdownTitle(markdownPath: string): string | null {
+  try {
+    const content = fs.readFileSync(markdownPath, 'utf-8');
+    
+    // Match first # header (not ##, ###, etc.)
+    const match = content.match(/^#\s+(.+)$/m);
+    return match ? match[1].trim() : null;
+  } catch {
+    return null;
+  }
+}
+
+// ============================================================================
 // Slug Generation
 // ============================================================================
 
@@ -131,7 +150,9 @@ async function importMarkdownLibrary(
   const markdownContent = fs.readFileSync(markdownPath, 'utf-8');
   console.log(`   Read ${markdownContent.length} chars of markdown content`);
   
-  const title = conceptGraph.metadata?.title || basename;
+  // Extract title: AI metadata > first markdown header > basename
+  const markdownTitle = extractMarkdownTitle(markdownPath);
+  const title = conceptGraph.metadata?.title || markdownTitle || basename;
   const slug = generateSlug(title);
   console.log(`   Generated slug: ${slug}`);
   
@@ -187,7 +208,9 @@ async function importNotebookLibrary(
   const notebookData = JSON.parse(fs.readFileSync(notebookPath, 'utf-8'));
   console.log(`   Read original notebook: ${notebookPath}`);
   
-  const title = conceptGraph.metadata?.title || basename;
+  // Extract title: AI metadata > first markdown header > basename
+  const markdownTitle = extractMarkdownTitle(markdownPath);
+  const title = conceptGraph.metadata?.title || markdownTitle || basename;
   const slug = generateSlug(title);
   console.log(`   Generated slug: ${slug}`);
   
@@ -443,8 +466,8 @@ async function importToDb(args: ImportArgs): Promise<void> {
   
   // Setup paths
   const markdownPath = args.markdownPath!;
-  const basename = path.basename(markdownPath, '.md');
-  const workDir = path.join(process.cwd(), 'markdown', basename);
+  const workDir = path.dirname(markdownPath);
+  const basename = path.basename(workDir);
   
   const conceptGraphPath = path.join(workDir, 'concept-graph-enriched.json');
   const chunksPath = path.join(workDir, 'chunk-embeddings.json');

@@ -49,7 +49,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(conceptGraph);
+    // Add source type and notebook data for frontend rendering
+    return NextResponse.json({
+      ...conceptGraph,
+      source_type: library.source_type || 'markdown',
+      notebook_data: library.notebook_data || null,
+    });
   } catch (error) {
     console.error('Error fetching concept graph:', error);
     return NextResponse.json(

@@ -20,6 +20,7 @@ import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import PythonScratchpad from './PythonScratchpad';
 import { MarkdownViewer } from './MarkdownViewer';
+import NotebookViewer from './NotebookViewer';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -80,6 +81,7 @@ type SocraticDialogueProps = {
   conceptData: any;
   libraryId: string;
   libraryType?: string;
+  notebookData?: any;
   onMasteryAchieved?: (conceptId: string) => void;
 };
 
@@ -89,6 +91,7 @@ export default function SocraticDialogue({
   conceptData,
   libraryId,
   libraryType,
+  notebookData,
   onMasteryAchieved,
 }: SocraticDialogueProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -444,6 +447,7 @@ export default function SocraticDialogue({
 
   // Dynamic source tab label based on library type
   const sourceTabLabel = libraryType === 'youtube' ? '🎥 Video' : 
+                         libraryType === 'notebook' ? '📓 Notebook' :
                          libraryType === 'markdown' ? '📚 Source' : 
                          '📖 Reference';
 
@@ -806,6 +810,8 @@ export default function SocraticDialogue({
                       setCode(newCode);
                     }}
                   />
+                ) : libraryType === 'notebook' && notebookData ? (
+                  <NotebookViewer notebook={notebookData} />
                 ) : sourceVideoId ? (
                   <div className="w-full h-full flex flex-col bg-black rounded-lg overflow-hidden">
                     <iframe

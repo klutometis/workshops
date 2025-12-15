@@ -8,6 +8,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2024-12-15 - Notebook Processing Path Fixes and Title Extraction
+
+**Progress:** Fixed critical path derivation bug in notebook processing and improved title extraction to use markdown headers instead of filenames.
+
+#### Fixed
+- **Path derivation bug** (`scripts/import-to-db.ts`):
+  - Was deriving workDir from markdown filename: `pythonintroch1-raw.md` → `markdown/pythonintroch1-raw/` ❌
+  - Now uses parent directory directly: `markdown/pythonintroch1/pythonintroch1-raw.md` → `markdown/pythonintroch1/` ✅
+  - Eliminated `-raw` suffix contamination in path construction
+  - Looks for artifacts in correct location: `concept-graph-enriched.json`, `chunks.json`, etc.
+
+#### Changed
+- **Improved title extraction** (`lib/processing.ts`, `scripts/import-to-db.ts`):
+  - Added `extractMarkdownTitle()` helper function
+  - New priority: AI metadata > first `# Header` > filename
+  - Eliminates meaningless titles like "PYTHONINTROCH1"
+  - Extracts human-readable titles from document structure
+- **Better basename handling**:
+  - Derive basename from workDir (directory name) instead of filename
+  - Consistent with the fact that multiple files live in one work directory
+
+#### Testing
+- ✅ Fixed import error: "Missing file: pythonintroch1-raw/concept-graph-enriched.json"
+- ✅ Now correctly finds: "pythonintroch1/concept-graph-enriched.json"
+- ✅ Verified title extraction works with markdown headers
+- ✅ Notebooks now display meaningful titles in UI
+
+#### Architecture Notes
+- **Work directory is authoritative** - Always the parent of the markdown file
+- **Filenames are not parsed** - No more string manipulation of `-raw.md`, `-cleaned.md` suffixes
+- **Title extraction is robust** - Falls back gracefully through 3 levels of quality
+
+---
+
 ### 2024-12-14 - Bug Fixes and Zero-Install Notebook Processing
 
 **Progress:** Fixed critical bugs in notebook processing pipeline and Socratic dialogue retry logic. Switched to `uvx` for zero-install Jupyter notebook conversion.

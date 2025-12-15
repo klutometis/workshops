@@ -560,6 +560,21 @@ async function downloadFile(url: string, outputPath: string): Promise<void> {
 }
 
 /**
+ * Extract title from markdown file (first # header)
+ */
+function extractMarkdownTitle(markdownPath: string): string | null {
+  try {
+    const content = fs.readFileSync(markdownPath, 'utf-8');
+    
+    // Match first # header (not ##, ###, etc.)
+    const match = content.match(/^#\s+(.+)$/m);
+    return match ? match[1].trim() : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Clean markdown for LLM processing
  * Removes images and HTML tags while preserving structure (headers, code blocks, etc.)
  */
@@ -582,9 +597,9 @@ function cleanMarkdownForLLM(markdown: string): string {
 
 /**
  * Convert Jupyter notebook to markdown using nbconvert
- * This handles all edge cases: LaTeX math, HTML outputs, tables, widgets, etc.
+ * Returns both raw (with images) and cleaned (for LLM) versions
  */
-function convertNotebookToMarkdown(notebookPath: string): string {
+function convertNotebookToMarkdown(notebookPath: string): { raw: string; cleaned: string } {
   try {
     // Use uvx with jupyter-core for robust conversion (no global install needed)
     const rawMarkdown = execSync(
@@ -595,9 +610,13 @@ function convertNotebookToMarkdown(notebookPath: string): string {
       }
     );
     
-    // Clean the markdown for LLM processing
-    // (removes images/HTML but preserves structure)
-    return cleanMarkdownForLLM(rawMarkdown);
+    // Return both versions:
+    // - raw: for display (with inline images)
+    // - cleaned: for LLM processing (images stripped)
+    return {
+      raw: rawMarkdown,
+      cleaned: cleanMarkdownForLLM(rawMarkdown)
+    };
     
   } catch (error: any) {
     throw new Error(
@@ -675,12 +694,15 @@ export async function processJupyterNotebook(
       }
     }
     
-    // Stage 2: Convert to markdown
+    // Stage 2: Convert to markdown (both raw and cleaned versions)
     onProgress?.('Converting to markdown', 20, fileName);
     
-    let markdownContent: string;
+    let rawMarkdown: string;
+    let cleanedMarkdown: string;
     try {
-      markdownContent = convertNotebookToMarkdown(notebookPath);
+      const converted = convertNotebookToMarkdown(notebookPath);
+      rawMarkdown = converted.raw;
+      cleanedMarkdown = converted.cleaned;
     } catch (error: any) {
       throw new ProcessingError(
         `Failed to convert notebook to markdown: ${error.message}`,
@@ -689,7 +711,7 @@ export async function processJupyterNotebook(
       );
     }
     
-    // Save markdown to work directory
+    // Save both versions to work directory
     const slug = path.basename(fileName, '.ipynb')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-');
@@ -699,13 +721,17 @@ export async function processJupyterNotebook(
       fs.mkdirSync(workDir, { recursive: true });
     }
     
-    const markdownPath = path.join(workDir, `${slug}.md`);
-    fs.writeFileSync(markdownPath, markdownContent, 'utf-8');
+    const rawMarkdownPath = path.join(workDir, `${slug}-raw.md`);
+    const cleanedMarkdownPath = path.join(workDir, `${slug}-cleaned.md`);
     
-    onProgress?.('Markdown saved', 25, markdownPath);
+    fs.writeFileSync(rawMarkdownPath, rawMarkdown, 'utf-8');
+    fs.writeFileSync(cleanedMarkdownPath, cleanedMarkdown, 'utf-8');
     
-    // Stage 3: Process markdown through pipeline (30-95%)
-    onProgress?.('Processing as markdown', 30);
+    onProgress?.('Markdown saved', 25, `Raw: ${rawMarkdownPath}, Cleaned: ${cleanedMarkdownPath}`);
+    
+    // Stage 3: Process cleaned markdown through pipeline (30-90%)
+    // Use cleaned version for LLM processing (concepts, chunks, embeddings)
+    onProgress?.('Processing cleaned markdown', 30);
     
     // Wrap the markdown progress callback to offset percentages (30-90%)
     const wrappedProgress: ProgressCallback = (stage, percent, message) => {
@@ -714,45 +740,41 @@ export async function processJupyterNotebook(
       onProgress?.(stage, adjustedPercent, message);
     };
     
-    // Run markdown pipeline WITHOUT final import (we'll do custom notebook import)
-    // This processes through embedding generation but stops before database import
-    // (slug and workDir already declared above)
-    
-    // Run all markdown processing steps except import
+    // Run all markdown processing steps on cleaned version (no images)
     try {
       // Extract concepts
       const conceptGraphPath = path.join(workDir, 'concept-graph.json');
       if (!fs.existsSync(conceptGraphPath)) {
         wrappedProgress('Extracting concepts', 20);
-        runScript('scripts/markdown/extract-concepts.ts', [markdownPath]);
+        runScript('scripts/markdown/extract-concepts.ts', [cleanedMarkdownPath]);
       }
       
       // Chunk markdown
       const chunksPath = path.join(workDir, 'chunks.json');
       if (!fs.existsSync(chunksPath)) {
         wrappedProgress('Chunking markdown', 40);
-        runScript('scripts/markdown/chunk-markdown.ts', [markdownPath]);
+        runScript('scripts/markdown/chunk-markdown.ts', [cleanedMarkdownPath]);
       }
       
       // Enrich concepts
       const enrichedConceptPath = path.join(workDir, 'concept-graph-enriched.json');
       if (!fs.existsSync(enrichedConceptPath)) {
         wrappedProgress('Enriching concepts', 60);
-        runScript('scripts/markdown/enrich-concepts.ts', [markdownPath]);
+        runScript('scripts/markdown/enrich-concepts.ts', [cleanedMarkdownPath]);
       }
       
       // Map chunks to concepts
       const mappingsPath = path.join(workDir, 'chunk-concept-mappings.json');
       if (!fs.existsSync(mappingsPath)) {
         wrappedProgress('Mapping chunks to concepts', 70);
-        runScript('scripts/markdown/map-chunks-to-concepts.ts', [markdownPath]);
+        runScript('scripts/markdown/map-chunks-to-concepts.ts', [cleanedMarkdownPath]);
       }
       
       // Generate embeddings
       const embeddingsPath = path.join(workDir, 'chunk-embeddings.json');
       if (!fs.existsSync(embeddingsPath)) {
         wrappedProgress('Generating embeddings', 80);
-        runScript('scripts/markdown/embed-chunks.ts', [markdownPath]);
+        runScript('scripts/markdown/embed-chunks.ts', [cleanedMarkdownPath]);
       }
     } catch (error: any) {
       throw new ProcessingError(
@@ -762,13 +784,14 @@ export async function processJupyterNotebook(
       );
     }
     
-    // Stage 4: Import as notebook (90-100%)
+    // Stage 4: Import to database (90-100%)
+    // Pass raw markdown for storage (with images) but embeddings use cleaned version
     onProgress?.('Importing to database', 95);
     try {
       runScript('scripts/import-to-db.ts', [
         '--type', 'notebook',
         '--notebook-path', notebookPath,
-        '--markdown-path', markdownPath
+        '--markdown-path', rawMarkdownPath  // Store raw version in DB (with images)
       ]);
     } catch (error: any) {
       throw new ProcessingError(
@@ -787,9 +810,13 @@ export async function processJupyterNotebook(
     
     onProgress?.('Complete', 100, 'Processing finished successfully');
     
+    // Extract title: AI metadata > first markdown header > filename
+    const markdownTitle = extractMarkdownTitle(rawMarkdownPath);
+    const title = conceptGraph.metadata?.title || markdownTitle || fileName;
+    
     return {
       libraryId: slug,
-      title: conceptGraph.metadata?.title || fileName,
+      title,
       slug,
       contentType: 'notebook',
       stats: {
@@ -800,7 +827,8 @@ export async function processJupyterNotebook(
       metadata: {
         sourceUrl: isUrl ? urlOrPath : undefined,
         sourceFile: notebookPath,
-        convertedMarkdown: markdownPath,
+        convertedMarkdown: rawMarkdownPath,
+        cleanedMarkdown: cleanedMarkdownPath,
         processedAt: new Date().toISOString(),
       },
     };
