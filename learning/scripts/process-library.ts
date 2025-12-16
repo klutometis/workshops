@@ -87,31 +87,30 @@ async function processLibrary(libraryId: string) {
         throw new Error(`Unsupported source type: ${library.source_type}`);
     }
 
-    // 4. Update library with final results (slug, title, stats)
+    // 4. Update library with final results (title, stats)
+    // Note: slug is set at creation time and should not be changed
     await pool.query(
       `UPDATE libraries 
        SET status = $1, 
            progress_message = $2, 
            processed_at = NOW(),
-           slug = $3,
-           title = $4,
+           title = $3,
            metadata = jsonb_set(
              COALESCE(metadata, '{}'::jsonb),
              '{stats}',
-             $5::jsonb
+             $4::jsonb
            )
-       WHERE id = $6`,
+       WHERE id = $5`,
       [
         'ready',
         'Processing complete! Library is ready to use.',
-        result.slug,
         result.title,
         JSON.stringify(result.stats),
         libraryId
       ]
     );
 
-    console.log(`\n✅ Library processed successfully: ${result.slug}`);
+    console.log(`\n✅ Library processed successfully: ${library.slug}`);
     console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
     process.exit(0);
 

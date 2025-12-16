@@ -8,6 +8,54 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2024-12-16 - Semantic URL Generation for YouTube Videos
+
+**Progress:** Fixed YouTube video imports to generate stable, semantic URLs from video titles instead of cryptic video IDs. URLs now look like `/users/klutometis/python-in-100-seconds` instead of `/users/klutometis/x7X9w_GIm1s`.
+
+#### Fixed
+- **Semantic slug generation** (`app/api/publish/route.ts`):
+  - Fetches real YouTube metadata (title, author) synchronously during publish
+  - Generates slug from video title before creating library record
+  - Falls back gracefully if metadata fetch fails
+  - Uses video title for semantic URLs: "Python in 100 Seconds" → `python-in-100-seconds`
+- **Slug stability during processing** (`scripts/process-library.ts`):
+  - Removed slug update from final processing stage
+  - Slug is now set once at creation time and never changed
+  - Processing only updates title and stats, not slug
+  - Prevents URL breakage during long-running imports
+- **Re-import flow** (`app/api/publish/route.ts`):
+  - Updates in-memory library object after database UPDATE
+  - Ensures redirect URL matches new slug
+  - Re-imports now correctly update from video ID to semantic slug
+
+#### Added
+- **YouTube metadata fetching** (`app/api/publish/route.ts`):
+  - `extractYouTubeId()` - Parse video ID from various URL formats
+  - `fetchYouTubeMetadata()` - Sync call to `scripts/youtube/fetch-video-info.ts`
+  - Reads `youtube/{videoId}/video-info.json` for title and author
+  - 10-second timeout with graceful fallback
+  - Author metadata properly flows to library record
+
+#### Architecture Benefits
+- ✅ **Readable URLs** - Human-friendly slugs instead of video IDs
+- ✅ **Stable links** - URLs never change once created
+- ✅ **SEO-friendly** - Descriptive slugs improve discoverability
+- ✅ **Consistent experience** - Same URL pattern for all content types
+
+#### Testing
+- ✅ New import: "Python in 100 Seconds" → `/users/klutometis/python-in-100-seconds`
+- ✅ Re-import: Updated old video ID slug to semantic slug
+- ✅ Processing preserves slug throughout pipeline
+- ✅ Video metadata (title, author) correctly fetched from YouTube
+- ✅ Fallback works when metadata unavailable
+
+#### Status
+**Phase 1b Priority Complete** ✅ - Semantic URLs working end-to-end!
+
+🎯 **Next:** Create `scripts/process-library.ts` wrapper to route content processing
+
+---
+
 ### 2024-12-16 - Navigation UI Improvements
 
 **Progress:** Fixed text contrast and visibility issues in navigation header. Dark floating navigation pill now provides consistent styling across both light and dark page backgrounds.

@@ -243,9 +243,10 @@ Publishing infrastructure is fully functional! Users can paste URLs, libraries a
 - 📝 Add "Private GitHub repo" checkbox (optional)
 - 📝 Command-line import tool (optional): `npx tsx scripts/import-from-url.ts <youtube-url>` for end-to-end import without database pre-creation
 
-**Note on Slug Generation:**
-- ✅ New imports automatically get pretty slugs (`python-in-100-seconds` instead of `vLqTf2b6GZw`)
-- ⚠️ Existing imports still have video ID slugs - can reimport from app or write migration script to preserve mastery data
+**Note on Slug Generation:** ✅ **FIXED** (2024-12-16)
+- ✅ All new imports get semantic slugs: `python-in-100-seconds` instead of `x7X9w_GIm1s`
+- ✅ Re-importing updates old libraries to semantic slugs
+- ✅ Slugs remain stable throughout processing (never overwritten)
 
 ### Architecture
 **GitHub-authenticated publishing:** All imports require sign-in and create libraries owned by that user.
@@ -392,7 +393,21 @@ Published to /users/{username}/{slug}
 - [x] Semantic search returns relevant multimodal segments
 - [x] Socratic tutor works with video-backed context
 
-**Status:** Production-ready for YouTube videos! 🎉
+**Status:** Production-ready for YouTube videos with semantic URLs! 🎉
+
+#### 4. Semantic URL Generation ✅ **COMPLETE** (2024-12-16)
+- [x] Fetch YouTube metadata synchronously in publish route
+- [x] Generate semantic slug from video title before creating library
+- [x] Prevent slug overwrite during processing
+- [x] Fix re-import flow to update in-memory object
+- [x] Test end-to-end with new imports and re-imports
+- [x] Verify URL stability throughout processing pipeline
+
+**Benefits:**
+- ✅ URLs are human-readable: `/users/klutometis/python-in-100-seconds`
+- ✅ Links never change once created
+- ✅ Better for SEO and sharing
+- ✅ Consistent with markdown/notebook URL patterns
 
 #### 2. Markdown File Processing 🚧 **IN PROGRESS**
 
