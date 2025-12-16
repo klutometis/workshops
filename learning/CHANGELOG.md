@@ -8,6 +8,63 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2024-12-15 - Interactive Library Refactoring Complete
+
+**Progress:** Eliminated code duplication between demo and user libraries by creating a reusable `InteractiveLibrary` component. User-owned libraries now support full interactive learning when ready.
+
+#### Added
+- **`InteractiveLibrary.tsx`** - Reusable component encapsulating all interactive functionality:
+  - Concept graph visualization with D3 force simulation
+  - Concept details sidebar with prerequisites and learning objectives
+  - Socratic dialogue integration with mastery tracking
+  - Learning progress dashboard with statistics and encouragement
+  - localStorage-based mastery persistence
+  - Ready/locked/recommended concept calculations based on prerequisites
+- **`LibraryStatusPage.tsx`** - Client component for displaying library metadata and processing status
+  - Different messaging for `pending`, `processing`, `failed`, and `ready` states
+  - Clean separation of concerns from interactive experience
+- **`LibraryInteractivePage.tsx`** - Client wrapper that passes user library data to `InteractiveLibrary`
+  - Handles navigation back to user profile
+  - Bridges server component data to client interactive component
+
+#### Changed
+- **Refactored `/library/[slug]/page.tsx`**:
+  - Simplified to load demo libraries from API
+  - Delegates all interactive logic to `InteractiveLibrary` component
+  - Zero duplication with user library experience
+- **Updated `/users/[username]/[slug]/page.tsx`**:
+  - Changed to server component that queries database
+  - Conditionally renders `LibraryInteractivePage` when `status === 'ready'` and concept graph exists
+  - Renders `LibraryStatusPage` for `pending`/`processing`/`failed` states
+  - Double-duty page: status during import → interactive library when ready
+
+#### Fixed
+- **Code duplication eliminated**: Demo and user libraries now share the same interactive experience
+- **User library interactivity**: Personal libraries at `/users/{username}/{slug}` now fully functional
+- **Mastery tracking working**: localStorage persists progress across sessions
+- **Progress dashboard functional**: Shows mastery count, recommended concepts, and encouragement
+
+#### Architecture Benefits
+- ✅ **Single source of truth** for interactive library experience
+- ✅ **Consistent UX** between demo and user-owned content
+- ✅ **Easier maintenance** - interactive features only defined once
+- ✅ **Better separation** - server data fetching vs. client interactivity
+- ✅ **Reusable component** - can be used for any library source in the future
+
+#### Testing
+- ✅ Demo libraries work: `/library/paip` loads and functions correctly
+- ✅ User libraries work: `/users/klutometis/python-intro-chapter-1` shows interactive experience when ready
+- ✅ Status page works: Shows appropriate messaging for processing states
+- ✅ Mastery tracking persists: Progress saved to localStorage correctly
+- ✅ No code duplication: Interactive logic exists only in `InteractiveLibrary.tsx`
+
+#### Status
+**Phase 1a Complete** ✅ - User libraries now have full interactive capability matching demo libraries!
+
+🎯 **Next:** Phase 1b - Build `/publish` route and import pipeline for content ingestion
+
+---
+
 ### 2024-12-15 - GitHub Authentication System Complete
 
 **Progress:** Implemented GitHub OAuth authentication with NextAuth v4 and database-backed user persistence. Full authentication UI with profile links using unique GitHub usernames.
@@ -62,12 +119,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Image security**: Next.js requires explicit domain whitelisting for external images
 
 #### Status
-**Phase 1a (Authentication):** ✅ Complete
+**Phase 1a (Authentication & Personal Libraries):** ✅ Complete
 - ✅ GitHub authentication working end-to-end
 - ✅ User persistence in database
 - ✅ Profile UI with avatars and usernames
 - ✅ Unique, stable profile URLs
-- 🎯 Next: Personal library pages at `/users/{username}` and `/users/{username}/{library}`
+- ✅ Personal library list page: `/users/{username}`
+- ✅ Individual library status page: `/users/{username}/{slug}`
+- 🎯 Next: Make library page show interactive experience when `ready` (concept graph, Socratic dialogue)
+- 🎯 Next: Build `/publish` route and import pipeline (Phase 1b)
+
+#### Architecture Notes
+- **URL structure:** User-namespaced pattern (`/users/[username]/[slug]`) chosen over global slugs (`/library/[slug]`)
+  - Rationale: Like GitHub repos, enables forking, natural sharing, no slug conflicts
+  - Legacy `/library/[slug]` pattern remains for demo libraries (PAIP, etc.)
+- **Double-duty page:** `/users/[username]/[slug]` shows status during processing, then becomes interactive library when ready
+- **Library management:** Contextual controls (⚙️ Settings dropdown) will appear for owners, not separate settings pages
 
 ---
 

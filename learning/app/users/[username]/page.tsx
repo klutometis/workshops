@@ -83,7 +83,7 @@ export default async function UserPage({ params }: { params: Promise<{ username:
       {libraries.length > 0 && (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {libraries.map((library: any) => (
-            <Link key={library.id} href={`/library/${library.slug}`}>
+            <Link key={library.id} href={`/users/${username}/${library.slug}`}>
               <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
                 <CardHeader>
                   <CardTitle>{library.title}</CardTitle>

@@ -82,7 +82,7 @@ Establish GitHub as the identity layer and enable personal libraries from day on
 
 ### Status: **COMPLETE** ✅ (2024-12-15)
 
-Phase 1a is complete - authentication and personal library pages working end-to-end:
+Phase 1a is complete - authentication, personal library pages, AND interactive library experience all working end-to-end:
 - ✅ GitHub OAuth flow functional
 - ✅ Users saved to database on sign-in
 - ✅ Profile data (name, avatar, login) persisted
@@ -94,6 +94,10 @@ Phase 1a is complete - authentication and personal library pages working end-to-
 - ✅ Database queries working (getUserByUsername, getLibrariesByUsername)
 - ✅ Empty state handling for users with no libraries
 - ✅ Tested with user `klutometis` successfully
+- ✅ **Interactive library refactoring complete** - `InteractiveLibrary.tsx` reusable component created
+- ✅ **Code duplication eliminated** - demo and user libraries share same interactive experience
+- ✅ **User libraries interactive** - `/users/{username}/{slug}` shows full learning experience when ready
+- ✅ **Status page working** - Shows processing state for pending/processing/failed libraries
 
 **Ready for Phase 1b:** Build `/publish` route and import pipeline! 🚀
 
@@ -141,10 +145,17 @@ Phase 1a is complete - authentication and personal library pages working end-to-
 - [x] Grid layout for library cards (similar to home page) ✅
 - [x] Returns 404 for non-existent users via `notFound()` ✅
 - [x] Fixed Next.js 15+ `params` Promise handling with `await params` ✅
-- [ ] Create `/users/[username]/[library]/page.tsx` - Individual library view (deferred)
-- [ ] Migrate existing library routes to new URL structure (deferred)
-- [ ] Add "View Profile" link to library headers (deferred)
-- [ ] Display author info (avatar, name, GitHub link) (deferred)
+- [x] Create `/users/[username]/[slug]/page.tsx` - Individual library view ✅
+- [x] **Library page double-duty complete** ✅:
+  - Shows `LibraryStatusPage` when `pending`/`processing`/`failed` ✅
+  - Shows `LibraryInteractivePage` when `ready` with concept graph data ✅
+  - Created reusable `InteractiveLibrary.tsx` component ✅
+  - Eliminated code duplication with `/library/[slug]` route ✅
+  - Full concept graph, Socratic dialogue, mastery tracking working ✅
+- [ ] Add contextual management controls (when logged in as owner):
+  - ⚙️ Settings dropdown in top-right corner
+  - Actions: Edit metadata, Reprocess, Make private/public, Delete
+  - Only visible to library owner
 
 #### 5. Home Page Updates 🎯 **HIGH PRIORITY**
 - [ ] Show "Sign in with GitHub to publish" for logged-out users
@@ -162,11 +173,15 @@ Phase 1a is complete - authentication and personal library pages working end-to-
 - [x] Test profile link uses GitHub username (`/users/klutometis`) ✅
 - [x] Confirm avatar images load correctly ✅
 - [x] Test sign out and re-sign in flow ✅
-- [x] Test personal library page displays correctly ✅
+- [x] Test personal library pages display correctly ✅
   - `/users/klutometis` renders profile with avatar and name
   - Shows "Public Libraries (0)" count
   - Empty state message displays correctly
   - Database queries work (user lookup + library join)
+- [x] Test individual library page status display ✅
+  - `/users/klutometis/python-intro-chapter-1` shows processing status
+  - Status updates correctly (`pending` → `processing` → `ready`/`failed`)
+  - Different UI for each status state
 
 ### Success Criteria
 - ✅ Users can sign in with GitHub
@@ -176,7 +191,23 @@ Phase 1a is complete - authentication and personal library pages working end-to-
 - ✅ Personal library pages work: `/users/klutometis` displays profile and libraries
 - ✅ Empty state message shows when no libraries published
 - ✅ Database queries correctly join users and libraries tables
+- ✅ Individual library page shows status: `/users/klutometis/python-intro-chapter-1`
+- ✅ **Library page shows interactive experience when ready** - Full learning interface working
+- ✅ **Code duplication eliminated** - Shared `InteractiveLibrary` component
 - 🎯 Next: Build `/publish` route and import pipeline (Phase 1b)
+
+### Architecture Note: URL Structure
+
+**Primary Pattern:** `/users/[username]/[slug]`
+- ✅ User-namespaced slugs (like GitHub repos)
+- ✅ Natural sharing: "Check out my library at `/users/klutometis/tsp`"
+- ✅ Supports future forking: `/users/pnorvig/tsp` vs `/users/klutometis/tsp`
+- ✅ Double-duty page: Status during processing → Interactive library when ready
+
+**Legacy Pattern:** `/library/[slug]` 
+- Used for original demo libraries (PAIP, etc.)
+- May eventually be deprecated in favor of user-namespaced pattern
+- Requires globally unique slugs (no namespace)
 
 ---
 
@@ -506,11 +537,41 @@ Enable users to manage, update, and collaborate on their published content.
 
 ### Tasks
 
-#### 1. Library Management
-- [ ] Edit library metadata (title, description)
-- [ ] Delete library (soft delete, preserve concept graph)
-- [ ] Update from source (re-import to sync with GitHub)
-- [ ] Visibility toggle (public/private/unlisted)
+#### 1. Library Management (Contextual Controls)
+
+**Implementation:** Settings dropdown on library page (visible only to owner)
+
+- [ ] **Edit metadata modal**:
+  - Change title, description
+  - Update tags/categories
+  - Modify thumbnail/cover image
+- [ ] **Reprocess action**:
+  - Re-run import pipeline from original source URL
+  - Useful when processing code improves
+  - Shows progress, preserves old version until complete
+- [ ] **Visibility toggle**:
+  - Public (default) - appears in feeds, search
+  - Private - only accessible to owner
+  - Unlisted - accessible via direct link only
+- [ ] **Delete library**:
+  - Confirmation dialog
+  - Soft delete (mark as deleted, preserve in DB)
+  - Option to hard delete after grace period
+
+**UI Pattern:**
+```tsx
+// Top-right corner of /users/[username]/[slug] when isOwner
+<DropdownMenu>
+  <Button variant="ghost">⚙️ Settings</Button>
+  <DropdownMenuContent>
+    <DropdownMenuItem>Edit Details</DropdownMenuItem>
+    <DropdownMenuItem>Reprocess Library</DropdownMenuItem>
+    <DropdownMenuItem>Make Private/Public/Unlisted</DropdownMenuItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem className="text-red-600">Delete Library</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
 
 #### 2. Row Level Security (RLS)
 - [ ] Implement Supabase RLS policies:

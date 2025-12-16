@@ -125,3 +125,66 @@ export async function getSegmentById(segmentId: string) {
   );
   return result.rows[0] || null;
 }
+
+// Helper: Create a new library
+export async function createLibrary(data: {
+  title: string;
+  author: string;
+  type: 'youtube' | 'markdown' | 'notebook';
+  slug: string;
+  source_url?: string;
+  video_id?: string;
+  markdown_content?: string;
+  user_id?: number;
+  is_public?: boolean;
+  source_type?: 'youtube' | 'markdown' | 'notebook';
+  metadata?: any;
+}) {
+  const result = await pool.query(
+    `INSERT INTO libraries (
+      title, author, type, slug, source_url, video_id, 
+      markdown_content, user_id, is_public, source_type, 
+      status, metadata, created_at
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending', $11, NOW())
+    RETURNING *`,
+    [
+      data.title,
+      data.author,
+      data.type,
+      data.slug,
+      data.source_url || null,
+      data.video_id || null,
+      data.markdown_content || null,
+      data.user_id || null,
+      data.is_public !== undefined ? data.is_public : true,
+      data.source_type || data.type,
+      data.metadata || {}
+    ]
+  );
+  return result.rows[0];
+}
+
+// Helper: Update library status
+export async function updateLibraryStatus(
+  libraryId: string,
+  status: 'pending' | 'processing' | 'ready' | 'failed',
+  errorMessage?: string
+) {
+  const result = await pool.query(
+    `UPDATE libraries 
+     SET status = $1, error_message = $2, processed_at = CASE WHEN $1 = 'ready' THEN NOW() ELSE processed_at END
+     WHERE id = $3
+     RETURNING *`,
+    [status, errorMessage || null, libraryId]
+  );
+  return result.rows[0];
+}
+
+// Helper: Check if slug exists for a user (for uniqueness)
+export async function isSlugTaken(slug: string, userId?: number) {
+  const result = await pool.query(
+    'SELECT id FROM libraries WHERE slug = $1 AND user_id = $2',
+    [slug, userId || null]
+  );
+  return result.rows.length > 0;
+}
