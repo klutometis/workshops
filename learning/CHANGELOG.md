@@ -8,6 +8,73 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2024-12-16 - Navigation UI Improvements
+
+**Progress:** Fixed text contrast and visibility issues in navigation header. Dark floating navigation pill now provides consistent styling across both light and dark page backgrounds.
+
+#### Fixed
+- **Text contrast in library header** (`app/components/InteractiveLibrary.tsx`):
+  - Changed author byline from `text-slate-300` to `text-slate-100`
+  - Now readable on dark blue gradient background
+- **Dark navigation pill** (`app/layout.tsx`):
+  - Added semi-transparent dark background: `bg-slate-900/90 backdrop-blur-sm`
+  - Floating pill design with rounded corners and shadow
+  - Works perfectly on both light (home page) and dark (library) backgrounds
+- **Username visibility** (`components/AuthButton.tsx`):
+  - Changed username text to `text-white` (was inheriting dark color)
+  - Added `hover:bg-slate-800` to "Sign out" button for better contrast
+  - All navigation text now consistently white on dark background
+- **About button styling** (`app/layout.tsx`):
+  - Updated to dark theme: `bg-slate-800 border-slate-700 text-white`
+  - Matches navigation pill aesthetic
+
+#### Architecture Notes
+- **Consistent navigation pattern**: Dark floating pill solves the "light text on light background" problem
+- **Professional appearance**: Similar to GitHub, Discord, and other modern web apps
+- **Accessibility**: High contrast white-on-dark meets WCAG standards
+- **Responsive backdrop blur**: Creates depth and visual polish
+
+#### Status
+**UI Polish Complete** ✅ - Navigation header now works beautifully on all page backgrounds!
+
+🎯 **Next:** Build processing pipeline script (`scripts/process-library.ts` wrapper)
+
+---
+
+### 2024-12-15 - Progress Callback System Fixed
+
+**Progress:** Fixed critical bug where progress updates were not reaching the database during library processing. Real-time status updates now work correctly with async database writes.
+
+#### Fixed
+- **Progress callback async handling** (`lib/processing.ts`):
+  - Changed `ProgressCallback` type to support `Promise<void> | void`
+  - Added `await` to all 24 `onProgress?.()` calls throughout the file
+  - Progress updates were fire-and-forget, abandoning database writes before completion
+  - Now properly waits for each database update before continuing to next stage
+- **Database status tracking** working end-to-end:
+  - Console logs showed "Transcribing audio: 25%" but database stayed at "Initializing..."
+  - Root cause: async `updateProgress()` calls were not awaited
+  - Now updates flow correctly: pending → processing (with progress) → ready
+
+#### Testing
+- ✅ Processed library `88b2316d-16e1-491f-bc2c-8613b8839b77` (Python in 100 Seconds video)
+- ✅ Frontend polling showed real-time updates: 10% → 20% → 25% → 40%...
+- ✅ Progress messages displayed correctly: "Downloading video", "Transcribing audio", etc.
+- ✅ Stage indicators updated in real-time (green checkmarks for completed, blue pulse for in-progress)
+- ✅ Database queries confirmed `progress_message` field updating correctly
+
+#### Architecture Notes
+- **ProgressCallback signature**: Now explicitly supports both sync and async callbacks
+- **All processing functions affected**: `processYouTubeVideo()`, `processMarkdownFile()`, `processJupyterNotebook()`
+- **Pattern established**: Always await progress callbacks to ensure database consistency
+
+#### Status
+**Phase 1b Priority 1 Complete** ✅ - Progress tracking now production-ready!
+
+🎯 **Next:** Wire up Cloud Run Job to trigger processing from `/api/publish` route
+
+---
+
 ### 2024-12-15 - Library Publishing Infrastructure Complete
 
 **Progress:** Built complete publishing flow with async processing architecture. Users can now paste URLs at `/publish`, libraries are created immediately with status tracking, and polling keeps the UI updated during processing.

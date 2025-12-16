@@ -32,7 +32,7 @@ export default function LibraryInteractivePage({ library, username }: LibraryInt
       library={{
         id: library.id.toString(),
         title: library.title,
-        author: library.github_name || library.github_login,
+        author: library.author,
         type: library.type,
         conceptGraphData: library.conceptGraphData,
       }}

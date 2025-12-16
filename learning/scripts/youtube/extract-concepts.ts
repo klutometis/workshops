@@ -7,6 +7,18 @@ import {
   type ConceptGraph,
 } from "./types.js";
 
+interface VideoInfo {
+  video_id: string;
+  title: string;
+  author: string;
+  channel: string;
+  duration: number;
+  upload_date: string;
+  description: string;
+  view_count: number;
+  fetched_at: string;
+}
+
 // ============================================================================
 // Main Extraction Logic
 // ============================================================================
@@ -19,12 +31,24 @@ async function extractConceptsFromVideo(videoId: string): Promise<void> {
   // Paths
   const videoDir = path.join(process.cwd(), "youtube", videoId);
   const transcriptPath = path.join(videoDir, "audio-transcript.json");
+  const videoInfoPath = path.join(videoDir, "video-info.json");
   const outputPath = path.join(videoDir, "concept-graph.json");
 
   // Check if transcript exists
   if (!fs.existsSync(transcriptPath)) {
     throw new Error(`❌ Transcript not found: ${transcriptPath}`);
   }
+
+  // Check if video info exists
+  if (!fs.existsSync(videoInfoPath)) {
+    throw new Error(`❌ Video info not found: ${videoInfoPath}\nRun fetch-video-info.ts first!`);
+  }
+
+  // Read video info for real title/author
+  console.log(`📖 Reading video info...`);
+  const videoInfo: VideoInfo = JSON.parse(fs.readFileSync(videoInfoPath, "utf-8"));
+  console.log(`   Title: ${videoInfo.title}`);
+  console.log(`   Author: ${videoInfo.author}\n`);
 
   console.log(`📖 Reading transcript...`);
   const raw = JSON.parse(fs.readFileSync(transcriptPath, "utf-8"));
@@ -42,8 +66,8 @@ async function extractConceptsFromVideo(videoId: string): Promise<void> {
 
   const conceptGraph = await extractConcepts({
     text: transcriptData.full_transcript,
-    title: "Let's build GPT: from scratch, in code, spelled out",
-    author: "Andrej Karpathy",
+    title: videoInfo.title,
+    author: videoInfo.author,
     sourceType: 'youtube',
     metadata: {
       video_id: videoId,

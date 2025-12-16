@@ -217,7 +217,7 @@ export default function InteractiveLibrary({ library, onBack, backLabel = '← B
             )}
             <h1 className="text-2xl font-bold">{library.title}</h1>
             {library.author && (
-              <p className="text-sm text-slate-300">by {library.author}</p>
+              <p className="text-sm text-slate-100">by {library.author}</p>
             )}
           </div>
         </div>

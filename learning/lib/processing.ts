@@ -13,7 +13,7 @@ export type ProgressCallback = (
   stage: string,
   percent: number,
   message?: string
-) => void;
+) => Promise<void> | void;
 
 /**
  * Result from processing any content type
@@ -129,9 +129,9 @@ export async function processYouTubeVideo(
     const videoPath = path.join(videoDir, 'video.mp4');
     
     if (fs.existsSync(audioPath) && fs.existsSync(videoPath)) {
-      onProgress?.('Downloading video', 10, 'Already downloaded (skipping)');
+      await onProgress?.('Downloading video', 10, 'Already downloaded (skipping)');
     } else {
-      onProgress?.('Downloading video', 10, `Video ID: ${videoId}`);
+      await onProgress?.('Downloading video', 10, `Video ID: ${videoId}`);
       try {
         runScript('scripts/youtube/download-media.sh', [videoId]);
       } catch (error: any) {
@@ -143,13 +143,31 @@ export async function processYouTubeVideo(
       }
     }
     
-    // Stage 2: Transcribe audio using Google Cloud Speech-to-Text
+    // Stage 2: Fetch video metadata (title, author, etc.)
+    const videoInfoPath = path.join(videoDir, 'video-info.json');
+    
+    if (fs.existsSync(videoInfoPath)) {
+      await onProgress?.('Fetching video info', 20, 'Already fetched (skipping)');
+    } else {
+      await onProgress?.('Fetching video info', 20, 'Getting real title and author from YouTube');
+      try {
+        runScript('scripts/youtube/fetch-video-info.ts', [videoId]);
+      } catch (error: any) {
+        throw new ProcessingError(
+          'Failed to fetch video info',
+          'fetch-video-info',
+          error
+        );
+      }
+    }
+    
+    // Stage 3: Transcribe audio using Google Cloud Speech-to-Text
     const transcriptPath = path.join(videoDir, 'audio-transcript.json');
     
     if (fs.existsSync(transcriptPath)) {
-      onProgress?.('Transcribing audio', 25, 'Already transcribed (skipping)');
+      await onProgress?.('Transcribing audio', 25, 'Already transcribed (skipping)');
     } else {
-      onProgress?.('Transcribing audio', 25);
+      await onProgress?.('Transcribing audio', 25);
       try {
         const audioPath = path.join(videoDir, 'audio.mp3');
         runScript('scripts/youtube/transcribe-audio.ts', [audioPath]);
@@ -162,13 +180,13 @@ export async function processYouTubeVideo(
       }
     }
     
-    // Stage 3: Sample and analyze frames
+    // Stage 4: Sample and analyze frames
     const analysisPath = path.join(videoDir, 'video-analysis.json');
     
     if (fs.existsSync(analysisPath)) {
-      onProgress?.('Analyzing video frames', 40, 'Already analyzed (skipping)');
+      await onProgress?.('Analyzing video frames', 40, 'Already analyzed (skipping)');
     } else {
-      onProgress?.('Analyzing video frames', 40);
+      await onProgress?.('Analyzing video frames', 40);
       try {
         runScript('scripts/youtube/analyze-frames.ts', [videoId]);
       } catch (error: any) {
@@ -180,13 +198,13 @@ export async function processYouTubeVideo(
       }
     }
     
-    // Stage 4: Extract concepts
+    // Stage 5: Extract concepts
     const conceptGraphPath = path.join(videoDir, 'concept-graph.json');
     
     if (fs.existsSync(conceptGraphPath)) {
-      onProgress?.('Extracting concepts', 55, 'Already extracted (skipping)');
+      await onProgress?.('Extracting concepts', 55, 'Already extracted (skipping)');
     } else {
-      onProgress?.('Extracting concepts', 55);
+      await onProgress?.('Extracting concepts', 55);
       try {
         runScript('scripts/youtube/extract-concepts.ts', [videoId]);
       } catch (error: any) {
@@ -198,13 +216,13 @@ export async function processYouTubeVideo(
       }
     }
     
-    // Stage 5: Map code to concepts
+    // Stage 6: Map code to concepts
     const codeMappingsPath = path.join(videoDir, 'code-concept-mappings.json');
     
     if (fs.existsSync(codeMappingsPath)) {
-      onProgress?.('Mapping code to concepts', 60, 'Already mapped (skipping)');
+      await onProgress?.('Mapping code to concepts', 60, 'Already mapped (skipping)');
     } else {
-      onProgress?.('Mapping code to concepts', 60);
+      await onProgress?.('Mapping code to concepts', 60);
       try {
         runScript('scripts/youtube/map-code-to-concepts.ts', [videoId]);
       } catch (error: any) {
@@ -216,13 +234,13 @@ export async function processYouTubeVideo(
       }
     }
     
-    // Stage 6: Enrich concepts with pedagogy
+    // Stage 7: Enrich concepts with pedagogy
     const enrichedConceptPath = path.join(videoDir, 'concept-graph-enriched.json');
     
     if (fs.existsSync(enrichedConceptPath)) {
-      onProgress?.('Enriching concepts', 68, 'Already enriched (skipping)');
+      await onProgress?.('Enriching concepts', 68, 'Already enriched (skipping)');
     } else {
-      onProgress?.('Enriching concepts', 68);
+      await onProgress?.('Enriching concepts', 68);
       try {
         runScript('scripts/youtube/enrich-concepts.ts', [videoId]);
       } catch (error: any) {
@@ -234,13 +252,13 @@ export async function processYouTubeVideo(
       }
     }
     
-    // Stage 7: Map segments to concepts
+    // Stage 8: Map segments to concepts
     const segmentMappingsPath = path.join(videoDir, 'segment-concept-mappings.json');
     
     if (fs.existsSync(segmentMappingsPath)) {
-      onProgress?.('Mapping segments to concepts', 75, 'Already mapped (skipping)');
+      await onProgress?.('Mapping segments to concepts', 75, 'Already mapped (skipping)');
     } else {
-      onProgress?.('Mapping segments to concepts', 75);
+      await onProgress?.('Mapping segments to concepts', 75);
       try {
         runScript('scripts/youtube/map-segments-to-concepts.ts', [videoId]);
       } catch (error: any) {
@@ -252,13 +270,13 @@ export async function processYouTubeVideo(
       }
     }
     
-    // Stage 7: Generate embeddings
+    // Stage 9: Generate embeddings
     const embeddingsPath = path.join(videoDir, 'segment-embeddings.json');
     
     if (fs.existsSync(embeddingsPath)) {
-      onProgress?.('Generating embeddings', 85, 'Already embedded (skipping)');
+      await onProgress?.('Generating embeddings', 85, 'Already embedded (skipping)');
     } else {
-      onProgress?.('Generating embeddings', 85);
+      await onProgress?.('Generating embeddings', 85);
       try {
         runScript('scripts/youtube/embed-video-segments.ts', [videoId]);
       } catch (error: any) {
@@ -270,8 +288,8 @@ export async function processYouTubeVideo(
       }
     }
     
-    // Stage 8: Import to database (always run - idempotent)
-    onProgress?.('Importing to database', 95);
+    // Stage 10: Import to database (always run - idempotent)
+    await onProgress?.('Importing to database', 95);
     try {
       runScript('scripts/import-youtube-to-db.ts', [videoId]);
     } catch (error: any) {
@@ -302,7 +320,7 @@ export async function processYouTubeVideo(
       segmentCount = embeddings.segments?.length || 0;
     }
     
-    onProgress?.('Complete', 100, 'Processing finished successfully');
+    await onProgress?.('Complete', 100, 'Processing finished successfully');
     
     return {
       libraryId: videoId,
@@ -374,9 +392,9 @@ export async function processMarkdownFile(
     // Stage 1: Extract concepts from full markdown (20%)
     const conceptGraphPath = path.join(workDir, 'concept-graph.json');
     if (fs.existsSync(conceptGraphPath)) {
-      onProgress?.('Extracting concepts', 20, 'Already extracted (skipping)');
+      await onProgress?.('Extracting concepts', 20, 'Already extracted (skipping)');
     } else {
-      onProgress?.('Extracting concepts', 20);
+      await onProgress?.('Extracting concepts', 20);
       try {
         runScript('scripts/markdown/extract-concepts.ts', [filePath]);
       } catch (error: any) {
@@ -391,9 +409,9 @@ export async function processMarkdownFile(
     // Stage 2: Chunk markdown into segments (40%)
     const chunksPath = path.join(workDir, 'chunks.json');
     if (fs.existsSync(chunksPath)) {
-      onProgress?.('Chunking markdown', 40, 'Already chunked (skipping)');
+      await onProgress?.('Chunking markdown', 40, 'Already chunked (skipping)');
     } else {
-      onProgress?.('Chunking markdown', 40, `Processing ${fileName}`);
+      await onProgress?.('Chunking markdown', 40, `Processing ${fileName}`);
       try {
         runScript('scripts/markdown/chunk-markdown.ts', [filePath]);
       } catch (error: any) {
@@ -408,9 +426,9 @@ export async function processMarkdownFile(
     // Stage 3: Enrich concepts with pedagogy (60%)
     const enrichedConceptPath = path.join(workDir, 'concept-graph-enriched.json');
     if (fs.existsSync(enrichedConceptPath)) {
-      onProgress?.('Enriching concepts', 60, 'Already enriched (skipping)');
+      await onProgress?.('Enriching concepts', 60, 'Already enriched (skipping)');
     } else {
-      onProgress?.('Enriching concepts', 60);
+      await onProgress?.('Enriching concepts', 60);
       try {
         runScript('scripts/markdown/enrich-concepts.ts', [filePath]);
       } catch (error: any) {
@@ -425,9 +443,9 @@ export async function processMarkdownFile(
     // Stage 4: Map chunks to concepts (70%)
     const mappingsPath = path.join(workDir, 'chunk-concept-mappings.json');
     if (fs.existsSync(mappingsPath)) {
-      onProgress?.('Mapping chunks to concepts', 70, 'Already mapped (skipping)');
+      await onProgress?.('Mapping chunks to concepts', 70, 'Already mapped (skipping)');
     } else {
-      onProgress?.('Mapping chunks to concepts', 70);
+      await onProgress?.('Mapping chunks to concepts', 70);
       try {
         runScript('scripts/markdown/map-chunks-to-concepts.ts', [filePath]);
       } catch (error: any) {
@@ -442,9 +460,9 @@ export async function processMarkdownFile(
     // Stage 5: Generate embeddings (80%)
     const embeddingsPath = path.join(workDir, 'chunk-embeddings.json');
     if (fs.existsSync(embeddingsPath)) {
-      onProgress?.('Generating embeddings', 80, 'Already embedded (skipping)');
+      await onProgress?.('Generating embeddings', 80, 'Already embedded (skipping)');
     } else {
-      onProgress?.('Generating embeddings', 80);
+      await onProgress?.('Generating embeddings', 80);
       try {
         runScript('scripts/markdown/embed-chunks.ts', [filePath]);
       } catch (error: any) {
@@ -457,7 +475,7 @@ export async function processMarkdownFile(
     }
     
     // Stage 6: Import to database (100%)
-    onProgress?.('Importing to database', 95);
+    await onProgress?.('Importing to database', 95);
     try {
       runScript('scripts/import-to-db.ts', ['--type', 'markdown', '--markdown-path', filePath]);
     } catch (error: any) {
@@ -468,7 +486,7 @@ export async function processMarkdownFile(
       );
     }
     
-    onProgress?.('Complete', 100, 'Processing finished successfully');
+    await onProgress?.('Complete', 100, 'Processing finished successfully');
     
     // Read results
     const enrichedPath = path.join(workDir, 'concept-graph-enriched.json');
@@ -650,7 +668,7 @@ export async function processJupyterNotebook(
   try {
     // Stage 1: Download notebook if URL
     if (isUrl) {
-      onProgress?.('Downloading notebook', 10, urlOrPath);
+      await onProgress?.('Downloading notebook', 10, urlOrPath);
       
       // Extract filename from URL
       const urlParts = urlOrPath.split('/');
@@ -695,7 +713,7 @@ export async function processJupyterNotebook(
     }
     
     // Stage 2: Convert to markdown (both raw and cleaned versions)
-    onProgress?.('Converting to markdown', 20, fileName);
+    await onProgress?.('Converting to markdown', 20, fileName);
     
     let rawMarkdown: string;
     let cleanedMarkdown: string;
@@ -727,11 +745,11 @@ export async function processJupyterNotebook(
     fs.writeFileSync(rawMarkdownPath, rawMarkdown, 'utf-8');
     fs.writeFileSync(cleanedMarkdownPath, cleanedMarkdown, 'utf-8');
     
-    onProgress?.('Markdown saved', 25, `Raw: ${rawMarkdownPath}, Cleaned: ${cleanedMarkdownPath}`);
+    await onProgress?.('Markdown saved', 25, `Raw: ${rawMarkdownPath}, Cleaned: ${cleanedMarkdownPath}`);
     
     // Stage 3: Process cleaned markdown through pipeline (30-90%)
     // Use cleaned version for LLM processing (concepts, chunks, embeddings)
-    onProgress?.('Processing cleaned markdown', 30);
+    await onProgress?.('Processing cleaned markdown', 30);
     
     // Wrap the markdown progress callback to offset percentages (30-90%)
     const wrappedProgress: ProgressCallback = (stage, percent, message) => {
@@ -786,7 +804,7 @@ export async function processJupyterNotebook(
     
     // Stage 4: Import to database (90-100%)
     // Pass raw markdown for storage (with images) but embeddings use cleaned version
-    onProgress?.('Importing to database', 95);
+    await onProgress?.('Importing to database', 95);
     try {
       runScript('scripts/import-to-db.ts', [
         '--type', 'notebook',
@@ -808,7 +826,7 @@ export async function processJupyterNotebook(
     const conceptGraph = JSON.parse(fs.readFileSync(enrichedPath, 'utf-8'));
     const embeddings = JSON.parse(fs.readFileSync(embeddingsPath, 'utf-8'));
     
-    onProgress?.('Complete', 100, 'Processing finished successfully');
+    await onProgress?.('Complete', 100, 'Processing finished successfully');
     
     // Extract title: AI metadata > first markdown header > filename
     const markdownTitle = extractMarkdownTitle(rawMarkdownPath);

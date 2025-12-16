@@ -164,7 +164,14 @@ Phase 1a is complete - authentication, personal library pages, AND interactive l
 - [ ] Featured libraries (curated by admin)
 - [ ] Browse by creator
 
-#### 6. Testing ✅ **COMPLETE**
+#### 6. UI Polish ✅ **COMPLETE** (2024-12-16)
+- [x] Fixed text contrast issues in library headers
+- [x] Implemented dark floating navigation pill
+- [x] Made all navigation text visible on both light and dark backgrounds
+- [x] Consistent styling across "Sign out", "About", and username display
+- [x] Professional appearance with backdrop blur and shadows
+
+#### 7. Testing ✅ **COMPLETE**
 - [x] Test OAuth flow (sign in → callback → session) ✅
 - [x] Verify user record created on first login ✅
   - User `klutometis` (Peter Danenberg) saved successfully
@@ -227,11 +234,18 @@ Publishing infrastructure is fully functional! Users can paste URLs, libraries a
 - ✅ Immediate redirect to status page
 - ✅ Real-time polling for status updates
 - ✅ All status transitions tested (pending → processing → ready)
+- ✅ Progress callbacks working with async database writes
+- ✅ Frontend shows real-time progress (10% → 25% → 40%...)
 
 **What's Next:**
 - 🎯 **Priority 1:** Create `scripts/process-library.ts` wrapper that routes to YouTube/markdown/notebook processors
 - 🎯 **Priority 2:** Trigger Cloud Run Job from `/api/publish` route
 - 📝 Add "Private GitHub repo" checkbox (optional)
+- 📝 Command-line import tool (optional): `npx tsx scripts/import-from-url.ts <youtube-url>` for end-to-end import without database pre-creation
+
+**Note on Slug Generation:**
+- ✅ New imports automatically get pretty slugs (`python-in-100-seconds` instead of `vLqTf2b6GZw`)
+- ⚠️ Existing imports still have video ID slugs - can reimport from app or write migration script to preserve mastery data
 
 ### Architecture
 **GitHub-authenticated publishing:** All imports require sign-in and create libraries owned by that user.
@@ -307,6 +321,12 @@ Published to /users/{username}/{slug}
   - Refresh library data from API ✅
   - Shows spinner and "Checking for updates..." indicator ✅
   - Displays progress_message in blue info box ✅
+
+- [x] Fix progress callback async handling (`lib/processing.ts`): ✅
+  - Changed `ProgressCallback` type to support `Promise<void> | void` ✅
+  - Added `await` to all `onProgress?.()` calls (24 total) ✅
+  - Progress updates now properly write to database ✅
+  - Tested end-to-end with real library processing ✅
 
 - [x] Add `progress_message` column to `libraries` table: ✅
   - Created migration 003 ✅

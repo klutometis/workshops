@@ -52,11 +52,11 @@ export default function RootLayout({
         <Providers>
           {children}
 
-          <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
+          <div className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-slate-900/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg">
             <AuthButton />
             <Link
               href="/about"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-slate-700 bg-slate-800 text-white shadow-sm hover:bg-slate-700 h-9 px-4 py-2"
             >
               About
             </Link>

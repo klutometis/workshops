@@ -46,7 +46,7 @@ export function AuthButton() {
               className="rounded-full"
             />
           )}
-          <span className="text-sm font-medium">
+          <span className="text-sm font-medium text-white">
             {session.user.name}
           </span>
         </Link>
@@ -54,6 +54,7 @@ export function AuthButton() {
           variant="ghost"
           size="sm"
           onClick={() => signOut()}
+          className="text-white hover:bg-slate-800"
         >
           Sign out
         </Button>

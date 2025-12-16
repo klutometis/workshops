@@ -27,6 +27,63 @@ type LibraryStatusPageProps = {
   username: string;
 };
 
+// Processing stages for different content types
+const PROCESSING_STAGES = {
+  youtube: [
+    { key: 'download', label: 'Downloading video', percent: 10 },
+    { key: 'transcribe', label: 'Transcribing audio', percent: 25 },
+    { key: 'analyze', label: 'Analyzing video frames', percent: 40 },
+    { key: 'extract', label: 'Extracting concepts', percent: 55 },
+    { key: 'map-code', label: 'Mapping code to concepts', percent: 60 },
+    { key: 'enrich', label: 'Enriching concepts', percent: 68 },
+    { key: 'map-segments', label: 'Mapping segments to concepts', percent: 75 },
+    { key: 'embed', label: 'Generating embeddings', percent: 85 },
+    { key: 'import', label: 'Importing to database', percent: 95 },
+  ],
+  markdown: [
+    { key: 'extract', label: 'Extracting concepts', percent: 20 },
+    { key: 'chunk', label: 'Chunking markdown', percent: 40 },
+    { key: 'enrich', label: 'Enriching concepts', percent: 60 },
+    { key: 'map', label: 'Mapping chunks to concepts', percent: 70 },
+    { key: 'embed', label: 'Generating embeddings', percent: 80 },
+    { key: 'import', label: 'Importing to database', percent: 95 },
+  ],
+  notebook: [
+    { key: 'download', label: 'Downloading notebook', percent: 10 },
+    { key: 'convert', label: 'Converting to markdown', percent: 20 },
+    { key: 'extract', label: 'Extracting concepts', percent: 35 },
+    { key: 'chunk', label: 'Chunking content', percent: 50 },
+    { key: 'enrich', label: 'Enriching concepts', percent: 65 },
+    { key: 'map', label: 'Mapping chunks to concepts', percent: 75 },
+    { key: 'embed', label: 'Generating embeddings', percent: 85 },
+    { key: 'import', label: 'Importing to database', percent: 95 },
+  ],
+};
+
+// Parse progress message to extract percentage and stage info
+function parseProgress(message: string | null, contentType: string): { percent: number; currentStage: string | null } {
+  if (!message) return { percent: 0, currentStage: null };
+
+  // Extract percentage if present (e.g., "Transcribing audio: 25%")
+  const percentMatch = message.match(/(\d+)%/);
+  if (percentMatch) {
+    return { percent: parseInt(percentMatch[1], 10), currentStage: message };
+  }
+
+  // Match against known stages to estimate progress
+  const stages = PROCESSING_STAGES[contentType as keyof typeof PROCESSING_STAGES] || PROCESSING_STAGES.youtube;
+  const lowerMessage = message.toLowerCase();
+  
+  for (const stage of stages) {
+    if (lowerMessage.includes(stage.label.toLowerCase())) {
+      return { percent: stage.percent, currentStage: stage.label };
+    }
+  }
+
+  // Default to 5% if processing but no specific stage detected
+  return { percent: 5, currentStage: message };
+}
+
 export default function LibraryStatusPage({ library: initialLibrary, username }: LibraryStatusPageProps) {
   const [library, setLibrary] = useState(initialLibrary);
   const [isPolling, setIsPolling] = useState(true);
@@ -61,7 +118,7 @@ export default function LibraryStatusPage({ library: initialLibrary, username }:
       } catch (error) {
         console.error('Error polling library status:', error);
       }
-    }, 5000); // Poll every 5 seconds
+    }, 2000); // Poll every 2 seconds for responsive updates
 
     return () => clearInterval(pollInterval);
   }, [library.id, library.status, router]);
@@ -179,23 +236,113 @@ export default function LibraryStatusPage({ library: initialLibrary, username }:
             </div>
           )}
 
-          {library.status === 'processing' && (
-            <div className="text-center py-12">
-              <div className="text-4xl mb-4 inline-block animate-spin">⚙️</div>
-              <p className="text-lg font-semibold mb-2">Processing Content</p>
-              <p className="text-muted-foreground text-sm">
-                Extracting concepts and generating embeddings. This may take 10-30 minutes.
-              </p>
-              {library.progress_message && (
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-700">{library.progress_message}</p>
+          {library.status === 'processing' && (() => {
+            const { percent, currentStage } = parseProgress(library.progress_message, library.type);
+            const stages = PROCESSING_STAGES[library.type as keyof typeof PROCESSING_STAGES] || PROCESSING_STAGES.youtube;
+
+            return (
+              <div className="py-12 max-w-3xl mx-auto">
+                <div className="text-center mb-8">
+                  <div className="text-4xl mb-4 inline-block animate-spin">⚙️</div>
+                  <p className="text-lg font-semibold mb-2">Processing Content</p>
+                  <p className="text-muted-foreground text-sm">
+                    Extracting concepts and generating embeddings. This may take 10-30 minutes.
+                  </p>
                 </div>
-              )}
-              <p className="text-xs text-muted-foreground mt-4">
-                This page will update automatically. You can close this tab and return later.
-              </p>
-            </div>
-          )}
+
+                {/* Progress Bar */}
+                <div className="mb-8">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">Overall Progress</span>
+                    <span className="text-sm font-semibold text-blue-600">{percent}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                    <div 
+                      className="bg-blue-600 h-3 rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Processing Stages Checklist */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-4">Processing Stages</h3>
+                  <div className="space-y-3">
+                    {stages.map((stage) => {
+                      const isComplete = percent > stage.percent;
+                      const isCurrent = percent >= stage.percent && percent < (stages[stages.indexOf(stage) + 1]?.percent || 100);
+                      const isPending = percent < stage.percent;
+
+                      return (
+                        <div key={stage.key} className="flex items-center gap-3">
+                          {/* Status Icon */}
+                          <div className="flex-shrink-0">
+                            {isComplete && (
+                              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                                <span className="text-green-600 text-sm">✓</span>
+                              </div>
+                            )}
+                            {isCurrent && (
+                              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                                <div className="w-3 h-3 rounded-full bg-blue-600 animate-pulse" />
+                              </div>
+                            )}
+                            {isPending && (
+                              <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+                                <div className="w-2 h-2 rounded-full bg-gray-400" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Stage Label */}
+                          <div className="flex-1">
+                            <span className={`text-sm ${
+                              isComplete ? 'text-green-700 font-medium' :
+                              isCurrent ? 'text-blue-700 font-semibold' :
+                              'text-gray-500'
+                            }`}>
+                              {stage.label}
+                            </span>
+                          </div>
+
+                          {/* Status Badge */}
+                          <div className="flex-shrink-0">
+                            {isComplete && (
+                              <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                                Done
+                              </span>
+                            )}
+                            {isCurrent && (
+                              <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded animate-pulse">
+                                In Progress
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Current Stage Message */}
+                {library.progress_message && (
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <span className="text-blue-600 text-lg">ℹ️</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-blue-900 mb-1">Current Status</p>
+                        <p className="text-sm text-blue-700">{library.progress_message}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-xs text-center text-muted-foreground mt-6">
+                  This page updates automatically every 2 seconds. You can close this tab and return later.
+                </p>
+              </div>
+            );
+          })()}
 
           {library.status === 'failed' && (
             <div className="text-center py-12">

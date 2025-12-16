@@ -15,7 +15,7 @@
  */
 
 import { notFound } from 'next/navigation';
-import pool from '@/lib/db';
+import pool, { getConceptGraph } from '@/lib/db';
 import LibraryStatusPage from './LibraryStatusPage';
 import LibraryInteractivePage from './LibraryInteractivePage';
 
@@ -42,8 +42,8 @@ async function getLibraryData(username: string, slug: string) {
 
   // Get concept graph data if library is ready
   let conceptGraphData = null;
-  if (library.status === 'ready' && library.concept_graph_data) {
-    conceptGraphData = library.concept_graph_data;
+  if (library.status === 'ready') {
+    conceptGraphData = await getConceptGraph(library.id);
   }
 
   return {
