@@ -66,6 +66,27 @@ export async function getAllLibraries() {
   return result.rows;
 }
 
+// Helper: Get user by GitHub username
+export async function getUserByUsername(username: string) {
+  const result = await pool.query(
+    'SELECT * FROM users WHERE github_login = $1',
+    [username]
+  );
+  return result.rows[0] || null;
+}
+
+// Helper: Get all public libraries for a user
+export async function getLibrariesByUsername(username: string) {
+  const result = await pool.query(
+    `SELECT l.* FROM libraries l
+     JOIN users u ON l.user_id = u.id
+     WHERE u.github_login = $1 AND l.is_public = true
+     ORDER BY l.created_at DESC`,
+    [username]
+  );
+  return result.rows;
+}
+
 // Helper: Get concept graph for a library
 export async function getConceptGraph(libraryId: string) {
   const result = await pool.query(

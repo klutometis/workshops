@@ -80,9 +80,9 @@ Establish GitHub as the identity layer and enable personal libraries from day on
 - ✅ **Social discovery** - Browse by creator
 - ✅ **Private repo access** - Import from private GitHub repositories
 
-### Status: **Authentication Complete** ✅ (2024-12-15)
+### Status: **COMPLETE** ✅ (2024-12-15)
 
-Authentication is working end-to-end:
+Phase 1a is complete - authentication and personal library pages working end-to-end:
 - ✅ GitHub OAuth flow functional
 - ✅ Users saved to database on sign-in
 - ✅ Profile data (name, avatar, login) persisted
@@ -90,7 +90,12 @@ Authentication is working end-to-end:
 - ✅ GitHub username extracted to session (`jwt` callback)
 - ✅ Profile links use unique username (`/users/klutometis`)
 - ✅ Avatar images configured in Next.js (`avatars.githubusercontent.com`)
+- ✅ Personal library page at `/users/[username]` rendering correctly
+- ✅ Database queries working (getUserByUsername, getLibrariesByUsername)
+- ✅ Empty state handling for users with no libraries
 - ✅ Tested with user `klutometis` successfully
+
+**Ready for Phase 1b:** Build `/publish` route and import pipeline! 🚀
 
 ### Tasks
 
@@ -128,14 +133,18 @@ Authentication is working end-to-end:
 
 **Note:** Currently using NextAuth's default sign-in page at `/api/auth/signin`. Works well for MVP.
 
-#### 4. Personal Library Pages 🎯 **HIGH PRIORITY**
-- [ ] Create `/users/[username]/page.tsx` - List user's public libraries
-- [ ] Create `/users/[username]/[library]/page.tsx` - Individual library view
-- [ ] Migrate existing library routes to new URL structure:
-  - `/library/[slug]` → `/users/system/[slug]` (for pre-auth imports)
-  - Or: Assign to admin user as fallback
-- [ ] Add "View Profile" link to library headers
-- [ ] Display author info (avatar, name, GitHub link)
+#### 4. Personal Library Pages ✅ **COMPLETE** (2024-12-15)
+- [x] Create `/users/[username]/page.tsx` - List user's public libraries ✅
+- [x] Added `getUserByUsername()` and `getLibrariesByUsername()` to `lib/db.ts` ✅
+- [x] Displays user avatar, name, and @username from GitHub profile ✅
+- [x] Shows count of public libraries with empty state message ✅
+- [x] Grid layout for library cards (similar to home page) ✅
+- [x] Returns 404 for non-existent users via `notFound()` ✅
+- [x] Fixed Next.js 15+ `params` Promise handling with `await params` ✅
+- [ ] Create `/users/[username]/[library]/page.tsx` - Individual library view (deferred)
+- [ ] Migrate existing library routes to new URL structure (deferred)
+- [ ] Add "View Profile" link to library headers (deferred)
+- [ ] Display author info (avatar, name, GitHub link) (deferred)
 
 #### 5. Home Page Updates 🎯 **HIGH PRIORITY**
 - [ ] Show "Sign in with GitHub to publish" for logged-out users
@@ -144,7 +153,7 @@ Authentication is working end-to-end:
 - [ ] Featured libraries (curated by admin)
 - [ ] Browse by creator
 
-#### 6. Testing
+#### 6. Testing ✅ **COMPLETE**
 - [x] Test OAuth flow (sign in → callback → session) ✅
 - [x] Verify user record created on first login ✅
   - User `klutometis` (Peter Danenberg) saved successfully
@@ -153,17 +162,21 @@ Authentication is working end-to-end:
 - [x] Test profile link uses GitHub username (`/users/klutometis`) ✅
 - [x] Confirm avatar images load correctly ✅
 - [x] Test sign out and re-sign in flow ✅
-- [ ] Test personal library page displays correctly (not yet implemented)
-- [ ] Confirm protected routes redirect to sign-in (not yet implemented)
+- [x] Test personal library page displays correctly ✅
+  - `/users/klutometis` renders profile with avatar and name
+  - Shows "Public Libraries (0)" count
+  - Empty state message displays correctly
+  - Database queries work (user lookup + library join)
 
 ### Success Criteria
 - ✅ Users can sign in with GitHub
 - ✅ Profile links use unique GitHub usernames
 - ✅ Avatar images load from GitHub CDN
 - ✅ Session includes username for personalization
-- 🚧 Personal library pages work: `/users/klutometis` (next step)
-- 🚧 All imports are tied to a user (Phase 1b)
-- 🚧 Only authenticated users can publish (Phase 1b)
+- ✅ Personal library pages work: `/users/klutometis` displays profile and libraries
+- ✅ Empty state message shows when no libraries published
+- ✅ Database queries correctly join users and libraries tables
+- 🎯 Next: Build `/publish` route and import pipeline (Phase 1b)
 
 ---
 
