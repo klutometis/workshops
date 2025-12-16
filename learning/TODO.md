@@ -216,6 +216,23 @@ Phase 1a is complete - authentication, personal library pages, AND interactive l
 ### Goal
 Build the `/publish` route and backend pipeline to process content from multiple sources.
 
+### Status: **Priority 1 COMPLETE** ✅ (2024-12-15)
+
+Publishing infrastructure is fully functional! Users can paste URLs, libraries are created instantly with UUID-based status tracking, and polling keeps the UI updated. Only remaining task is wiring up the Cloud Run Job to actually process content.
+
+**What Works:**
+- ✅ `/publish` page with authentication gate
+- ✅ URL auto-detection (YouTube, GitHub notebooks, markdown)
+- ✅ Fast library creation (~1 second)
+- ✅ Immediate redirect to status page
+- ✅ Real-time polling for status updates
+- ✅ All status transitions tested (pending → processing → ready)
+
+**What's Next:**
+- 🎯 **Priority 1:** Create `scripts/process-library.ts` wrapper that routes to YouTube/markdown/notebook processors
+- 🎯 **Priority 2:** Trigger Cloud Run Job from `/api/publish` route
+- 📝 Add "Private GitHub repo" checkbox (optional)
+
 ### Architecture
 **GitHub-authenticated publishing:** All imports require sign-in and create libraries owned by that user.
 
@@ -226,37 +243,124 @@ Go to /publish
     ↓
 Paste URL: GitHub .ipynb, YouTube, .md, etc.
     ↓
-Pipeline processes content
+Pipeline processes content (Cloud Run Job - TODO)
     ↓
 Published to /users/{username}/{slug}
 ```
 
-### Tasks
+### Completed Tasks
 
-#### 1. Publish Route & UI ⚡ **IMMEDIATE** (requires auth from Phase 1a)
-- [ ] Create `/publish/page.tsx` - Main import interface
-- [ ] Require authentication (redirect if not logged in)
-- [ ] Input: URL field (auto-detect source type)
-- [ ] Support types:
-  - GitHub: `github.com/{owner}/{repo}/blob/{branch}/{path}.ipynb`
+#### 1. Publish Route & UI ✅ **COMPLETE** (2024-12-15)
+- [x] Create `/publish/page.tsx` - Main import interface ✅
+- [x] Require authentication (redirect if not logged in) ✅
+- [x] Input: URL field (auto-detect source type) ✅
+- [x] Support types: ✅
   - YouTube: `youtube.com/watch?v={id}`
+  - GitHub notebooks: `github.com/{owner}/{repo}/blob/{branch}/{path}.ipynb`
+  - GitHub markdown: `github.com/{owner}/{repo}/blob/{branch}/{path}.md`
   - Public URLs: `example.com/notebook.ipynb`
-- [ ] Show source type detection
-- [ ] Add "Private GitHub repo" checkbox (uses OAuth token)
-- [ ] Display processing progress UI
-- [ ] Redirect to `/users/{username}/{slug}` on success
+- [x] Show source type detection ✅
+- [x] Redirect to `/users/{username}/{slug}` immediately ✅
+- [ ] Add "Private GitHub repo" checkbox (uses OAuth token) - **deferred, not needed for MVP**
 
-#### 2. Publish API Endpoint ⚡ **IMMEDIATE**
-- [ ] Create `/api/publish/route.ts`
-- [ ] Extract `user_id` from session (NextAuth)
-- [ ] Parse and validate source URL
-- [ ] Route to appropriate processor:
-  - GitHub → `processJupyterNotebook()` or `processMarkdownFile()`
-  - YouTube → `processYouTubeVideo()`
-  - Generic URL → download and detect type
-- [ ] Generate unique slug (title-based, handle collisions)
-- [ ] Store library with `user_id` foreign key
-- [ ] Return: `{ libraryId, slug, url: '/users/{username}/{slug}' }`
+#### 2. Async Processing Architecture ✅ **COMPLETE** (2024-12-15)
+
+**Decision:** Long-running imports (10-30 minutes) require async processing pattern.
+
+**Pattern:**
+1. **`POST /api/publish`** - Fast, synchronous (~1 second): ✅
+   - Create library record with `status: 'pending'`
+   - Trigger Cloud Run Job (one API call) - **TODO**
+   - Return library ID immediately
+   - Frontend redirects to status page
+
+2. **Cloud Run Job** - Long-running, independent: 🚧 **TODO**
+   - Does heavy processing (download, transcribe, extract, embed)
+   - Updates database: `pending` → `processing` → `ready`/`failed`
+   - Can write `progress_message` for UI feedback
+   - Runs to completion regardless of client connection
+
+3. **`LibraryStatusPage`** - Client polls for updates: ✅
+   - Calls `GET /api/libraries/[id]` every 5 seconds
+   - Shows current status and progress
+   - Stops polling when `ready` or `failed`
+   - Automatically shows interactive library when ready
+
+**Implementation Tasks:**
+- [x] Create `/api/publish/route.ts`: ✅
+  - Extract `user_id` from session (NextAuth) ✅
+  - Parse and validate source URL ✅
+  - Generate unique slug (title-based, handle collisions) ✅
+  - Create library record with `status: 'pending'`, `user_id` foreign key ✅
+  - Return: `{ libraryId, slug, url: '/users/{username}/{slug}' }` ✅
+  - **TODO:** Trigger Cloud Run Job with library ID and source URL
+
+- [x] Create `/api/libraries/[id]/route.ts`: ✅
+  - Polling endpoint for library status updates ✅
+  - Returns library metadata, status, progress_message, error_message ✅
+  - Validates UUID format before querying database ✅
+  - Fixed bug: Was using `parseInt(id, 10)` which converted UUIDs to integers ✅
+
+- [x] Add polling to `LibraryStatusPage.tsx`: ✅
+  - `useEffect` with `setInterval` (every 5 seconds) ✅
+  - Stop polling when status is `ready` or `failed` ✅
+  - Refresh library data from API ✅
+  - Shows spinner and "Checking for updates..." indicator ✅
+  - Displays progress_message in blue info box ✅
+
+- [x] Add `progress_message` column to `libraries` table: ✅
+  - Created migration 003 ✅
+  - Updated schema.sql ✅
+  - Applied and tested successfully ✅
+
+- [ ] Create Cloud Run Job for processing: 🚧 **NEXT PRIORITY**
+  - Create `scripts/process-library.ts` wrapper
+  - Accepts library ID and source URL as args
+  - Routes to appropriate processor (YouTube, notebook, markdown)
+  - Updates database status throughout process
+  - Writes `progress_message` for UI feedback
+  - Sets `error_message` on failure
+  - Deploy as Cloud Run Job
+  - Trigger from `/api/publish` route
+
+#### Testing ✅ **COMPLETE** (2024-12-15)
+- [x] Published YouTube video: "Getting Started with Python in Less Than 10 Minutes" ✅
+- [x] Library created with UUID: `88b2316d-16e1-491f-bc2c-8613b8839b77` ✅
+- [x] Redirected to `/users/klutometis/youtube-video` immediately ✅
+- [x] Status page showed "Pending" with polling indicator ✅
+- [x] Manually updated database to test status transitions: ✅
+  - `pending` → Green "⏳ Pending" badge, polling active
+  - `processing` → Blue "⚙️ Processing" badge, progress message shown, polling continues
+  - `ready` → Green "✅ Ready" badge, polling stopped, processed timestamp displayed
+- [x] Polling stopped automatically when status changed to `ready` ✅
+- [x] No more UUID parsing errors in API logs ✅
+- [x] Progress messages displayed correctly in UI ✅
+
+### Next Steps
+
+**🎯 Immediate Priority:** Wire up processing!
+
+1. **Create `scripts/process-library.ts`** (30 minutes):
+   ```typescript
+   // Accepts library ID from command line
+   // Fetches library from database
+   // Routes to appropriate processor based on source_type
+   // Updates status: pending → processing → ready/failed
+   // Writes progress_message throughout
+   ```
+
+2. **Local testing** (15 minutes):
+   - Trigger manually: `npx tsx scripts/process-library.ts <library-id>`
+   - Watch status page update in real-time
+   - Verify concept graph appears when ready
+
+3. **Deploy as Cloud Run Job** (1 hour):
+   - Create Dockerfile
+   - Deploy to Cloud Run Jobs
+   - Trigger from `/api/publish` route via Cloud Run Jobs API
+   - Test end-to-end: publish → process → ready
+
+**After that:** Phases 2-5 (Python scratchpad, content management, production)
 
 #### 3. YouTube Video Processing ✅ **COMPLETE** (2024-12-12)
 - [x] **End-to-end pipeline working**
@@ -426,9 +530,14 @@ The notebook type is purely an **import variant**, not a distinct content type.
 
 #### 7. Testing (End-to-End with Auth)
 - [ ] Sign in as test user
-- [ ] Import public Jupyter notebook from GitHub → appears at `/users/testuser/notebook-name`
-- [ ] Import YouTube video → appears at `/users/testuser/video-title`
-- [ ] Import markdown file → appears at `/users/testuser/doc-title`
+- [ ] Import public Jupyter notebook from GitHub:
+  - Redirected to status page immediately
+  - Status updates via polling (`pending` → `processing` → `ready`)
+  - Appears at `/users/testuser/notebook-name`
+  - Interactive library loads when ready
+- [ ] Import YouTube video → same flow
+- [ ] Import markdown file → same flow
+- [ ] Test client disconnect during processing (close tab, reopen - should still work)
 - [ ] Verify all appear in personal library list
 - [ ] Confirm other users can view (if public)
 - [ ] Test private GitHub repo import (requires OAuth token)

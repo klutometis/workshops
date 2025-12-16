@@ -138,20 +138,20 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // 7. TODO: Trigger processing pipeline asynchronously
-    // For now, just return the library
-    // Next step: Call processing scripts based on type
+    console.log(`📚 Library created: ID=${library.id}, slug=${slug}, type=${detected.type}`);
+    console.log(`🔗 URL: /users/${username}/${slug}`);
 
+    // 7. TODO: Trigger Cloud Run Job here
+    // For now, this is a stub - processing will be implemented next
+    console.log(`⚠️  Processing not yet implemented - library will remain in 'pending' status`);
+
+    // 8. Return success with redirect URL
     return NextResponse.json({
       success: true,
-      library: {
-        id: library.id,
-        slug: library.slug,
-        title: library.title,
-        type: library.type,
-        status: library.status,
-        url: `/users/${username}/${slug}`
-      }
+      libraryId: library.id,
+      slug: library.slug,
+      url: `/users/${username}/${slug}`,
+      message: 'Library created successfully. Processing will begin shortly.',
     }, { status: 201 });
 
   } catch (error) {

@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS libraries (
   
   -- Processing status
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'ready', 'failed')),
+  progress_message TEXT,
   error_message TEXT,
   
   -- Timestamps

@@ -8,6 +8,78 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2024-12-15 - Library Publishing Infrastructure Complete
+
+**Progress:** Built complete publishing flow with async processing architecture. Users can now paste URLs at `/publish`, libraries are created immediately with status tracking, and polling keeps the UI updated during processing.
+
+#### Added
+- **`/api/libraries/[id]` route** - Polling endpoint for library status updates
+  - Returns library metadata, status, progress_message, error_message
+  - Validates UUID format before querying database
+  - Enables real-time status updates without page refresh
+- **`/publish` page** - Publishing interface with URL input
+  - Auto-detects source type (YouTube, GitHub notebook, markdown)
+  - Shows detected source info before publishing
+  - Requires authentication (redirects to sign-in if not logged in)
+  - Redirects to library status page immediately after creation
+- **`/api/publish` route** - Fast synchronous library creation
+  - Validates and parses source URLs
+  - Creates library record with `status: 'pending'`
+  - Generates unique slug with collision handling (title, title-2, etc.)
+  - Returns library ID and redirect URL to status page
+  - TODO: Trigger Cloud Run Job for actual processing
+- **Database schema update** - Added `progress_message` column
+  - Stores human-readable progress updates during processing
+  - Migration 003: `ALTER TABLE libraries ADD COLUMN progress_message TEXT`
+  - Applied and tested successfully
+- **Enhanced `LibraryStatusPage.tsx`** - Client-side polling implementation
+  - Polls `/api/libraries/[id]` every 5 seconds when status is `pending` or `processing`
+  - Stops polling automatically when status reaches `ready` or `failed`
+  - Shows spinner and "Checking for updates..." indicator during polling
+  - Displays progress_message in blue info box when present
+  - Auto-refreshes to interactive library when processing completes
+
+#### Fixed
+- **UUID parsing bug** (`/api/libraries/[id]/route.ts`):
+  - Was calling `parseInt(id, 10)` which converted UUIDs to integers
+  - "88b2316d-16e1-491f-bc2c-8613b8839b77" became "88" causing database errors
+  - Now validates UUID format with regex and passes string directly
+  - Fixed PostgreSQL error: "invalid input syntax for type uuid"
+
+#### Changed
+- **Async processing architecture established**:
+  - Phase 1: `/api/publish` creates library record (~1 second, synchronous)
+  - Phase 2: Cloud Run Job processes content (10-30 minutes, async) - TODO
+  - Phase 3: Status page polls for updates and auto-refreshes when ready
+  - Decouples library creation from processing (no more timeouts)
+
+#### Testing
+- ✅ Published YouTube video: "Getting Started with Python in Less Than 10 Minutes"
+- ✅ Library created with UUID: `88b2316d-16e1-491f-bc2c-8613b8839b77`
+- ✅ Redirected to `/users/klutometis/youtube-video` immediately
+- ✅ Status page showed "Pending" with polling indicator
+- ✅ Manually updated database to test status transitions:
+  - `pending` → Green "⏳ Pending" badge, polling active
+  - `processing` → Blue "⚙️ Processing" badge, progress message shown, polling continues
+  - `ready` → Green "✅ Ready" badge, polling stopped, processed timestamp displayed
+- ✅ Polling stopped automatically when status changed to `ready`
+- ✅ No more UUID parsing errors in API logs
+- ✅ Progress messages displayed correctly in UI
+
+#### Architecture Benefits
+- ✅ **Fast publishing** - Libraries created instantly, no waiting for processing
+- ✅ **Resilient** - Processing happens independently, survives client disconnects
+- ✅ **Real-time updates** - Polling keeps users informed without manual refresh
+- ✅ **Clean separation** - Library creation (sync) vs. processing (async)
+- ✅ **Scalable** - Ready for Cloud Run Job integration
+
+#### Status
+**Phase 1b Priority 1 Complete** ✅ - Publishing infrastructure and status polling working end-to-end!
+
+🎯 **Next:** Wire up processing script (`scripts/process-library.ts`) that routes to YouTube/markdown/notebook processors and updates database status.
+
+---
+
 ### 2024-12-15 - Interactive Library Refactoring Complete
 
 **Progress:** Eliminated code duplication between demo and user libraries by creating a reusable `InteractiveLibrary` component. User-owned libraries now support full interactive learning when ready.

@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,7 +27,44 @@ type LibraryStatusPageProps = {
   username: string;
 };
 
-export default function LibraryStatusPage({ library, username }: LibraryStatusPageProps) {
+export default function LibraryStatusPage({ library: initialLibrary, username }: LibraryStatusPageProps) {
+  const [library, setLibrary] = useState(initialLibrary);
+  const [isPolling, setIsPolling] = useState(true);
+  const router = useRouter();
+
+  // Poll for status updates
+  useEffect(() => {
+    // Don't poll if already in a terminal state
+    if (library.status === 'ready' || library.status === 'failed') {
+      setIsPolling(false);
+      return;
+    }
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/libraries/${library.id}`);
+        if (response.ok) {
+          const updatedLibrary = await response.json();
+          setLibrary(updatedLibrary);
+
+          // If processing is complete, stop polling and refresh page
+          if (updatedLibrary.status === 'ready' || updatedLibrary.status === 'failed') {
+            setIsPolling(false);
+            clearInterval(pollInterval);
+            
+            // Refresh the page to load the interactive library
+            if (updatedLibrary.status === 'ready') {
+              router.refresh();
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error polling library status:', error);
+      }
+    }, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [library.id, library.status, router]);
   // Status badge configuration
   const statusConfig = {
     pending: {
@@ -80,6 +121,11 @@ export default function LibraryStatusPage({ library, username }: LibraryStatusPa
             <span className="text-sm text-muted-foreground">
               {typeInfo.emoji} {typeInfo.label}
             </span>
+            {isPolling && (
+              <span className="text-xs text-muted-foreground animate-pulse">
+                • Checking for updates...
+              </span>
+            )}
           </div>
 
           {/* Title */}
@@ -127,6 +173,9 @@ export default function LibraryStatusPage({ library, username }: LibraryStatusPa
               <p className="text-muted-foreground text-sm">
                 This library is queued for processing. Concepts will be extracted shortly.
               </p>
+              <p className="text-xs text-muted-foreground mt-4">
+                This page will update automatically. You can close this tab and return later.
+              </p>
             </div>
           )}
 
@@ -135,7 +184,15 @@ export default function LibraryStatusPage({ library, username }: LibraryStatusPa
               <div className="text-4xl mb-4 inline-block animate-spin">⚙️</div>
               <p className="text-lg font-semibold mb-2">Processing Content</p>
               <p className="text-muted-foreground text-sm">
-                Extracting concepts and generating embeddings. This may take a few minutes.
+                Extracting concepts and generating embeddings. This may take 10-30 minutes.
+              </p>
+              {library.progress_message && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-700">{library.progress_message}</p>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-4">
+                This page will update automatically. You can close this tab and return later.
               </p>
             </div>
           )}
@@ -144,8 +201,11 @@ export default function LibraryStatusPage({ library, username }: LibraryStatusPa
             <div className="text-center py-12">
               <p className="text-4xl mb-4">❌</p>
               <p className="text-lg font-semibold mb-2">Processing Failed</p>
+              <p className="text-muted-foreground text-sm mb-4">
+                There was an error processing this library.
+              </p>
               {library.error_message && (
-                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-left">
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-left max-w-2xl mx-auto">
                   <p className="text-sm font-mono text-red-700">{library.error_message}</p>
                 </div>
               )}
