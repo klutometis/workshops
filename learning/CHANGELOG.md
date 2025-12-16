@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 2024-12-15 - GitHub Authentication System Complete
 
-**Progress:** Implemented GitHub OAuth authentication with NextAuth v4 and database-backed user persistence.
+**Progress:** Implemented GitHub OAuth authentication with NextAuth v4 and database-backed user persistence. Full authentication UI with profile links using unique GitHub usernames.
 
 #### Added
 - **GitHub OAuth provider** configured with NextAuth v4
@@ -23,6 +23,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `GET /api/auth/signin` - Built-in NextAuth sign-in page
   - `POST /api/auth/signin/github` - GitHub OAuth initiation
   - `GET /api/auth/callback/github` - OAuth callback handler
+- **Session username extraction** (`lib/auth.ts`):
+  - Added `jwt` callback to extract GitHub `login` from OAuth profile
+  - Added username to session via `session` callback
+  - Profile links now use unique GitHub username instead of display name
+- **Authentication UI components** (`components/AuthButton.tsx`):
+  - Sign in button with GitHub branding
+  - User menu with avatar, username, and sign out
+  - Profile link to `/users/{username}` (e.g., `/users/klutometis`)
+  - Integrated into app layout header
+- **Next.js image configuration** (`next.config.ts`):
+  - Whitelisted `avatars.githubusercontent.com` for GitHub avatar images
+  - Configured `remotePatterns` for secure external image loading
 
 #### Fixed
 - **NextAuth v4 vs v5 API confusion**:
@@ -30,18 +42,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Corrected to v4 API (`authOptions` export + `NextAuth(authOptions)`)
 - **Custom sign-in page 404**: Removed non-existent `/auth/signin` reference
 - **OAuth state cookie errors**: Fixed by using default NextAuth sign-in page
+- **GitHub avatar loading**: Fixed "hostname not configured" error by adding to Next.js image config
+- **Profile link uniqueness**: Changed from display name to GitHub username for stable URLs
 
 #### Testing
 - ✅ Full OAuth flow working (GitHub → callback → session)
 - ✅ User `klutometis` authenticated and saved to database
 - ✅ Database record verified: `github_login`, `github_name`, `created_at` all correct
 - ✅ No more OAuth errors or state cookie issues
+- ✅ Username extraction to session (requires re-login after jwt callback added)
+- ✅ Profile link correctly uses `/users/klutometis` (not `/users/Peter%20Danenberg`)
+- ✅ Avatar images load from GitHub CDN without errors
+- ✅ Sign out and re-sign in flow works correctly
+
+#### Architecture Notes
+- **GitHub username as URL identifier**: Uses unique `login` field instead of mutable display name
+- **JWT callback timing**: Username extraction only runs on sign-in, not every request
+- **Session token updates**: Existing sessions need re-login to get new fields
+- **Image security**: Next.js requires explicit domain whitelisting for external images
 
 #### Status
-**Phase 1a (OAuth):** ✅ Complete
-- ✅ GitHub authentication working
+**Phase 1a (Authentication):** ✅ Complete
+- ✅ GitHub authentication working end-to-end
 - ✅ User persistence in database
-- 🚧 Next: Personal library pages at `/users/{username}/{library}`
+- ✅ Profile UI with avatars and usernames
+- ✅ Unique, stable profile URLs
+- 🎯 Next: Personal library pages at `/users/{username}` and `/users/{username}/{library}`
 
 ---
 

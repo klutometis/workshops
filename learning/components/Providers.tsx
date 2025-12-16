@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-import type { NextConfig } from 'next';
+'use client'
 
-const nextConfig: NextConfig = {
-  output: 'standalone',
-  typescript: {
-    // Skip type checking during Docker builds (check in CI/CD instead)
-    ignoreBuildErrors: process.env.SKIP_TYPE_CHECK === '1',
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'avatars.githubusercontent.com',
-      },
-    ],
-  },
-};
+import { SessionProvider } from "next-auth/react"
 
-export default nextConfig;
+export function Providers({ children }: { children: React.ReactNode }) {
+  return <SessionProvider>{children}</SessionProvider>
+}

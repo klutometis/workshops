@@ -48,10 +48,21 @@ export const authOptions: NextAuthOptions = {
       }
       return true
     },
+    async jwt({ token, account, profile }) {
+      // Add GitHub username to token when user first signs in
+      if (account?.provider === "github" && profile) {
+        const githubProfile = profile as any
+        token.username = githubProfile.login
+      }
+      return token
+    },
     async session({ session, token }) {
-      // Add user ID to session
+      // Add user ID and username to session
       if (token.sub && session.user) {
         session.user.id = token.sub
+      }
+      if (token.username && session.user) {
+        session.user.username = token.username as string
       }
       return session
     },

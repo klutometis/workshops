@@ -80,13 +80,16 @@ Establish GitHub as the identity layer and enable personal libraries from day on
 - ✅ **Social discovery** - Browse by creator
 - ✅ **Private repo access** - Import from private GitHub repositories
 
-### Status: **OAuth Complete** ✅ (2024-12-15)
+### Status: **Authentication Complete** ✅ (2024-12-15)
 
 Authentication is working end-to-end:
 - ✅ GitHub OAuth flow functional
 - ✅ Users saved to database on sign-in
 - ✅ Profile data (name, avatar, login) persisted
 - ✅ `last_login_at` updates on subsequent logins
+- ✅ GitHub username extracted to session (`jwt` callback)
+- ✅ Profile links use unique username (`/users/klutometis`)
+- ✅ Avatar images configured in Next.js (`avatars.githubusercontent.com`)
 - ✅ Tested with user `klutometis` successfully
 
 ### Tasks
@@ -97,6 +100,9 @@ Authentication is working end-to-end:
 - [x] Register OAuth app at github.com/settings/developers
 - [x] Store credentials in environment (loaded via `scripts/dev.sh`)
 - [x] Create NextAuth API routes (`app/api/auth/[...nextauth]/route.ts`)
+- [x] Add `jwt` callback to extract GitHub username from profile
+- [x] Add `session` callback to include username in session
+- [x] Configure Next.js image domains for GitHub avatars
 - [x] Test OAuth flow and verify database persistence
 
 #### 2. Database Schema Updates ✅ **COMPLETE** (Already existed)
@@ -110,15 +116,17 @@ Authentication is working end-to-end:
   ```
 - [ ] Add index: `CREATE INDEX idx_libraries_user_id ON libraries(user_id);`
 
-#### 3. Authentication UI Components 🎯 **NEXT PRIORITY**
-- [x] Create `app/api/auth/[...nextauth]/route.ts` (NextAuth handler) ✅
-- [ ] Add `useAuth()` hook wrapper
-- [ ] Create `<SignInButton>` component: "🚀 Sign in with GitHub"
-- [ ] Create `<UserMenu>` component (avatar, profile link, sign out)
-- [ ] Add auth UI to app layout header
-- [ ] Protected route wrapper for `/publish`
+#### 3. Authentication UI Components ✅ **COMPLETE** (2024-12-15)
+- [x] Create `app/api/auth/[...nextauth]/route.ts` (NextAuth handler)
+- [x] Create `AuthButton` component with sign-in/user menu
+- [x] Display GitHub avatar with proper image configuration
+- [x] Profile link to `/users/{username}` (unique GitHub login)
+- [x] Sign out functionality
+- [x] Add auth UI to app layout header
+- [x] Integrate `SessionProvider` in layout
+- [ ] Protected route wrapper for `/publish` (deferred to Phase 1b)
 
-**Note:** Currently using NextAuth's default sign-in page at `/api/auth/signin`. Custom UI components are next step.
+**Note:** Currently using NextAuth's default sign-in page at `/api/auth/signin`. Works well for MVP.
 
 #### 4. Personal Library Pages 🎯 **HIGH PRIORITY**
 - [ ] Create `/users/[username]/page.tsx` - List user's public libraries
@@ -141,15 +149,21 @@ Authentication is working end-to-end:
 - [x] Verify user record created on first login ✅
   - User `klutometis` (Peter Danenberg) saved successfully
   - Timestamp: 2025-12-15 23:25:43.369512+00
+- [x] Verify username extraction to session (requires re-login after jwt callback added) ✅
+- [x] Test profile link uses GitHub username (`/users/klutometis`) ✅
+- [x] Confirm avatar images load correctly ✅
+- [x] Test sign out and re-sign in flow ✅
 - [ ] Test personal library page displays correctly (not yet implemented)
 - [ ] Confirm protected routes redirect to sign-in (not yet implemented)
-- [ ] Test sign out and session expiry
 
 ### Success Criteria
 - ✅ Users can sign in with GitHub
-- ✅ Personal library pages work: `/users/pnorvig`
-- ✅ All imports are tied to a user
-- ✅ Only authenticated users can publish
+- ✅ Profile links use unique GitHub usernames
+- ✅ Avatar images load from GitHub CDN
+- ✅ Session includes username for personalization
+- 🚧 Personal library pages work: `/users/klutometis` (next step)
+- 🚧 All imports are tied to a user (Phase 1b)
+- 🚧 Only authenticated users can publish (Phase 1b)
 
 ---
 
