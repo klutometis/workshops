@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 type LibraryStatusPageProps = {
   library: any;
@@ -51,6 +52,7 @@ const PROCESSING_STAGES = {
   notebook: [
     { key: 'download', label: 'Downloading notebook', percent: 10 },
     { key: 'convert', label: 'Converting to markdown', percent: 20 },
+    { key: 'save', label: 'Saving markdown files', percent: 25 },
     { key: 'extract', label: 'Extracting concepts', percent: 35 },
     { key: 'chunk', label: 'Chunking content', percent: 50 },
     { key: 'enrich', label: 'Enriching concepts', percent: 65 },
@@ -87,6 +89,7 @@ function parseProgress(message: string | null, contentType: string): { percent: 
 export default function LibraryStatusPage({ library: initialLibrary, username }: LibraryStatusPageProps) {
   const [library, setLibrary] = useState(initialLibrary);
   const [isPolling, setIsPolling] = useState(true);
+  const [showLogs, setShowLogs] = useState(false);
   const router = useRouter();
 
   // Poll for status updates
@@ -156,6 +159,17 @@ export default function LibraryStatusPage({ library: initialLibrary, username }:
   };
 
   const typeInfo = typeConfig[library.type as keyof typeof typeConfig];
+
+  // Parse processing logs
+  const processingLogs = library.processing_logs || [];
+  const hasLogs = processingLogs.length > 0;
+  
+  // Auto-expand logs if failed
+  useEffect(() => {
+    if (library.status === 'failed' && hasLogs) {
+      setShowLogs(true);
+    }
+  }, [library.status, hasLogs]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -370,6 +384,80 @@ export default function LibraryStatusPage({ library: initialLibrary, username }:
           )}
         </CardContent>
       </Card>
+
+      {/* Processing Logs */}
+      {hasLogs && (
+        <Card className="mt-6">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg">📋 Processing Logs</CardTitle>
+                <CardDescription>
+                  {processingLogs.length} log {processingLogs.length === 1 ? 'entry' : 'entries'}
+                  {library.status === 'failed' && ' • Review logs to diagnose failure'}
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowLogs(!showLogs)}
+              >
+                {showLogs ? 'Collapse ▲' : 'Expand ▼'}
+              </Button>
+            </div>
+          </CardHeader>
+          
+          {showLogs && (
+            <CardContent>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-96 overflow-y-auto font-mono text-xs">
+                {processingLogs.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">No logs yet</p>
+                ) : (
+                  <div className="space-y-2">
+                    {processingLogs.map((log: any, index: number) => {
+                      const timestamp = new Date(log.ts).toLocaleTimeString();
+                      const levelConfig = {
+                        info: { icon: 'ℹ️', color: 'text-blue-700', bg: 'bg-blue-50' },
+                        error: { icon: '❌', color: 'text-red-700', bg: 'bg-red-50' },
+                        debug: { icon: '🔍', color: 'text-gray-700', bg: 'bg-gray-50' },
+                      };
+                      const config = levelConfig[log.level as keyof typeof levelConfig] || levelConfig.info;
+                      
+                      return (
+                        <div 
+                          key={index} 
+                          className={`p-2 rounded ${config.bg} border border-gray-200`}
+                        >
+                          <div className="flex items-start gap-2">
+                            <span className="flex-shrink-0">{config.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-gray-500 text-[10px]">{timestamp}</span>
+                                <span className={`font-semibold ${config.color} text-[10px] uppercase`}>
+                                  [{log.stage}]
+                                </span>
+                              </div>
+                              <pre className={`${config.color} whitespace-pre-wrap break-words text-xs`}>
+                                {log.msg}
+                              </pre>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              
+              {library.status === 'processing' && (
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Logs update in real-time as processing continues
+                </p>
+              )}
+            </CardContent>
+          )}
+        </Card>
+      )}
 
       {/* Metadata */}
       <div className="mt-4 text-xs text-muted-foreground">

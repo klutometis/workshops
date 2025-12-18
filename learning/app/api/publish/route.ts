@@ -22,6 +22,7 @@ import pool from '@/lib/db';
 import { execSync } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as crypto from 'crypto';
 
 // URL type detection
 function detectSourceType(url: string): { type: 'youtube' | 'notebook' | 'markdown'; videoId?: string } | null {
@@ -176,55 +177,58 @@ export async function POST(request: NextRequest) {
       title = customTitle || extractTitleFromUrl(url, detected.type);
     }
     
-    let slug = generateSlug(title);
-    
-    // Ensure slug uniqueness for this user
-    let counter = 1;
-    while (await isSlugTaken(slug, user.id)) {
-      slug = `${generateSlug(title)}-${counter}`;
-      counter++;
-    }
-
     // 6. Check if library already exists (for re-import)
+    // URLs are the true unique key - same URL = same content = re-import
     let library;
     let isReimport = false;
+    let slug = generateSlug(title);
     
-    if (detected.videoId) {
-      // Check if this video is already imported by this user
-      const existingResult = await pool.query(
-        'SELECT * FROM libraries WHERE video_id = $1 AND user_id = $2',
-        [detected.videoId, user.id]
-      );
+    const existingResult = await pool.query(
+      'SELECT * FROM libraries WHERE source_url = $1 AND user_id = $2',
+      [url, user.id]
+    );
+    
+    if (existingResult.rows.length > 0) {
+      // Case 1: URL exists → Re-import (keep existing slug)
+      library = existingResult.rows[0];
+      isReimport = true;
+      slug = library.slug;
+      console.log(`🔄 Re-importing existing library: ${library.id} (slug: ${slug})`);
+    } else {
+      // New URL - check if slug is available
+      const slugTaken = await isSlugTaken(slug, user.id);
       
-      if (existingResult.rows.length > 0) {
-        // Re-import: Update existing library
-        library = existingResult.rows[0];
-        isReimport = true;
+      if (slugTaken) {
+        // Case 3: Slug collision → Add deterministic hash of URL (like git commits)
+        const urlHash = crypto.createHash('sha256')
+          .update(url)
+          .digest('hex')
+          .substring(0, 8); // First 8 chars
         
-        await pool.query(
-          `UPDATE libraries 
-           SET title = $1, 
-               slug = $2, 
-               source_url = $3,
-               is_public = $4,
-               status = 'pending',
-               progress_message = NULL,
-               error_message = NULL,
-               metadata = jsonb_set(
-                 COALESCE(metadata, '{}'::jsonb),
-                 '{reimported_at}',
-                 to_jsonb(NOW())
-               )
-           WHERE id = $5`,
-          [title, slug, url, isPublic, library.id]
-        );
-        
-        // Update in-memory object to match database
-        library.slug = slug;
-        library.title = title;
-        
-        console.log(`🔄 Re-importing existing library: ${library.id} with new slug: ${slug}`);
+        slug = `${slug}-${urlHash}`;
+        console.log(`⚠️  Slug collision detected, using hash suffix: ${slug}`);
       }
+      // else: Case 2: Slug available → Use as-is
+    }
+    
+    // If re-importing, reset the existing library to pending
+    if (isReimport && library) {
+      await pool.query(
+        `UPDATE libraries 
+         SET title = $1, 
+             is_public = $2,
+             status = 'pending',
+             progress_message = NULL,
+             error_message = NULL,
+             processing_logs = '[]'::jsonb,
+             metadata = jsonb_set(
+               COALESCE(metadata, '{}'::jsonb),
+               '{reimported_at}',
+               to_jsonb(NOW())
+             )
+         WHERE id = $3`,
+        [title, isPublic, library.id]
+      );
     }
     
     // Create new library if not re-importing

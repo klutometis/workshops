@@ -17,22 +17,72 @@ import pool from '../lib/db';
 import path from 'path';
 import fs from 'fs/promises';
 
+// Database logging helper - appends to processing_logs JSONB array
+async function logToDatabase(
+  libraryId: string,
+  level: 'info' | 'error' | 'debug',
+  stage: string,
+  message: string
+) {
+  try {
+    const logEntry = {
+      ts: new Date().toISOString(),
+      level,
+      stage,
+      msg: message.length > 2000 
+        ? message.slice(0, 1000) + '\n...[truncated]...\n' + message.slice(-1000)
+        : message
+    };
+    
+    await pool.query(
+      `UPDATE libraries 
+       SET processing_logs = processing_logs || $1::jsonb 
+       WHERE id = $2`,
+      [JSON.stringify([logEntry]), libraryId]
+    );
+  } catch (error) {
+    // Don't fail processing if logging fails
+    console.error(`⚠️  Failed to log to database:`, error);
+  }
+}
+
 // Progress update helper
-async function updateProgress(libraryId: string, message: string) {
+async function updateProgress(libraryId: string, message: string, stage?: string) {
   console.log(`📝 ${message}`);
   try {
+    // Update progress_message for UI
     await pool.query(
       'UPDATE libraries SET progress_message = $1 WHERE id = $2',
       [message, libraryId]
     );
+    
+    // Also log to processing_logs for debugging
+    if (stage) {
+      await logToDatabase(libraryId, 'info', stage, message);
+    }
   } catch (error) {
     console.error(`⚠️  Failed to update progress: ${error}`);
   }
 }
 
 // Error handler
-async function markFailed(libraryId: string, error: Error) {
+async function markFailed(libraryId: string, error: Error, stage?: string) {
   console.error(`❌ Processing failed:`, error);
+  
+  // Unwrap ProcessingError to get actual script failure details (stdout/stderr)
+  const actualError = (error as any).originalError || error;
+  
+  // Log full error with all available details to database
+  const errorDetails = [
+    `Error: ${error.message}`,
+    actualError.message !== error.message ? `\n\nUnderlying error:\n${actualError.message}` : '',
+    actualError.stack ? `\n\nStack trace:\n${actualError.stack}` : '',
+  ].filter(Boolean).join('');
+  
+  if (stage) {
+    await logToDatabase(libraryId, 'error', stage, errorDetails);
+  }
+  
   await pool.query(
     'UPDATE libraries SET status = $1, error_message = $2 WHERE id = $3',
     ['failed', error.message, libraryId]
@@ -62,11 +112,17 @@ async function processLibrary(libraryId: string) {
     console.log(`🔗 Source: ${library.source_url}`);
     console.log(`📄 Type: ${library.source_type}\n`);
 
-    // 2. Update status to processing
+    // 2. Clear logs and update status to processing (atomically prevents stale logs from previous runs)
     await pool.query(
-      'UPDATE libraries SET status = $1, progress_message = $2 WHERE id = $3',
+      `UPDATE libraries 
+       SET status = $1, 
+           progress_message = $2, 
+           processing_logs = '[]'::jsonb 
+       WHERE id = $3`,
       ['processing', 'Initializing content processing...', libraryId]
     );
+    
+    await logToDatabase(libraryId, 'info', 'init', `Starting ${library.source_type} processing for: ${library.title}`);
 
     // 3. Route to appropriate processor and get result
     let result;
@@ -115,7 +171,11 @@ async function processLibrary(libraryId: string) {
     process.exit(0);
 
   } catch (error) {
-    await markFailed(libraryId, error as Error);
+    const err = error as Error;
+    console.error('\n❌ FATAL ERROR:', err.message);
+    console.error('Stack:', err.stack);
+    
+    await markFailed(libraryId, err, 'fatal');
     await pool.end();
     process.exit(1);
   }
@@ -138,7 +198,8 @@ async function processYouTube(libraryId: string, sourceUrl: string, slug: string
 
   // Run the full YouTube pipeline with progress callback
   const result = await processYouTubeVideo(sourceUrl, async (stage, percent, message) => {
-    await updateProgress(libraryId, message || `${stage}: ${percent}%`);
+    const progressMsg = message || `${stage}: ${percent}%`;
+    await updateProgress(libraryId, progressMsg, stage);
   });
   
   return result;
@@ -151,8 +212,9 @@ async function processMarkdown(libraryId: string, sourceUrl: string, slug: strin
   const { processMarkdownFile } = await import('../lib/processing');
 
   // Run the markdown pipeline with progress callback
-  const result = await processMarkdownFile(sourceUrl, async (stage, percent, message) => {
-    await updateProgress(libraryId, message || `${stage}: ${percent}%`);
+  const result = await processMarkdownFile(sourceUrl, libraryId, async (stage, percent, message) => {
+    const progressMsg = message || `${stage}: ${percent}%`;
+    await updateProgress(libraryId, progressMsg, stage);
   });
   
   return result;
@@ -165,8 +227,9 @@ async function processNotebook(libraryId: string, sourceUrl: string, slug: strin
   const { processJupyterNotebook } = await import('../lib/processing');
 
   // Run the notebook pipeline (converts to markdown internally) with progress callback
-  const result = await processJupyterNotebook(sourceUrl, async (stage, percent, message) => {
-    await updateProgress(libraryId, message || `${stage}: ${percent}%`);
+  const result = await processJupyterNotebook(sourceUrl, libraryId, async (stage, percent, message) => {
+    const progressMsg = message || `${stage}: ${percent}%`;
+    await updateProgress(libraryId, progressMsg, stage);
   });
   
   return result;

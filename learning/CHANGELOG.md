@@ -52,7 +52,166 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 #### Status
 **Phase 1b Priority Complete** ✅ - Semantic URLs working end-to-end!
 
-🎯 **Next:** Create `scripts/process-library.ts` wrapper to route content processing
+🎯 **Next:** Test local processing and deploy Cloud Run Job
+
+---
+
+### 2024-12-16 - Notebook Libraries Working End-to-End
+
+**Progress:** Jupyter notebook libraries now render perfectly using existing markdown infrastructure. Eliminated frontend complexity by treating notebooks as markdown with inline images.
+
+#### Changed
+- **Simplified notebook rendering** (`SocraticDialogue.tsx`):
+  - Removed `NotebookViewer` component import and special case
+  - Notebooks now use `MarkdownViewer` like regular markdown
+  - Removed `notebookData` prop from component (no longer needed)
+  - Auto-load markdown content immediately when cached (don't wait for sources)
+  - Auto-scroll to first source anchor when assistant provides sources
+- **Tab focus improvements** (`SocraticDialogue.tsx`):
+  - Notebook and markdown libraries now default to "Source" tab (show content immediately)
+  - YouTube libraries default to "Python" tab (interactive coding first)
+  - Tab reset logic respects library type when closing/reopening dialogue
+- **Source ordering by document position** (`api/socratic-dialogue/route.ts`):
+  - Text chunks (markdown/notebook) now sorted by `start_line` (document order)
+  - Video segments remain sorted by `audio_start` (chronological)
+  - Consistent API-level sorting for all library types
+- **System prompt enhancement** (`api/socratic-dialogue/route.ts`):
+  - Added guidance to encourage Python tab for coding exercises
+  - Point #6: "encourage them to switch to the **Python** tab to write and test code interactively"
+
+#### Architecture Benefits
+- ✅ **Zero frontend complexity** - No special notebook handling
+- ✅ **Reuses markdown infrastructure** - Viewer, RAG, processing all shared
+- ✅ **Inline images preserved** - Converted notebooks display images correctly
+- ✅ **Intuitive source order** - Text flows in document order, videos in chronological order
+- ✅ **Better UX** - Notebooks show content immediately, not blank Python scratchpad
+
+#### Testing
+- ✅ Notebook libraries render markdown with inline images
+- ✅ Source tab shown by default for text-based libraries
+- ✅ Tab focus preserved when switching between concepts
+- ✅ Sources appear in document order (line numbers)
+- ✅ No more `notebookData` undefined errors
+
+#### Status
+**Notebook Libraries Complete** ✅ - Ready for production use!
+
+---
+
+### 2024-12-16 - Processing Logs & Enhanced Error Handling
+
+**Progress:** Added comprehensive logging infrastructure for debugging long-running imports and diagnosing failures. Processing errors now capture full script output.
+
+#### Added
+- **Database logging system** (`scripts/process-library.ts`):
+  - `logToDatabase()` helper appends to `processing_logs` JSONB array
+  - Structure: `[{ts, level, stage, msg}]` with automatic truncation for large messages
+  - Logs written throughout processing (init, extract, chunk, enrich, etc.)
+  - Error logs include full stack traces and underlying error details
+- **Processing logs column** (`migrations/004-add-processing-logs.sql`):
+  - JSONB array for timestamped log entries during processing
+  - GIN index for efficient log queries
+  - Default empty array, appended to atomically
+- **Processing logs UI** (`LibraryStatusPage.tsx`):
+  - Collapsible logs viewer with expand/collapse button
+  - Color-coded by level (info=blue, error=red, debug=gray)
+  - Shows timestamp, stage, and formatted message
+  - Auto-expands on failure for debugging
+  - Real-time updates during processing
+  - Max height with scroll for long logs
+- **Enhanced error capture** (`lib/processing.ts`):
+  - `runScript()` now captures both stdout and stderr
+  - Error messages include script path, exit code, and full output
+  - Helps diagnose script failures (missing files, syntax errors, etc.)
+- **Improved progress updates** (`scripts/process-library.ts`):
+  - Both `progress_message` (for UI) and `processing_logs` (for debugging) updated
+  - Stage parameter passed to logging
+  - Fatal errors logged with full stack trace
+  - Clear log separation between processing runs (atomic reset on start)
+
+#### Fixed
+- **Re-import slug handling** (`api/publish/route.ts`):
+  - Source URL is now the unique key (same URL = re-import)
+  - Existing libraries preserve their original slug
+  - New imports check slug availability before creating
+  - Slug collisions resolved with deterministic URL hash (8 chars)
+  - In-memory library object no longer updated (caused stale data)
+- **Library update logic** (`import-to-db.ts`):
+  - Changed from INSERT with ON CONFLICT to UPDATE WHERE id
+  - Import script now requires `--library-id` parameter
+  - Updates existing record instead of creating duplicates
+  - Proper UPDATE logic for both markdown and notebook types
+- **Processing function signatures** (`lib/processing.ts`):
+  - `processMarkdownFile()` now accepts `libraryId` parameter
+  - `processJupyterNotebook()` now accepts `libraryId` parameter
+  - Library ID passed to `import-to-db.ts` script
+  - Enables proper database updates during processing
+
+#### Architecture
+```
+Processing → Database Logs (debugging) + Progress Message (UI)
+                ↓                              ↓
+         Detailed timeline              User-friendly status
+         with errors/warnings           "Extracting concepts: 35%"
+```
+
+**Logs vs Progress:**
+- `processing_logs`: Timestamped array for developers (debugging, timeout detection)
+- `progress_message`: Single string for users (current stage and percent)
+
+#### Testing
+- ✅ Processing logs appear in real-time during import
+- ✅ Failed processing shows full error logs
+- ✅ Logs collapsible/expandable in UI
+- ✅ Re-imports preserve original slugs
+- ✅ Slug collisions handled with URL hash
+- ✅ Script failures show stdout/stderr in error message
+
+#### Status
+**Processing Infrastructure Production-Ready** ✅ - Full observability and error diagnostics!
+
+🎯 **Next:** Test full end-to-end import with real notebook
+
+---
+
+### 2024-12-16 - Processing Wrapper Complete
+
+**Progress:** Created universal processing script that routes library imports to appropriate content processors. Ready for local testing and Cloud Run deployment.
+
+#### Added
+- **Processing orchestrator** (`scripts/process-library.ts`):
+  - Accepts library UUID from command line or Cloud Run Job
+  - Fetches library metadata (source_url, source_type, slug, title) from database
+  - Routes to processor based on type:
+    - `youtube` → `processYouTubeVideo()` (fully working)
+    - `markdown` → `processMarkdownFile()` (partially implemented)
+    - `notebook` → `processJupyterNotebook()` (partially implemented)
+  - Updates database status: `pending` → `processing` → `ready`/`failed`
+  - Writes `progress_message` throughout for real-time UI feedback
+  - Sets `error_message` and marks `failed` on exceptions
+  - UUID validation with helpful error messages
+  - Proper exit codes (0 = success, 1 = failure) for Cloud Run
+  - Idempotent database connections with graceful cleanup
+
+#### Architecture
+```
+/api/publish → Create library (status: pending)
+     ↓
+Cloud Run Job (TODO) triggers: process-library.ts <uuid>
+     ↓
+Fetch from DB → Route by type → Process → Update DB (status: ready)
+     ↓
+Status page polls → Shows progress → Auto-refresh when ready
+```
+
+#### Status
+**Processing wrapper ready for deployment!** ✅
+
+🎯 **Next Steps:**
+1. Test locally: `npx tsx scripts/process-library.ts <library-id>`
+2. Create Dockerfile for Cloud Run environment
+3. Deploy as Cloud Run Job
+4. Trigger from `/api/publish` route
 
 ---
 

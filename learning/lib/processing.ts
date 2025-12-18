@@ -96,7 +96,17 @@ function runScript(scriptPath: string, args: string[] = []): string {
       maxBuffer: 50 * 1024 * 1024 // 50MB buffer for large outputs
     });
   } catch (error: any) {
-    throw new Error(`Script failed: ${scriptPath}\n${error.stderr || error.message}`);
+    // Capture both stdout and stderr for debugging
+    const stdout = error.stdout || '';
+    const stderr = error.stderr || '';
+    const combined = [
+      `Script: ${scriptPath}`,
+      `Exit code: ${error.status || 'unknown'}`,
+      stderr ? `\nSTDERR:\n${stderr}` : '',
+      stdout ? `\nSTDOUT:\n${stdout}` : '',
+    ].filter(Boolean).join('\n');
+    
+    throw new Error(combined || error.message);
   }
 }
 
@@ -362,11 +372,13 @@ export async function processYouTubeVideo(
  * 5. Import to database (100%)
  * 
  * @param filePath - Path to markdown file
+ * @param libraryId - Database library ID (UUID)
  * @param onProgress - Optional progress callback
  * @returns Processing result with library ID and stats
  */
 export async function processMarkdownFile(
   filePath: string,
+  libraryId: string,
   onProgress?: ProgressCallback
 ): Promise<ProcessingResult> {
   // Validate file exists
@@ -477,7 +489,11 @@ export async function processMarkdownFile(
     // Stage 6: Import to database (100%)
     await onProgress?.('Importing to database', 95);
     try {
-      runScript('scripts/import-to-db.ts', ['--type', 'markdown', '--markdown-path', filePath]);
+      runScript('scripts/import-to-db.ts', [
+        '--library-id', libraryId,
+        '--type', 'markdown',
+        '--markdown-path', filePath
+      ]);
     } catch (error: any) {
       throw new ProcessingError(
         'Failed to import to database',
@@ -653,11 +669,13 @@ function convertNotebookToMarkdown(notebookPath: string): { raw: string; cleaned
  * 3. Process as markdown (20-100%)
  * 
  * @param urlOrPath - GitHub URL or local path to .ipynb file
+ * @param libraryId - Database library ID (UUID)
  * @param onProgress - Optional progress callback
  * @returns Processing result with library ID and stats
  */
 export async function processJupyterNotebook(
   urlOrPath: string,
+  libraryId: string,
   onProgress?: ProgressCallback
 ): Promise<ProcessingResult> {
   const isUrl = urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://');
@@ -740,7 +758,7 @@ export async function processJupyterNotebook(
     }
     
     const rawMarkdownPath = path.join(workDir, `${slug}-raw.md`);
-    const cleanedMarkdownPath = path.join(workDir, `${slug}-cleaned.md`);
+    const cleanedMarkdownPath = path.join(workDir, `${slug}.md`);  // Use slug so scripts derive correct work directory
     
     fs.writeFileSync(rawMarkdownPath, rawMarkdown, 'utf-8');
     fs.writeFileSync(cleanedMarkdownPath, cleanedMarkdown, 'utf-8');
@@ -749,13 +767,16 @@ export async function processJupyterNotebook(
     
     // Stage 3: Process cleaned markdown through pipeline (30-90%)
     // Use cleaned version for LLM processing (concepts, chunks, embeddings)
-    await onProgress?.('Processing cleaned markdown', 30);
+    
+    // Bridge the gap before markdown processing starts
+    await onProgress?.('Extracting concepts', 30);  // Fixed: Remove custom message so percentage formatting works
     
     // Wrap the markdown progress callback to offset percentages (30-90%)
     const wrappedProgress: ProgressCallback = (stage, percent, message) => {
       // Map 0-95 from markdown processing to 30-90 in notebook processing
       const adjustedPercent = 30 + Math.floor(percent * 0.63);
-      onProgress?.(stage, adjustedPercent, message);
+      // Don't pass custom messages to allow proper percentage formatting
+      onProgress?.(stage, adjustedPercent);
     };
     
     // Run all markdown processing steps on cleaned version (no images)
@@ -807,6 +828,7 @@ export async function processJupyterNotebook(
     await onProgress?.('Importing to database', 95);
     try {
       runScript('scripts/import-to-db.ts', [
+        '--library-id', libraryId,
         '--type', 'notebook',
         '--notebook-path', notebookPath,
         '--markdown-path', rawMarkdownPath  // Store raw version in DB (with images)

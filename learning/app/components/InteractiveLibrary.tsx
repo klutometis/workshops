@@ -333,7 +333,6 @@ export default function InteractiveLibrary({ library, onBack, backLabel = '← B
           conceptData={selectedConcept}
           libraryId={library.id}
           libraryType={library.type}
-          notebookData={sourceType === 'notebook' ? notebookData : undefined}
           onMasteryAchieved={handleMasteryAchieved}
         />
       )}

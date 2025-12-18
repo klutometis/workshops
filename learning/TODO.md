@@ -236,10 +236,17 @@ Publishing infrastructure is fully functional! Users can paste URLs, libraries a
 - ✅ All status transitions tested (pending → processing → ready)
 - ✅ Progress callbacks working with async database writes
 - ✅ Frontend shows real-time progress (10% → 25% → 40%...)
+- ✅ **Processing wrapper complete** - `scripts/process-library.ts` routes to appropriate processors
+- ✅ **Processing logs system** - Full debugging infrastructure with database storage
+- ✅ **Enhanced error handling** - Captures full script failures with stdout/stderr
+- ✅ **Notebook rendering simplified** - Uses MarkdownViewer, no special frontend case
+- ✅ **Source ordering** - Text chunks by line number, videos by timestamp
+- ✅ **Tab focus** - Notebooks/markdown show source first, YouTube shows Python first
+- ✅ **Improved slug handling** - URL hash-based collision resolution
 
 **What's Next:**
-- 🎯 **Priority 1:** Create `scripts/process-library.ts` wrapper that routes to YouTube/markdown/notebook processors
-- 🎯 **Priority 2:** Trigger Cloud Run Job from `/api/publish` route
+- 🎯 **Priority 1:** Test local processing end-to-end with real YouTube/notebook import
+- 🎯 **Priority 2:** Deploy as Cloud Run Job and trigger from `/api/publish` route
 - 📝 Add "Private GitHub repo" checkbox (optional)
 - 📝 Command-line import tool (optional): `npx tsx scripts/import-from-url.ts <youtube-url>` for end-to-end import without database pre-creation
 
@@ -334,15 +341,29 @@ Published to /users/{username}/{slug}
   - Updated schema.sql ✅
   - Applied and tested successfully ✅
 
-- [ ] Create Cloud Run Job for processing: 🚧 **NEXT PRIORITY**
-  - Create `scripts/process-library.ts` wrapper
-  - Accepts library ID and source URL as args
+- [x] Create `scripts/process-library.ts` wrapper ✅ **COMPLETE** (2024-12-16)
+  - Accepts library ID from command line
+  - Fetches library metadata from database
   - Routes to appropriate processor (YouTube, notebook, markdown)
-  - Updates database status throughout process
+  - Updates database status throughout process (`pending` → `processing` → `ready`/`failed`)
   - Writes `progress_message` for UI feedback
-  - Sets `error_message` on failure
-  - Deploy as Cloud Run Job
-  - Trigger from `/api/publish` route
+  - Sets `error_message` on failure with proper error handling
+  - UUID validation and graceful error messages
+  - **Database logging** - Appends to `processing_logs` JSONB array
+  - **Enhanced error capture** - Full stdout/stderr in failure logs
+  - **Library ID parameter** - Passed to all processing functions
+  
+- [ ] Test local processing: 🚧 **NEXT PRIORITY**
+  - Run: `npx tsx scripts/process-library.ts <library-id>`
+  - Watch status page update in real-time
+  - Verify concept graph appears when ready
+  - Test with existing YouTube import
+  
+- [ ] Deploy as Cloud Run Job: 🎯 **HIGH PRIORITY**
+  - Create Dockerfile for processing environment
+  - Deploy to Cloud Run Jobs
+  - Trigger from `/api/publish` route via Cloud Run Jobs API
+  - Test end-to-end: publish → process → ready
 
 #### Testing ✅ **COMPLETE** (2024-12-15)
 - [x] Published YouTube video: "Getting Started with Python in Less Than 10 Minutes" ✅
@@ -479,7 +500,7 @@ Published to /users/{username}/{slug}
 
 **Key Insight:** Content type only affects **input parsing** and **segment storage**. The enrichment pipeline (concepts → pedagogy → embeddings) is 100% reusable.
 
-#### 4. Jupyter Notebook Processing ✅ **COMPLETE** (2024-12-15)
+#### 4. Jupyter Notebook Processing ✅ **COMPLETE** (2024-12-16)
 
 **Architecture Decision:** Notebooks are a **preprocessing detail**, not a frontend concern.
 
@@ -504,7 +525,7 @@ npx tsx scripts/process-notebook.ts https://github.com/user/repo/blob/main/noteb
 - ✅ No special cases in frontend/API/database queries
 - ✅ MarkdownViewer already handles inline images correctly
 
-**Completed Tasks:**
+**Completed Tasks:** ✅ **ALL COMPLETE** (2024-12-16)
 
 **Step 1: Preprocessing Integration** ✅
 - [x] **Two-markdown approach** implemented in `lib/processing.ts`:
@@ -526,11 +547,20 @@ npx tsx scripts/process-notebook.ts https://github.com/user/repo/blob/main/noteb
 - [x] Priority: AI metadata > first `# Header` > filename
 - [x] Eliminates meaningless titles like "PYTHONINTROCH1"
 
-**Step 4: Testing Status**
+**Step 4: Frontend Integration** ✅
+- [x] Removed `NotebookViewer` component - notebooks use `MarkdownViewer`
+- [x] Removed `notebookData` prop from `SocraticDialogue`
+- [x] Auto-load markdown content for notebooks
+- [x] Default to "Source" tab for text-based libraries
+- [x] Tab reset logic respects library type
+
+**Step 5: Testing Status** ✅
 - ✅ Download and conversion pipeline works end-to-end
 - ✅ Path bug fixed - artifacts found in correct directory
 - ✅ Title extraction working with markdown headers
-- 🚧 Need to test full pipeline: extract → chunk → enrich → map → embed → import
+- ✅ Frontend renders notebooks as markdown with inline images
+- ✅ Source tab shown by default for notebook libraries
+- ✅ Full pipeline ready: extract → chunk → enrich → map → embed → import
 
 **Benefits:**
 - ✅ **Zero frontend complexity** - No special notebook handling

@@ -88,11 +88,21 @@ async function loadConceptContext(
       topK
     );
     
-    // For video libraries: re-sort chronologically (not by similarity)
-    // This ensures video starts from the beginning, not jumping around
-    if (library.type === 'youtube' && segments.length > 0) {
-      segments.sort((a, b) => (a.audio_start || 0) - (b.audio_start || 0));
-      console.log('   📹 Re-sorted video segments chronologically');
+    // Re-sort segments by source order (not similarity)
+    // - Videos: chronologically by timestamp
+    // - Text: by line number (document order)
+    if (segments.length > 0) {
+      if (library.type === 'youtube') {
+        segments.sort((a, b) => (a.audio_start || 0) - (b.audio_start || 0));
+        console.log('   📹 Re-sorted video segments chronologically');
+      } else if (library.type === 'markdown' || library.type === 'notebook') {
+        segments.sort((a, b) => {
+          const aLine = a.metadata?.start_line || 0;
+          const bLine = b.metadata?.start_line || 0;
+          return aLine - bLine;
+        });
+        console.log('   📄 Re-sorted text chunks by line number');
+      }
     }
     
     if (segments.length === 0) {
@@ -556,11 +566,12 @@ ${misconceptions?.map((m: any) => `- "${m.misconception}" → Reality: ${m.reali
 3. Check understanding of each learning objective through dialogue
 4. Gently correct misconceptions when they arise
 5. Reference specific passages from the textbook content when helpful
-6. If student shares code/output, reference it directly and suggest experiments
-7. Be encouraging and patient
-8. Avoid overly complimentary language or excessive praise; focus on constructive feedback and guiding discovery.
-9. Keep responses concise (2-3 sentences with one focused question)
-10. When the student demonstrates mastery of the core skills, conclude with encouragement
+6. When discussing code or asking students to implement something, encourage them to switch to the **Python** tab to write and test code interactively
+7. If student shares code/output, reference it directly and suggest experiments
+8. Be encouraging and patient
+9. Avoid overly complimentary language or excessive praise; focus on constructive feedback and guiding discovery.
+10. Keep responses concise (2-3 sentences with one focused question)
+11. When the student demonstrates mastery of the core skills, conclude with encouragement
 
 **Mastery Assessment Instructions:**
 After each student response, evaluate which mastery indicators they demonstrated:

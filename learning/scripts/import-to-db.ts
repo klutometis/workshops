@@ -60,6 +60,7 @@ interface ChunkEmbeddings {
 
 interface ImportArgs {
   type: 'markdown' | 'notebook' | 'youtube';
+  libraryId: string;
   markdownPath?: string;
   notebookPath?: string;
   videoId?: string;
@@ -75,6 +76,8 @@ function parseArgs(argv: string[]): ImportArgs {
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--type') {
       args.type = argv[++i];
+    } else if (argv[i] === '--library-id') {
+      args.libraryId = argv[++i];
     } else if (argv[i] === '--markdown-path') {
       args.markdownPath = argv[++i];
     } else if (argv[i] === '--notebook-path') {
@@ -141,11 +144,12 @@ function createPool(): Pool {
 
 async function importMarkdownLibrary(
   pool: Pool,
+  libraryId: string,
   conceptGraph: ConceptGraph,
   markdownPath: string,
   basename: string
-): Promise<string> {
-  console.log(`📚 Importing markdown library...`);
+): Promise<void> {
+  console.log(`📚 Updating markdown library: ${libraryId}...`);
   
   const markdownContent = fs.readFileSync(markdownPath, 'utf-8');
   console.log(`   Read ${markdownContent.length} chars of markdown content`);
@@ -153,54 +157,43 @@ async function importMarkdownLibrary(
   // Extract title: AI metadata > first markdown header > basename
   const markdownTitle = extractMarkdownTitle(markdownPath);
   const title = conceptGraph.metadata?.title || markdownTitle || basename;
-  const slug = generateSlug(title);
-  console.log(`   Generated slug: ${slug}`);
+  console.log(`   Title: ${title}`);
   
-  const result = await pool.query(
-    `INSERT INTO libraries (
-      title, author, type, slug, source_url, markdown_content,
-      source_type,
-      total_concepts, status, processed_at
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-    ON CONFLICT (slug) 
-    DO UPDATE SET
-      title = EXCLUDED.title,
-      author = EXCLUDED.author,
-      markdown_content = EXCLUDED.markdown_content,
-      source_type = EXCLUDED.source_type,
-      total_concepts = EXCLUDED.total_concepts,
-      status = EXCLUDED.status,
-      processed_at = EXCLUDED.processed_at
-    RETURNING id`,
+  await pool.query(
+    `UPDATE libraries 
+     SET title = $1,
+         author = $2,
+         markdown_content = $3,
+         source_type = $4,
+         total_concepts = $5,
+         status = $6,
+         processed_at = $7
+     WHERE id = $8`,
     [
       title,
       conceptGraph.metadata?.author || 'Unknown',
-      'markdown',
-      slug,
-      markdownPath,
       markdownContent,
       'markdown',
       conceptGraph.nodes?.length || 0,
       'ready',
       conceptGraph.metadata?.enriched_at || conceptGraph.metadata?.extracted_at || new Date().toISOString(),
+      libraryId,
     ]
   );
   
-  const libraryId = result.rows[0].id;
-  console.log(`   ✓ Library imported: ${libraryId}`);
+  console.log(`   ✓ Library updated`);
   console.log(`   ✓ Source type: markdown\n`);
-  
-  return libraryId;
 }
 
 async function importNotebookLibrary(
   pool: Pool,
+  libraryId: string,
   conceptGraph: ConceptGraph,
   markdownPath: string,
   notebookPath: string,
   basename: string
-): Promise<string> {
-  console.log(`📚 Importing notebook library...`);
+): Promise<void> {
+  console.log(`📚 Updating notebook library: ${libraryId}...`);
   
   const markdownContent = fs.readFileSync(markdownPath, 'utf-8');
   console.log(`   Read ${markdownContent.length} chars of markdown content`);
@@ -211,47 +204,35 @@ async function importNotebookLibrary(
   // Extract title: AI metadata > first markdown header > basename
   const markdownTitle = extractMarkdownTitle(markdownPath);
   const title = conceptGraph.metadata?.title || markdownTitle || basename;
-  const slug = generateSlug(title);
-  console.log(`   Generated slug: ${slug}`);
+  console.log(`   Title: ${title}`);
   
-  const result = await pool.query(
-    `INSERT INTO libraries (
-      title, author, type, slug, source_url, markdown_content,
-      source_type, notebook_data,
-      total_concepts, status, processed_at
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-    ON CONFLICT (slug) 
-    DO UPDATE SET
-      title = EXCLUDED.title,
-      author = EXCLUDED.author,
-      markdown_content = EXCLUDED.markdown_content,
-      source_type = EXCLUDED.source_type,
-      notebook_data = EXCLUDED.notebook_data,
-      total_concepts = EXCLUDED.total_concepts,
-      status = EXCLUDED.status,
-      processed_at = EXCLUDED.processed_at
-    RETURNING id`,
+  await pool.query(
+    `UPDATE libraries 
+     SET title = $1,
+         author = $2,
+         markdown_content = $3,
+         source_type = $4,
+         notebook_data = $5,
+         total_concepts = $6,
+         status = $7,
+         processed_at = $8
+     WHERE id = $9`,
     [
       title,
       conceptGraph.metadata?.author || 'Unknown',
-      'notebook',
-      slug,
-      notebookPath,
       markdownContent,
       'notebook',
       JSON.stringify(notebookData),
       conceptGraph.nodes?.length || 0,
       'ready',
       conceptGraph.metadata?.enriched_at || conceptGraph.metadata?.extracted_at || new Date().toISOString(),
+      libraryId,
     ]
   );
   
-  const libraryId = result.rows[0].id;
-  console.log(`   ✓ Library imported: ${libraryId}`);
+  console.log(`   ✓ Library updated`);
   console.log(`   ✓ Source type: notebook`);
   console.log(`   ✓ Notebook data stored (${JSON.stringify(notebookData).length} bytes)\n`);
-  
-  return libraryId;
 }
 
 // ============================================================================
@@ -447,6 +428,9 @@ async function importEmbeddings(
 
 async function importToDb(args: ImportArgs): Promise<void> {
   // Validate arguments
+  if (!args.libraryId) {
+    throw new Error('--library-id is required');
+  }
   if (args.type === 'markdown' && !args.markdownPath) {
     throw new Error('--markdown-path is required for markdown import');
   }
@@ -512,14 +496,15 @@ async function importToDb(args: ImportArgs): Promise<void> {
     await pool.query('BEGIN');
     
     // Import library (type-specific)
-    let libraryId: string;
     if (args.type === 'markdown') {
-      libraryId = await importMarkdownLibrary(pool, conceptGraph, markdownPath, basename);
+      await importMarkdownLibrary(pool, args.libraryId, conceptGraph, markdownPath, basename);
     } else if (args.type === 'notebook') {
-      libraryId = await importNotebookLibrary(pool, conceptGraph, markdownPath, args.notebookPath!, basename);
+      await importNotebookLibrary(pool, args.libraryId, conceptGraph, markdownPath, args.notebookPath!, basename);
     } else {
       throw new Error(`Unsupported type: ${args.type}`);
     }
+    
+    const libraryId = args.libraryId;
     
     // Shared imports
     await importConcepts(pool, libraryId, conceptGraph);
@@ -581,7 +566,7 @@ const args = parseArgs(process.argv.slice(2));
 
 if (!args.type || args.type === '--help' || args.type === '-h') {
   console.log(`
-Usage: tsx scripts/import-to-db.ts --type <type> [options]
+Usage: tsx scripts/import-to-db.ts --library-id <id> --type <type> [options]
 
 Import content to PostgreSQL database.
 
@@ -590,6 +575,7 @@ Types:
   notebook    Import Jupyter notebook
 
 Options:
+  --library-id <uuid>       Library ID to update (required)
   --markdown-path <path>    Path to markdown file (required for markdown & notebook)
   --notebook-path <path>    Path to .ipynb file (required for notebook)
 
@@ -599,10 +585,10 @@ Environment Variables:
 
 Examples:
   # Import markdown
-  tsx scripts/import-to-db.ts --type markdown --markdown-path data/tsp.md
+  tsx scripts/import-to-db.ts --library-id <uuid> --type markdown --markdown-path data/tsp.md
   
   # Import notebook
-  tsx scripts/import-to-db.ts --type notebook \\
+  tsx scripts/import-to-db.ts --library-id <uuid> --type notebook \\
     --notebook-path temp/notebooks/Sudoku.ipynb \\
     --markdown-path markdown/sudoku/sudoku.md
 

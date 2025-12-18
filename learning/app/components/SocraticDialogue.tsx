@@ -20,7 +20,6 @@ import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import PythonScratchpad from './PythonScratchpad';
 import { MarkdownViewer } from './MarkdownViewer';
-import NotebookViewer from './NotebookViewer';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -81,7 +80,6 @@ type SocraticDialogueProps = {
   conceptData: any;
   libraryId: string;
   libraryType?: string;
-  notebookData?: any;
   onMasteryAchieved?: (conceptId: string) => void;
 };
 
@@ -91,7 +89,6 @@ export default function SocraticDialogue({
   conceptData,
   libraryId,
   libraryType,
-  notebookData,
   onMasteryAchieved,
 }: SocraticDialogueProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -114,7 +111,11 @@ export default function SocraticDialogue({
   } | null>(null);
   const [lastSentCode, setLastSentCode] = useState<string>('');
   const [lastSentEvaluation, setLastSentEvaluation] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'python' | 'source'>('python');
+  const [activeTab, setActiveTab] = useState<'python' | 'source'>(
+    // Notebook/markdown libraries: start with source tab to show content immediately
+    // YouTube libraries: start with Python for interactive coding
+    (libraryType === 'notebook' || libraryType === 'markdown') ? 'source' : 'python'
+  );
   const [mobileActiveTab, setMobileActiveTab] = useState<'chat' | 'workspace'>('chat');
   const [objectivesExpanded, setObjectivesExpanded] = useState(false);
   const [sourceAnchor, setSourceAnchor] = useState<string | undefined>();
@@ -148,20 +149,27 @@ export default function SocraticDialogue({
     }
   }, [messages, libraryType]);
 
-  // Auto-load markdown source for markdown libraries
+  // Auto-load markdown source for markdown/notebook libraries
   useEffect(() => {
-    if (libraryType === 'markdown' && cachedMarkdownContent && messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role === 'assistant' && lastMessage.sources) {
-        const firstMarkdownSource = lastMessage.sources.find(s => s.markdown_anchor);
-        if (firstMarkdownSource) {
-          setSourceMarkdownContent(cachedMarkdownContent);
-          setSourceAnchor(undefined); // Don't jump to anchor yet
-          setSourceVideoId(undefined);
-          setSourceTimestamp(undefined);
+    if ((libraryType === 'markdown' || libraryType === 'notebook') && cachedMarkdownContent) {
+      // Show source immediately when content is cached (don't wait for sources)
+      setSourceMarkdownContent(cachedMarkdownContent);
+      setSourceAnchor(undefined);
+      setSourceVideoId(undefined);
+      setSourceTimestamp(undefined);
+      
+      // Auto-scroll to first source anchor when assistant provides sources
+      if (messages.length > 0) {
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage.role === 'assistant' && lastMessage.sources) {
+          const firstMarkdownSource = lastMessage.sources.find(s => s.markdown_anchor);
+          if (firstMarkdownSource && firstMarkdownSource.markdown_anchor) {
+            setSourceAnchor(firstMarkdownSource.markdown_anchor);
+          }
         }
       }
     }
+    
   }, [messages, libraryType, cachedMarkdownContent]);
 
   // Auto-focus textarea when loading completes
@@ -191,7 +199,8 @@ export default function SocraticDialogue({
       setEvaluation(null);
       setLastSentCode('');
       setLastSentEvaluation(null);
-      setActiveTab('python');
+      // Reset to correct initial tab based on library type
+      setActiveTab((libraryType === 'notebook' || libraryType === 'markdown') ? 'source' : 'python');
       setSourceAnchor(undefined);
       setSourceMarkdownContent(undefined);
       setSourceVideoId(undefined);
@@ -199,7 +208,7 @@ export default function SocraticDialogue({
       setVideoAutoplay(false);
       setCachedMarkdownContent(undefined);
     }
-  }, [open]);
+  }, [open, libraryType]);
 
   const startDialogue = async () => {
     setIsLoading(true);
@@ -810,8 +819,6 @@ export default function SocraticDialogue({
                       setCode(newCode);
                     }}
                   />
-                ) : libraryType === 'notebook' && notebookData ? (
-                  <NotebookViewer notebook={notebookData} />
                 ) : sourceVideoId ? (
                   <div className="w-full h-full flex flex-col bg-black rounded-lg overflow-hidden">
                     <iframe
