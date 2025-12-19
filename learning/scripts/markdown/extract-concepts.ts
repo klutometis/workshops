@@ -16,12 +16,12 @@ async function extractConceptsFromMarkdown(markdownPath: string): Promise<void> 
     throw new Error(`❌ Markdown file not found: ${markdownPath}`);
   }
 
-  // Paths
+  // Paths - use the directory where the markdown file actually is
+  const markdownDir = path.dirname(markdownPath);
   const basename = path.basename(markdownPath, '.md');
-  const markdownDir = path.join(process.cwd(), "markdown", basename);
   const outputPath = path.join(markdownDir, "concept-graph.json");
 
-  // Create output directory
+  // Ensure output directory exists
   if (!fs.existsSync(markdownDir)) {
     fs.mkdirSync(markdownDir, { recursive: true });
   }

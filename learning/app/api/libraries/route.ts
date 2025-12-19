@@ -15,11 +15,11 @@
  */
 
 import { NextResponse } from 'next/server';
-import { getAllLibraries } from '@/lib/db';
+import { getPublicLibraries } from '@/lib/db';
 
 export async function GET() {
   try {
-    const libraries = await getAllLibraries();
+    const libraries = await getPublicLibraries();
     
     // Transform database format to frontend format
     const formatted = libraries.map(lib => ({

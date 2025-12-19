@@ -45,6 +45,11 @@ export DATABASE_URL="${LEARNING_DATABASE_URL_PROXY:-}"
 # Google AI
 export GOOGLE_API_KEY="${GOOGLE_API_KEY:-}"
 
+# Cloud Run Job (for remote processing)
+export CLOUD_RUN_PROJECT_ID="${LEARNING_GCP_PROJECT_ID:-}"
+export CLOUD_RUN_REGION="${LEARNING_GCP_REGION:-}"
+export CLOUD_RUN_JOB_NAME="${LEARNING_CLOUD_RUN_JOB_NAME:-}"
+
 # Node environment
 export NODE_ENV="development"
 
@@ -56,6 +61,11 @@ echo -e "  GitHub OAuth: ${GITHUB_CLIENT_ID:+${GREEN}✅ configured${NC}}${GITHU
 echo -e "  NextAuth Secret: ${NEXTAUTH_SECRET:+${GREEN}✅ configured${NC}}${NEXTAUTH_SECRET:-${YELLOW}⚠️  missing${NC}}"
 echo -e "  Database: ${DATABASE_URL:+${GREEN}✅ connected${NC}}${DATABASE_URL:-${YELLOW}⚠️  missing${NC}}"
 echo -e "  Google AI: ${GOOGLE_API_KEY:+${GREEN}✅ configured${NC}}${GOOGLE_API_KEY:-${YELLOW}⚠️  missing${NC}}"
+echo -e "  Processing Mode: ${PROCESSING_MODE:-${BLUE}local${NC}}"
+if [ "${PROCESSING_MODE}" = "job" ]; then
+  echo -e "  Cloud Run Job: ${CLOUD_RUN_JOB_NAME:+${GREEN}✅ ${CLOUD_RUN_JOB_NAME}${NC}}${CLOUD_RUN_JOB_NAME:-${YELLOW}⚠️  missing${NC}}"
+fi
+echo -e "  Keep Temp Files: ${KEEP_TEMP_FILES:+${YELLOW}⚠️  enabled (debug mode)${NC}}${KEEP_TEMP_FILES:-${GREEN}✅ disabled${NC}}"
 echo ""
 
 if [ -z "$GITHUB_CLIENT_ID" ] || [ -z "$GITHUB_CLIENT_SECRET" ]; then

@@ -66,6 +66,14 @@ export async function getAllLibraries() {
   return result.rows;
 }
 
+// Helper: Get all public libraries (for home page)
+export async function getPublicLibraries() {
+  const result = await pool.query(
+    'SELECT * FROM libraries WHERE is_public = true ORDER BY title'
+  );
+  return result.rows;
+}
+
 // Helper: Get user by GitHub username
 export async function getUserByUsername(username: string) {
   const result = await pool.query(
@@ -75,12 +83,12 @@ export async function getUserByUsername(username: string) {
   return result.rows[0] || null;
 }
 
-// Helper: Get all public libraries for a user
+// Helper: Get all libraries for a user (visible on their profile)
 export async function getLibrariesByUsername(username: string) {
   const result = await pool.query(
     `SELECT l.* FROM libraries l
      JOIN users u ON l.user_id = u.id
-     WHERE u.github_login = $1 AND l.is_public = true
+     WHERE u.github_login = $1
      ORDER BY l.created_at DESC`,
     [username]
   );
@@ -156,7 +164,7 @@ export async function createLibrary(data: {
       data.video_id || null,
       data.markdown_content || null,
       data.user_id || null,
-      data.is_public !== undefined ? data.is_public : true,
+      data.is_public !== undefined ? data.is_public : false,
       data.source_type || data.type,
       data.metadata || {}
     ]

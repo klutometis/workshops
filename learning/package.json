@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@google-cloud/run": "^3.1.0",
     "@google-cloud/speech": "^7.2.1",
     "@google-cloud/storage": "^7.18.0",
     "@google/genai": "^1.33.0",

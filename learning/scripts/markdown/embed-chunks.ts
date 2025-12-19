@@ -144,9 +144,8 @@ async function embedChunks(markdownPath: string): Promise<void> {
   console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
   console.log(`📄 Markdown file: ${markdownPath}\n`);
 
-  // Setup paths
-  const basename = path.basename(markdownPath, '.md');
-  const workDir = path.join(process.cwd(), 'markdown', basename);
+  // Setup paths - use the directory where the markdown file actually is
+  const workDir = path.dirname(markdownPath);
   const mappingsPath = path.join(workDir, 'chunk-concept-mappings.json');
   const outputPath = path.join(workDir, 'chunk-embeddings.json');
 

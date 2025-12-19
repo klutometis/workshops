@@ -53,6 +53,9 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copy scripts directory (needed for Cloud Run Jobs)
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+
 # Copy embeddings and concept data (read-only at runtime)
 COPY --from=builder /app/paip-chapter-1 ./paip-chapter-1
 

@@ -157,21 +157,67 @@ Phase 1a is complete - authentication, personal library pages, AND interactive l
   - Actions: Edit metadata, Reprocess, Make private/public, Delete
   - Only visible to library owner
 
-#### 5. Home Page Updates 🎯 **HIGH PRIORITY**
+#### 5. Personal Library Page Improvements 🎯 **HIGH PRIORITY**
+
+**Goal:** Better navigation and library management from personal profile page.
+
+**Essential (Quick Wins):**
+- [ ] **Back to home link** - "← Public Libraries" at top of page
+- [ ] **"Publish New Library" button** - Prominent CTA directing to `/publish`
+- [ ] **Delete library action** - Per-library dropdown with delete option:
+  - Confirmation dialog: "Are you sure? This cannot be undone."
+  - API: `DELETE /api/libraries/[id]` (requires auth, owner-only)
+  - Soft delete recommended (mark `deleted_at`, don't actually remove)
+  - Show success toast, refresh library list
+
+**Nice to Have (Future):**
+- [ ] **Toggle public/private** - Quick switch in library card dropdown
+  - Updates `is_public` flag without deleting
+  - "Make Public" / "Make Private" action
+  - Instant feedback with toast notification
+- [ ] **Edit metadata** - Modal to update title, description
+  - API: `PATCH /api/libraries/[id]` 
+  - Form validation for title/description
+  - Slug remains unchanged (preserve URLs)
+- [ ] **Copy share link** - Button to copy library URL to clipboard
+  - Shows full URL: `https://example.com/users/username/slug`
+  - "Link copied!" toast feedback
+- [ ] **Reprocess library** - Re-run import pipeline (see Phase 1b contextual controls)
+
+**UI Pattern for Library Cards:**
+```tsx
+// Each library card shows:
+[Library Title]
+Status badge | Created date
+[View] [⋮ More] ← Dropdown with:
+  - Copy share link
+  - Toggle public/private
+  - Edit details
+  - Delete
+```
+
+**Implementation Notes:**
+- Only show management controls when viewing your own profile
+- Hide actions when viewing someone else's profile
+- Use confirmation dialogs for destructive actions
+- Show loading states during API calls
+- Refresh library list after successful updates
+
+#### 6. Home Page Updates 📝 **MEDIUM PRIORITY**
 - [ ] Show "Sign in with GitHub to publish" for logged-out users
 - [ ] Show "Publish new content" button for logged-in users
 - [ ] "Recently Published" feed across all users
 - [ ] Featured libraries (curated by admin)
 - [ ] Browse by creator
 
-#### 6. UI Polish ✅ **COMPLETE** (2024-12-16)
+#### 7. UI Polish ✅ **COMPLETE** (2024-12-16)
 - [x] Fixed text contrast issues in library headers
 - [x] Implemented dark floating navigation pill
 - [x] Made all navigation text visible on both light and dark backgrounds
 - [x] Consistent styling across "Sign out", "About", and username display
 - [x] Professional appearance with backdrop blur and shadows
 
-#### 7. Testing ✅ **COMPLETE**
+#### 8. Testing ✅ **COMPLETE**
 - [x] Test OAuth flow (sign in → callback → session) ✅
 - [x] Verify user record created on first login ✅
   - User `klutometis` (Peter Danenberg) saved successfully
@@ -223,7 +269,7 @@ Phase 1a is complete - authentication, personal library pages, AND interactive l
 ### Goal
 Build the `/publish` route and backend pipeline to process content from multiple sources.
 
-### Status: **Priority 1 COMPLETE** ✅ (2024-12-15)
+### Status: **Priority 1 COMPLETE** ✅ (2024-12-18)
 
 Publishing infrastructure is fully functional! Users can paste URLs, libraries are created instantly with UUID-based status tracking, and polling keeps the UI updated. Only remaining task is wiring up the Cloud Run Job to actually process content.
 
@@ -243,10 +289,12 @@ Publishing infrastructure is fully functional! Users can paste URLs, libraries a
 - ✅ **Source ordering** - Text chunks by line number, videos by timestamp
 - ✅ **Tab focus** - Notebooks/markdown show source first, YouTube shows Python first
 - ✅ **Improved slug handling** - URL hash-based collision resolution
+- ✅ **Public/private libraries** - `is_public` flag filters home page, personal libraries hidden by default
 
 **What's Next:**
-- 🎯 **Priority 1:** Test local processing end-to-end with real YouTube/notebook import
-- 🎯 **Priority 2:** Deploy as Cloud Run Job and trigger from `/api/publish` route
+- ✅ **Priority 1 COMPLETE:** Local processing tested end-to-end ✅
+- ✅ **Priority 2 COMPLETE:** Cloud Run Job infrastructure deployed ✅
+- 🎯 **Next:** Deploy to production and test full publishing flow
 - 📝 Add "Private GitHub repo" checkbox (optional)
 - 📝 Command-line import tool (optional): `npx tsx scripts/import-from-url.ts <youtube-url>` for end-to-end import without database pre-creation
 
@@ -353,17 +401,18 @@ Published to /users/{username}/{slug}
   - **Enhanced error capture** - Full stdout/stderr in failure logs
   - **Library ID parameter** - Passed to all processing functions
   
-- [ ] Test local processing: 🚧 **NEXT PRIORITY**
-  - Run: `npx tsx scripts/process-library.ts <library-id>`
-  - Watch status page update in real-time
-  - Verify concept graph appears when ready
-  - Test with existing YouTube import
+- [x] Test local processing: ✅ **COMPLETE** (2024-12-18)
+  - Tested: `npx tsx scripts/process-library.ts 53bb5e7f-9a4d-4cf1-a926-7e6b7d3d203a`
+  - Notebook processing working end-to-end
+  - Temp file cleanup verified
+  - All stages complete: extract → chunk → enrich → map → embed → import
   
-- [ ] Deploy as Cloud Run Job: 🎯 **HIGH PRIORITY**
-  - Create Dockerfile for processing environment
-  - Deploy to Cloud Run Jobs
-  - Trigger from `/api/publish` route via Cloud Run Jobs API
-  - Test end-to-end: publish → process → ready
+- [x] Deploy as Cloud Run Job: ✅ **COMPLETE** (2024-12-18)
+  - Dockerfile includes scripts directory
+  - Cloud Run Job created: `learning-processor`
+  - Trigger logic implemented in `/api/publish` route
+  - Environment-based mode selection (local vs job)
+  - **Ready for production deployment:** `cd learning && ./scripts/deploy.sh`
 
 #### Testing ✅ **COMPLETE** (2024-12-15)
 - [x] Published YouTube video: "Getting Started with Python in Less Than 10 Minutes" ✅

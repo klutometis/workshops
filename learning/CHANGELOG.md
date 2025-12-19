@@ -8,6 +8,117 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2024-12-18 - Cloud Run Job Infrastructure & Public/Private Libraries
+
+**Progress:** Completed Cloud Run Job deployment infrastructure for background processing. Libraries now use public/private filtering with isolated temp directories.
+
+#### Added - Cloud Run Job Support
+- **Background processing modes** (`app/api/publish/route.ts`):
+  - `PROCESSING_MODE=local` - Spawns background process (development)
+  - `PROCESSING_MODE=job` - Triggers Cloud Run Job (production)
+  - Automatic mode detection with graceful fallback
+- **Cloud Run Job deployment** (`scripts/deploy.sh`):
+  - Creates/updates `learning-processor` job with 2Gi memory, 2 CPU
+  - 1-hour timeout for long-running imports
+  - Passes `LIBRARY_ID` via environment variable
+  - Max 1 retry on failure
+- **Job execution entry point** (`scripts/process-library.ts`):
+  - Reads `LIBRARY_ID` from env var (Cloud Run) or argv (local CLI)
+  - Isolated temp directories per library (`/tmp/{type}/{libraryId}`)
+  - Automatic cleanup in finally blocks
+  - `KEEP_TEMP_FILES=true` flag for debugging
+- **Docker image updates** (`Dockerfile`):
+  - Scripts directory copied to image (required for job execution)
+  - Full pipeline available in Cloud Run environment
+- **Development environment** (`scripts/dev.sh`):
+  - Cloud Run Job configuration variables
+  - Processing mode selection
+  - Temp file cleanup status indicator
+
+#### Added - Public/Private Library Filtering
+
+#### Added
+- **`getPublicLibraries()` function** (`lib/db.ts`):
+  - Filters libraries by `is_public = true`
+  - Used by home page to show only canonical libraries
+  - Keeps `getAllLibraries()` available for admin/internal use
+- **Home page filtering** (`app/api/libraries/route.ts`):
+  - Changed from `getAllLibraries()` to `getPublicLibraries()`
+  - Home page now shows only public canonical libraries
+  - Personal libraries hidden unless explicitly made public
+
+#### Changed
+- **Default library visibility** (`lib/db.ts`):
+  - Changed `createLibrary()` default from `is_public = true` to `is_public = false`
+  - New personal libraries are now private by default
+  - Prevents cluttering home page with exercise imports
+  - Canonical libraries must explicitly set `is_public: true`
+
+#### Fixed
+- **Home page clutter**:
+  - Personal exercise libraries (01-STRINGS-EXERCISE, PYTHONINTROCH1) no longer appear
+  - Canonical libraries (CHERYL, SPELLINGBEE, SUDOKU, etc.) remain visible
+  - Clean separation between curated content and personal work
+
+#### Database Changes
+- Set canonical libraries to public:
+  ```sql
+  UPDATE libraries SET is_public = true 
+  WHERE slug IN ('cheryl', 'spellingbee', 'sudoku', 
+                 'poker-ranking-hands-etc', 'how-to-count-things',
+                 'the-traveling-salesperson-problem');
+  ```
+- Personal libraries remain private by default
+
+#### Architecture Benefits
+- ✅ **Clean home page** - Only curated, high-quality libraries shown
+- ✅ **Private by default** - Personal work stays hidden unless shared
+- ✅ **Flexible visibility** - Can later add UI to toggle public/private
+- ✅ **Admin control** - Can curate which libraries appear on home page
+
+#### Testing
+- ✅ Verified home page shows only 6 canonical libraries
+- ✅ Confirmed personal libraries filtered out
+- ✅ Checked database query returns correct `is_public` values
+- ✅ New libraries will be private by default
+
+#### Fixed - Critical Bugs
+- **Typo in file download** (`lib/processing.ts`):
+  - Fixed `createWriteeStream` → `createWriteStream`
+  - Would have caused all markdown/notebook downloads to fail
+
+#### Architecture Benefits - Cloud Run Jobs
+- ✅ **Decoupled processing** - Long-running imports don't block API responses
+- ✅ **Isolated execution** - Each library processes in its own temp directory
+- ✅ **Automatic cleanup** - Temp files deleted after completion
+- ✅ **Flexible deployment** - Same code works locally and in Cloud Run
+- ✅ **Debuggable** - `KEEP_TEMP_FILES=true` preserves artifacts for inspection
+
+#### Architecture Benefits - Public/Private Libraries
+- ✅ **Clean home page** - Only curated, high-quality libraries shown
+- ✅ **Private by default** - Personal work stays hidden unless shared
+- ✅ **Flexible visibility** - Can later add UI to toggle public/private
+- ✅ **Admin control** - Can curate which libraries appear on home page
+
+#### Testing
+- ✅ Local processing works end-to-end: `npx tsx scripts/process-library.ts <uuid>`
+- ✅ Temp file cleanup verified (both success and failure paths)
+- ✅ Notebook processing complete: 01-strings-exercise imported successfully
+- ✅ Verified home page shows only 6 canonical libraries
+- ✅ Confirmed personal libraries filtered out
+- ✅ New libraries created as private by default
+- ✅ Personal library page shows "Publish New Library" button
+- ✅ Navigation improvements working ("Back to Public Libraries" link)
+
+#### Status
+**Cloud Run Infrastructure Complete** ✅ - Background processing ready for production!
+
+**Public/Private Library System Complete** ✅ - Home page now curated and clean!
+
+🎯 **Next:** Deploy Cloud Run Job to production, test end-to-end publishing flow
+
+---
+
 ### 2024-12-16 - Semantic URL Generation for YouTube Videos
 
 **Progress:** Fixed YouTube video imports to generate stable, semantic URLs from video titles instead of cryptic video IDs. URLs now look like `/users/klutometis/python-in-100-seconds` instead of `/users/klutometis/x7X9w_GIm1s`.

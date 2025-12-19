@@ -107,7 +107,7 @@ gcloud builds submit \
   .
 
 echo ""
-echo -e "${YELLOW}☁️  Deploying to Cloud Run...${NC}"
+echo -e "${YELLOW}☁️  Deploying Cloud Run Service (API/Web)...${NC}"
 gcloud run deploy "${SERVICE_NAME}" \
   --image="${IMAGE_URL}" \
   --region="${REGION}" \
@@ -118,7 +118,7 @@ gcloud run deploy "${SERVICE_NAME}" \
   --min-instances=0 \
   --max-instances=10 \
   --timeout=300 \
-  --set-env-vars="NODE_ENV=production,GOOGLE_API_KEY=${GOOGLE_API_KEY},DATABASE_URL=${LEARNING_DATABASE_URL},GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID},GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET},NEXTAUTH_SECRET=${NEXTAUTH_SECRET},NEXTAUTH_URL=${NEXTAUTH_URL}" \
+  --set-env-vars="NODE_ENV=production,GOOGLE_API_KEY=${GOOGLE_API_KEY},DATABASE_URL=${LEARNING_DATABASE_URL},GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID},GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET},NEXTAUTH_SECRET=${NEXTAUTH_SECRET},NEXTAUTH_URL=${NEXTAUTH_URL},PROCESSING_MODE=job,CLOUD_RUN_JOB_NAME=learning-processor,CLOUD_RUN_PROJECT_ID=${PROJECT_ID},CLOUD_RUN_REGION=${REGION}" \
   --project="${PROJECT_ID}"
 
 # Get the service URL
@@ -128,10 +128,53 @@ SERVICE_URL=$(gcloud run services describe "${SERVICE_NAME}" \
   --format='value(status.url)')
 
 echo ""
+echo -e "${YELLOW}⚙️  Deploying Cloud Run Job (Background Processor)...${NC}"
+
+JOB_NAME="learning-processor"
+
+# Check if job exists
+if gcloud run jobs describe "${JOB_NAME}" \
+  --region="${REGION}" \
+  --project="${PROJECT_ID}" &>/dev/null; then
+  
+  echo "  Updating existing job ${JOB_NAME}..."
+  gcloud run jobs update "${JOB_NAME}" \
+    --image="${IMAGE_URL}" \
+    --region="${REGION}" \
+    --project="${PROJECT_ID}" \
+    --command="npx" \
+    --args="tsx,scripts/process-library.ts" \
+    --memory=2Gi \
+    --cpu=2 \
+    --max-retries=1 \
+    --task-timeout=3600 \
+    --set-env-vars="NODE_ENV=production,GOOGLE_API_KEY=${GOOGLE_API_KEY},DATABASE_URL=${LEARNING_DATABASE_URL}"
+else
+  echo "  Creating new job ${JOB_NAME}..."
+  gcloud run jobs create "${JOB_NAME}" \
+    --image="${IMAGE_URL}" \
+    --region="${REGION}" \
+    --project="${PROJECT_ID}" \
+    --command="npx" \
+    --args="tsx,scripts/process-library.ts" \
+    --memory=2Gi \
+    --cpu=2 \
+    --max-retries=1 \
+    --task-timeout=3600 \
+    --set-env-vars="NODE_ENV=production,GOOGLE_API_KEY=${GOOGLE_API_KEY},DATABASE_URL=${LEARNING_DATABASE_URL}"
+fi
+
+echo "  Job ${JOB_NAME} deployed ✓"
+
+echo ""
 echo -e "${GREEN}✅ Deployment complete!${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "  Service URL: ${SERVICE_URL}"
+echo -e "  Cloud Run Job: ${JOB_NAME}"
 echo ""
 echo -e "Test your deployment:"
 echo -e "  ${BLUE}curl ${SERVICE_URL}${NC}"
+echo ""
+echo -e "Trigger a job manually (for testing):"
+echo -e "  ${BLUE}gcloud run jobs execute ${JOB_NAME} --region=${REGION} --update-env-vars LIBRARY_ID=<uuid>${NC}"
 echo ""

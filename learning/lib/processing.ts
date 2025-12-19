@@ -131,7 +131,7 @@ export async function processYouTubeVideo(
   onProgress?: ProgressCallback
 ): Promise<ProcessingResult> {
   const videoId = extractVideoId(urlOrId);
-  const videoDir = path.join(process.cwd(), 'youtube', videoId);
+  const videoDir = path.join('/tmp', 'youtube', videoId);
   
   try {
     // Stage 1: Download video (with audio using yt-dlp)
@@ -390,10 +390,10 @@ export async function processMarkdownFile(
     );
   }
   
-  // Generate slug and work directory
+  // Generate slug and work directory (use libraryId for isolation)
   const fileName = path.basename(filePath, '.md');
   const slug = fileName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  const workDir = path.join(process.cwd(), 'markdown', slug);
+  const workDir = path.join('/tmp', 'markdown', libraryId);
   
   try {
     // Create work directory
@@ -699,8 +699,8 @@ export async function processJupyterNotebook(
         );
       }
       
-      // Create temp directory
-      const tempDir = path.join(process.cwd(), 'temp', 'notebooks');
+      // Create temp directory (use libraryId for isolation)
+      const tempDir = path.join('/tmp', 'notebooks', libraryId);
       if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir, { recursive: true });
       }
@@ -747,11 +747,11 @@ export async function processJupyterNotebook(
       );
     }
     
-    // Save both versions to work directory
+    // Save both versions to work directory (use libraryId for isolation)
     const slug = path.basename(fileName, '.ipynb')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-');
-    const workDir = path.join(process.cwd(), 'markdown', slug);
+    const workDir = path.join('/tmp', 'markdown', libraryId);
     
     if (!fs.existsSync(workDir)) {
       fs.mkdirSync(workDir, { recursive: true });
@@ -763,20 +763,16 @@ export async function processJupyterNotebook(
     fs.writeFileSync(rawMarkdownPath, rawMarkdown, 'utf-8');
     fs.writeFileSync(cleanedMarkdownPath, cleanedMarkdown, 'utf-8');
     
-    await onProgress?.('Markdown saved', 25, `Raw: ${rawMarkdownPath}, Cleaned: ${cleanedMarkdownPath}`);
+    await onProgress?.('Markdown saved', 25, `Temp dir: ${workDir}`);
     
     // Stage 3: Process cleaned markdown through pipeline (30-90%)
     // Use cleaned version for LLM processing (concepts, chunks, embeddings)
     
-    // Bridge the gap before markdown processing starts
-    await onProgress?.('Extracting concepts', 30);  // Fixed: Remove custom message so percentage formatting works
-    
     // Wrap the markdown progress callback to offset percentages (30-90%)
-    const wrappedProgress: ProgressCallback = (stage, percent, message) => {
+    const wrappedProgress: ProgressCallback = async (stage, percent, message) => {
       // Map 0-95 from markdown processing to 30-90 in notebook processing
       const adjustedPercent = 30 + Math.floor(percent * 0.63);
-      // Don't pass custom messages to allow proper percentage formatting
-      onProgress?.(stage, adjustedPercent);
+      await onProgress?.(stage, adjustedPercent);
     };
     
     // Run all markdown processing steps on cleaned version (no images)
@@ -784,35 +780,35 @@ export async function processJupyterNotebook(
       // Extract concepts
       const conceptGraphPath = path.join(workDir, 'concept-graph.json');
       if (!fs.existsSync(conceptGraphPath)) {
-        wrappedProgress('Extracting concepts', 20);
+        await wrappedProgress('Extracting concepts', 20);
         runScript('scripts/markdown/extract-concepts.ts', [cleanedMarkdownPath]);
       }
       
       // Chunk markdown
       const chunksPath = path.join(workDir, 'chunks.json');
       if (!fs.existsSync(chunksPath)) {
-        wrappedProgress('Chunking markdown', 40);
+        await wrappedProgress('Chunking markdown', 40);
         runScript('scripts/markdown/chunk-markdown.ts', [cleanedMarkdownPath]);
       }
       
       // Enrich concepts
       const enrichedConceptPath = path.join(workDir, 'concept-graph-enriched.json');
       if (!fs.existsSync(enrichedConceptPath)) {
-        wrappedProgress('Enriching concepts', 60);
+        await wrappedProgress('Enriching concepts', 60);
         runScript('scripts/markdown/enrich-concepts.ts', [cleanedMarkdownPath]);
       }
       
       // Map chunks to concepts
       const mappingsPath = path.join(workDir, 'chunk-concept-mappings.json');
       if (!fs.existsSync(mappingsPath)) {
-        wrappedProgress('Mapping chunks to concepts', 70);
+        await wrappedProgress('Mapping chunks to concepts', 70);
         runScript('scripts/markdown/map-chunks-to-concepts.ts', [cleanedMarkdownPath]);
       }
       
       // Generate embeddings
       const embeddingsPath = path.join(workDir, 'chunk-embeddings.json');
       if (!fs.existsSync(embeddingsPath)) {
-        wrappedProgress('Generating embeddings', 80);
+        await wrappedProgress('Generating embeddings', 80);
         runScript('scripts/markdown/embed-chunks.ts', [cleanedMarkdownPath]);
       }
     } catch (error: any) {

@@ -23,9 +23,8 @@ async function main() {
     process.exit(1);
   }
   
-  // Setup output directory
-  const basename = path.basename(markdownPath, '.md');
-  const markdownDir = path.join(process.cwd(), 'markdown', basename);
+  // Setup output directory - use the directory where the markdown file actually is
+  const markdownDir = path.dirname(markdownPath);
   
   if (!fs.existsSync(markdownDir)) {
     fs.mkdirSync(markdownDir, { recursive: true });

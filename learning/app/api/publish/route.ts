@@ -254,19 +254,55 @@ export async function POST(request: NextRequest) {
     console.log(`🔗 URL: /users/${username}/${slug}`);
 
     // 7. Trigger background processing
+    const processingMode = process.env.PROCESSING_MODE || 'local';
+    
     try {
-      const { spawn } = await import('child_process');
-      
-      // Spawn processor as detached background process
-      const child = spawn('npx', ['tsx', 'scripts/process-library.ts', library.id], {
-        detached: true,
-        stdio: 'ignore', // Don't capture output
-        cwd: process.cwd(),
-      });
-      
-      child.unref(); // Allow API to respond without waiting
-      
-      console.log(`🚀 Background processing started for library ${library.id}`);
+      if (processingMode === 'job') {
+        // Production: Trigger Cloud Run Job
+        console.log(`🚀 Triggering Cloud Run Job for library ${library.id}...`);
+        
+        const { RunsClient } = await import('@google-cloud/run');
+        const client = new RunsClient();
+        
+        const projectId = process.env.CLOUD_RUN_PROJECT_ID;
+        const region = process.env.CLOUD_RUN_REGION;
+        const jobName = process.env.CLOUD_RUN_JOB_NAME || 'learning-processor';
+        
+        if (!projectId || !region) {
+          throw new Error('CLOUD_RUN_PROJECT_ID and CLOUD_RUN_REGION must be set when PROCESSING_MODE=job');
+        }
+        
+        const name = `projects/${projectId}/locations/${region}/jobs/${jobName}`;
+        
+        await client.runJob({
+          name,
+          overrides: {
+            containerOverrides: [{
+              env: [
+                { name: 'LIBRARY_ID', value: library.id }
+              ]
+            }]
+          }
+        });
+        
+        console.log(`✅ Cloud Run Job triggered successfully for library ${library.id}`);
+        
+      } else {
+        // Local development: Spawn background process
+        console.log(`🚀 Spawning local background process for library ${library.id}...`);
+        
+        const { spawn } = await import('child_process');
+        
+        const child = spawn('npx', ['tsx', 'scripts/process-library.ts', library.id], {
+          detached: true,
+          stdio: 'ignore', // Don't capture output
+          cwd: process.cwd(),
+        });
+        
+        child.unref(); // Allow API to respond without waiting
+        
+        console.log(`✅ Local background processor spawned for library ${library.id}`);
+      }
     } catch (error) {
       console.error('⚠️  Failed to start background processing:', error);
       // Don't fail the request - library is created, user can retry processing

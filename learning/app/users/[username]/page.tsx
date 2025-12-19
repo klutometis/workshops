@@ -17,17 +17,22 @@
 import { notFound } from 'next/navigation';
 import { getUserByUsername, getLibrariesByUsername } from '@/lib/db';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { ArrowLeft, Plus } from 'lucide-react';
 
 export default async function UserPage({ params }: { params: Promise<{ username: string }> }) {
   // Await params (Next.js 15 requirement)
   const { username } = await params;
   
-  // Fetch user and their libraries in parallel
-  const [user, libraries] = await Promise.all([
+  // Fetch user, libraries, and session in parallel
+  const [user, libraries, session] = await Promise.all([
     getUserByUsername(username),
-    getLibrariesByUsername(username)
+    getLibrariesByUsername(username),
+    getServerSession(authOptions)
   ]);
 
   // 404 if user doesn't exist
@@ -35,8 +40,26 @@ export default async function UserPage({ params }: { params: Promise<{ username:
     notFound();
   }
 
+  // Check if viewing own profile
+  console.log('🔍 Debug session:', {
+    sessionUser: session?.user,
+    username,
+    comparison: session?.user?.username === username
+  });
+  const isOwnProfile = session?.user?.username === username;
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Navigation Header */}
+      <div className="mb-8">
+        <Link href="/">
+          <Button variant="ghost" size="sm" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Public Libraries
+          </Button>
+        </Link>
+      </div>
+
       {/* User Profile Header */}
       <div className="mb-8 flex items-center gap-6">
         {user.github_avatar && (
@@ -59,10 +82,19 @@ export default async function UserPage({ params }: { params: Promise<{ username:
       </div>
 
       {/* Libraries Section */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold mb-4">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-2xl font-semibold">
           Public Libraries ({libraries.length})
         </h2>
+        
+        {isOwnProfile && (
+          <Link href="/publish">
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Publish New Library
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Empty State */}

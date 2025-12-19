@@ -11,11 +11,17 @@
  * 4. Exits with code 0 (success) or 1 (failure)
  * 
  * Works identically in local dev and Cloud Run environments.
+ * 
+ * All temporary files are written to /tmp (Cloud Run writable directory)
+ * and cleaned up after processing completes.
  */
 
 import pool from '../lib/db';
 import path from 'path';
 import fs from 'fs/promises';
+
+// Environment flags
+const KEEP_TEMP_FILES = process.env.KEEP_TEMP_FILES === 'true';
 
 // Database logging helper - appends to processing_logs JSONB array
 async function logToDatabase(
@@ -191,48 +197,107 @@ async function processYouTube(libraryId: string, sourceUrl: string, slug: string
     throw new Error('Invalid YouTube URL');
   }
 
-  console.log(`🎬 Processing YouTube video: ${videoId}\n`);
+  const workDir = path.join('/tmp', 'youtube', videoId);
 
-  // Import the existing YouTube processing modules
-  const { processYouTubeVideo } = await import('../lib/processing');
+  try {
+    console.log(`🎬 Processing YouTube video: ${videoId}\n`);
 
-  // Run the full YouTube pipeline with progress callback
-  const result = await processYouTubeVideo(sourceUrl, async (stage, percent, message) => {
-    const progressMsg = message || `${stage}: ${percent}%`;
-    await updateProgress(libraryId, progressMsg, stage);
-  });
-  
-  return result;
+    // Import the existing YouTube processing modules
+    const { processYouTubeVideo } = await import('../lib/processing');
+
+    // Run the full YouTube pipeline with progress callback
+    const result = await processYouTubeVideo(sourceUrl, async (stage, percent, message) => {
+      const progressMsg = message || `${stage}: ${percent}%`;
+      await updateProgress(libraryId, progressMsg, stage);
+    });
+    
+    return result;
+    
+  } finally {
+    // Clean up temporary files (unless KEEP_TEMP_FILES=true)
+    if (KEEP_TEMP_FILES) {
+      console.log(`🔍 Debug mode: Keeping temp files at ${workDir}`);
+    } else {
+      try {
+        await fs.rm(workDir, { recursive: true, force: true });
+        console.log(`🧹 Cleaned up: ${workDir}`);
+      } catch (error) {
+        console.warn(`⚠️  Failed to clean up ${workDir}:`, error);
+      }
+    }
+  }
 }
 
 // Markdown processing pipeline
 async function processMarkdown(libraryId: string, sourceUrl: string, slug: string) {
-  console.log(`📄 Processing markdown: ${sourceUrl}\n`);
+  const workDir = path.join('/tmp', 'markdown', libraryId);
 
-  const { processMarkdownFile } = await import('../lib/processing');
+  try {
+    console.log(`📄 Processing markdown: ${sourceUrl}\n`);
 
-  // Run the markdown pipeline with progress callback
-  const result = await processMarkdownFile(sourceUrl, libraryId, async (stage, percent, message) => {
-    const progressMsg = message || `${stage}: ${percent}%`;
-    await updateProgress(libraryId, progressMsg, stage);
-  });
-  
-  return result;
+    const { processMarkdownFile } = await import('../lib/processing');
+
+    // Run the markdown pipeline with progress callback
+    const result = await processMarkdownFile(sourceUrl, libraryId, async (stage, percent, message) => {
+      const progressMsg = message || `${stage}: ${percent}%`;
+      await updateProgress(libraryId, progressMsg, stage);
+    });
+    
+    return result;
+    
+  } finally {
+    // Clean up temporary files (unless KEEP_TEMP_FILES=true)
+    if (KEEP_TEMP_FILES) {
+      console.log(`🔍 Debug mode: Keeping temp files at ${workDir}`);
+    } else {
+      try {
+        await fs.rm(workDir, { recursive: true, force: true });
+        console.log(`🧹 Cleaned up: ${workDir}`);
+      } catch (error) {
+        console.warn(`⚠️  Failed to clean up ${workDir}:`, error);
+      }
+    }
+  }
 }
 
 // Notebook processing pipeline
 async function processNotebook(libraryId: string, sourceUrl: string, slug: string) {
-  console.log(`📓 Processing Jupyter notebook: ${sourceUrl}\n`);
+  const workDir = path.join('/tmp', 'markdown', libraryId);
+  const notebookDir = path.join('/tmp', 'notebooks', libraryId);
 
-  const { processJupyterNotebook } = await import('../lib/processing');
+  try {
+    console.log(`📓 Processing Jupyter notebook: ${sourceUrl}\n`);
 
-  // Run the notebook pipeline (converts to markdown internally) with progress callback
-  const result = await processJupyterNotebook(sourceUrl, libraryId, async (stage, percent, message) => {
-    const progressMsg = message || `${stage}: ${percent}%`;
-    await updateProgress(libraryId, progressMsg, stage);
-  });
-  
-  return result;
+    const { processJupyterNotebook } = await import('../lib/processing');
+
+    // Run the notebook pipeline (converts to markdown internally) with progress callback
+    const result = await processJupyterNotebook(sourceUrl, libraryId, async (stage, percent, message) => {
+      const progressMsg = message || `${stage}: ${percent}%`;
+      await updateProgress(libraryId, progressMsg, stage);
+    });
+    
+    return result;
+    
+  } finally {
+    // Clean up temporary files (both markdown work dir and downloaded notebooks)
+    if (KEEP_TEMP_FILES) {
+      console.log(`🔍 Debug mode: Keeping temp files at ${workDir} and ${notebookDir}`);
+    } else {
+      try {
+        await fs.rm(workDir, { recursive: true, force: true });
+        console.log(`🧹 Cleaned up: ${workDir}`);
+      } catch (error) {
+        console.warn(`⚠️  Failed to clean up ${workDir}:`, error);
+      }
+      
+      try {
+        await fs.rm(notebookDir, { recursive: true, force: true });
+        console.log(`🧹 Cleaned up: ${notebookDir}`);
+      } catch (error) {
+        console.warn(`⚠️  Failed to clean up ${notebookDir}:`, error);
+      }
+    }
+  }
 }
 
 // Helper: Extract YouTube video ID from URL
@@ -251,11 +316,14 @@ function extractYouTubeId(url: string): string | null {
 }
 
 // CLI entry point
-const libraryId = process.argv[2];
+// Check environment variable first (Cloud Run Job), fall back to argv (local CLI)
+const libraryId = process.env.LIBRARY_ID || process.argv[2];
 
 if (!libraryId) {
   console.error('❌ Error: Library ID required\n');
-  console.error('Usage: npx tsx scripts/process-library.ts <library-id>\n');
+  console.error('Usage:\n');
+  console.error('  Local CLI:       npx tsx scripts/process-library.ts <library-id>');
+  console.error('  Cloud Run Job:   LIBRARY_ID=<uuid> npx tsx scripts/process-library.ts\n');
   console.error('Example: npx tsx scripts/process-library.ts 88b2316d-16e1-491f-bc2c-8613b8839b77');
   process.exit(1);
 }

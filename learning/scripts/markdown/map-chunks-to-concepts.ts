@@ -142,9 +142,8 @@ async function mapChunksToConcepts(markdownPath: string): Promise<void> {
   console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
   console.log(`📄 Markdown file: ${markdownPath}\n`);
 
-  // Setup paths
-  const basename = path.basename(markdownPath, '.md');
-  const workDir = path.join(process.cwd(), 'markdown', basename);
+  // Setup paths - use the directory where the markdown file actually is
+  const workDir = path.dirname(markdownPath);
   const chunksPath = path.join(workDir, 'chunks.json');
   const conceptGraphPath = path.join(workDir, 'concept-graph-enriched.json');
   const outputPath = path.join(workDir, 'chunk-concept-mappings.json');

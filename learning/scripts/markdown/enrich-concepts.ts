@@ -48,19 +48,13 @@ type EnrichedConcept = z.infer<typeof enrichedConceptSchema>;
 // Load Input Data
 // ============================================================================
 
-function loadConceptGraph(slug: string): any {
-  const conceptPath = path.join(
-    process.cwd(),
-    `markdown/${slug}/concept-graph.json`
-  );
+function loadConceptGraph(workDir: string): any {
+  const conceptPath = path.join(workDir, "concept-graph.json");
   return JSON.parse(fs.readFileSync(conceptPath, "utf-8"));
 }
 
-function loadChunks(slug: string): any {
-  const chunksPath = path.join(
-    process.cwd(),
-    `markdown/${slug}/chunks.json`
-  );
+function loadChunks(workDir: string): any {
+  const chunksPath = path.join(workDir, "chunks.json");
   return JSON.parse(fs.readFileSync(chunksPath, "utf-8"));
 }
 
@@ -237,7 +231,7 @@ async function enrichConcept(
 // Main Processing Loop
 // ============================================================================
 
-async function enrichConcepts(slug: string, markdownPath: string): Promise<void> {
+async function enrichConcepts(markdownPath: string): Promise<void> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY environment variable not set");
@@ -245,11 +239,12 @@ async function enrichConcepts(slug: string, markdownPath: string): Promise<void>
   
   const ai = new GoogleGenAI({ apiKey });
   
-  console.log(`🎓 Enriching concepts for: ${slug}\n`);
+  const workDir = path.dirname(markdownPath);
+  console.log(`🎓 Enriching concepts in: ${workDir}\n`);
   
   // Load all inputs
-  const conceptGraph = loadConceptGraph(slug);
-  const chunks = loadChunks(slug);
+  const conceptGraph = loadConceptGraph(workDir);
+  const chunks = loadChunks(workDir);
   const fullMarkdown = loadMarkdown(markdownPath);
   
   console.log(`📊 Loaded:`);
@@ -282,10 +277,7 @@ async function enrichConcepts(slug: string, markdownPath: string): Promise<void>
   }
   
   // Save enriched concept graph
-  const outputPath = path.join(
-    process.cwd(),
-    `markdown/${slug}/concept-graph-enriched.json`
-  );
+  const outputPath = path.join(workDir, "concept-graph-enriched.json");
   
   const enrichedGraph = {
     metadata: {
@@ -321,10 +313,7 @@ async function main() {
     process.exit(1);
   }
   
-  // Extract slug from filename
-  const slug = path.basename(markdownPath, '.md');
-  
-  await enrichConcepts(slug, markdownPath);
+  await enrichConcepts(markdownPath);
 }
 
 main().catch(console.error);
