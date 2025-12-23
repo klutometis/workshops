@@ -92,7 +92,7 @@ function runScript(scriptPath: string, args: string[] = []): string {
     
     return execSync(command, { 
       encoding: 'utf-8',
-      stdio: ['inherit', 'pipe', 'pipe'],
+      stdio: ['inherit', 'pipe', 'inherit'],  // Inherit stderr so errors are visible
       maxBuffer: 50 * 1024 * 1024 // 50MB buffer for large outputs
     });
   } catch (error: any) {
@@ -637,7 +637,7 @@ function convertNotebookToMarkdown(notebookPath: string): { raw: string; cleaned
   try {
     // Use uvx with jupyter-core for robust conversion (no global install needed)
     const rawMarkdown = execSync(
-      `uvx --from jupyter-core jupyter nbconvert --to markdown --stdout --no-prompt "${notebookPath}"`,
+      `uvx --from nbconvert jupyter nbconvert --to markdown --stdout --no-prompt "${notebookPath}"`,
       { 
         encoding: 'utf-8',
         maxBuffer: 50 * 1024 * 1024 // 50MB buffer for large notebooks
@@ -782,6 +782,15 @@ export async function processJupyterNotebook(
       if (!fs.existsSync(conceptGraphPath)) {
         await wrappedProgress('Extracting concepts', 20);
         runScript('scripts/markdown/extract-concepts.ts', [cleanedMarkdownPath]);
+        
+        // Verify the script actually created the file
+        if (!fs.existsSync(conceptGraphPath)) {
+          throw new Error(
+            `Concept extraction completed but output not found: ${conceptGraphPath}\n` +
+            `Work dir: ${workDir}\n` +
+            `Markdown: ${cleanedMarkdownPath}`
+          );
+        }
       }
       
       // Chunk markdown
@@ -789,6 +798,10 @@ export async function processJupyterNotebook(
       if (!fs.existsSync(chunksPath)) {
         await wrappedProgress('Chunking markdown', 40);
         runScript('scripts/markdown/chunk-markdown.ts', [cleanedMarkdownPath]);
+        
+        if (!fs.existsSync(chunksPath)) {
+          throw new Error(`Chunking completed but output not found: ${chunksPath}`);
+        }
       }
       
       // Enrich concepts
@@ -796,6 +809,24 @@ export async function processJupyterNotebook(
       if (!fs.existsSync(enrichedConceptPath)) {
         await wrappedProgress('Enriching concepts', 60);
         runScript('scripts/markdown/enrich-concepts.ts', [cleanedMarkdownPath]);
+        
+        if (!fs.existsSync(enrichedConceptPath)) {
+          // List what files ARE in the work directory to help debug
+          const debugInfo = [
+            `Enrichment completed but output not found: ${enrichedConceptPath}`,
+            `Work dir: ${workDir}`,
+            `Markdown: ${cleanedMarkdownPath}`,
+          ];
+          
+          if (fs.existsSync(workDir)) {
+            const files = fs.readdirSync(workDir);
+            debugInfo.push(`Files in work dir: ${files.join(', ')}`);
+          } else {
+            debugInfo.push('Work dir does not exist!');
+          }
+          
+          throw new Error(debugInfo.join('\n'));
+        }
       }
       
       // Map chunks to concepts
@@ -803,6 +834,10 @@ export async function processJupyterNotebook(
       if (!fs.existsSync(mappingsPath)) {
         await wrappedProgress('Mapping chunks to concepts', 70);
         runScript('scripts/markdown/map-chunks-to-concepts.ts', [cleanedMarkdownPath]);
+        
+        if (!fs.existsSync(mappingsPath)) {
+          throw new Error(`Mapping completed but output not found: ${mappingsPath}`);
+        }
       }
       
       // Generate embeddings
@@ -810,6 +845,10 @@ export async function processJupyterNotebook(
       if (!fs.existsSync(embeddingsPath)) {
         await wrappedProgress('Generating embeddings', 80);
         runScript('scripts/markdown/embed-chunks.ts', [cleanedMarkdownPath]);
+        
+        if (!fs.existsSync(embeddingsPath)) {
+          throw new Error(`Embedding completed but output not found: ${embeddingsPath}`);
+        }
       }
     } catch (error: any) {
       throw new ProcessingError(

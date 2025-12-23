@@ -8,6 +8,59 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2024-12-22 - Notebook Processing Pipeline Complete 🎉
+
+**Major Milestone:** Jupyter notebook processing now works end-to-end in production on Cloud Run Jobs! Full pipeline from URL paste to interactive library in ~8 minutes.
+
+#### Fixed - Critical Production Bugs
+- **API key environment variable mismatch** (`scripts/markdown/enrich-concepts.ts`):
+  - Was only checking `GEMINI_API_KEY`
+  - Other scripts check `GOOGLE_API_KEY || GEMINI_API_KEY`
+  - Cloud Run Job has `GOOGLE_API_KEY` set, causing enrichment to fail silently
+  - Now checks both variables like other scripts
+- **Error visibility in script execution** (`lib/processing.ts`):
+  - Changed `stdio: ['inherit', 'pipe', 'pipe']` to `stdio: ['inherit', 'pipe', 'inherit']`
+  - Script stderr now surfaces immediately in logs
+  - Revealed the hidden API key error that was blocking enrichment
+- **File existence diagnostics** (`lib/processing.ts`):
+  - Added directory listing when output files missing after script runs
+  - Shows exactly what files were created vs. expected
+  - Helped identify enrichment stage as the failure point
+
+#### Testing - End-to-End Production Validation
+- ✅ **Library ID:** `53bb5e7f-9a4d-4cf1-a926-7e6b7d3d203a`
+- ✅ **Source:** GitHub Jupyter notebook (learn-python3/01_strings_exercise.ipynb)
+- ✅ **Pipeline stages all successful:**
+  - Notebook download and conversion (instant)
+  - Concept extraction: 58 seconds
+  - Markdown chunking: 15 seconds
+  - **Concept enrichment: 6 minutes 23 seconds** (Gemini API calls for pedagogy)
+  - Chunk-to-concept mapping: 15 seconds
+  - Embedding generation: 4 seconds
+  - Database import: 3 seconds
+- ✅ **Total processing time:** ~8 minutes
+- ✅ **Temp file cleanup:** Both `/tmp/markdown/` and `/tmp/notebooks/` cleaned up
+- ✅ **Library status:** Successfully transitioned `pending` → `processing` → `ready`
+
+#### Performance Notes
+- **Concept enrichment is the bottleneck** (~75% of total time)
+  - Each concept calls Gemini API for learning objectives, mastery indicators, misconceptions
+  - This is expensive but provides high-quality pedagogical metadata
+  - Optimization deferred to Phase 5 (consider batch API, caching, or async processing)
+
+#### Architecture Benefits
+- ✅ **Full visibility** - stderr inheritance reveals all script failures immediately
+- ✅ **Robust error handling** - File existence checks provide detailed diagnostics
+- ✅ **Consistent API key handling** - All scripts now check both environment variables
+- ✅ **Production-ready** - Cloud Run Job handles long-running processing reliably
+
+#### Status
+**Phase 1b COMPLETE** ✅ - Publishing and processing pipeline fully operational in production!
+
+🎯 **Next:** Phase 2 - Python scratchpad UX improvements for workshop attendees
+
+---
+
 ### 2024-12-18 - Cloud Run Job Infrastructure & Public/Private Libraries
 
 **Progress:** Completed Cloud Run Job deployment infrastructure for background processing. Libraries now use public/private filtering with isolated temp directories.

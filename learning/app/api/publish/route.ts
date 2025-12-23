@@ -261,9 +261,6 @@ export async function POST(request: NextRequest) {
         // Production: Trigger Cloud Run Job
         console.log(`🚀 Triggering Cloud Run Job for library ${library.id}...`);
         
-        const { RunsClient } = await import('@google-cloud/run');
-        const client = new RunsClient();
-        
         const projectId = process.env.CLOUD_RUN_PROJECT_ID;
         const region = process.env.CLOUD_RUN_REGION;
         const jobName = process.env.CLOUD_RUN_JOB_NAME || 'learning-processor';
@@ -272,20 +269,41 @@ export async function POST(request: NextRequest) {
           throw new Error('CLOUD_RUN_PROJECT_ID and CLOUD_RUN_REGION must be set when PROCESSING_MODE=job');
         }
         
-        const name = `projects/${projectId}/locations/${region}/jobs/${jobName}`;
+        // Get access token for Google Cloud API
+        const { GoogleAuth } = await import('google-auth-library');
+        const auth = new GoogleAuth({
+          scopes: ['https://www.googleapis.com/auth/cloud-platform']
+        });
+        const client = await auth.getClient();
+        const accessToken = await client.getAccessToken();
         
-        await client.runJob({
-          name,
-          overrides: {
-            containerOverrides: [{
-              env: [
-                { name: 'LIBRARY_ID', value: library.id }
-              ]
-            }]
-          }
+        // Trigger Cloud Run Job via REST API
+        const url = `https://run.googleapis.com/v2/projects/${projectId}/locations/${region}/jobs/${jobName}:run`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            overrides: {
+              containerOverrides: [{
+                env: [{
+                  name: 'LIBRARY_ID',
+                  value: library.id
+                }]
+              }]
+            }
+          })
         });
         
-        console.log(`✅ Cloud Run Job triggered successfully for library ${library.id}`);
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Cloud Run Job failed: ${response.status} ${error}`);
+        }
+        
+        const result = await response.json();
+        console.log(`✅ Cloud Run Job triggered successfully: ${result.name}`);
         
       } else {
         // Local development: Spawn background process

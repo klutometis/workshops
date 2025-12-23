@@ -48,6 +48,22 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Install uv for Jupyter notebook processing as nextjs user
+# This ensures cache and downloads are writable
+RUN apk add --no-cache curl bash
+
+USER nextjs
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Add uv to PATH (installed to ~/.local/bin by default)
+ENV PATH="/home/nextjs/.local/bin:${PATH}"
+
+USER root
+RUN apk del curl bash
+
+USER nextjs
+
 # Copy only necessary files from builder
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -55,6 +71,15 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Copy scripts directory (needed for Cloud Run Jobs)
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+
+# Copy lib directory (needed by scripts)
+COPY --from=builder --chown=nextjs:nodejs /app/lib ./lib
+
+# Copy package files for fresh install
+COPY --from=builder --chown=nextjs:nodejs /app/package.json /app/package-lock.json ./
+
+# Install only production dependencies (scripts need @google/genai, zod, etc.)
+RUN npm install --production
 
 # Copy embeddings and concept data (read-only at runtime)
 COPY --from=builder /app/paip-chapter-1 ./paip-chapter-1

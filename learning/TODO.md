@@ -269,9 +269,9 @@ Status badge | Created date
 ### Goal
 Build the `/publish` route and backend pipeline to process content from multiple sources.
 
-### Status: **Priority 1 COMPLETE** ✅ (2024-12-18)
+### Status: **COMPLETE** ✅ (2024-12-22)
 
-Publishing infrastructure is fully functional! Users can paste URLs, libraries are created instantly with UUID-based status tracking, and polling keeps the UI updated. Only remaining task is wiring up the Cloud Run Job to actually process content.
+**🎉 Phase 1b is COMPLETE!** The entire import pipeline is working end-to-end in production on Cloud Run Jobs!
 
 **What Works:**
 - ✅ `/publish` page with authentication gate
@@ -290,18 +290,34 @@ Publishing infrastructure is fully functional! Users can paste URLs, libraries a
 - ✅ **Tab focus** - Notebooks/markdown show source first, YouTube shows Python first
 - ✅ **Improved slug handling** - URL hash-based collision resolution
 - ✅ **Public/private libraries** - `is_public` flag filters home page, personal libraries hidden by default
+- ✅ **Cloud Run Job working in production** - Successfully processed Jupyter notebook end-to-end (~8 min)
+- ✅ **API key handling fixed** - All scripts check both GOOGLE_API_KEY and GEMINI_API_KEY
+- ✅ **Error surfacing working** - stderr inheritance reveals script failures immediately
+- ✅ **Temp file cleanup verified** - Both markdown and notebook temp dirs cleaned up
 
-**What's Next:**
-- ✅ **Priority 1 COMPLETE:** Local processing tested end-to-end ✅
-- ✅ **Priority 2 COMPLETE:** Cloud Run Job infrastructure deployed ✅
-- 🎯 **Next:** Deploy to production and test full publishing flow
-- 📝 Add "Private GitHub repo" checkbox (optional)
-- 📝 Command-line import tool (optional): `npx tsx scripts/import-from-url.ts <youtube-url>` for end-to-end import without database pre-creation
+**Performance Notes:**
+- 📊 Concept enrichment takes ~6 minutes (Gemini API calls for pedagogical metadata)
+- 📊 Total processing time: ~8 minutes for typical notebook
+- 🎯 Enrichment performance optimization deferred to Phase 5
+
+**Future Enhancements (Optional):**
+- 📝 Add "Private GitHub repo" checkbox
+- 📝 Command-line import tool: `npx tsx scripts/import-from-url.ts <url>`
 
 **Note on Slug Generation:** ✅ **FIXED** (2024-12-16)
 - ✅ All new imports get semantic slugs: `python-in-100-seconds` instead of `x7X9w_GIm1s`
 - ✅ Re-importing updates old libraries to semantic slugs
 - ✅ Slugs remain stable throughout processing (never overwritten)
+
+**Success Criteria:** ✅ **ALL COMPLETE**
+- ✅ Users can publish from `/publish` page
+- ✅ YouTube videos process end-to-end
+- ✅ Jupyter notebooks process end-to-end (Cloud Run production test successful)
+- ✅ Markdown files process end-to-end
+- ✅ Status page polls and updates in real-time
+- ✅ Libraries appear at `/users/{username}/{slug}` when ready
+- ✅ Interactive learning experience works with imported content
+- ✅ Cloud Run Job handles long-running processing (~8 min typical)
 
 ### Architecture
 **GitHub-authenticated publishing:** All imports require sign-in and create libraries owned by that user.
