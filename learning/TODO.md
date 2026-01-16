@@ -741,6 +741,13 @@ Improve the Python scratchpad UX for learners working through exercises and exam
 - [ ] Add "Debug tips" for common errors
 - [ ] Syntax validation before execution
 
+#### 7. Project Mode Integration 🎯 **NEW - FROM PHASE 6**
+- [ ] **Multi-file code organization** - Support multiple Python files in scratchpad
+- [ ] **Checkpoint system** - Save progress at project milestones
+- [ ] **Connect to project goals** - Link scratchpad exercises to coherent projects
+- [ ] **Project navigation** - Switch between exercise steps
+- [ ] **Progress tracking** - Visual indicator of project completion
+
 ### Proposed Layout
 
 ```
@@ -988,6 +995,236 @@ This is working as intended, but there are opportunities to improve retrieval pr
 - Fewer generic segments in top-3 results
 - Improved student engagement in Socratic dialogues
 - Reduced need for fallback context
+
+---
+
+## Phase 6: Pedagogical Improvements & Project-Based Learning
+
+### Goal
+Balance Socratic questioning with material access, and enable coherent project-based exercises.
+
+### Context (From 2024-12-22 Meeting with Peter Norvig)
+**Key Insights:**
+- Students frustrated by lack of access to reading material during dialogue
+- Current system too question-heavy; need better balance
+- "Too easy" feedback - students not building anything substantial
+- LLMs can easily write functions, but can't do conceptual work
+- Need exercises like "define concept in your own words" vs "write this function"
+- Missing: Coherent projects that stitch fragments together (e.g., robot control)
+
+### Tasks
+
+#### 1. Material Access During Dialogue ⚡ **HIGH PRIORITY**
+- [ ] **Add "View Source" button in Socratic dialogue** - Quick access to relevant segments
+- [ ] **Show material preview in dialogue** - Expandable sections with context
+- [ ] **Balance question types**:
+  - More "define in your own words" conceptual questions
+  - Fewer "implement this function" questions (LLMs can do this)
+- [ ] **Adjust system prompt** - Encourage more reading before questioning
+- [ ] **Add "Read more" suggestions** - Direct students to relevant material
+
+#### 2. Project-Based Learning Framework 🎯 **GOAL: THIS FRIDAY**
+
+##### 2a. Function Extraction & Unit Testing (New - 2026-01-16)
+
+**Context:** Enable unit test-based mastery demonstration. Students can click "I got this" and go straight to coding exercises with automated test feedback.
+
+**Key Architectural Decision:**
+Extract a **complete, coherent, runnable program** from the notebook FIRST, then map functions to concepts. This ensures:
+- ✅ **Coherence** - Functions work together (dependencies intact)
+- ✅ **Completeness** - All imports, type aliases, helpers included
+- ✅ **Testability** - Can verify the extracted program runs
+- ✅ **Monkey-patchable** - Student implements one function, we test it in the context of the complete working program
+
+**Example:** TSP notebook → `tsp_complete.py` (200-300 lines) → Parse out 15-20 functions → Associate with concepts → Generate tests that use complete program context
+
+**Database Schema:**
+- [ ] Create `library_programs` table:
+  - `id`, `library_id` (UNIQUE), `program_code`, `language`
+  - `metadata` (JSONB - version, extracted_at)
+  - Stores complete, coherent, runnable program extracted from notebook
+- [ ] Create `concept_functions` table:
+  - `id`, `library_id`, `concept_id`, `function_name`
+  - `function_signature`, `function_body`, `docstring`
+  - `line_start`, `line_end` (position in complete program)
+  - `dependencies` (TEXT[] - function names this function calls)
+  - `test_cases` (JSONB - generated unit tests)
+- [ ] Create migration script and apply to database
+- [ ] Add indexes: `idx_concept_functions_library_id`, `idx_concept_functions_concept_id`
+
+**Program Extraction Pipeline (Two Stages):**
+
+**Stage 5a: Extract Complete Program** ✅ **COMPLETE**
+- [x] Write `scripts/extract-program.ts`:
+  - Use Gemini to extract all executable code from notebook
+  - Prompt: "Extract a complete, runnable Python program from this notebook"
+  - Preserve imports, type aliases, helper functions, all algorithms
+  - Output: Complete Python file that can run standalone
+  - **Add verification tests** - Simple smoke tests to validate extraction:
+    - Functions exist and are callable
+    - Basic sanity checks (e.g., `nearest_neighbor(cities)` returns valid tour)
+    - If verification fails, use auto-fix loop (up to 3 attempts)
+  - **Auto-fix loop** - Send errors back to Gemini for fixing
+- [x] Test on TSP notebook:
+  - Produced 356 lines of working Python code
+  - All functions present and properly ordered (dependencies before usage)
+  - Imports at top, type aliases, then functions
+  - Verification tests pass (after 1-2 fix attempts)
+
+**Stage 5b: Map Functions to Concepts + Generate Mastery Tests**
+- [ ] Write `scripts/map-functions-to-concepts.ts`:
+  - Parse the complete program for function definitions (use AST or regex)
+  - Use Gemini to associate each function with concept(s)
+  - Identify dependencies: which functions call which (AST analysis)
+  - **Generate mastery tests for each function** (3-5 tests per function):
+    - Prompt includes: complete program, function code, associated concept
+    - Tests should verify: correctness, concept understanding, edge cases
+    - Tests must use program context (helpers like `random_cities`, `tour_length`)
+    - Format: `{name, setup, code, points, description}` (see NOTES.md)
+  - Output JSON with function metadata + dependencies + test_cases
+- [ ] Test on TSP complete program:
+  - Should identify ~15-20 functions
+  - Verify concept associations: `nearest_neighbor` → "Greedy Algorithms"
+  - Check dependencies: `nearest_neighbor` calls `distance`, `tour_length`
+  - **Verify test generation quality:**
+    - Each function has 3-5 tests
+    - Tests use program helpers (`random_cities(10, seed=42)`)
+    - Tests check correctness AND concept understanding (e.g., greedy quality)
+    - Tests are deterministic (same seed values)
+
+**Integration into Pipeline:**
+- [ ] Update `lib/processing.ts`:
+  - Add stage 5a: Extract program (55% progress)
+  - Add stage 5b: Map functions (60% progress)
+  - Only runs for notebook/markdown content types
+  - Save complete program to `library_programs` table
+  - Save function mappings to `concept_functions` table
+
+**Retroactive Processing:**
+- [ ] Write `scripts/retroactive-function-extraction.ts`:
+  - Fetch all notebook/markdown libraries from database
+  - Run function extraction on each
+  - Save results to `concept_functions` table
+- [ ] Test on existing TSP library
+- [ ] Run on all libraries (can be done anytime after extraction script is ready)
+
+**API Endpoints:**
+- [ ] `GET /api/libraries/[id]/program` - Fetch complete program code
+  - Returns: `{ programCode: string, language: string }`
+  - Used to pre-load program context in Pyodide
+- [ ] `GET /api/concepts/[id]/exercise` - Fetch exercise for a concept
+  - Returns: `{ function: {...}, programContext: string, testCases: [...] }`
+  - `programContext` = complete program MINUS the target function
+  - Used by coding interface to set up exercise environment
+
+**Coding Interface (Phase 2 Integration):**
+- [ ] Create `CodeMasteryExercise.tsx` component:
+  - Shows concept learning objectives
+  - Code editor with function stub (only target function visible)
+  - "Run Tests" button
+  - Test results display (X/Y passing, with details)
+  - Uses existing Pyodide scratchpad for execution
+- [ ] Integrate with Python scratchpad (monkey-patch approach):
+  - **Pre-load program context** in Pyodide (hidden from student):
+    - `exec(programContext)` - Loads all imports, helpers, dependencies
+    - Student doesn't see this code
+  - **Show only target function** in editor:
+    - Function signature + docstring
+    - Student writes implementation body
+  - **Execute tests** in Pyodide:
+    - Student's function definition runs in context with all dependencies
+    - Tests call student's function with helpers available (`random_cities`, etc.)
+    - Parse test output (pass/fail per test case)
+  - Show progress: "3/5 tests passing"
+- [ ] Handle edge cases:
+  - Syntax errors in student code
+  - Runtime errors during test execution
+  - Infinite loops (timeout after 5 seconds)
+
+**"I Got This" Button Integration:**
+- [ ] Add button to concept UI in InteractiveLibrary:
+  - Shows next to "Start Learning" or in concept graph node
+  - Only visible if concept has associated functions
+- [ ] Implement mode switching:
+  - `setMode('coding')` transitions from dialogue to coding interface
+  - Fetches functions for concept via API
+  - Loads first function as exercise
+- [ ] Handle completion:
+  - Mark concept as mastered when all tests pass
+  - Option to continue to next concept or return to graph
+
+**Success Criteria:**
+- ✅ TSP notebook → complete program (~200-300 lines, verification tests pass)
+- ✅ ~15-20 functions extracted and mapped to concepts
+- ✅ Each function has 3-5 context-aware mastery tests
+- ✅ Tests are deterministic and use program helpers
+- ✅ "I got this" → coding interface with pre-loaded context
+- ✅ Students write target function, tests run in full program context
+- ✅ All tests passing = concept mastered
+- ✅ Test output shows: "✓ test_basic_correctness: PASS" format
+
+**Implementation Priority:** **HIGH** (Peter wants this by Friday)
+
+---
+
+##### 2b. Project-Based Learning (Original Plan)
+- [ ] **Define project structure** - How to represent multi-step coherent projects
+- [ ] **Example: Robot control project** - Stitch together:
+  - Motor control basics
+  - Sensor integration
+  - Navigation algorithms
+  - Complete working robot
+- [ ] **Project database schema** - Store project definitions, milestones, code checkpoints
+- [ ] **Project templates** - Starter projects users can import
+- [ ] **Reference: Exercise notebooks** - Study https://github.com/jerry-git/learn-python3/blob/master/notebooks/beginner/exercises/01_strings_exercise.ipynb
+
+#### 3. Import Metadata & Customization 📝 **MEDIUM PRIORITY**
+- [ ] **Expose system prompts during import** - Let users customize:
+  - Concept extraction instructions
+  - Chunking strategy
+  - Question types to generate
+- [ ] **Metadata fields during import**:
+  - Title (with smart defaults from content)
+  - Abstract/summary (user-provided or AI-generated)
+  - Keywords/tags (for discovery)
+- [ ] **Markdown frontmatter support** - Define simple format:
+  ```markdown
+  ---
+  title: "My Python Tutorial"
+  abstract: "Learn Python basics..."
+  keywords: [python, beginner, tutorial]
+  system_prompt: "Focus on conceptual understanding..."
+  ---
+  # Content starts here...
+  ```
+- [ ] **Metadata form on publish** - Optional fields, not required every time
+- [ ] **Smart defaults** - Extract from content when possible
+
+#### 4. Versioning & Iteration 🔄 **MEDIUM PRIORITY**
+- [ ] **GitHub-style branching** - Inspiration for library versions
+- [ ] **Overwrite vs. Create New** - When re-importing:
+  - Option 1: Overwrite existing library (update in place)
+  - Option 2: Create new version (keep history)
+- [ ] **Version history UI** - Show timeline of updates
+- [ ] **Compare versions** - Diff concept graphs between versions
+
+#### 5. Exercise Design Patterns 📚 **RESEARCH**
+- [ ] **Study effective exercise types**:
+  - ✅ "Define X in your own words" (conceptual, LLM-proof)
+  - ✅ "Explain why Y happens" (understanding)
+  - ❌ "Write function to do Z" (too easy for LLMs)
+  - ✅ "Debug this code" (requires reasoning)
+  - ✅ "Design system architecture" (synthesis)
+- [ ] **Categorize question types** - Tag concepts with difficulty/type
+- [ ] **Adaptive questioning** - Adjust based on student responses
+- [ ] **Project milestones** - Break coherent projects into checkpoints
+
+### Success Criteria
+- Students can access material without leaving dialogue
+- Coherent project example working by Friday
+- Import flow includes metadata customization
+- Exercise types promote conceptual understanding over code generation
+- Code fragments connect into meaningful projects
 
 ---
 

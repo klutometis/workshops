@@ -1,5 +1,485 @@
 # Pedagogical Concept Graph (PCG) - Design Notes
 
+## Function Extraction for Unit Testing (2026-01-16)
+
+### Context: Peter's Project Proposal
+
+Peter wants to extend the current pipeline to support **unit test-based mastery demonstration**. The idea:
+- Take something like the TSP notebook
+- Extract coherent programs/functions from the notebook
+- Associate code fragments with concept nodes
+- Have students write code against unit tests to demonstrate mastery
+- "I got this" button → skip dialogue, go straight to coding
+
+### Good News: Minimal Pipeline Changes Required
+
+The current pipeline already does most of the heavy lifting:
+1. ✅ Extracts concepts from notebooks/markdown
+2. ✅ Chunks content (keeping code + explanatory text together)
+3. ✅ Maps segments to concepts
+4. ✅ Embeds everything for semantic search
+
+### Better Approach: Extract Coherent Program First
+
+**Key Insight:** Instead of extracting functions ad-hoc per concept, extract a **complete, runnable program** from the notebook, then associate functions with concepts.
+
+**Why this is better:**
+1. ✅ **Coherence** - Guarantees functions work together (dependencies intact)
+2. ✅ **Boilerplate included** - Imports, type aliases, helper functions all present
+3. ✅ **Testable** - Can run the complete program to verify correctness
+4. ✅ **Monkey-patchable** - Student implements `nearest_neighbor()`, we can test it by replacing just that function in the working program
+
+**Example: TSP Notebook**
+Looking at the structure:
+- Cell 1: Imports (`itertools`, `random`, `matplotlib`, etc.)
+- Cell 2: Core abstractions (`City = complex`, `distance()`, `tour_length()`, `shortest()`)
+- Cell 3: Utilities (`random_cities()`, `plot_tour()`)
+- Cell 4-N: Algorithms (`exhaustive_tsp()`, `nearest_neighbor()`, `greedy_tsp()`, `two_opt()`, etc.)
+
+**What we extract:**
+```python
+# tsp_complete.py - Generated from notebook
+import itertools
+import random
+# ... all imports
+
+City = complex
+Cities = frozenset
+# ... all type aliases
+
+def distance(A, B): ...
+def tour_length(tour): ...
+# ... all foundational functions
+
+def nearest_neighbor(cities): ...  # ← Student will implement this
+def greedy_tsp(cities): ...
+# ... all algorithms
+```
+
+### Proposed Addition: Two-Stage Extraction
+
+Add **two new optional stages** between "chunk" and "enrich":
+
+```
+Current:  extract → chunk → enrich → map → embed → import
+Proposed: extract → chunk → 
+          [EXTRACT PROGRAM] →      # Stage 5a: Complete runnable code
+          [MAP FUNCTIONS] →         # Stage 5b: Function → concept associations
+          enrich → map → embed → import
+```
+
+**Stage 5a: Extract Complete Program**
+- LLM extracts all executable code from notebook
+- Preserves imports, type aliases, helper functions
+- Output: `tsp_complete.py` (or stored in DB)
+- Can be executed standalone: `python tsp_complete.py`
+
+**Stage 5b: Map Functions to Concepts + Generate Tests**
+- Parse the complete program for function definitions
+- LLM associates each function with concept(s)
+- Identify dependencies (which functions call which)
+- **Generate mastery tests for each function** (see Test Generation Strategy below)
+
+**Database schema addition:**
+```sql
+-- Store the complete, coherent program
+CREATE TABLE library_programs (
+  id SERIAL PRIMARY KEY,
+  library_id INTEGER REFERENCES libraries(id) UNIQUE,
+  program_code TEXT NOT NULL,  -- Complete runnable Python code
+  language TEXT DEFAULT 'python',
+  metadata JSONB  -- Version info, extracted_at, etc.
+);
+
+-- Map individual functions to concepts
+CREATE TABLE concept_functions (
+  id SERIAL PRIMARY KEY,
+  library_id INTEGER REFERENCES libraries(id),
+  concept_id TEXT REFERENCES concepts(id),
+  function_name TEXT NOT NULL,
+  function_signature TEXT,
+  function_body TEXT,
+  docstring TEXT,
+  line_start INTEGER,  -- Position in complete program
+  line_end INTEGER,
+  dependencies TEXT[],  -- Function names this function calls
+  test_cases JSONB  -- Generated unit tests
+);
+```
+
+### Retroactive Processing
+
+Can process existing libraries to extract functions:
+```typescript
+// scripts/retroactive-function-extraction.ts
+const libraries = await getLibrariesByType(['notebook', 'markdown']);
+for (const lib of libraries) {
+  const functions = await extractFunctions(lib.slug, lib.contentType);
+  await saveFunctionsToDb(lib.id, functions);
+}
+```
+
+### Simple Redefinition (No Monkey-Patching Needed!)
+
+**Key Discovery (2026-01-16):** Python's late binding means we don't need to remove the original function - just redefine it!
+
+**How it works:**
+```python
+# In Pyodide scratchpad:
+
+# 1. Load complete program (including original function)
+exec(complete_program_code)
+
+# 2. Student writes their implementation (redefines the function)
+def nearest_neighbor(cities):
+    # Student's code here
+    ...
+
+# 3. Run tests - they use the student's version!
+# Python looks up function names at CALL time, not definition time
+# tour_length() now calls the student's distance(), not the original
+
+test_cases = [
+    {"input": random_cities(10), "expected_quality": "< 15000"},
+    {"input": cities_usa, "expected_quality": "< 50000"}
+]
+```
+
+**Why this works:**
+- ✅ Python's late binding: functions look up names at call time
+- ✅ Redefinition updates the global scope
+- ✅ `tour_length()` calls whatever `distance` is currently defined
+- ✅ Much simpler than monkey-patching!
+
+**Benefits:**
+- ✅ Student only writes the target function
+- ✅ All dependencies available (imports, helpers, types)
+- ✅ Can test complex functions that call other functions
+- ✅ Realistic programming environment
+- ✅ **No need to strip functions from the program**
+
+### Integration Points
+
+**1. API Endpoints:**
+- `GET /api/libraries/[id]/program` - Fetch complete program
+- `GET /api/concepts/[id]/functions` - Fetch functions for a concept
+- Returns: function metadata + which parts of program to pre-load
+
+**2. "I Got This" Button Flow:**
+```tsx
+const handleIGotThis = async (conceptId: string) => {
+  // Fetch the target function and program context
+  const { function, program, testCases } = await fetch(
+    `/api/concepts/${conceptId}/exercise`
+  );
+  
+  setMode('coding');
+  loadExercise({
+    concept,
+    targetFunction: function,
+    programContext: program,  // Everything except target function
+    testCases
+  });
+};
+```
+
+**3. Coding Interface:**
+- Pre-load program context in Pyodide (hidden from student)
+- Show only the target function signature/stub
+- Student writes implementation
+- Run tests that execute in full program context
+- Progress tracking: X/Y tests passing
+- Visual feedback on test results
+
+### Key Benefits
+
+- ✅ **Minimal changes** - One additional extraction stage
+- ✅ **Reuses infrastructure** - Concept mapping, database, API all exist
+- ✅ **Works retroactively** - Can process TSP and other existing notebooks
+- ✅ **Progressive enhancement** - Optional; doesn't break existing flow
+- ✅ **Fits pedagogical vision** - Clear progression: read → dialogue → code
+
+### Example: TSP Notebook
+
+Expected extraction from TSP notebook (~138 cells, 64 code cells):
+- ~15-20 functions (e.g., `distance`, `tour_length`, `nearest_neighbor`, `two_opt`)
+- Associated with concepts: "Euclidean Distance", "Tour Validation", "Greedy Algorithms", "Local Search"
+- Generated tests checking correctness, edge cases, performance
+
+### Implementation Estimate
+
+1. **Prototype function extraction** (1-2 days)
+   - Write `scripts/extract-functions.ts` using Gemini
+   - Test on TSP notebook
+   - Verify concept associations
+
+2. **Database schema** (30 min)
+   - Create table and indexes
+   - Add API endpoint
+
+3. **Coding interface** (2-3 days)
+   - Code editor component
+   - Test runner with Pyodide
+   - Progress/results UI
+
+4. **Wire up "I Got This"** (1 day)
+   - Add button to concept UI
+   - Mode switching logic
+   - Exercise loading
+
+**Total: ~1 week for MVP**
+
+---
+
+## Getting Started: First Steps (2026-01-16)
+
+### Step 1: Manual Prototype (TODAY - 2 hours)
+
+**Goal:** Validate the approach by manually doing what we want the LLM to do
+
+**Tasks:**
+1. **Extract complete program manually** (30 min)
+   - Open `docs/TSP.ipynb`
+   - Copy all code cells into `learning/prototypes/tsp_manual.py`
+   - Order properly: imports → types → helpers → algorithms
+   - Run `python prototypes/tsp_manual.py` - does it work?
+
+2. **Identify one function to test** (15 min)
+   - Pick simple function: `distance(A, B)` or `tour_length(tour)`
+   - Write down: signature, dependencies, concept association
+   - Example: `distance` → concept "Euclidean Distance", no dependencies
+
+3. **Write manual test cases** (30 min)
+   - Create `prototypes/test_tsp_manual.py`
+   - Write 3 tests for chosen function using the complete program context
+   - Example for `distance`:
+     ```python
+     from tsp_manual import City, distance
+     
+     def test_distance_basic():
+         a = City(0, 0)
+         b = City(3, 4)
+         assert distance(a, b) == 5.0
+     
+     def test_distance_symmetric():
+         a = City(10, 20)
+         b = City(30, 40)
+         assert distance(a, b) == distance(b, a)
+     ```
+
+4. **Test monkey-patching approach** (45 min)
+   - Create `prototypes/test_monkey_patch.py`
+   - Load complete program EXCEPT target function
+   - Student writes their implementation
+   - Run tests in that context
+   - Does it work? Any issues?
+   - Example:
+     ```python
+     # Load everything except distance()
+     exec(open('tsp_manual.py').read().replace('def distance', '# def distance'))
+     
+     # Student implementation
+     def distance(A, B):
+         return abs(A - B)  # Their code
+     
+     # Tests run with City, Tour, etc. already defined
+     cities = random_cities(5)
+     assert callable(distance)
+     ```
+
+**Deliverable:** Working manual prototype that proves the approach
+
+**Status:** ✅ **COMPLETE** (2026-01-16)
+- ✅ Extracted complete program to `prototypes/tsp_manual.py` (120 lines)
+- ✅ Program runs successfully with smoke tests
+- ✅ Created manual test suite: `test_tsp_manual.py` (8 tests for 3 functions)
+- ✅ **Discovered simple redefinition works - no monkey-patching needed!**
+- ✅ Validated with `test_simple_append.py` - all 4 tests pass
+
+**Key Learning:** Python's late binding means we just load the complete program, then the student redefines the target function. The redefinition automatically replaces it everywhere!
+
+---
+
+### Step 2: Automate Program Extraction (DAY 2 - 3 hours)
+
+**Goal:** Write script that uses LLM to extract complete program
+
+**Tasks:**
+1. Create `scripts/extract-program.ts`
+2. Test prompt on TSP notebook
+3. Verify extracted program runs
+4. Add verification tests
+
+**Acceptance:** `npx tsx scripts/extract-program.ts docs/TSP.ipynb` produces working Python file
+
+**Status:** ✅ **COMPLETE** (2026-01-16)
+- ✅ Created `scripts/extract-program.ts` with Gemini extraction
+- ✅ Added auto-fix loop (up to 3 attempts) to handle errors
+- ✅ Verification tests with Python execution
+- ✅ Successfully extracted 356-line working program from TSP notebook
+- ✅ Gemini auto-fixed Python 3.13 compatibility (`hash((n, seed))`)
+- ✅ Non-deterministic but works reliably with retry logic
+
+**Key Learning:** Auto-fix loop is essential - first extraction may have errors, but Gemini can fix them when given the error message.
+
+---
+
+### Step 3: Automate Function Mapping (DAY 3 - 4 hours)
+
+**Goal:** Parse program, map functions to concepts, generate tests
+
+**Tasks:**
+1. Create `scripts/map-functions-to-concepts.ts`
+2. Use existing concept graph from database
+3. Generate tests with LLM
+4. Validate test quality
+
+**Acceptance:** TSP has 15-20 functions with 3-5 tests each, stored in JSON
+
+---
+
+### Step 4: Database Integration (DAY 4 - 2 hours)
+
+Create tables and import scripts
+
+---
+
+### Step 5: UI Integration (DAY 5 - Full day)
+
+Build coding interface and wire up "I got this" button
+
+---
+
+## Test Generation Strategy
+
+There are **two types of tests** in this system:
+
+### 1. Verification Tests (During Program Extraction)
+
+**Purpose:** Verify the extracted complete program is correct
+
+**When:** Stage 5a - immediately after extracting `tsp_complete.py`
+
+**What:** Simple smoke tests to validate extraction quality
+```python
+# Verify functions exist and are callable
+assert callable(distance)
+assert callable(tour_length)
+assert callable(nearest_neighbor)
+
+# Basic sanity check
+cities = random_cities(5)
+tour = nearest_neighbor(cities)
+assert valid_tour(tour, cities)
+```
+
+**Storage:** Not stored in database - just used during extraction pipeline
+
+**Result:** If tests fail, extraction failed; don't proceed to Stage 5b
+
+---
+
+### 2. Mastery Tests (For Student Assessment)
+
+**Purpose:** Assess student understanding of a specific concept
+
+**When:** Stage 5b - during function mapping to concepts
+
+**Why generate during Stage 5b:**
+- ✅ **Context-aware** - LLM knows complete program, available helpers, concept being tested
+- ✅ **Deterministic** - Same function always gets same tests (can review/curate)
+- ✅ **Fast for students** - No wait time when clicking "I got this"
+- ✅ **Quality control** - Can manually review/improve tests before students see them
+
+**Generation prompt:**
+```
+Given this complete TSP program and the function `nearest_neighbor` 
+which demonstrates "Greedy Algorithms", generate 3-5 test cases that:
+
+1. Verify correctness (produces valid tour)
+2. Check quality (greedy should find reasonable solutions)
+3. Test edge cases (small inputs, identical cities)
+4. Use available helpers (random_cities, tour_length, etc.)
+
+The tests will run in an environment where all dependencies are pre-loaded.
+Format each test with:
+- name: Brief description
+- setup: Variable initialization (using program helpers)
+- code: Test execution and assertions
+- points: Weight for partial credit
+```
+
+**Example generated tests:**
+```json
+{
+  "function": "nearest_neighbor",
+  "concept": "greedy-algorithms",
+  "test_cases": [
+    {
+      "name": "test_basic_correctness",
+      "setup": "cities = random_cities(10, seed=42)",
+      "code": "tour = nearest_neighbor(cities)\nassert valid_tour(tour, cities)\nassert len(tour) == 10",
+      "points": 1,
+      "description": "Produces a valid tour visiting all cities"
+    },
+    {
+      "name": "test_solution_quality",
+      "setup": "cities = random_cities(20, seed=99)",
+      "code": "tour = nearest_neighbor(cities)\nlength = tour_length(tour)\nassert length < 50000",
+      "points": 2,
+      "description": "Greedy solution should be reasonably short"
+    },
+    {
+      "name": "test_edge_case_two_cities",
+      "setup": "cities = frozenset([City(0, 0), City(100, 100)])",
+      "code": "tour = nearest_neighbor(cities)\nassert len(tour) == 2\nassert tour[0] in cities",
+      "points": 1,
+      "description": "Handles minimal input correctly"
+    }
+  ]
+}
+```
+
+**Storage:** Saved to `concept_functions.test_cases` (JSONB column)
+
+**Execution (when student clicks "I got this"):**
+```python
+# In Pyodide scratchpad:
+
+# 1. Pre-load complete program context (hidden from student)
+exec(program_context)  # distance, tour_length, random_cities, etc. now defined
+
+# 2. Student writes their implementation
+def nearest_neighbor(cities):
+    # Student code here
+    ...
+
+# 3. Run each test case
+passed = 0
+total = len(test_cases)
+
+for test in test_cases:
+    try:
+        exec(test['setup'])  # cities = random_cities(10, seed=42)
+        exec(test['code'])   # tour = nearest_neighbor(cities); assert ...
+        passed += 1
+        print(f"✓ {test['name']}: PASS")
+    except AssertionError as e:
+        print(f"✗ {test['name']}: FAIL - {e}")
+    except Exception as e:
+        print(f"✗ {test['name']}: ERROR - {e}")
+
+print(f"\nScore: {passed}/{total} tests passed")
+```
+
+**Key Benefits:**
+- Tests use the complete program context (`random_cities`, `tour_length`, etc.)
+- Student only implements the target function
+- Tests verify both correctness AND concept understanding (e.g., greedy quality)
+- Deterministic and reviewable before students see them
+
+---
+
 ## Question: Is the PCG a Union of the Three JSON Files?
 
 **Short answer:** Almost, but not quite a simple union!

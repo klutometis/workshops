@@ -8,6 +8,72 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2026-01-16 - Function Extraction Pipeline - Phase 1 Complete 🎉
+
+**Major Milestone:** Built prototype and infrastructure for extracting programs from notebooks and mapping functions to concepts for unit-test-based mastery exercises.
+
+#### Added - Manual Prototype (Step 1)
+- **Complete program extraction** (`prototypes/tsp_manual.py`):
+  - Manually extracted 120-line working TSP program from notebook
+  - Fixed Python 3.13 compatibility issues
+  - Includes all functions, types, helpers
+- **Manual test suite** (`prototypes/test_tsp_manual.py`):
+  - 8 tests for 3 functions (distance, tour_length, valid_tour)
+  - Demonstrates concept-based mastery testing
+- **Simple redefinition validation** (`prototypes/test_simple_append.py`):
+  - Proved no monkey-patching needed!
+  - Python's late binding handles function redefinition automatically
+  - Students can just load complete program, then redefine target function
+
+#### Added - Database Schema (Migration 005)
+- **`library_programs` table** - stores complete extracted programs:
+  - `program_code` TEXT - full runnable Python code
+  - `verified` BOOLEAN - did smoke tests pass
+  - `metadata` JSONB - extraction details
+- **`concept_functions` table** - maps functions to concepts:
+  - Function signature, body, docstring
+  - `dependencies` TEXT[] - functions this function calls
+  - `test_cases` JSONB - mastery tests (3-5 per function)
+  - Line numbers in complete program
+- **Helper functions:**
+  - `get_concept_exercise(library_id, concept_id)` - returns function + tests + program context
+  - `get_library_functions(library_id)` - lists all functions with metadata
+
+#### Added - Automated Program Extraction
+- **`scripts/extract-program.ts`** - extracts complete program from notebook:
+  - Uses Gemini to extract all executable code
+  - Auto-fix loop (up to 3 attempts) handles errors
+  - Verification tests with Python execution
+  - Successfully extracted 356-line working program from TSP.ipynb
+  - Non-deterministic but reliable with retry logic
+- **Key learning:** Gemini can fix its own errors when given error messages
+  - First attempt may have syntax errors
+  - Auto-fix loop catches errors and asks Gemini to fix
+  - Usually succeeds by attempt 2-3
+
+#### Architecture Decisions
+- **Extract complete program first, then map functions** (not ad-hoc extraction per concept)
+  - Guarantees coherence - functions work together
+  - All dependencies (imports, helpers, types) included
+  - Can verify complete program runs before mapping
+- **Simple function redefinition** (not monkey-patching)
+  - Load complete program in Pyodide (including original function)
+  - Student redefines target function
+  - Python's late binding makes it work automatically
+- **Tests in database** (not generated on-the-fly)
+  - Generated once during import (Stage 5b)
+  - Stored in `concept_functions.test_cases` JSONB
+  - Fast for students, deterministic, reviewable
+
+#### Next Steps - Stage 5b
+- Build `scripts/map-functions-to-concepts.ts`
+- Parse extracted program for function definitions
+- Use Gemini to associate functions with concepts
+- Generate test cases (3-5 per function)
+- Store in database
+
+---
+
 ### 2024-12-22 - Notebook Processing Pipeline Complete 🎉
 
 **Major Milestone:** Jupyter notebook processing now works end-to-end in production on Cloud Run Jobs! Full pipeline from URL paste to interactive library in ~8 minutes.
