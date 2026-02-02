@@ -188,6 +188,54 @@ export async function updateLibraryStatus(
   return result.rows[0];
 }
 
+// Helper: Update library metadata
+export async function updateLibrary(
+  libraryId: string,
+  updates: {
+    title?: string;
+    description?: string | null;
+    is_public?: boolean;
+  }
+) {
+  // Build dynamic update query
+  const setClauses: string[] = [];
+  const values: any[] = [];
+  let paramIndex = 1;
+
+  if (updates.title !== undefined) {
+    setClauses.push(`title = $${paramIndex++}`);
+    values.push(updates.title);
+  }
+
+  if (updates.description !== undefined) {
+    setClauses.push(`description = $${paramIndex++}`);
+    values.push(updates.description);
+  }
+
+  if (updates.is_public !== undefined) {
+    setClauses.push(`is_public = $${paramIndex++}`);
+    values.push(updates.is_public);
+  }
+
+  if (setClauses.length === 0) {
+    // No updates provided, return existing library
+    return getLibraryById(libraryId);
+  }
+
+  // Add library ID as final parameter
+  values.push(libraryId);
+
+  const query = `
+    UPDATE libraries 
+    SET ${setClauses.join(', ')}
+    WHERE id = $${paramIndex}
+    RETURNING *
+  `;
+
+  const result = await pool.query(query, values);
+  return result.rows[0] || null;
+}
+
 // Helper: Check if slug exists for a user (for uniqueness)
 export async function isSlugTaken(slug: string, userId?: number) {
   const result = await pool.query(

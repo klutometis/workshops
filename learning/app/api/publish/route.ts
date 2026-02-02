@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Parse request body
     const body = await request.json();
-    const { url, title: customTitle, isPublic = true } = body;
+    const { url, title: customTitle, isPublic = false } = body;
 
     if (!url || typeof url !== 'string') {
       return NextResponse.json(

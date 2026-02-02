@@ -16,13 +16,14 @@
 
 import { notFound } from 'next/navigation';
 import { getUserByUsername, getLibrariesByUsername } from '@/lib/db';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { ArrowLeft, Plus } from 'lucide-react';
+import LibrariesGrid from './LibrariesGrid';
 
 export default async function UserPage({ params }: { params: Promise<{ username: string }> }) {
   // Await params (Next.js 15 requirement)
@@ -113,34 +114,11 @@ export default async function UserPage({ params }: { params: Promise<{ username:
 
       {/* Libraries Grid */}
       {libraries.length > 0 && (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {libraries.map((library: any) => (
-            <Link key={library.id} href={`/users/${username}/${library.slug}`}>
-              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <CardTitle>{library.title}</CardTitle>
-                  <CardDescription>
-                    {library.author}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="capitalize">{library.type}</span>
-                    {library.total_concepts > 0 && (
-                      <span>{library.total_concepts} concepts</span>
-                    )}
-                    {library.status === 'ready' && (
-                      <span className="text-green-600 font-medium">✓ Ready</span>
-                    )}
-                    {library.status === 'processing' && (
-                      <span className="text-yellow-600">⏳ Processing</span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        <LibrariesGrid
+          libraries={libraries}
+          username={username}
+          isOwnProfile={isOwnProfile}
+        />
       )}
     </div>
   );

@@ -998,6 +998,236 @@ This is working as intended, but there are opportunities to improve retrieval pr
 
 ---
 
+## Phase 7: UX Improvements & Metadata Management 🚀 **IN PROGRESS** (2026-02-02)
+
+### Goal
+Improve core user experience and enable library metadata management. Work with Peter Norvig to refine the learning interface.
+
+### Status: **IN PROGRESS** 
+
+**Target:** Complete today (2026-02-02)
+
+### Context (From 2026-02-02 Meeting with Peter Norvig)
+
+**Key Pain Points:**
+- Homepage shows all libraries, but should only show curated public ones
+- No metadata editor for library owners to update title, author, abstract
+- Current lesson flow requires too many clicks (graph → click node → start lesson)
+- Model too rigid about moving students between concepts
+- Students forced to navigate back to graph manually to pick next concept
+
+**Desired Experience:**
+- Library homepage shows only manually-curated public libraries
+- Library owners can edit metadata from their profile page
+- Lesson starts immediately with auto-selected node (no graph navigation)
+- Model seamlessly transitions between concepts
+- Model more flexible about accepting mastery ("I know this" should suffice)
+- Graph becomes supporting tool (modal popup) instead of primary interface
+
+### Tasks
+
+#### 1. About Page Update ⚡ **QUICK WIN** (15 min)
+- [ ] Update `/app/about/page.tsx` with proper origin story:
+  - **Name origin:** "lilpaiper" is a portmanteau of "Little Schemer" and "PAIP"
+  - **Personal significance:** Beloved Little Schemer book influenced design
+  - **Copyright note:** Publisher assigned PAIP copyright back to Peter Norvig
+  - Keep existing information about Socratic learning approach
+  - Improve clarity and storytelling
+
+#### 2. Change Default Library Visibility ⚡ **QUICK WIN** (15 min)
+- [ ] Update `/app/api/publish/route.ts`:
+  - Change `isPublic` default from `true` to `false` (line ~142)
+  - New libraries private by default
+  - Only custodians/admins can mark as public
+- [ ] Update database default in schema:
+  - Change `is_public BOOLEAN NOT NULL DEFAULT true` → `DEFAULT false`
+  - Create migration: `004_default_private_libraries.sql`
+  - Apply migration to database
+- [ ] Test: Create new library, verify it doesn't appear on homepage
+- [ ] Document: Note in publish page UI that libraries start as private
+
+#### 3. Metadata Editor on User Profile Page 🎯 **HIGH PRIORITY** (2-3 hours)
+
+**Goal:** Library owners can edit title, author, abstract from their profile page.
+
+**Implementation Plan:**
+
+**Step 3a: Create Edit Modal Component** (45 min)
+- [ ] Create `/app/components/LibraryEditModal.tsx`:
+  - Form fields: title, author (read-only), description/abstract
+  - Optional: is_public toggle (only for admins/custodians)
+  - Validation: title required, max lengths
+  - Save/Cancel buttons
+  - Loading states during save
+  - Success/error toast notifications
+- [ ] Use shadcn/ui components (Dialog, Form, Input, Textarea)
+- [ ] Style to match existing UI aesthetic
+
+**Step 3b: Add PATCH Endpoint** (30 min)
+- [ ] Update `/app/api/libraries/[id]/route.ts`:
+  - Add `PATCH` handler for library updates
+  - Accept fields: `{ title?, description?, is_public? }`
+  - Validate: user is library owner (check `user_id` against session)
+  - Validate: only admins can change `is_public`
+  - Update database, return updated library
+  - Error handling: 401 (unauthorized), 400 (validation), 500 (server)
+- [ ] Add database function `updateLibrary(id, userId, updates)` to `/lib/db.ts`
+
+**Step 3b: Integrate Edit UI into Profile Page** (45 min)
+- [ ] Update `/app/users/[username]/page.tsx`:
+  - Add "Edit" button to each library card (only if viewing own profile)
+  - Import `LibraryEditModal` component
+  - Pass library data and refresh callback
+  - Handle edit modal open/close state
+  - Refresh library list after successful edit
+- [ ] Add visual indicator: ⚙️ or ✏️ icon on library cards
+- [ ] Ensure edit button only visible to library owner
+
+**Step 3d: Testing** (30 min)
+- [ ] Test edit flow end-to-end:
+  - Sign in as user
+  - Navigate to own profile
+  - Click edit on a library
+  - Update title and description
+  - Verify changes persist in database and UI
+- [ ] Test authorization: Other users can't edit your libraries
+- [ ] Test validation: Empty title rejected, max lengths enforced
+- [ ] Test edge cases: Network errors, concurrent edits
+
+#### 4. Major Lesson Page Redesign 🎯 **COMPLEX** (3-4 hours)
+
+**Goal:** Invert current dynamic - learning view primary, graph view secondary.
+
+**Current (Problematic):**
+```
+Graph View (primary) → Click node → Lesson Modal (popup)
+                    ↑ Click back to pick next concept
+```
+
+**New (Desired):**
+```
+Lesson View (primary) → [Graph button] → Graph Modal (popup)
+    ↓ (automatic)
+Next Concept (seamless) → [Graph button] → Graph Modal (popup)
+```
+
+**Implementation Plan:**
+
+**Step 4a: Refactor InteractiveLibrary Component** (1 hour)
+- [ ] Update `/app/components/InteractiveLibrary.tsx`:
+  - **Auto-select starting node** on component mount:
+    - Use existing logic: find concepts with no prerequisites (graph roots)
+    - If multiple roots, pick first one
+    - Open Socratic dialogue immediately (set `dialogueOpen = true`)
+  - **Move ConceptGraph to modal**:
+    - Create "Overview" or "Map" button in header
+    - Graph renders in full-screen modal instead of sidebar
+    - Modal has "Select Concept" functionality (keep existing click behavior)
+  - **Remove ConceptDetails sidebar** (or make it part of lesson view):
+    - Show concept info at top of dialogue instead
+  - **New layout**: Full-screen dialogue with minimal chrome
+  - **Add "Show Map" button**: Opens graph modal for navigation
+
+**Step 4b: Update SocraticDialogue for Auto-Transitions** (1.5 hours)
+- [ ] Update `/app/components/SocraticDialogue.tsx`:
+  - **Detect mastery completion** from model response:
+    - Parse model message for mastery declarations
+    - OR: Add explicit mastery signal in API response
+  - **Auto-select next concept**:
+    - When current concept mastered, compute next available concept
+    - Use frontier logic: concepts with all prerequisites met
+    - Prefer concepts with edges from current concept (follow the graph)
+  - **Seamless transition**:
+    - Show brief acknowledgment: "✓ Mastered: [concept]" (2 seconds)
+    - Optional: Confetti animation 🎉
+    - Clear dialogue history
+    - Start new dialogue with next concept automatically
+    - Update URL/state to reflect new concept
+  - **Edge case**: If no next concepts available, show completion message
+
+**Step 4c: Adjust Model Prompts for Flexibility** (45 min)
+- [ ] Update `/app/api/socratic-dialogue/route.ts`:
+  - **Add system prompt guidance**:
+    - "If student says 'I know this,' give ONE quick verification question"
+    - "Accept mastery more readily - trust the student"
+    - "When concept requires implementation (e.g., euclidian_distance), ask student to code it"
+    - "Once mastered, EXPLICITLY say: 'You've mastered [concept]. Moving to [next].'"
+  - **Add mastery signal** in response format:
+    - Return: `{ message, masteryAchieved: boolean, nextConcept?: string }`
+    - Frontend uses this to trigger auto-transition
+  - Test prompt adjustments with various student responses
+
+**Step 4d: Add Progress Celebrations** (30 min)
+- [ ] Add visual feedback for concept completion:
+  - Install confetti library: `npm install canvas-confetti`
+  - Trigger confetti when concept mastered
+  - Update progress bar/counter in header
+  - Brief toast: "✓ Mastered: [concept name]"
+  - Optional: Show path progress (X/Y concepts in current path)
+
+**Step 4e: Create Graph Modal Component** (30 min)
+- [ ] Create `/app/components/GraphModal.tsx`:
+  - Full-screen modal with ConceptGraph
+  - Same click-to-select behavior as before
+  - "Close" button returns to lesson
+  - When node clicked, close modal and start/resume dialogue for that concept
+  - Show mastery states in graph (mastered/current/available/locked)
+
+**Step 4f: Testing & Refinement** (30 min)
+- [ ] Test complete learning flow:
+  - Open library → Lesson starts immediately with root concept
+  - Complete concept → Seamlessly transitions to next
+  - Click "Show Map" → Graph modal opens
+  - Click different concept in graph → Lesson switches to that concept
+  - Complete all concepts → Completion message shown
+- [ ] Test flexibility:
+  - Say "I know this" → Model gives quick check, moves on
+  - Implement code concept → Model asks for implementation
+  - Model accepts mastery more readily
+- [ ] Get Peter's feedback on new flow
+
+### Success Criteria
+
+**Phase 7 Complete When:**
+- ✅ About page tells the lilpaiper origin story
+- ✅ New libraries default to private (is_public = false)
+- ✅ Library owners can edit title, author, abstract from profile page
+- ✅ Lesson starts immediately with auto-selected concept (no graph navigation)
+- ✅ Model seamlessly transitions between concepts (no manual navigation)
+- ✅ Model accepts "I know this" with minimal verification
+- ✅ Graph available as modal popup for overview/manual selection
+- ✅ Visual celebration (confetti/progress) when concepts mastered
+- ✅ Peter Norvig approves of new learning flow
+
+### Implementation Order (Today's Plan)
+
+**Morning (3-4 hours):**
+1. ✅ Update about page (15 min)
+2. ✅ Change default visibility to private (15 min + migration)
+3. ✅ Build metadata editor (2-3 hours)
+   - Edit modal component
+   - PATCH endpoint
+   - Integration with profile page
+   - Testing
+
+**Afternoon (3-4 hours):**
+4. ✅ Lesson page redesign (3-4 hours)
+   - Refactor InteractiveLibrary
+   - Auto-select starting node
+   - Move graph to modal
+   - Auto-transition between concepts
+   - Adjust model prompts
+   - Progress celebrations
+   - Testing with Peter
+
+**End of Day:**
+- Demo to Peter
+- Gather feedback
+- Make any quick adjustments
+- Document changes in CHANGELOG.md
+
+---
+
 ## Phase 6: Pedagogical Improvements & Project-Based Learning
 
 ### Goal

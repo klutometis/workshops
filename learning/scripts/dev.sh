@@ -62,7 +62,7 @@ echo -e "  NextAuth Secret: ${NEXTAUTH_SECRET:+${GREEN}✅ configured${NC}}${NEX
 echo -e "  Database: ${DATABASE_URL:+${GREEN}✅ connected${NC}}${DATABASE_URL:-${YELLOW}⚠️  missing${NC}}"
 echo -e "  Google AI: ${GOOGLE_API_KEY:+${GREEN}✅ configured${NC}}${GOOGLE_API_KEY:-${YELLOW}⚠️  missing${NC}}"
 echo -e "  Processing Mode: ${PROCESSING_MODE:-${BLUE}local${NC}}"
-if [ "${PROCESSING_MODE}" = "job" ]; then
+if [ "${PROCESSING_MODE:-}" = "job" ]; then
   echo -e "  Cloud Run Job: ${CLOUD_RUN_JOB_NAME:+${GREEN}✅ ${CLOUD_RUN_JOB_NAME}${NC}}${CLOUD_RUN_JOB_NAME:-${YELLOW}⚠️  missing${NC}}"
 fi
 echo -e "  Keep Temp Files: ${KEEP_TEMP_FILES:+${YELLOW}⚠️  enabled (debug mode)${NC}}${KEEP_TEMP_FILES:-${GREEN}✅ disabled${NC}}"

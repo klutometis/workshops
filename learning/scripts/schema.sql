@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS libraries (
   
   -- Ownership
   user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-  is_public BOOLEAN NOT NULL DEFAULT true,
+  is_public BOOLEAN NOT NULL DEFAULT false,  -- Changed to false in migration 006 (2026-02-02)
   
   -- Basic metadata
   title TEXT NOT NULL,
