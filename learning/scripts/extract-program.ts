@@ -5,23 +5,23 @@
  * Stage 5a: Program Extraction
  * 
  * Usage:
- *   npx tsx scripts/extract-program.ts <notebook-path>
- *   npx tsx scripts/extract-program.ts docs/TSP.ipynb
+ *   npx tsx scripts/extract-program.ts <library-slug>
+ *   npx tsx scripts/extract-program.ts tsp
  * 
  * What it does:
- * 1. Read notebook JSON
+ * 1. Fetch library and notebook from database
  * 2. Use Gemini to extract complete program
  * 3. Verify program runs (smoke tests)
- * 4. Save to output file
+ * 4. Save to database (library_programs table)
  * 
  * Output:
- *   - <notebook-name>-program.py (complete runnable program)
- *   - <notebook-name>-program.json (metadata)
+ *   - Saves to database: library_programs(library_id, program_code, verified)
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { Pool } from 'pg';
 
 interface NotebookCell {
   cell_type: 'code' | 'markdown';
@@ -53,14 +53,21 @@ if (!apiKey) {
   process.exit(1);
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+const connectionString = process.env.DATABASE_URL || process.env.LEARNING_DATABASE_URL_PROXY;
+if (!connectionString) {
+  console.error('❌ DATABASE_URL or LEARNING_DATABASE_URL_PROXY not set');
+  process.exit(1);
+}
 
-async function extractProgram(notebookPath: string): Promise<ExtractionResult> {
-  console.log(`\n📖 Reading notebook: ${notebookPath}`);
+const pool = new Pool({ connectionString });
+
+const genAI = new GoogleGenerativeAI(apiKey);
+const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+
+async function extractProgram(notebookContent: string, librarySlug: string): Promise<ExtractionResult> {
+  console.log(`\n📖 Parsing notebook for ${librarySlug}`);
   
-  // Read notebook
-  const notebookContent = fs.readFileSync(notebookPath, 'utf-8');
+  // Parse notebook
   const notebook: Notebook = JSON.parse(notebookContent);
   
   console.log(`   Cells: ${notebook.cells.length}`);
@@ -134,11 +141,11 @@ Output ONLY the complete Python program, no explanations or markdown.`;
     language: 'python',
     verified: false, // Will verify in next step
     metadata: {
-      notebookPath,
+      notebookPath: librarySlug,
       extractedAt: new Date().toISOString(),
       cellCount: notebook.cells.length,
       codeBlockCount: codeCells.length,
-      extractionMethod: 'gemini-2.0-flash-exp'
+      extractionMethod: 'gemini-3-flash-preview'
     }
   };
 }
@@ -238,44 +245,68 @@ async function main() {
   const args = process.argv.slice(2);
   
   if (args.length === 0) {
-    console.error('Usage: npx tsx scripts/extract-program.ts <notebook-path>');
-    console.error('Example: npx tsx scripts/extract-program.ts docs/TSP.ipynb');
+    console.error('Usage: npx tsx scripts/extract-program.ts <library-slug>');
+    console.error('Example: npx tsx scripts/extract-program.ts tsp');
     process.exit(1);
   }
   
-  const notebookPath = args[0];
-  
-  if (!fs.existsSync(notebookPath)) {
-    console.error(`❌ File not found: ${notebookPath}`);
-    process.exit(1);
-  }
+  const librarySlug = args[0];
   
   console.log('═══════════════════════════════════════════════════════');
   console.log('  Extract Complete Program (Stage 5a)');
   console.log('═══════════════════════════════════════════════════════');
   
   try {
-    // Extract program
-    const result = await extractProgram(notebookPath);
+    // Fetch library from database
+    console.log(`\n📚 Fetching library: ${librarySlug}`);
+    const queryResult = await pool.query(
+      'SELECT id, slug, notebook_data FROM libraries WHERE slug = $1',
+      [librarySlug]
+    );
+    
+    if (queryResult.rows.length === 0) {
+      console.error(`❌ Library not found: ${librarySlug}`);
+      process.exit(1);
+    }
+    
+    const library = queryResult.rows[0];
+    
+    if (!library.notebook_data) {
+      console.error(`❌ Library has no notebook data: ${librarySlug}`);
+      process.exit(1);
+    }
+    
+    console.log(`   Library ID: ${library.id}`);
+    
+    // Extract program (notebook_data is already a JSON object)
+    const notebookJson = typeof library.notebook_data === 'string' 
+      ? library.notebook_data 
+      : JSON.stringify(library.notebook_data);
+    const result = await extractProgram(notebookJson, librarySlug);
     
     // Verify it runs (with auto-fix loop)
     const { verified, code } = await verifyProgram(result.programCode);
     result.verified = verified;
     result.programCode = code; // Use fixed version if it was fixed
     
-    // Save output
-    const baseName = path.basename(notebookPath, '.ipynb');
-    const outputDir = path.dirname(notebookPath);
-    const programPath = path.join(outputDir, `${baseName}-program.py`);
-    const metadataPath = path.join(outputDir, `${baseName}-program.json`);
-    
-    fs.writeFileSync(programPath, result.programCode);
-    fs.writeFileSync(metadataPath, JSON.stringify(result.metadata, null, 2));
+    // Save to database
+    console.log(`\n💾 Saving to database...`);
+    await pool.query(`
+      INSERT INTO library_programs (library_id, program_code, verified, metadata)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (library_id) 
+      DO UPDATE SET 
+        program_code = EXCLUDED.program_code,
+        verified = EXCLUDED.verified,
+        metadata = EXCLUDED.metadata,
+        updated_at = NOW()
+    `, [library.id, result.programCode, result.verified, JSON.stringify(result.metadata)]);
     
     console.log(`\n✅ Extraction complete!`);
-    console.log(`   Program: ${programPath}`);
-    console.log(`   Metadata: ${metadataPath}`);
+    console.log(`   Library: ${librarySlug}`);
+    console.log(`   Program lines: ${result.programCode.split('\n').length}`);
     console.log(`   Verified: ${verified ? '✅ Yes' : '❌ No (needs fixes)'}`);
+    console.log(`   Saved to: library_programs table`);
     
     if (!verified) {
       console.log(`\n⚠️  Program needs manual fixes before use`);

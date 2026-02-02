@@ -22,16 +22,18 @@ import { Textarea } from '@/components/ui/textarea';
 
 type PythonScratchpadProps = {
   starterCode?: string;
+  programContext?: string; // Full program code to prepend during execution
   onExecute?: (code: string, output: string, error: string | null) => void;
   onCodeChange?: (code: string) => void;
 };
 
 export default function PythonScratchpad({ 
-  starterCode = '', 
+  starterCode = '',
+  programContext = '',
   onExecute,
   onCodeChange
 }: PythonScratchpadProps) {
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(starterCode);
   const [output, setOutput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,6 +41,13 @@ export default function PythonScratchpad({
   const [activeTab, setActiveTab] = useState<'console' | 'graphics'>('console');
   const pyodideRef = useRef<any>(null);
   const outputRef = useRef<HTMLDivElement>(null);
+
+  // Update code when starterCode prop changes
+  useEffect(() => {
+    if (starterCode) {
+      setCode(starterCode);
+    }
+  }, [starterCode]);
 
   // Initialize Pyodide on mount
   useEffect(() => {
@@ -50,11 +59,11 @@ export default function PythonScratchpad({
         });
         
         // Load commonly used packages
-        await pyodide.loadPackage(['numpy', 'micropip']);
+        await pyodide.loadPackage(['numpy', 'matplotlib', 'micropip']);
         
         pyodideRef.current = pyodide;
         setIsLoading(false);
-        console.log('✅ Pyodide loaded successfully');
+        console.log('✅ Pyodide loaded successfully with numpy, matplotlib, micropip');
       } catch (err) {
         console.error('Failed to load Pyodide:', err);
         setError('Failed to initialize Python environment');
@@ -85,8 +94,9 @@ from io import StringIO
 sys.stdout = StringIO()
       `);
 
-      // Run user code
-      await pyodide.runPythonAsync(code);
+      // Prepend program context if available, then run user code
+      const fullCode = programContext ? `${programContext}\n\n${code}` : code;
+      await pyodide.runPythonAsync(fullCode);
 
       // Get captured output
       const stdout = pyodide.runPython('sys.stdout.getvalue()');

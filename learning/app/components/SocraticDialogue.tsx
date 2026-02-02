@@ -124,6 +124,9 @@ export default function SocraticDialogue({
   const [sourceTimestamp, setSourceTimestamp] = useState<number | undefined>();
   const [videoAutoplay, setVideoAutoplay] = useState<boolean>(false);
   const [cachedMarkdownContent, setCachedMarkdownContent] = useState<string | undefined>();
+  const [functionData, setFunctionData] = useState<any>(null);
+  const [starterCode, setStarterCode] = useState<string>('');
+  const [programCode, setProgramCode] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -131,6 +134,68 @@ export default function SocraticDialogue({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Load function data and generate starter code
+  useEffect(() => {
+    if (open && conceptData?.id) {
+      fetch(`/api/concept-functions?libraryId=${libraryId}&conceptId=${conceptData.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.function) {
+            setFunctionData(data.function);
+            
+            // Store program code for execution context
+            if (data.programCode) {
+              setProgramCode(data.programCode);
+            }
+            
+            // Generate starter code with function stub and test cases
+            const testCases = data.function.test_cases || [];
+            const testCaseCode = testCases.length > 0 
+              ? `\n\n# Test cases\n${testCases.map((tc: any, i: number) => {
+                  const setup = tc.setup ? `${tc.setup}\n` : '';
+                  return `# Test ${i + 1}: ${tc.description || tc.name || `Test case ${i + 1}`}\n` +
+                         `${setup}${tc.code}`;
+                }).join('\n\n')}`
+              : '';
+            
+            const code = `# ${conceptData.name}
+# ${conceptData.description || ''}
+
+${data.function.function_signature}
+    """${data.function.docstring || 'TODO: Implement this function'}"""
+    pass  # TODO: Replace this with your implementation
+${testCaseCode}
+`;
+            setStarterCode(code);
+          } else {
+            // No function found, use default starter code
+            setStarterCode(`# 🧮 Python scratchpad for exploring ${conceptData.name}
+# 
+# Feel free to experiment here! You can:
+# - Test out ideas in code
+# - Answer questions by implementing solutions
+# - Work through examples
+# 
+# Your code and output will be visible to your tutor.
+`);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to load function data:', err);
+          // Use default starter code on error
+          setStarterCode(`# 🧮 Python scratchpad for exploring ${conceptData.name}
+# 
+# Feel free to experiment here! You can:
+# - Test out ideas in code
+# - Answer questions by implementing solutions
+# - Work through examples
+# 
+# Your code and output will be visible to your tutor.
+`);
+        });
+    }
+  }, [open, conceptData, libraryId]);
 
   // Auto-load first video source for video libraries (but don't autoplay)
   useEffect(() => {
@@ -803,15 +868,8 @@ export default function SocraticDialogue({
               <div className="flex-1 overflow-hidden">
                 {activeTab === 'python' ? (
                   <PythonScratchpad
-                    starterCode={`# 🧮 Python scratchpad for exploring ${conceptData.name}
-# 
-# Feel free to experiment here! You can:
-# - Test out ideas in code
-# - Answer questions by implementing solutions
-# - Work through examples
-# 
-# Your code and output will be visible to your tutor.
-`}
+                    starterCode={starterCode}
+                    programContext={programCode}
                     onExecute={(execCode, output, error) => {
                       setEvaluation({ output, error });
                     }}
