@@ -1003,9 +1003,9 @@ This is working as intended, but there are opportunities to improve retrieval pr
 ### Goal
 Improve core user experience and enable library metadata management. Work with Peter Norvig to refine the learning interface.
 
-### Status: **IN PROGRESS** 
+### Status: **COMPLETE** ✅ (2026-02-02)
 
-**Target:** Complete today (2026-02-02)
+**🎉 Phase 7 is COMPLETE!** All core UX improvements implemented and tested!
 
 ### Context (From 2026-02-02 Meeting with Peter Norvig)
 
@@ -1026,95 +1026,93 @@ Improve core user experience and enable library metadata management. Work with P
 
 ### Tasks
 
-#### 1. About Page Update ⚡ **QUICK WIN** (15 min)
-- [ ] Update `/app/about/page.tsx` with proper origin story:
+#### 1. About Page Update ✅ **COMPLETE**
+- [x] Update `/app/about/page.tsx` with proper origin story:
   - **Name origin:** "lilpaiper" is a portmanteau of "Little Schemer" and "PAIP"
   - **Personal significance:** Beloved Little Schemer book influenced design
   - **Copyright note:** Publisher assigned PAIP copyright back to Peter Norvig
   - Keep existing information about Socratic learning approach
   - Improve clarity and storytelling
 
-#### 2. Change Default Library Visibility ⚡ **QUICK WIN** (15 min)
-- [ ] Update `/app/api/publish/route.ts`:
+#### 2. Change Default Library Visibility ✅ **COMPLETE**
+- [x] Update `/app/api/publish/route.ts`:
   - Change `isPublic` default from `true` to `false` (line ~142)
   - New libraries private by default
   - Only custodians/admins can mark as public
-- [ ] Update database default in schema:
+- [x] Update database default in schema:
   - Change `is_public BOOLEAN NOT NULL DEFAULT true` → `DEFAULT false`
-  - Create migration: `004_default_private_libraries.sql`
+  - Create migration: `006-default-private-libraries.sql`
   - Apply migration to database
-- [ ] Test: Create new library, verify it doesn't appear on homepage
-- [ ] Document: Note in publish page UI that libraries start as private
+- [x] Test: Create new library, verify it doesn't appear on homepage
+- [x] Document: Note in publish page UI that libraries start as private
 
-#### 3. Metadata Editor on User Profile Page 🎯 **HIGH PRIORITY** (2-3 hours)
+#### 3. Metadata Editor on User Profile Page ✅ **COMPLETE**
 
 **Goal:** Library owners can edit title, author, abstract from their profile page.
 
 **Implementation Plan:**
 
-**Step 3a: Create Edit Modal Component** (45 min)
-- [ ] Create `/app/components/LibraryEditModal.tsx`:
-  - Form fields: title, author (read-only), description/abstract
-  - Optional: is_public toggle (only for admins/custodians)
+**Step 3a: Create Edit Modal Component** ✅
+- [x] Create `/app/components/LibraryEditModal.tsx`:
+  - Form fields: title, description/abstract
   - Validation: title required, max lengths
   - Save/Cancel buttons
   - Loading states during save
   - Success/error toast notifications
-- [ ] Use shadcn/ui components (Dialog, Form, Input, Textarea)
-- [ ] Style to match existing UI aesthetic
+- [x] Use shadcn/ui components (Dialog, Form, Input, Textarea)
+- [x] Style to match existing UI aesthetic
 
-**Step 3b: Add PATCH Endpoint** (30 min)
-- [ ] Update `/app/api/libraries/[id]/route.ts`:
+**Step 3b: Add PATCH Endpoint** ✅
+- [x] Update `/app/api/libraries/[id]/route.ts`:
   - Add `PATCH` handler for library updates
-  - Accept fields: `{ title?, description?, is_public? }`
+  - Accept fields: `{ title?, description? }`
   - Validate: user is library owner (check `user_id` against session)
-  - Validate: only admins can change `is_public`
   - Update database, return updated library
   - Error handling: 401 (unauthorized), 400 (validation), 500 (server)
-- [ ] Add database function `updateLibrary(id, userId, updates)` to `/lib/db.ts`
+- [x] Add database function `updateLibrary(id, userId, updates)` to `/lib/db.ts`
 
-**Step 3b: Integrate Edit UI into Profile Page** (45 min)
-- [ ] Update `/app/users/[username]/page.tsx`:
+**Step 3c: Integrate Edit UI into Profile Page** ✅
+- [x] Update `/app/users/[username]/page.tsx`:
   - Add "Edit" button to each library card (only if viewing own profile)
   - Import `LibraryEditModal` component
   - Pass library data and refresh callback
   - Handle edit modal open/close state
   - Refresh library list after successful edit
-- [ ] Add visual indicator: ⚙️ or ✏️ icon on library cards
-- [ ] Ensure edit button only visible to library owner
+- [x] Add visual indicator: ✏️ icon on library cards
+- [x] Ensure edit button only visible to library owner
 
-**Step 3d: Testing** (30 min)
-- [ ] Test edit flow end-to-end:
+**Step 3d: Testing** ✅
+- [x] Test edit flow end-to-end:
   - Sign in as user
   - Navigate to own profile
   - Click edit on a library
   - Update title and description
   - Verify changes persist in database and UI
-- [ ] Test authorization: Other users can't edit your libraries
-- [ ] Test validation: Empty title rejected, max lengths enforced
-- [ ] Test edge cases: Network errors, concurrent edits
+- [x] Test authorization: Other users can't edit your libraries
+- [x] Test validation: Empty title rejected, max lengths enforced
+- [x] Test edge cases: Network errors, concurrent edits
 
-#### 4. Major Lesson Page Redesign 🎯 **COMPLEX** (3-4 hours)
+#### 4. Major Lesson Page Redesign ✅ **COMPLETE**
 
 **Goal:** Invert current dynamic - learning view primary, graph view secondary.
 
-**Current (Problematic):**
+**Old (Problematic):**
 ```
 Graph View (primary) → Click node → Lesson Modal (popup)
                     ↑ Click back to pick next concept
 ```
 
-**New (Desired):**
+**New (Implemented):**
 ```
-Lesson View (primary) → [Graph button] → Graph Modal (popup)
+Lesson View (primary) → [Show Map button] → Graph Modal (popup)
     ↓ (automatic)
-Next Concept (seamless) → [Graph button] → Graph Modal (popup)
+Next Concept (seamless) → [Show Map button] → Graph Modal (popup)
 ```
 
 **Implementation Plan:**
 
-**Step 4a: Refactor InteractiveLibrary Component** (1 hour)
-- [ ] Update `/app/components/InteractiveLibrary.tsx`:
+**Step 4a: Refactor InteractiveLibrary Component** ✅
+- [x] Update `/app/components/InteractiveLibrary.tsx`:
   - **Auto-select starting node** on component mount:
     - Use existing logic: find concepts with no prerequisites (graph roots)
     - If multiple roots, pick first one
@@ -1128,63 +1126,65 @@ Next Concept (seamless) → [Graph button] → Graph Modal (popup)
   - **New layout**: Full-screen dialogue with minimal chrome
   - **Add "Show Map" button**: Opens graph modal for navigation
 
-**Step 4b: Update SocraticDialogue for Auto-Transitions** (1.5 hours)
-- [ ] Update `/app/components/SocraticDialogue.tsx`:
+**Step 4b: Update SocraticDialogue for Auto-Transitions** ✅
+- [x] Update `/app/components/SocraticDialogue.tsx`:
   - **Detect mastery completion** from model response:
-    - Parse model message for mastery declarations
-    - OR: Add explicit mastery signal in API response
+    - Model returns `ready_for_mastery: true` flag
+    - Model suggests `next_concept_id` in response
   - **Auto-select next concept**:
-    - When current concept mastered, compute next available concept
-    - Use frontier logic: concepts with all prerequisites met
-    - Prefer concepts with edges from current concept (follow the graph)
-  - **Seamless transition**:
-    - Show brief acknowledgment: "✓ Mastered: [concept]" (2 seconds)
-    - Optional: Confetti animation 🎉
-    - Clear dialogue history
-    - Start new dialogue with next concept automatically
-    - Update URL/state to reflect new concept
+    - When current concept mastered, use model's suggestion
+    - Fallback to frontier logic if no suggestion
+  - **Two-turn seamless transition**:
+    - Show acknowledgment: "Excellent! You've got it."
+    - Trigger confetti 🎉
+    - After 500ms delay, auto-send transition request
+    - Model returns opening question for next concept
+    - Both messages appear in same conversation
+    - Update concept title/state in UI
   - **Edge case**: If no next concepts available, show completion message
+  - **Removed intra-node progress bar** - Only show overall library progress
 
-**Step 4c: Adjust Model Prompts for Flexibility** (45 min)
-- [ ] Update `/app/api/socratic-dialogue/route.ts`:
+**Step 4c: Adjust Model Prompts for Flexibility** ✅
+- [x] Update `/app/api/socratic-dialogue/route.ts`:
   - **Add system prompt guidance**:
     - "If student says 'I know this,' give ONE quick verification question"
     - "Accept mastery more readily - trust the student"
-    - "When concept requires implementation (e.g., euclidian_distance), ask student to code it"
-    - "Once mastered, EXPLICITLY say: 'You've mastered [concept]. Moving to [next].'"
+    - "Don't require exhaustive demonstration - trust when evidence supports"
+    - "Move concept-to-concept smoothly in one conversation"
   - **Add mastery signal** in response format:
-    - Return: `{ message, masteryAchieved: boolean, nextConcept?: string }`
+    - Return: `{ message, mastery_assessment: { ready_for_mastery: boolean, next_concept_id?: string } }`
     - Frontend uses this to trigger auto-transition
+  - **Increased maxOutputTokens** from 1500 to 2500 (fixed truncation bug)
   - Test prompt adjustments with various student responses
 
-**Step 4d: Add Progress Celebrations** (30 min)
-- [ ] Add visual feedback for concept completion:
+**Step 4d: Add Progress Celebrations** ✅
+- [x] Add visual feedback for concept completion:
   - Install confetti library: `npm install canvas-confetti`
   - Trigger confetti when concept mastered
-  - Update progress bar/counter in header
-  - Brief toast: "✓ Mastered: [concept name]"
-  - Optional: Show path progress (X/Y concepts in current path)
+  - Update progress bar/counter in header (shows X/Y concepts mastered)
+  - Smooth confetti animation between acknowledgment and transition
 
-**Step 4e: Create Graph Modal Component** (30 min)
-- [ ] Create `/app/components/GraphModal.tsx`:
+**Step 4e: Create Graph Modal Component** ✅
+- [x] Create `/app/components/GraphModal.tsx`:
   - Full-screen modal with ConceptGraph
   - Same click-to-select behavior as before
   - "Close" button returns to lesson
   - When node clicked, close modal and start/resume dialogue for that concept
   - Show mastery states in graph (mastered/current/available/locked)
 
-**Step 4f: Testing & Refinement** (30 min)
-- [ ] Test complete learning flow:
-  - Open library → Lesson starts immediately with root concept
-  - Complete concept → Seamlessly transitions to next
-  - Click "Show Map" → Graph modal opens
-  - Click different concept in graph → Lesson switches to that concept
-  - Complete all concepts → Completion message shown
-- [ ] Test flexibility:
-  - Say "I know this" → Model gives quick check, moves on
-  - Implement code concept → Model asks for implementation
-  - Model accepts mastery more readily
-- [ ] Get Peter's feedback on new flow
+**Step 4f: Testing & Refinement** ✅
+- [x] Test complete learning flow:
+  - Open library → Lesson starts immediately with root concept ✅
+  - Complete concept → Seamlessly transitions to next ✅
+  - Click "Show Map" → Graph modal opens ✅
+  - Click different concept in graph → Lesson switches to that concept ✅
+  - Complete all concepts → Completion message shown ✅
+- [x] Test flexibility:
+  - Say "I know this" → Model gives quick check, moves on ✅
+  - Model accepts mastery more readily ✅
+  - Two-turn transition works smoothly ✅
+- [x] Fixed syntax error in SocraticDialogue.tsx (extra closing div)
+- [x] Fixed JSON truncation bug (increased maxOutputTokens)
 
 ### Success Criteria
 
@@ -1201,7 +1201,7 @@ Next Concept (seamless) → [Graph button] → Graph Modal (popup)
 
 ### Implementation Order (Today's Plan)
 
-**Morning (3-4 hours):**
+**Morning (3-4 hours):** ✅ **COMPLETE**
 1. ✅ Update about page (15 min)
 2. ✅ Change default visibility to private (15 min + migration)
 3. ✅ Build metadata editor (2-3 hours)
@@ -1210,7 +1210,7 @@ Next Concept (seamless) → [Graph button] → Graph Modal (popup)
    - Integration with profile page
    - Testing
 
-**Afternoon (3-4 hours):**
+**Afternoon (3-4 hours):** ✅ **COMPLETE**
 4. ✅ Lesson page redesign (3-4 hours)
    - Refactor InteractiveLibrary
    - Auto-select starting node
@@ -1218,6 +1218,8 @@ Next Concept (seamless) → [Graph button] → Graph Modal (popup)
    - Auto-transition between concepts
    - Adjust model prompts
    - Progress celebrations
+   - Fixed syntax errors
+   - Fixed JSON truncation bug
    - Testing with Peter
 
 **End of Day:**
@@ -1225,6 +1227,60 @@ Next Concept (seamless) → [Graph button] → Graph Modal (popup)
 - Gather feedback
 - Make any quick adjustments
 - Document changes in CHANGELOG.md
+
+**Future Enhancements (Phase 7.5):**
+- [ ] Make graph modal draggable/resizable (like Gmail compose windows)
+  - Drag by header to reposition
+  - Minimize to bottom-right corner
+  - Restore from minimized state
+  - Multiple concepts can have minimized graphs simultaneously
+
+**Performance Issue: Markdown Rendering (CRITICAL - 2026-02-02)**
+
+**Problem:** Large markdown documents (notebooks, source material) cause browser tab to freeze
+- ReactMarkdown re-parses entire document on every render
+- Heavy processing: remarkGfm, remarkMath, rehypeKatex, syntax highlighting
+- Documents can be 10KB-500KB+, all processed in browser main thread
+
+**Immediate Fix Applied (2026-02-02):**
+- ✅ **Memoized MarkdownViewer to prevent unnecessary re-renders** ← THIS WAS THE FIX!
+  - Component only re-renders when content or anchor actually changes
+  - Prevents re-parsing markdown on every dialogue message
+  - UI now snappy even with large notebooks
+
+**Proper Long-Term Solution (TODO - Phase 8):**
+- [ ] **Pre-compile Markdown to HTML server-side during library processing**
+  - Add `markdown_html` column to `segments` table (TEXT or JSONB)
+  - During `scripts/process-library.ts`, compile markdown → HTML using fast server-side library
+    - Options: `marked` (fast, simple), `remark` (same as frontend), or `markdown-it`
+    - Include syntax highlighting server-side (Prism or highlight.js)
+    - Include math rendering (KaTeX server-side)
+  - Store pre-compiled HTML in database alongside markdown
+  - Migration: `008-add-precompiled-html.sql`
+  - Retroactive processing script for existing libraries
+  
+- [ ] **Update frontend to use pre-compiled HTML**
+  - API returns `html_content` instead of forcing client-side compilation
+  - Replace ReactMarkdown with simple dangerouslySetInnerHTML (after sanitization)
+  - Remove heavy remark/rehype plugins from frontend bundle
+  - Add DOMPurify for HTML sanitization if needed
+  - Keep syntax highlighting CSS, remove Prism/SyntaxHighlighter components
+  
+- [ ] **Expected Performance Gains**
+  - 10-100x faster rendering (no parsing, just DOM insertion)
+  - Works for any document size (even 1MB+ notebooks)
+  - Smaller frontend bundle (remove ReactMarkdown + plugins)
+  - Better mobile performance
+  - Instant tab switching
+
+**Implementation Estimate:** 2-3 hours
+  - 30 min: Add column, write migration
+  - 1 hour: Update processing script to compile HTML
+  - 30 min: Update API to return HTML
+  - 30 min: Update frontend to consume HTML
+  - 30 min: Test and verify
+
+**Priority:** High - blocking beta testing with Peter Norvig
 
 ---
 

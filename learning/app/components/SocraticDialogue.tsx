@@ -80,7 +80,11 @@ type SocraticDialogueProps = {
   conceptData: any;
   libraryId: string;
   libraryType?: string;
-  onMasteryAchieved?: (conceptId: string) => void;
+  onMasteryAchieved?: (conceptId: string, nextConceptId?: string) => void;
+  inline?: boolean; // If true, render as full-screen instead of modal
+  conceptGraph?: any; // Full concept graph for next-node selection
+  masteredConcepts?: string[]; // Array of mastered concept IDs
+  onConceptChange?: (conceptId: string) => void; // Callback when transitioning to new concept
 };
 
 export default function SocraticDialogue({
@@ -90,6 +94,10 @@ export default function SocraticDialogue({
   libraryId,
   libraryType,
   onMasteryAchieved,
+  inline = false,
+  conceptGraph,
+  masteredConcepts,
+  onConceptChange,
 }: SocraticDialogueProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -289,6 +297,8 @@ ${testCaseCode}
           conceptData,
           textbookContext: null, // Signal: please do semantic search
           libraryId,
+          conceptGraph,
+          masteredConcepts,
         }),
       });
 
@@ -417,6 +427,8 @@ ${testCaseCode}
           conceptData,
           textbookContext,
           libraryId,
+          conceptGraph,
+          masteredConcepts,
         }),
       });
 
@@ -441,6 +453,87 @@ ${testCaseCode}
         );
         setDemonstratedSkills(newSkills);
         setReadyForMastery(data.mastery_assessment.ready_for_mastery);
+        
+        // If mastery achieved, trigger two-turn transition
+        if (data.mastery_assessment.ready_for_mastery) {
+          const nextConceptId = data.mastery_assessment.next_concept_id;
+          console.log('🎉 Mastery achieved! Next concept:', nextConceptId);
+          
+          // Show acknowledgment message first
+          setMessages([...updatedMessages, { 
+            role: 'assistant', 
+            content: data.message,
+            assessment: data.mastery_assessment,
+            sources: data.sources || []
+          }]);
+          
+          // Trigger confetti + mastery callback
+          if (onMasteryAchieved) {
+            onMasteryAchieved(conceptData.id, nextConceptId);
+          }
+          
+          // If there's a next concept, auto-start it after brief delay
+          if (nextConceptId && conceptGraph && onConceptChange) {
+            setTimeout(async () => {
+              // Find next concept data from graph
+              const concepts = conceptGraph.concepts || conceptGraph.nodes || [];
+              const nextConcept = concepts.find((c: any) => c.id === nextConceptId);
+              
+              if (!nextConcept) {
+                console.error('Next concept not found in graph:', nextConceptId);
+                return;
+              }
+              
+              console.log('🔄 Starting transition to:', nextConcept.name);
+              
+              // Make API call to start new concept dialogue
+              try {
+                const response = await fetch('/api/socratic-dialogue', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    conceptId: nextConcept.id,
+                    conversationHistory: [], // Fresh start
+                    conceptData: nextConcept,
+                    textbookContext: null,
+                    libraryId,
+                    conceptGraph,
+                    masteredConcepts: [...(masteredConcepts || []), conceptData.id], // Add just-mastered concept
+                    transition: true, // Flag to indicate this is a transition
+                  }),
+                });
+                
+                if (!response.ok) {
+                  throw new Error('Failed to start next concept');
+                }
+                
+                const nextData = await response.json();
+                
+                // Add second assistant message (opening of next concept)
+                setMessages(prev => [...prev, {
+                  role: 'assistant',
+                  content: nextData.message,
+                  assessment: nextData.mastery_assessment,
+                  sources: nextData.sources || []
+                }]);
+                
+                // Notify parent that concept changed
+                onConceptChange(nextConceptId);
+                
+                // Reset dialogue state for new concept
+                setHasStarted(true);
+                setDemonstratedSkills(new Set());
+                setReadyForMastery(false);
+                
+              } catch (error) {
+                console.error('Error transitioning to next concept:', error);
+              }
+            }, 500); // 500ms delay - brief pause for confetti
+          }
+          
+          // Skip adding message again below (we already added it)
+          return;
+        }
       }
       
       // Update tracking for next turn - only if they were actually sent
@@ -525,17 +618,27 @@ ${testCaseCode}
                          libraryType === 'markdown' ? '📚 Source' : 
                          '📖 Reference';
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`
-        ${showPythonEditor ? 'max-w-[100vw] md:!max-w-[96vw] w-[100vw] md:!w-[96vw]' : 'max-w-[100vw] md:max-w-3xl w-[100vw] md:w-auto'}
-        h-[100vh] md:!h-[90vh] 
-        flex flex-col p-2 md:p-4
-      `}>
-        <DialogHeader className="pb-2">
-          <DialogTitle className="text-lg md:text-xl">Learning: {conceptData.name}</DialogTitle>
-          <DialogDescription className="text-sm">{conceptData.description}</DialogDescription>
-        </DialogHeader>
+  // Main content that will be wrapped either in Dialog or rendered inline
+  const mainContent = (
+    <div className={`
+      ${inline ? 'h-full' : ''}
+      ${showPythonEditor ? (inline ? 'w-full' : 'max-w-[100vw] md:!max-w-[96vw] w-[100vw] md:!w-[96vw]') : (inline ? 'max-w-4xl mx-auto' : 'max-w-[100vw] md:max-w-3xl w-[100vw] md:w-auto')}
+      ${inline ? 'h-full' : 'h-[100vh] md:!h-[90vh]'}
+      flex flex-col p-2 md:p-4 ${inline ? 'bg-white' : ''}
+    `}>
+        {!inline && (
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-lg md:text-xl">Learning: {conceptData.name}</DialogTitle>
+            <DialogDescription className="text-sm">{conceptData.description}</DialogDescription>
+          </DialogHeader>
+        )}
+        
+        {inline && (
+          <div className="pb-4 border-b mb-4">
+            <h2 className="text-2xl font-bold mb-2">Learning: {conceptData.name}</h2>
+            <p className="text-slate-600">{conceptData.description}</p>
+          </div>
+        )}
 
         {/* Mobile-only top-level tabs */}
         {showPythonEditor && (
@@ -563,56 +666,23 @@ ${testCaseCode}
           </div>
         )}
 
-        {/* Progress indicator - always visible */}
-        {totalIndicators > 0 ? (
-          <div className="px-3 md:px-4 py-2 bg-slate-50 rounded-lg space-y-2 text-sm">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">Progress:</span>
-              <span className="text-slate-600">
-                {demonstratedCount} / {totalIndicators} skills demonstrated
+        {/* Ready for mastery indicator - only shown when achieved */}
+        {readyForMastery && (
+          <div className="px-3 md:px-4 py-2 bg-slate-50 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-green-600 font-medium">
+                ✨ Ready for mastery!
               </span>
+              <Button 
+                onClick={handleMarkAsMastered}
+                variant="default"
+                size="sm"
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Mark as Mastered
+              </Button>
             </div>
-            <div className="w-full bg-slate-200 rounded-full h-2">
-              <div
-                className="bg-green-500 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            {readyForMastery && (
-              <div className="flex items-center justify-between pt-2 border-t">
-                <span className="text-sm text-green-600 font-medium">
-                  ✨ Ready for mastery!
-                </span>
-                <Button 
-                  onClick={handleMarkAsMastered}
-                  variant="default"
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  Mark as Mastered
-                </Button>
-              </div>
-            )}
           </div>
-        ) : (
-          // Fallback for concepts without explicit mastery indicators
-          readyForMastery && (
-            <div className="px-4 py-2 bg-slate-50 rounded-lg">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-green-600 font-medium">
-                  ✨ Ready for mastery!
-                </span>
-                <Button 
-                  onClick={handleMarkAsMastered}
-                  variant="default"
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  Mark as Mastered
-                </Button>
-              </div>
-            </div>
-          )
         )}
 
         {/* Main content area */}
@@ -939,6 +1009,18 @@ ${testCaseCode}
             </div>
           </details>
         )}
+    </div>
+  );
+
+  // Wrap in Dialog if not inline, otherwise return content directly
+  if (inline) {
+    return open ? mainContent : null;
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[100vw] md:max-w-[96vw] w-[100vw] md:w-[96vw] h-[100vh] md:!h-[90vh] flex flex-col p-0">
+        {mainContent}
       </DialogContent>
     </Dialog>
   );

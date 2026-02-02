@@ -20,6 +20,8 @@ import { useState, useEffect } from 'react';
 import ConceptGraph from './ConceptGraph';
 import ConceptDetails from './ConceptDetails';
 import SocraticDialogue from './SocraticDialogue';
+import GraphModal from './GraphModal';
+import { Map as MapIcon } from 'lucide-react';
 
 type Library = {
   id: string;
@@ -56,6 +58,8 @@ export default function InteractiveLibrary({ library, onBack, backLabel = '← B
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [masteredConcepts, setMasteredConcepts] = useState<Map<string, MasteryRecord>>(new Map());
   const [loading, setLoading] = useState(true);
+  const [autoStarted, setAutoStarted] = useState(false);
+  const [graphModalOpen, setGraphModalOpen] = useState(false);
 
   // Load concept graph when library is loaded
   useEffect(() => {
@@ -110,6 +114,53 @@ export default function InteractiveLibrary({ library, onBack, backLabel = '← B
       localStorage.setItem(`pcg-mastery-${library.id}`, JSON.stringify(obj));
     }
   }, [masteredConcepts, library.id]);
+
+  // Auto-start lesson with first recommended concept
+  useEffect(() => {
+    if (loading || !conceptGraphData || autoStarted) return;
+    
+    const concepts = conceptGraphData.concepts || conceptGraphData.nodes || [];
+    if (concepts.length === 0) return;
+
+    // Calculate ready concepts
+    const readyConcepts = concepts.filter((c: any) => 
+      !masteredConcepts.has(c.id) &&
+      (c.prerequisites || []).every((p: string) => masteredConcepts.has(p))
+    );
+
+    if (readyConcepts.length > 0) {
+      // Use recommendation algorithm to pick best starting concept
+      const difficultyRank: Record<string, number> = {
+        basic: 1,
+        intermediate: 2,
+        advanced: 3,
+      };
+
+      const countUnlocks = (conceptId: string): number => {
+        return concepts.filter((c: any) =>
+          (c.prerequisites || []).includes(conceptId)
+        ).length;
+      };
+
+      const recommended = readyConcepts
+        .sort((a: any, b: any) => {
+          if (a.difficulty !== b.difficulty) {
+            return difficultyRank[a.difficulty] - difficultyRank[b.difficulty];
+          }
+          return countUnlocks(b.id) - countUnlocks(a.id);
+        });
+
+      const firstConcept = recommended[0];
+      console.log(`🚀 Auto-starting lesson with: ${firstConcept.name}`);
+      setSelectedConceptId(firstConcept.id);
+      setDialogueOpen(true);
+      setAutoStarted(true);
+    } else if (masteredConcepts.size === concepts.length) {
+      // All concepts mastered!
+      console.log('🏆 All concepts mastered!');
+      setAutoStarted(true);
+    }
+  }, [loading, conceptGraphData, masteredConcepts, autoStarted]);
 
   // Show loading state
   if (loading || !conceptGraphData) {
@@ -190,7 +241,18 @@ export default function InteractiveLibrary({ library, onBack, backLabel = '← B
     setDialogueOpen(true);
   };
 
-  const handleMasteryAchieved = (conceptId: string) => {
+  const handleMasteryAchieved = async (conceptId: string, nextConceptId?: string) => {
+    // Import confetti dynamically
+    const confetti = (await import('canvas-confetti')).default;
+    
+    // Trigger confetti celebration!
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+    
+    // Update mastered concepts
     setMasteredConcepts(prev => {
       const next = new Map(prev);
       next.set(conceptId, {
@@ -201,12 +263,80 @@ export default function InteractiveLibrary({ library, onBack, backLabel = '← B
     });
   };
 
+  const handleConceptChange = (newConceptId: string) => {
+    console.log('📍 Concept changed to:', newConceptId);
+    // Update selected concept (this will update the concept title/description in UI)
+    setSelectedConceptId(newConceptId);
+  };
+
+  // Handle concept selection from graph modal
+  const handleNodeSelect = (conceptId: string) => {
+    setSelectedConceptId(conceptId);
+    if (!dialogueOpen) {
+      setDialogueOpen(true);
+    }
+  };
+
+  // All concepts mastered - show completion
+  if (!loading && masteredConcepts.size === concepts.length && concepts.length > 0) {
+    return (
+      <div className="h-screen flex flex-col">
+        <header className="bg-slate-900 text-white p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              {onBack && (
+                <button 
+                  onClick={onBack}
+                  className="text-sm text-slate-300 hover:text-white mb-1 transition-colors"
+                >
+                  {backLabel}
+                </button>
+              )}
+              <h1 className="text-2xl font-bold">{library.title}</h1>
+              {library.author && (
+                <p className="text-sm text-slate-100">by {library.author}</p>
+              )}
+            </div>
+          </div>
+        </header>
+
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center max-w-2xl">
+            <div className="text-6xl mb-6">🏆</div>
+            <h2 className="text-4xl font-bold mb-4">Congratulations!</h2>
+            <p className="text-xl text-slate-600 mb-6">
+              You've mastered all {concepts.length} concepts in this library!
+            </p>
+            <button
+              onClick={() => setGraphModalOpen(true)}
+              className="px-6 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
+            >
+              Review Concept Map
+            </button>
+          </div>
+        </div>
+
+        <GraphModal
+          open={graphModalOpen}
+          onClose={() => setGraphModalOpen(false)}
+          onNodeSelect={handleNodeSelect}
+          graphData={conceptGraphData}
+          masteredConcepts={masteredConcepts}
+          recommendedConcepts={recommendedConceptIds}
+          readyConcepts={new Set(readyConcepts.map(c => c.id))}
+          lockedConcepts={new Set(lockedConcepts.map(c => c.id))}
+          selectedConceptId={selectedConceptId}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen flex flex-col">
-      {/* Header */}
+      {/* Header with Progress Bar and Show Map Button */}
       <header className="bg-slate-900 text-white p-4">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex-1">
             {onBack && (
               <button 
                 onClick={onBack}
@@ -220,122 +350,73 @@ export default function InteractiveLibrary({ library, onBack, backLabel = '← B
               <p className="text-sm text-slate-100">by {library.author}</p>
             )}
           </div>
+
+          <button
+            onClick={() => setGraphModalOpen(true)}
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2"
+          >
+            <MapIcon className="w-4 h-4" />
+            <span>Show Map</span>
+          </button>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="mt-3">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-sm text-slate-300">Progress</span>
+            <span className="text-sm font-bold text-white">
+              {masteredCount} / {totalConcepts} ({masteredPercent}%)
+            </span>
+          </div>
+          <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${masteredPercent}%` }}
+            />
+          </div>
         </div>
       </header>
 
-      {/* Main content */}
-      <div className="flex-1 flex overflow-hidden relative">
-        {/* Graph (70%) */}
-        <div className="flex-[7] border-r">
-          <ConceptGraph 
-            data={conceptGraphData} 
-            onNodeClick={setSelectedConceptId}
-            masteredConcepts={masteredConcepts}
-            recommendedConcepts={recommendedConceptIds}
-            readyConcepts={new Set(readyConcepts.map(c => c.id))}
-            lockedConcepts={new Set(lockedConcepts.map(c => c.id))}
+      {/* Main content - Full screen lesson */}
+      <div className="flex-1 overflow-hidden">
+        {selectedConcept && dialogueOpen ? (
+          <SocraticDialogue
+            open={dialogueOpen}
+            onOpenChange={setDialogueOpen}
+            conceptData={selectedConcept}
+            libraryId={library.id}
+            libraryType={library.type}
+            onMasteryAchieved={handleMasteryAchieved}
+            inline={true}
+            conceptGraph={conceptGraphData}
+            masteredConcepts={Array.from(masteredConcepts.keys())}
+            onConceptChange={handleConceptChange}
           />
-        </div>
-
-        {/* Details sidebar (30%) */}
-        {/* On mobile: full-screen overlay when concept selected */}
-        {/* On desktop: fixed sidebar */}
-        <div className={`
-          flex-[3] overflow-auto
-          md:relative md:block
-          ${selectedConcept 
-            ? 'fixed inset-0 z-50 w-full bg-white' 
-            : 'hidden md:block'
-          }
-        `}>
-          {/* Mobile close button */}
-          {selectedConcept && (
-            <button
-              onClick={() => setSelectedConceptId(null)}
-              className="md:hidden fixed top-4 right-4 z-10 bg-white rounded-full p-2 shadow-lg border border-slate-200 hover:bg-slate-100"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
-          
-          {/* Stats Dashboard */}
-          <div className="mb-6 p-4 bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg border border-slate-200 shadow-sm">
-            <h3 className="text-lg font-bold mb-3 text-slate-800">Learning Progress</h3>
-            
-            {/* Mastery Progress */}
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-slate-700">Concepts Mastered</span>
-                <span className="text-sm font-bold text-slate-900">
-                  {masteredCount} / {totalConcepts} ({masteredPercent}%)
-                </span>
-              </div>
-              <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${masteredPercent}%` }}
-                />
-              </div>
+        ) : (
+          <div className="h-full flex items-center justify-center p-8">
+            <div className="text-center max-w-2xl">
+              <div className="text-6xl mb-6">📚</div>
+              <h2 className="text-3xl font-bold mb-4">Loading your lesson...</h2>
+              <p className="text-lg text-slate-600">
+                Preparing the first concept for you to learn.
+              </p>
             </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-2 mt-4">
-              <div className="bg-white p-3 rounded-lg border border-slate-200 text-center">
-                <div className="text-2xl font-bold text-green-600">{masteredCount}</div>
-                <div className="text-xs text-slate-600 mt-1">Mastered</div>
-              </div>
-              <div className="bg-white p-3 rounded-lg border border-slate-200 text-center">
-                <div className="text-2xl font-bold text-blue-600">{readyConcepts.length}</div>
-                <div className="text-xs text-slate-600 mt-1">Ready</div>
-              </div>
-              <div className="bg-white p-3 rounded-lg border border-slate-200 text-center">
-                <div className="text-2xl font-bold text-slate-400">{lockedConcepts.length}</div>
-                <div className="text-xs text-slate-600 mt-1">Locked</div>
-              </div>
-            </div>
-
-            {/* Encouragement Message */}
-            {masteredCount > 0 && (
-              <div className="mt-4 p-2 bg-green-50 rounded border border-green-200 text-center">
-                <span className="text-sm text-green-700 font-medium">
-                  {masteredCount === 1 && "🎉 Great start! Keep learning!"}
-                  {masteredCount > 1 && masteredCount < 10 && "🚀 You're building momentum!"}
-                  {masteredCount >= 10 && masteredCount < 20 && "💪 Excellent progress!"}
-                  {masteredCount >= 20 && masteredCount < totalConcepts && "🔥 You're on fire!"}
-                  {masteredCount === totalConcepts && "🏆 Chapter Complete! Amazing work!"}
-                </span>
-              </div>
-            )}
           </div>
-
-          <ConceptDetails 
-            concept={selectedConcept} 
-            onStartLearning={handleStartLearning}
-            masteryRecord={selectedConceptId ? masteredConcepts.get(selectedConceptId) || null : null}
-            conceptStatus={getConceptStatus(selectedConceptId)}
-            allConcepts={concepts}
-            masteredConcepts={masteredConcepts}
-            recommendedConcepts={recommendedConceptIds}
-            readyConcepts={new Set(readyConcepts.map(c => c.id))}
-            lockedConcepts={new Set(lockedConcepts.map(c => c.id))}
-            onConceptClick={setSelectedConceptId}
-          />
-        </div>
+        )}
       </div>
 
-      {/* Socratic Dialogue Modal */}
-      {selectedConcept && (
-        <SocraticDialogue
-          open={dialogueOpen}
-          onOpenChange={setDialogueOpen}
-          conceptData={selectedConcept}
-          libraryId={library.id}
-          libraryType={library.type}
-          onMasteryAchieved={handleMasteryAchieved}
-        />
-      )}
+      {/* Graph Modal */}
+      <GraphModal
+        open={graphModalOpen}
+        onClose={() => setGraphModalOpen(false)}
+        onNodeSelect={handleNodeSelect}
+        graphData={conceptGraphData}
+        masteredConcepts={masteredConcepts}
+        recommendedConcepts={recommendedConceptIds}
+        readyConcepts={new Set(readyConcepts.map(c => c.id))}
+        lockedConcepts={new Set(lockedConcepts.map(c => c.id))}
+        selectedConceptId={selectedConceptId}
+      />
     </div>
   );
 }

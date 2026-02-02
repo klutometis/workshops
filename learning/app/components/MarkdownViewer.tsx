@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -15,7 +15,7 @@ type MarkdownViewerProps = {
   scrollToAnchor?: string;  // e.g., 'nearest-neighbor-algorithm'
 };
 
-export function MarkdownViewer({ markdownContent, scrollToAnchor }: MarkdownViewerProps) {
+export const MarkdownViewer = memo(function MarkdownViewer({ markdownContent, scrollToAnchor }: MarkdownViewerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -93,4 +93,8 @@ export function MarkdownViewer({ markdownContent, scrollToAnchor }: MarkdownView
       </div>
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Only re-render if content or anchor actually changed
+  return prevProps.markdownContent === nextProps.markdownContent &&
+         prevProps.scrollToAnchor === nextProps.scrollToAnchor;
+});

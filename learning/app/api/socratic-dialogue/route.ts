@@ -255,7 +255,7 @@ async function loadConceptContext(
 
 export async function POST(request: NextRequest) {
   try {
-    const { conceptId, conversationHistory, conceptData, textbookContext, libraryId } = await request.json();
+    const { conceptId, conversationHistory, conceptData, textbookContext, libraryId, conceptGraph, masteredConcepts } = await request.json();
 
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('🎓 NEW SOCRATIC DIALOGUE REQUEST');
@@ -303,7 +303,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build system prompt with textbook grounding
-    const systemPrompt = buildSocraticPrompt(conceptData, textbookSections);
+    const systemPrompt = buildSocraticPrompt(conceptData, textbookSections, conceptGraph, masteredConcepts);
     
     console.log('\n📝 SYSTEM PROMPT CONSTRUCTED:');
     console.log(`   - Total length: ${systemPrompt.length} characters`);
@@ -339,7 +339,7 @@ export async function POST(request: NextRequest) {
           contents: geminiContents,
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 1500,
+            maxOutputTokens: 2500,
             responseMimeType: 'application/json',
             responseSchema: {
               type: 'object',
@@ -367,6 +367,10 @@ export async function POST(request: NextRequest) {
                     next_focus: {
                       type: 'string',
                       description: 'Which skill or area to focus on next',
+                    },
+                    next_concept_id: {
+                      type: 'string',
+                      description: 'If ready_for_mastery is true and concept graph is provided, suggest the ID of the next concept to learn',
                     },
                   },
                   required: ['indicators_demonstrated', 'confidence', 'ready_for_mastery'],
@@ -527,7 +531,9 @@ function generateMarkdownAnchor(section: string | null | undefined): string | un
 // Build a Socratic teaching prompt using the concept's pedagogical data
 function buildSocraticPrompt(
   conceptData: any, 
-  textbookSections?: string
+  textbookSections?: string,
+  conceptGraph?: any,
+  masteredConcepts?: string[]
 ): string {
   const { name, description, learning_objectives, mastery_indicators, examples, misconceptions } = conceptData;
 
@@ -577,8 +583,55 @@ ${misconceptions?.map((m: any) => `- "${m.misconception}" → Reality: ${m.reali
 After each student response, evaluate which mastery indicators they demonstrated:
 - Set "indicators_demonstrated" to array of skill IDs (e.g., ["quote_syntax", "evaluation_blocking"])
 - Set "confidence" between 0-1 based on how clearly they showed understanding
-- Set "ready_for_mastery" to true only when student has demonstrated ALL critical basic indicators and most intermediate ones
+- Set "ready_for_mastery" to true when student has demonstrated understanding of core concepts
 - Set "next_focus" to suggest which skill to probe next, or congratulate if mastery achieved
+
+**FLEXIBILITY GUIDELINES - IMPORTANT:**
+
+1. **"I know this" Signal:**
+   - If student says "I know this", "I already understand X", or expresses confidence
+   - Give ONE quick verification question targeting a key mastery indicator
+   - If they answer correctly, set ready_for_mastery: true immediately
+   - Trust the student when evidence supports their claim
+   - Don't belabor the point or require exhaustive demonstration
+
+2. **Code Implementation Concepts:**
+   - If mastery indicators mention implementation or the concept has associated code
+   - Ask student to implement it in the Python scratchpad
+   - If implementation works correctly, set ready_for_mastery: true immediately
+   - Don't require additional questioning beyond working code
+
+3. **Concept Switching:**
+   - If student asks to learn something different or says they're ready to move on
+   - Acknowledge their request
+   - Do quick verification (1-2 questions max)
+   - Set ready_for_mastery: true if verification passes
+   - The system will handle transitioning to the requested concept
+
+4. **Mastery Threshold (RELAXED):**
+   Set ready_for_mastery: true when ANY of these conditions are met:
+   - Student demonstrates understanding of core concept clearly
+   - Student provides working code implementation
+   - Student correctly answers verification after claiming knowledge
+   - Student shows impatience and can answer a quick check question
+   
+   You do NOT need:
+   - Exhaustive demonstration of every indicator
+   - Multiple rounds of questioning
+   - Perfect explanations
+
+5. **Transition Messaging:**
+   When setting ready_for_mastery: true, keep message brief:
+   - "Excellent! You've got this concept down."
+   - "Perfect! That shows you understand [concept]."
+   - "Great work! You've mastered [concept]."
+   
+   Do NOT say:
+   - "We're done with this topic"
+   - "Congratulations on finishing"
+   - "Let's move to the next concept"
+   
+   The system will automatically handle transitions - you just acknowledge mastery.
 
 **Response Format:**
 Return JSON with:
@@ -599,5 +652,29 @@ Return JSON with:
 - Celebrate correct reasoning
 - Guide them toward the correct understanding without simply giving the answer
 
-Begin the dialogue by asking them an opening question to gauge their current understanding.`;
+Begin the dialogue by asking them an opening question to gauge their current understanding.
+
+${conceptGraph && masteredConcepts ? `
+**NEXT CONCEPT SELECTION (when ready_for_mastery is true):**
+
+You have access to the full concept graph. When the student masters the current concept, suggest which concept to learn next.
+
+**Concept Graph:**
+${JSON.stringify({
+  concepts: conceptGraph.concepts || conceptGraph.nodes,
+  edges: conceptGraph.edges
+}, null, 2)}
+
+**Already Mastered Concepts:**
+${JSON.stringify(masteredConcepts, null, 2)}
+
+**Selection Criteria:**
+1. **Prerequisites Met:** Only suggest concepts where all prerequisites are in the mastered list
+2. **Logical Flow:** Prefer concepts that build directly on what was just learned
+3. **Difficulty Progression:** Generally prefer basic → intermediate → advanced
+4. **Student Interest:** If student expresses interest in a specific topic, validate it's available and suggest it
+
+When setting ready_for_mastery: true, include "next_concept_id" with the ID of the concept you recommend learning next.
+If no concepts are available (all mastered or prerequisites not met), set next_concept_id to null.
+` : ''}`;
 }
