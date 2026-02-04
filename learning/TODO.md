@@ -264,6 +264,344 @@ Status badge | Created date
 
 ---
 
+## 🐛 Known Issues & Bug Fixes (2026-02-03)
+
+### High Priority Bugs
+
+#### 1. Metadata Extraction Not Applied on First Import ✅ **FIXED** (2026-02-03)
+**Issue:** Extracted metadata (title, description, author) from LLM analysis was not being used - titles remained uppercase filenames like "PYTHONINTROCH2" instead of proper extracted titles.
+
+**Root Cause:** Variable name typo - using `sourceUrl` instead of `urlOrPath` in metadata extraction call, causing `ReferenceError` that was caught and silently ignored.
+
+**Fix:** Changed line 787 in `lib/processing.ts`:
+```typescript
+// Before (incorrect):
+const metadata = await extractMetadataFn(cleanedMarkdown, sourceUrl, apiKey);
+
+// After (correct):
+const metadata = await extractMetadataFn(cleanedMarkdown, urlOrPath, apiKey);
+```
+
+**Result:** Metadata extraction now works on first import. Libraries get:
+- ✅ Proper extracted titles
+- ✅ Descriptions from content
+- ✅ Author identification
+- ✅ Topics, difficulty level, estimated hours
+
+**Status:** Fixed and tested
+
+---
+
+#### 2. YouTube Import Not Tested Recently ⚠️
+**Issue:** YouTube import pipeline hasn't been exercised since recent refactoring. Need to bring back Karpathy lesson to verify it still works.
+
+**Tasks:**
+- [ ] Test YouTube URL import end-to-end
+- [ ] Verify video processing pipeline still works
+- [ ] Check semantic search on video segments
+- [ ] Ensure video player shows in source tab
+- [ ] Test timestamp navigation
+
+**Original working video:** Karpathy GPT lesson (was working in Phase 1)
+
+---
+
+#### 3. Notebook Tab Empty on Dialogue Open ✅ **FIXED** (2026-02-03)
+**Issue:** Notebook tab showed "No Source Selected" when dialogue opened, only populated after first message.
+
+**Root cause:** Markdown content only fetched after first API call to `/api/socratic-dialogue`
+
+**Fix:** Added useEffect to fetch library markdown immediately on dialogue open:
+```typescript
+// SocraticDialogue.tsx line 208
+useEffect(() => {
+  if (open && (libraryType === 'notebook' || libraryType === 'markdown') && !cachedMarkdownContent) {
+    fetch(`/api/libraries/${libraryId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.markdown_content) {
+          setCachedMarkdownContent(data.markdown_content);
+        }
+      });
+  }
+}, [open, libraryType, libraryId, cachedMarkdownContent]);
+```
+
+**Status:** Fixed - notebook content now loads immediately
+
+---
+
+#### 4. Source Material Not Loading (UUID vs Slug) ✅ **FIXED** (2026-02-03)
+**Issue:** Socratic dialogue showed "(No textbook sections found)" even though chunks existed in database.
+
+**Root cause:** API expected slug but received UUID from client.
+
+**Fix:** Updated `loadConceptContext()` to auto-detect UUID vs slug:
+```typescript
+const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(libraryId);
+const library = isUUID ? await getLibraryById(libraryId) : await getLibraryBySlug(libraryId);
+```
+
+**Status:** Fixed - semantic search now works correctly
+
+---
+
+### Medium Priority Issues
+
+#### 5. Concept Graph Size - Too Many Nodes 🔍
+**Issue:** Every notebook generates ~20+ concepts regardless of content complexity. Simple notebooks end up with excessive granularity.
+
+**Hypothesis:** Extraction prompt may be encouraging creation of 20 nodes, or model defaults to this pattern.
+
+**Impact:**
+- Lessons are very long (never finished one completely)
+- Too granular for simple content
+- Overwhelming for beginners
+
+**Proposed solutions:**
+- [ ] Review concept extraction prompt for bias toward 20 nodes
+- [ ] Add guidance to create "natural" number of concepts
+- [ ] Consider difficulty-based chunking (simple content → fewer concepts)
+- [ ] Add max_concepts parameter with smart defaults
+
+**Files to check:**
+- `scripts/markdown/extract-concepts.ts` - Concept extraction prompt
+- `lib/concept-extractor.ts` - May have hardcoded expectations
+
+---
+
+#### 6. Missing Graph View in Dialogue ✅ **FIXED** (2026-02-03)
+**Issue:** No way to return to graph view from within a dialogue session.
+
+**Solution Implemented:**
+- ✅ Added "🗺️ Map" button in dialogue header (both dialog and inline modes)
+- ✅ Opens GraphModal showing full concept graph with mastery progress
+- ✅ Click any unlocked concept to switch to learning it
+- ✅ Visual states: mastered (green), recommended (blue), ready (yellow), locked (gray)
+
+**Implementation:**
+- `app/components/SocraticDialogue.tsx` - Added map button and GraphModal integration
+- Calculates ready/locked/recommended concepts from prerequisites
+- Converts masteredConcepts array to Map for GraphModal interface
+- Closes modal and triggers concept change via `onConceptChange` callback
+
+**Status:** Complete and working
+
+---
+
+### Feature Requests
+
+#### 7. Library Hierarchies / Grouping 📚
+**Issue:** Need to organize related libraries into courses/chapters.
+
+**Use case:**
+- Python Intro has Ch1, Ch2, Ch3, etc.
+- Want to show as one "course" with chapters
+- Main page should group related content
+
+**Proposed structure:**
+```
+Course: "Introduction to Python"
+  ├─ Chapter 1: Variables and Types
+  ├─ Chapter 2: Control Flow
+  └─ Chapter 3: Functions
+```
+
+**Database changes needed:**
+- Add `parent_library_id` to libraries table (self-referential)
+- Or create separate `courses` table
+- UI: Show hierarchical view on user profile page
+- UI: "Next Chapter" button at end of dialogue
+
+**Priority:** Medium - helps organization but not blocking
+
+---
+
+#### 8. Shorter Lessons / Micro-Learning ⚡
+**Related to #5 (too many concepts)**
+
+**Goal:** Support 5-10 minute learning sessions, not just full chapters.
+
+**Approaches:**
+1. **Concept-level lessons:** Single concept from larger library
+2. **Difficulty tiers:** Progressive disclosure (basic → intermediate → advanced)
+3. **Smart chunking:** Break large notebooks into smaller semantic units
+4. **Time estimates:** Show "~7 minutes" on concept cards
+
+**Implementation ideas:**
+- Show estimated time per concept (from metadata)
+- Allow "Learn just this concept" from graph view
+- Save progress and resume later
+- Show "Quick wins" on homepage (concepts < 10 min)
+
+---
+
+## 🔬 Research: PageIndex as Alternative to Vector RAG
+
+### Overview
+[PageIndex](https://github.com/VectifyAI/PageIndex) is a **vectorless, reasoning-based RAG** system that uses hierarchical tree indexing instead of chunking + embeddings. Worth evaluating as replacement for our current approach.
+
+### Core Concept
+**Current approach (ours):**
+```
+Document → LLM chunking → Embeddings → Vector similarity search → Retrieve chunks
+```
+
+**PageIndex approach:**
+```
+Document → Hierarchical tree structure (ToC-like) → LLM reasoning search → Retrieve sections
+```
+
+### Key Differences
+
+| Aspect | Our Current System | PageIndex |
+|--------|-------------------|-----------|
+| **Chunking** | LLM-based semantic chunking | No chunking - preserves natural document structure |
+| **Index** | Vector embeddings (pgvector) | Tree structure (hierarchical ToC) |
+| **Search** | Cosine similarity | LLM reasoning over tree nodes |
+| **Retrieval** | "Vibe-based" similarity | Context-aware tree traversal |
+| **Traceability** | Chunk IDs, line numbers | Node IDs, page ranges, section titles |
+
+### Advantages of PageIndex
+
+1. **No Chunking Artifacts**
+   - Our issue: Empty code blocks, section splitting, arbitrary chunk boundaries
+   - PageIndex: Preserves natural document hierarchy (sections, subsections)
+
+2. **Reasoning > Similarity**
+   - Our issue: Semantically similar ≠ contextually relevant
+   - PageIndex: LLM reasons about which sections contain answer
+   - Example: Query "How do decorators work?" vs similar text about "Python syntax"
+
+3. **Better Structure Preservation**
+   - Documents naturally have hierarchical structure
+   - Tree represents this explicitly (like human ToC)
+   - Easier to navigate ("Section 2.3.1" vs "Chunk 47")
+
+4. **Proven Results**
+   - 98.7% accuracy on FinanceBench (SOTA)
+   - Outperforms vector RAG on professional documents
+   - Designed for complex, long-form content
+
+5. **Explainability**
+   - Can trace: "Found in Section 2.3: Financial Stability → Subsection 2.3.1"
+   - Our system: "Found in chunk-5-python-basics (similarity: 0.78)"
+
+### Potential Downsides
+
+1. **More API Calls**
+   - Tree search requires multiple LLM calls (traversal)
+   - Our embedding: One-time cost, then fast vector search
+   - PageIndex: LLM reasoning on each query
+
+2. **Latency**
+   - Vector search: < 100ms
+   - Tree reasoning: Seconds (multiple LLM calls)
+   - Matters for interactive dialogue
+
+3. **Cost**
+   - Our approach: Embedding once, search free
+   - PageIndex: LLM reasoning per query (ongoing cost)
+
+4. **Structure Dependency**
+   - Works best with well-structured documents (reports, textbooks)
+   - Our notebooks already well-structured (markdown headings)
+   - But what about unstructured content?
+
+5. **Implementation Effort**
+   - Need to rewrite entire RAG pipeline
+   - Migrate existing libraries
+   - Our system already works (minus noise issues)
+
+### Relevance to Our Issues
+
+**Problem 1: "Pulling noise" (your concern)**
+- Our chunks sometimes capture irrelevant similar text
+- PageIndex's reasoning would filter better
+- Example: Query about "Python scripts" might pull similar text about "shell scripts"
+- Tree reasoning: Understands we want Python, not shell
+
+**Problem 2: Too many concepts (Issue #5)**
+- Our extraction creates ~20 concepts per notebook
+- PageIndex naturally creates hierarchical structure
+- Could map concepts to tree nodes (chapters → sections → concepts)
+
+**Problem 3: Chunk boundaries**
+- Our chunking splits explanations from code
+- PageIndex preserves section integrity
+- Better for "show me where this is explained"
+
+### Hybrid Approach?
+
+Could we combine best of both?
+
+**Option A: PageIndex for structure + Vector for search**
+1. Use PageIndex to build tree structure (replaces concept extraction)
+2. Still embed leaf nodes for fast similarity search
+3. Use tree for navigation UI (graph view)
+
+**Option B: Tree-structured concepts**
+1. Keep our concept extraction
+2. Add hierarchical relationships (parent_concept_id)
+3. Use tree reasoning for concept discovery
+4. Keep embeddings for content search
+
+**Option C: Dual index**
+1. PageIndex tree for "big picture" navigation
+2. Vector search for granular content retrieval
+3. Best of both: structure + speed
+
+### Recommendation
+
+**Short term:** Add to research backlog
+- Current system works, just has noise
+- PageIndex requires significant rewrite
+- Test with one document first (prototype)
+
+**Medium term:** Prototype hybrid approach
+- Build PageIndex tree for Python notebooks
+- Compare retrieval quality vs current system
+- Measure latency and cost tradeoffs
+
+**Long term:** Consider full migration IF:
+- Prototype shows significantly better retrieval
+- Latency is acceptable for dialogue (~2-3s)
+- Cost is manageable (could cache tree search results)
+- Improves learning experience measurably
+
+### Next Steps
+
+1. **Prototype** (1-2 days):
+   - [ ] Install PageIndex, process one notebook
+   - [ ] Compare tree structure to our concept graph
+   - [ ] Test retrieval on 10 sample queries
+   - [ ] Measure: accuracy, latency, API cost
+
+2. **Evaluate** (1 day):
+   - [ ] Does it reduce "noise" in retrieval?
+   - [ ] Is tree structure better than flat concepts?
+   - [ ] Is latency acceptable for interactive use?
+   - [ ] Does it align with pedagogical goals?
+
+3. **Decide** (after prototype):
+   - Keep current system (with improvements)
+   - Adopt PageIndex (full migration)
+   - Hybrid approach (best of both)
+
+### Open Questions
+
+- How does PageIndex handle Jupyter notebooks specifically?
+- Can we map tree nodes to concept graph nodes?
+- Does hierarchical structure help or hurt pedagogical flow?
+- Could tree search replace concept extraction entirely?
+
+**Status:** Research - needs prototyping before decision  
+**Priority:** Medium (current system works, but this could be transformative)  
+**Assignee:** TBD  
+**Blocked by:** Nothing - can prototype in parallel
+
+---
+
 ## Phase 1b: Import/Publish Pipeline (requires Phase 1a)
 
 ### Goal
@@ -1511,6 +1849,315 @@ Extract a **complete, coherent, runnable program** from the notebook FIRST, then
 - Import flow includes metadata customization
 - Exercise types promote conceptual understanding over code generation
 - Code fragments connect into meaningful projects
+
+---
+
+## Performance Optimization Opportunities
+
+### Concept Enrichment Performance Analysis
+
+**Current Bottleneck:** The "Enriching concepts" stage is the most time-consuming processing step.
+
+**What's Happening:** (`scripts/markdown/enrich-concepts.ts`)
+- **One LLM call per concept** (line 258: `for (const concept of conceptGraph.nodes)`)
+- Each call generates comprehensive pedagogical metadata:
+  - Learning objectives (3-5 items)
+  - Mastery indicators (3-6 items with test methods)
+  - Misconceptions (2-4 items with correction strategies)
+  - Key insights (2-4 items)
+  - Optional: practical applications, gotchas, debugging tips
+- **Context sent per call:**
+  - Full markdown document (up to 50k chars, line 120)
+  - All relevant chunks for the concept
+  - Prerequisite information
+- **Rate limiting:** 1 second delay between concepts (line 271)
+- **Model:** gemini-2.5-flash with structured JSON output
+
+**Cost Analysis:**
+- For a document with N concepts:
+  - Time: ~2-5 seconds per concept (LLM call + rate limit)
+  - Tokens: ~5k-15k input tokens per concept (full document + chunks)
+  - Total: For 30 concepts = 60-150 seconds = 1-2.5 minutes minimum
+
+**Optimization Opportunities:**
+
+#### 1. **Batch Processing with Parallel Requests** ✅ IMPLEMENTED
+- **Status:** DONE - Parallel processing with retry and throttle detection
+- **Configuration:** Set `ENRICHMENT_BATCH_SIZE` environment variable (default: 3)
+- **Features:**
+  - Processes 3 concepts in parallel by default
+  - Automatic retry with exponential backoff for rate limits (2s, 4s, 8s)
+  - Logs throttle events and suggests batch size adjustments
+  - Tracks performance metrics (total time, avg per concept, throttle count)
+  - Uses `Promise.allSettled` to continue even if some concepts fail
+- **Usage:**
+  ```bash
+  # Default (batch size 3)
+  npx tsx scripts/markdown/enrich-concepts.ts path/to/file.md
+  
+  # Conservative (batch size 2 for aggressive rate limits)
+  ENRICHMENT_BATCH_SIZE=2 npx tsx scripts/markdown/enrich-concepts.ts path/to/file.md
+  
+  # Aggressive (batch size 5 - may hit rate limits)
+  ENRICHMENT_BATCH_SIZE=5 npx tsx scripts/markdown/enrich-concepts.ts path/to/file.md
+  ```
+- **Monitoring:** Check end-of-run summary for throttle warnings
+- **Expected improvement:** 2-3x faster with batch size 3 (depending on rate limits)
+
+#### 2. **Context Window Optimization** 🔥 HIGH IMPACT
+- Current: Sending full 50k char document for EVERY concept
+- Proposed: Send only relevant chunks + small document summary
+- **Expected improvement:** 50-80% token reduction per call
+- **Implementation:**
+  - Create document summary once (200-500 words)
+  - For each concept: summary + relevant chunks only
+  - Only include full document for concepts explicitly marked as "overview" or "architecture"
+- **Token savings:** 50k → ~10k per call
+- **Trade-off:** Slightly less context, but enrichment is concept-specific anyway
+
+#### 3. **Incremental Enrichment** ⚡ MEDIUM IMPACT
+- Current: Re-enrich all concepts on every reimport
+- Proposed: Only enrich new/modified concepts
+- **Implementation:**
+  - Hash concept definitions (name + description + prerequisites)
+  - Store hashes in enriched output
+  - On reimport, skip concepts with matching hashes
+- **Expected improvement:** Near-instant for unchanged concepts
+- **Use case:** Iterative development, fixing typos, adding concepts
+
+#### 4. **Progressive Enrichment Levels** ⚡ MEDIUM IMPACT
+- Current: All concepts get full enrichment
+- Proposed: Tiered enrichment based on concept importance
+- **Levels:**
+  - **Basic** (fast): Learning objectives + key insights only
+  - **Standard** (current): Full pedagogical metadata
+  - **Deep** (optional): Extended applications, edge cases, alternative explanations
+- **Heuristics for level selection:**
+  - Prerequisites referenced by many concepts → Standard/Deep
+  - Leaf concepts with no dependents → Basic
+  - User can override via metadata
+- **Expected improvement:** 30-40% faster for typical documents
+
+#### 5. **Caching & Reuse Across Similar Content** 💡 LOW IMPACT (FUTURE)
+- Proposed: Build a library of pedagogical patterns for common concepts
+- Examples:
+  - "list comprehension" across different Python tutorials
+  - "recursion" across different languages
+  - "TCP handshake" across networking materials
+- **Implementation:** Semantic similarity search of concept names/descriptions
+- **Trade-off:** Less authentic to specific document style
+- **Best for:** Generic/universal concepts
+
+#### 6. **Streaming Enrichment Updates** 💡 LOW IMPACT (UX)
+- Current: UI shows "Enriching concepts: X%" as single stage
+- Proposed: Show per-concept progress
+- **Implementation:** 
+  - Update progress after each concept: "Enriching concepts: 12/30 (list comprehension)"
+  - Gives better UX feedback for long-running operations
+- **No performance gain, but perceived performance improvement**
+
+---
+
+## Bug Fixes & UX Improvements
+
+### Stuck "Pending" State Issue ✅ FIXED
+
+**Problem:** When reimporting a library, it would get stuck in "pending" status showing "Processing Starting Soon" indefinitely.
+
+**Root Cause:** The reimport endpoint (`/api/libraries/[id]/reimport/route.ts`) was resetting the library status but not triggering the background processing job.
+
+**Solution Implemented:**
+1. **Fixed reimport endpoint** - Now triggers background processing (local spawn or Cloud Run Job)
+2. **Added "Retry Processing" button** - Users can manually trigger if stuck
+3. **Button appears in pending state** with helpful message: "⏱️ Waiting longer than expected?"
+
+**User Experience:**
+- If processing doesn't start within ~30 seconds, click "🔄 Retry Processing"
+- Button shows on library status page during "pending" state
+- Automatically refreshes page when processing starts
+- Non-destructive - safe to retry multiple times
+
+**For Developers:**
+- Check background process: `ps aux | grep process-library`
+- Manually trigger: `npx tsx scripts/process-library.ts <library-id>`
+- Check logs: Library status page shows processing logs in real-time
+
+---
+
+### Known Issues
+
+#### Semantic Chunker Produces 0 Chunks for Some Notebooks ⚠️ CONFIRMED BUG
+
+**Status:** Root cause identified, needs fix
+
+**Symptom:** 
+- Notebook processing completes but produces 0 text chunks
+- Concepts are extracted successfully (e.g., 20 concepts for PythonIntroCh1)
+- Library works but has no RAG search capability
+
+**Root Cause - CONFIRMED:**
+Testing with PythonIntroCh1.ipynb revealed:
+- ✅ Markdown file generated: 3.7KB with real content
+- ❌ Chunking step produces: `{ "chunks": [], "total_chunks": 0 }`
+- 🐛 LLM-based semantic chunker (`lib/markdown-chunker.ts`) fails to identify chunkable units
+
+**Example of content that failed to chunk:**
+```markdown
+# 1. Very simple 'programs'
+## 1.1 Running Python from the command line
+In order to test pieces of code we can run Python from the command line...
+
+print('Hello, World')
+
+## 1.2 Math in Python
+Type `1 + 1` and execute the code...
+```
+
+**Why the chunker fails:**
+1. **Notebook format peculiarities**: 
+   - Lots of empty code blocks (```python\n\n```)
+   - Very brief instructional text between code
+   - Mix of markdown and code that may not form "semantic teaching units"
+   
+2. **LLM chunker expectations mismatch**:
+   - Designed for prose-heavy educational content
+   - Expects paragraphs of explanation + examples
+   - Notebook style: terse instructions + "try this" + empty space
+
+3. **Possible timeout/hanging**:
+   - Manual chunker invocation hung for 60+ seconds
+   - May be stuck in LLM call or retry loop
+   - Empty result suggests it gave up or returned no chunks
+
+**Debug Evidence:**
+```bash
+# Files preserved at: /tmp/markdown/3f41d8c2-7e56-4284-acc1-fb3b3a9c8fd9/
+pythonintroch1.md:            3705 bytes  # Has content!
+chunks.json:                   198 bytes  # { "chunks": [] }
+chunk-concept-mappings.json:   171 bytes  # Empty mappings
+chunk-embeddings.json:         281 bytes  # Empty embeddings
+concept-graph.json:          21732 bytes  # 20 concepts ✓
+concept-graph-enriched.json: 115558 bytes # Enriched successfully ✓
+```
+
+**Impact:**
+- Concepts work fine (navigation, prerequisites)
+- Socratic dialogue works (uses concepts, not chunks)
+- ❌ RAG search doesn't work (no text chunks to search)
+- ❌ "Show me where this is taught" feature broken
+
+**Fixes to Consider:**
+
+1. **Short-term: Fallback chunker** (HIGH PRIORITY)
+   - If LLM chunker produces 0 chunks, use simple heuristic
+   - Split on H2 headings (`## `)
+   - Each section = one chunk
+   - Will be less semantic but better than nothing
+   ```typescript
+   if (chunks.length === 0 && markdownSize > 0) {
+     console.log('⚠️ LLM chunker failed, using heading-based fallback');
+     chunks = simpleHeadingChunker(markdown);
+   }
+   ```
+
+2. **Medium-term: Notebook-aware chunker**
+   - Detect notebook-style markdown (lots of code blocks)
+   - Different chunking strategy for interactive tutorials
+   - Group instruction + code + output as single chunk
+   - Preserve pedagogical flow
+
+3. **Long-term: Hybrid approach**
+   - Try LLM chunker first (with timeout)
+   - Fall back to rule-based if fails
+   - Learn which content types work with which chunker
+
+**Testing:**
+- Test with different notebook styles:
+  - Prose-heavy (like PAIP) ✓ Works
+  - Code-heavy with instructions (PythonIntroCh1) ❌ Fails
+  - Mixed (needs testing)
+- Add timeout to prevent hanging
+
+**RESOLVED - Chunker Now Working!** ✅
+
+After debugging, the chunker is now working correctly:
+- Empty code blocks are removed before processing (17 removed from PythonIntroCh1)
+- Empty sections are skipped
+- Successfully created 8 chunks in 47 seconds
+- Using native SDK timeout (120s) instead of custom wrapper
+
+**Previous Issue - API Timeout on Notebook Content:**
+
+Testing revealed gemini-3-flash-preview **times out** (>60s) when chunking notebook-style markdown:
+- 3237 chars of content
+- 29 code blocks (14 empty: ` ``` python\n\n``` `)  
+- 54 text lines
+- Prompt size: 8093 chars (~2000 tokens)
+
+The API call hangs indefinitely - not an error, just no response. This is different from returning empty chunks.
+
+**Immediate Workarounds:**
+
+1. **Preprocess notebook markdown** (RECOMMENDED):
+   ```typescript
+   // Before chunking, clean up empty code blocks
+   markdown = markdown.replace(/```python\s*```/g, '');
+   ```
+
+2. **Use gemini-2.5-flash instead** (known to work):
+   - More stable for edge cases
+   - Slightly slower but reliable
+   
+3. **Skip chunking for code-heavy notebooks**:
+   - If code blocks > text lines, use fallback chunker
+   - Simple heading-based splitting
+
+4. **Timeout with retry**:
+   - Current timeout: 60s
+   - Could retry with simpler prompt or different model
+
+**Root Cause Hypothesis:**
+- Empty code blocks confuse the model
+- Repetitive structure (instruction → empty code → repeat)
+- Model may be trying to "fill in" the empty code blocks
+- Or model is confused about what constitutes a "semantic chunk"
+
+**Next Steps:**
+- Add empty code block preprocessing
+- Test with gemini-2.5-flash as fallback
+- Implement heading-based fallback chunker
+
+**Workaround for Users:**
+- Processing completes successfully
+- Concepts and learning objectives still work
+- Just can't search within the content
+
+**Files for testing:**
+- `/tmp/markdown/3f41d8c2-7e56-4284-acc1-fb3b3a9c8fd9/pythonintroch1.md`
+- Use `KEEP_TEMP_FILES=true DEBUG_PROCESSING=true` to preserve
+
+---
+
+### Recommended Implementation Order
+
+1. **Start with #1 (Parallel Processing)** - ✅ DONE - Easiest to implement, biggest immediate gain
+2. **Then #2 (Context Optimization)** - Significant cost/speed improvement
+3. **Then #6 (Streaming Updates)** - Better UX while working on others
+4. **Consider #3 (Incremental)** - For iterative development workflows
+5. **Consider #4 (Progressive Levels)** - For very large documents (50+ concepts)
+
+### Measurement & Validation
+
+Before optimizing, capture baseline metrics:
+- Concepts per document: `conceptGraph.nodes.length`
+- Time per concept: Log timestamps in enrichment loop
+- Token usage per concept: Parse from Gemini API response metadata
+- Total enrichment time: Already visible in UI
+
+After each optimization:
+- Verify pedagogical quality unchanged (spot-check enriched concepts)
+- Measure new timings
+- Check error rates (parallel requests may hit rate limits)
 
 ---
 

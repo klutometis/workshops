@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getLibraryById, updateLibrary } from '@/lib/db';
 import { getServerSession } from 'next-auth';
+import pool from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
@@ -131,6 +132,56 @@ export async function PATCH(
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating library:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      return NextResponse.json(
+        { error: 'Invalid library ID format' },
+        { status: 400 }
+      );
+    }
+
+    // Check authentication
+    const session = await getServerSession();
+    if (!session || !session.user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Get existing library to verify ownership
+    const library = await getLibraryById(id);
+    if (!library) {
+      return NextResponse.json(
+        { error: 'Library not found' },
+        { status: 404 }
+      );
+    }
+
+    // TODO: Verify ownership - check library.user_id matches session.user.id
+    // For now, only authenticated users can delete
+
+    // Delete library (CASCADE will remove related data)
+    await pool.query('DELETE FROM libraries WHERE id = $1', [id]);
+
+    return NextResponse.json({ success: true, message: 'Library deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting library:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

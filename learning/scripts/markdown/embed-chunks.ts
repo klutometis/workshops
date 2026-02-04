@@ -162,6 +162,31 @@ async function embedChunks(markdownPath: string): Promise<void> {
   console.log(`✅ Loaded ${chunks.length} chunks with mappings`);
   console.log(`   Source: ${mappingsData.source_file || 'N/A'}\n`);
 
+  // Handle case of 0 chunks - create empty output and exit gracefully
+  if (chunks.length === 0) {
+    console.log(`⚠️  No chunks to embed - creating empty embeddings file\n`);
+    
+    const emptyResult: EmbeddingResult = {
+      source_file: mappingsData.source_file,
+      chunks: [],
+      metadata: {
+        total_embeddings: 0,
+        embedded_at: new Date().toISOString(),
+        embedding_model: 'gemini-embedding-001',
+        embedding_dimensions: 768,
+      },
+    };
+    
+    fs.writeFileSync(outputPath, JSON.stringify(emptyResult, null, 2));
+    console.log(`✅ Saved empty embeddings to: ${outputPath}`);
+    console.log(`\n⚠️  Note: This notebook produced 0 text chunks.`);
+    console.log(`   This may indicate:`);
+    console.log(`   - The notebook contains only code cells with no markdown`);
+    console.log(`   - The chunking step failed to identify semantic units`);
+    console.log(`   - The content is very short or minimal\n`);
+    return;
+  }
+
   // Load concept names for richer embeddings
   console.log('📚 Loading concept names...');
   const conceptNames = await loadConceptNames(workDir);

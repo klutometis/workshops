@@ -27,7 +27,7 @@ export async function GET() {
       title: lib.title,
       author: lib.author,
       type: lib.type,
-      description: lib.metadata?.description || `Learn ${lib.title}`,
+      description: lib.description || lib.metadata?.description || `Learn ${lib.title}`,
       color: lib.metadata?.color || 'blue',
       stats: {
         totalConcepts: lib.total_concepts || 0,

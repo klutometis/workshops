@@ -194,7 +194,7 @@ async function enrichConcept(
   
   // 4. Call Gemini with structured output
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-3-flash-preview",
     contents: prompt,
     config: {
       responseMimeType: "application/json",
@@ -228,7 +228,71 @@ async function enrichConcept(
 }
 
 // ============================================================================
-// Main Processing Loop
+// Retry Logic with Exponential Backoff
+// ============================================================================
+
+async function enrichConceptWithRetry(
+  concept: any,
+  chunks: any,
+  fullMarkdown: string,
+  conceptGraph: any,
+  ai: any,
+  maxRetries: number = 3
+): Promise<EnrichedConcept> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const enriched = await enrichConcept(concept, chunks, fullMarkdown, conceptGraph, ai);
+      
+      // Success - reset any throttle warnings
+      if (attempt > 1) {
+        console.log(`   ✅ Succeeded on retry ${attempt - 1}`);
+      }
+      
+      return enriched;
+      
+    } catch (error: any) {
+      lastError = error;
+      
+      // Check if it's a rate limit / quota error
+      const isRateLimit = 
+        error.message?.includes('429') ||
+        error.message?.includes('quota') ||
+        error.message?.includes('rate limit') ||
+        error.message?.includes('RESOURCE_EXHAUSTED') ||
+        error.status === 429;
+      
+      const isServerError = 
+        error.message?.includes('500') ||
+        error.message?.includes('503') ||
+        error.status === 500 ||
+        error.status === 503;
+      
+      if (isRateLimit) {
+        const backoffMs = Math.pow(2, attempt) * 1000; // Exponential: 2s, 4s, 8s
+        console.error(`   ⚠️  RATE LIMITED on attempt ${attempt}/${maxRetries} for "${concept.name}"`);
+        console.error(`   ⏳ Backing off for ${backoffMs}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+        
+      } else if (isServerError && attempt < maxRetries) {
+        const backoffMs = 2000; // Fixed 2s for server errors
+        console.error(`   ⚠️  Server error (${error.status || 'unknown'}) on attempt ${attempt}/${maxRetries}`);
+        console.error(`   ⏳ Retrying in ${backoffMs}ms...`);
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+        
+      } else {
+        // Not retryable, or final attempt
+        throw error;
+      }
+    }
+  }
+  
+  throw lastError || new Error('Max retries exceeded');
+}
+
+// ============================================================================
+// Main Processing Loop (Parallel with Throttle Detection)
 // ============================================================================
 
 async function enrichConcepts(markdownPath: string): Promise<void> {
@@ -252,38 +316,74 @@ async function enrichConcepts(markdownPath: string): Promise<void> {
   console.log(`   - ${chunks.chunks.length} chunks`);
   console.log(`   - Full markdown (${Math.round(fullMarkdown.length / 1000)}k chars)`);
   
-  const enrichedConcepts: EnrichedConcept[] = [];
+  // Parallel batch processing configuration
+  const PARALLEL_BATCH_SIZE = parseInt(process.env.ENRICHMENT_BATCH_SIZE || '3', 10);
+  console.log(`\n⚡ Parallel processing: ${PARALLEL_BATCH_SIZE} concepts at a time\n`);
   
-  // Process each concept
-  for (const concept of conceptGraph.nodes) {
-    try {
-      const enriched = await enrichConcept(
-        concept,
-        chunks,
-        fullMarkdown,
-        conceptGraph,
-        ai
-      );
+  const enrichedConcepts: EnrichedConcept[] = [];
+  const startTime = Date.now();
+  let throttleCount = 0;
+  
+  // Process concepts in parallel batches
+  for (let i = 0; i < conceptGraph.nodes.length; i += PARALLEL_BATCH_SIZE) {
+    const batch = conceptGraph.nodes.slice(i, i + PARALLEL_BATCH_SIZE);
+    const batchNum = Math.floor(i / PARALLEL_BATCH_SIZE) + 1;
+    const totalBatches = Math.ceil(conceptGraph.nodes.length / PARALLEL_BATCH_SIZE);
+    
+    console.log(`📦 Batch ${batchNum}/${totalBatches} (${batch.length} concepts)`);
+    
+    const batchStartTime = Date.now();
+    
+    // Process batch in parallel with individual retry logic
+    const batchResults = await Promise.allSettled(
+      batch.map((concept: any) => 
+        enrichConceptWithRetry(concept, chunks, fullMarkdown, conceptGraph, ai)
+          .catch(error => {
+            // Track throttle events
+            if (error.message?.includes('RATE LIMITED')) {
+              throttleCount++;
+            }
+            throw error;
+          })
+      )
+    );
+    
+    // Collect successful results and log failures
+    for (let j = 0; j < batchResults.length; j++) {
+      const result = batchResults[j];
+      const concept = batch[j];
       
-      enrichedConcepts.push(enriched);
-      
-      // Rate limiting: small delay between concepts
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-    } catch (error) {
-      console.error(`   ❌ Failed to enrich ${concept.name}:`, error);
-      // Continue with other concepts even if one fails
+      if (result.status === 'fulfilled') {
+        enrichedConcepts.push(result.value);
+      } else {
+        console.error(`   ❌ Failed to enrich ${concept.name}:`, result.reason?.message || result.reason);
+      }
+    }
+    
+    const batchDuration = Date.now() - batchStartTime;
+    console.log(`   ⏱️  Batch completed in ${(batchDuration / 1000).toFixed(1)}s\n`);
+    
+    // Small delay between batches to avoid overwhelming the API
+    if (i + PARALLEL_BATCH_SIZE < conceptGraph.nodes.length) {
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
   
   // Save enriched concept graph
   const outputPath = path.join(workDir, "concept-graph-enriched.json");
   
+  const totalDuration = Date.now() - startTime;
+  const avgTimePerConcept = totalDuration / enrichedConcepts.length;
+  
   const enrichedGraph = {
     metadata: {
       ...conceptGraph.metadata,
       enriched_at: new Date().toISOString(),
       enrichment_version: "1.0",
+      parallel_batch_size: PARALLEL_BATCH_SIZE,
+      total_duration_ms: totalDuration,
+      avg_time_per_concept_ms: Math.round(avgTimePerConcept),
+      throttle_events: throttleCount,
     },
     nodes: enrichedConcepts,
     edges: conceptGraph.edges,
@@ -294,10 +394,19 @@ async function enrichConcepts(markdownPath: string): Promise<void> {
   console.log(`\n✅ Enrichment complete!`);
   console.log(`📄 Saved to: ${outputPath}`);
   console.log(`\n📈 Summary:`);
-  console.log(`   - ${enrichedConcepts.length} concepts enriched`);
+  console.log(`   - ${enrichedConcepts.length}/${conceptGraph.nodes.length} concepts enriched`);
   console.log(`   - ${enrichedConcepts.reduce((sum, c) => sum + c.learning_objectives.length, 0)} total learning objectives`);
   console.log(`   - ${enrichedConcepts.reduce((sum, c) => sum + c.mastery_indicators.length, 0)} total mastery indicators`);
   console.log(`   - ${enrichedConcepts.reduce((sum, c) => sum + c.misconceptions.length, 0)} total misconceptions`);
+  console.log(`\n⏱️  Performance:`);
+  console.log(`   - Total time: ${(totalDuration / 1000).toFixed(1)}s`);
+  console.log(`   - Avg per concept: ${(avgTimePerConcept / 1000).toFixed(1)}s`);
+  console.log(`   - Parallel batch size: ${PARALLEL_BATCH_SIZE}`);
+  if (throttleCount > 0) {
+    console.log(`\n⚠️  Throttling detected:`);
+    console.log(`   - ${throttleCount} rate limit events`);
+    console.log(`   - Consider reducing ENRICHMENT_BATCH_SIZE (currently ${PARALLEL_BATCH_SIZE})`);
+  }
 }
 
 // ============================================================================

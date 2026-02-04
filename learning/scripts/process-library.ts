@@ -22,6 +22,17 @@ import fs from 'fs/promises';
 
 // Environment flags
 const KEEP_TEMP_FILES = process.env.KEEP_TEMP_FILES === 'true';
+const DEBUG_MODE = process.env.DEBUG_PROCESSING === 'true';
+
+// Debug logging helper
+function debugLog(message: string, data?: any) {
+  if (DEBUG_MODE) {
+    console.log(`🔍 [DEBUG] ${message}`);
+    if (data) {
+      console.log(JSON.stringify(data, null, 2));
+    }
+  }
+}
 
 // Database logging helper - appends to processing_logs JSONB array
 async function logToDatabase(
@@ -104,7 +115,7 @@ async function processLibrary(libraryId: string) {
   try {
     // 1. Fetch library from database
     const queryResult = await pool.query(
-      'SELECT id, source_url, source_type, slug, title FROM libraries WHERE id = $1',
+      'SELECT id, source_url, source_type, slug, title, description, author FROM libraries WHERE id = $1',
       [libraryId]
     );
 
@@ -113,6 +124,7 @@ async function processLibrary(libraryId: string) {
     }
 
     const library = queryResult.rows[0];
+    const isFirstImport = !library.description;  // First import if description not yet set
     console.log(`📖 Title: ${library.title}`);
     console.log(`🏷️  Slug: ${library.slug}`);
     console.log(`🔗 Source: ${library.source_url}`);
@@ -134,40 +146,59 @@ async function processLibrary(libraryId: string) {
     let result;
     switch (library.source_type) {
       case 'youtube':
-        result = await processYouTube(libraryId, library.source_url, library.slug);
+        result = await processYouTube(libraryId, library.source_url, library.slug, isFirstImport);
         break;
 
       case 'markdown':
-        result = await processMarkdown(libraryId, library.source_url, library.slug);
+        result = await processMarkdown(libraryId, library.source_url, library.slug, isFirstImport);
         break;
 
       case 'notebook':
-        result = await processNotebook(libraryId, library.source_url, library.slug);
+        result = await processNotebook(libraryId, library.source_url, library.slug, isFirstImport);
         break;
 
       default:
         throw new Error(`Unsupported source type: ${library.source_type}`);
     }
 
-    // 4. Update library with final results (title, stats)
+    // 4. Update library with final results (title, stats, extracted metadata)
     // Note: slug is set at creation time and should not be changed
+    // Note: description/author only updated if currently NULL (preserve manual edits on reimport)
+    
+    // Build metadata JSON with stats + extracted metadata (topics, level, estimated_hours)
+    const metadataUpdate: any = {
+      stats: result.stats,
+    };
+    
+    // Add extracted metadata to metadata JSONB if available
+    if (result.extractedMetadata) {
+      metadataUpdate.extracted = {
+        topics: result.extractedMetadata.topics || [],
+        level: result.extractedMetadata.level || null,
+        estimated_hours: result.extractedMetadata.estimated_hours || null,
+      };
+    }
+    
     await pool.query(
       `UPDATE libraries 
        SET status = $1, 
            progress_message = $2, 
            processed_at = NOW(),
            title = $3,
-           metadata = jsonb_set(
-             COALESCE(metadata, '{}'::jsonb),
-             '{stats}',
-             $4::jsonb
-           )
-       WHERE id = $5`,
+           -- Only update description if currently NULL (preserve manual edits)
+           description = COALESCE(description, $4),
+           -- Only update author if currently NULL (preserve manual edits)
+           author = COALESCE(author, $5),
+           -- Merge stats and extracted metadata into metadata JSONB
+           metadata = COALESCE(metadata, '{}'::jsonb) || $6::jsonb
+       WHERE id = $7`,
       [
         'ready',
         'Processing complete! Library is ready to use.',
         result.title,
-        JSON.stringify(result.stats),
+        result.extractedMetadata?.description || null,  // NULL if not extracted
+        result.extractedMetadata?.author || null,       // NULL if not extracted
+        JSON.stringify(metadataUpdate),
         libraryId
       ]
     );
@@ -191,7 +222,7 @@ async function processLibrary(libraryId: string) {
 }
 
 // YouTube processing pipeline
-async function processYouTube(libraryId: string, sourceUrl: string, slug: string) {
+async function processYouTube(libraryId: string, sourceUrl: string, slug: string, isFirstImport: boolean) {
   const videoId = extractYouTubeId(sourceUrl);
   if (!videoId) {
     throw new Error('Invalid YouTube URL');
@@ -229,7 +260,7 @@ async function processYouTube(libraryId: string, sourceUrl: string, slug: string
 }
 
 // Markdown processing pipeline
-async function processMarkdown(libraryId: string, sourceUrl: string, slug: string) {
+async function processMarkdown(libraryId: string, sourceUrl: string, slug: string, isFirstImport: boolean) {
   const workDir = path.join('/tmp', 'markdown', libraryId);
 
   try {
@@ -261,7 +292,7 @@ async function processMarkdown(libraryId: string, sourceUrl: string, slug: strin
 }
 
 // Notebook processing pipeline
-async function processNotebook(libraryId: string, sourceUrl: string, slug: string) {
+async function processNotebook(libraryId: string, sourceUrl: string, slug: string, isFirstImport: boolean) {
   const workDir = path.join('/tmp', 'markdown', libraryId);
   const notebookDir = path.join('/tmp', 'notebooks', libraryId);
 
@@ -274,14 +305,30 @@ async function processNotebook(libraryId: string, sourceUrl: string, slug: strin
     const result = await processJupyterNotebook(sourceUrl, libraryId, async (stage, percent, message) => {
       const progressMsg = message || `${stage}: ${percent}%`;
       await updateProgress(libraryId, progressMsg, stage);
-    });
+    }, isFirstImport);
     
     return result;
     
   } finally {
     // Clean up temporary files (both markdown work dir and downloaded notebooks)
-    if (KEEP_TEMP_FILES) {
-      console.log(`🔍 Debug mode: Keeping temp files at ${workDir} and ${notebookDir}`);
+    if (KEEP_TEMP_FILES || DEBUG_MODE) {
+      console.log(`\n🔍 DEBUG MODE: Preserving temp files for inspection`);
+      console.log(`📂 Markdown work directory: ${workDir}`);
+      console.log(`📂 Notebook directory: ${notebookDir}`);
+      
+      // List files in work directory for debugging
+      try {
+        const files = await fs.readdir(workDir);
+        console.log(`\n📋 Files in ${workDir}:`);
+        for (const file of files) {
+          const stats = await fs.stat(path.join(workDir, file));
+          console.log(`   ${file} (${stats.size} bytes)`);
+        }
+      } catch (error) {
+        console.log(`   ⚠️  Could not list files: ${error}`);
+      }
+      
+      console.log(`\n💡 To inspect: cd ${workDir}\n`);
     } else {
       try {
         await fs.rm(workDir, { recursive: true, force: true });

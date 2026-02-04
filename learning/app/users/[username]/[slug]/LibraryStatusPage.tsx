@@ -90,6 +90,7 @@ export default function LibraryStatusPage({ library: initialLibrary, username }:
   const [library, setLibrary] = useState(initialLibrary);
   const [isPolling, setIsPolling] = useState(true);
   const [showLogs, setShowLogs] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
   const router = useRouter();
 
   // Poll for status updates
@@ -241,12 +242,49 @@ export default function LibraryStatusPage({ library: initialLibrary, username }:
             <div className="text-center py-12">
               <p className="text-4xl mb-4">⏳</p>
               <p className="text-lg font-semibold mb-2">Processing Starting Soon</p>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-sm mb-4">
                 This library is queued for processing. Concepts will be extracted shortly.
               </p>
-              <p className="text-xs text-muted-foreground mt-4">
+              <p className="text-xs text-muted-foreground mb-6">
                 This page will update automatically. You can close this tab and return later.
               </p>
+              
+              {/* Retry button for stuck pending state */}
+              <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg max-w-md mx-auto">
+                <p className="text-sm text-yellow-800 mb-3">
+                  ⏱️ Waiting longer than expected?
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    setIsRetrying(true);
+                    try {
+                      const response = await fetch(`/api/libraries/${library.id}/reimport`, {
+                        method: 'POST',
+                      });
+                      
+                      if (!response.ok) {
+                        throw new Error('Failed to trigger processing');
+                      }
+                      
+                      // Refresh page to show processing status
+                      router.refresh();
+                    } catch (error) {
+                      console.error('Error triggering processing:', error);
+                      alert('Failed to start processing. Please try again or contact support.');
+                      setIsRetrying(false);
+                    }
+                  }}
+                  disabled={isRetrying}
+                  className="border-yellow-300 hover:bg-yellow-100"
+                >
+                  {isRetrying ? '⏳ Starting...' : '🔄 Retry Processing'}
+                </Button>
+                <p className="text-xs text-yellow-700 mt-2">
+                  This will restart the processing pipeline
+                </p>
+              </div>
             </div>
           )}
 
@@ -282,9 +320,10 @@ export default function LibraryStatusPage({ library: initialLibrary, username }:
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
                   <h3 className="text-sm font-semibold text-gray-700 mb-4">Processing Stages</h3>
                   <div className="space-y-3">
-                    {stages.map((stage) => {
-                      const isComplete = percent > stage.percent;
-                      const isCurrent = percent >= stage.percent && percent < (stages[stages.indexOf(stage) + 1]?.percent || 100);
+                    {stages.map((stage, index) => {
+                      const nextStagePercent = stages[index + 1]?.percent || 100;
+                      const isComplete = percent > nextStagePercent || (percent === 100 && index < stages.length - 1);
+                      const isCurrent = !isComplete && percent >= stage.percent && percent < nextStagePercent;
                       const isPending = percent < stage.percent;
 
                       return (

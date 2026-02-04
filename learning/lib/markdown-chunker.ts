@@ -84,8 +84,21 @@ function parseHeading(line: string): { level: number; text: string } | null {
  * Split document into sections by h1 headers with provenance metadata
  */
 function splitIntoSections(markdown: string, sourceFile: string): Section[] {
+  const DEBUG = process.env.DEBUG_PROCESSING === 'true';
+  
+  if (DEBUG) {
+    console.log(`\n🔍 [SPLIT DEBUG] splitIntoSections called`);
+    console.log(`   Input markdown length: ${markdown.length} chars`);
+    console.log(`   First 200 chars: ${markdown.substring(0, 200)}`);
+    console.log(`   Last 200 chars: ${markdown.substring(markdown.length - 200)}`);
+  }
+  
   const sections: Section[] = [];
   const lines = markdown.split('\n');
+  
+  if (DEBUG) {
+    console.log(`   Total lines: ${lines.length}`);
+  }
   
   let currentHeader = 'Introduction';
   let currentContent: string[] = [];
@@ -106,15 +119,18 @@ function splitIntoSections(markdown: string, sourceFile: string): Section[] {
     
     if (heading && heading.level === 1) {  // Main section header
       // Save previous section if it has content
-      if (currentContent.length > 0) {
+      const sectionContent = currentContent.join('\n').trim();
+      if (currentContent.length > 0 && sectionContent.length > 0) {
         sections.push({
           header: currentHeader,
-          content: currentContent.join('\n').trim(),
+          content: sectionContent,
           headingPath: headingStack.map(h => h.text),
           anchor: generateAnchor(currentHeader),
           startLine: sectionStartLine,
           endLine: lineNum - 1,
         });
+      } else if (DEBUG) {
+        console.log(`   ⏭️  Skipping empty section: "${currentHeader}"`);
       }
       
       // Start new section
@@ -148,6 +164,19 @@ function splitIntoSections(markdown: string, sourceFile: string): Section[] {
     });
   }
   
+  if (DEBUG) {
+    console.log(`\n🔍 [SPLIT DEBUG] splitIntoSections result`);
+    console.log(`   Sections created: ${sections.length}`);
+    sections.forEach((s, i) => {
+      console.log(`   ${i + 1}. "${s.header}" - ${s.content.length} chars (lines ${s.startLine}-${s.endLine})`);
+      if (s.content.length === 0) {
+        console.log(`      ⚠️ EMPTY SECTION!`);
+      } else {
+        console.log(`      Preview: ${s.content.substring(0, 100)}...`);
+      }
+    });
+  }
+  
   return sections;
 }
 
@@ -158,6 +187,26 @@ function buildChunkingPrompt(
   markdown: string, 
   concepts?: Array<{ id: string; name: string; description: string }>
 ): string {
+  const DEBUG = process.env.DEBUG_PROCESSING === 'true';
+  
+  if (DEBUG) {
+    console.log(`\n🔍 [PROMPT DEBUG] Building chunking prompt`);
+    console.log(`   Markdown length: ${markdown.length} chars`);
+    console.log(`   Concepts: ${concepts?.length || 0}`);
+    console.log(`   Estimated tokens: ~${Math.ceil(markdown.length / 4)}`);
+    
+    // Check for potential issues
+    const emptyCodeBlocks = (markdown.match(/```python\s*```/g) || []).length;
+    if (emptyCodeBlocks > 0) {
+      console.log(`   ⚠️ Found ${emptyCodeBlocks} empty code blocks`);
+    }
+    
+    const codeBlockCount = (markdown.match(/```/g) || []).length / 2;
+    const textLines = markdown.split('\n').filter(l => l.trim() && !l.startsWith('```')).length;
+    console.log(`   Code blocks: ${codeBlockCount}, Text lines: ${textLines}`);
+    console.log(`   Ratio: ${codeBlockCount > textLines ? 'CODE-HEAVY' : 'TEXT-HEAVY'}`);
+  }
+  
   const conceptsContext = concepts && concepts.length > 0
     ? `
 **CANONICAL CONCEPT IDs (use these EXACT IDs, do not invent new ones):**
@@ -239,8 +288,38 @@ export async function chunkMarkdownFile(
   onProgress?: (stage: string, current: number, total: number) => void,
   concepts?: Array<{ id: string; name: string; description: string }>
 ): Promise<MarkdownChunk[]> {
+  const DEBUG = process.env.DEBUG_PROCESSING === 'true';
+  
+  if (DEBUG) {
+    console.log(`\n🔍 [CHUNKER DEBUG] Starting chunkMarkdownFile`);
+    console.log(`   Source: ${sourceFile}`);
+    console.log(`   Markdown length: ${markdown.length} chars`);
+    console.log(`   Concepts provided: ${concepts?.length || 0}`);
+  }
+  
+  // Preprocess: Remove empty code blocks that confuse the model
+  const originalLength = markdown.length;
+  const emptyCodeBlocks = (markdown.match(/```\w*\s*```/g) || []).length;
+  
+  if (emptyCodeBlocks > 0) {
+    if (DEBUG) {
+      console.log(`   🧹 Preprocessing: Found ${emptyCodeBlocks} empty code blocks`);
+    }
+    markdown = markdown.replace(/```\w*\s*```/g, '');
+    if (DEBUG) {
+      console.log(`   ✂️  Removed empty code blocks: ${originalLength} → ${markdown.length} chars`);
+    }
+  }
+  
   // Split into sections with provenance metadata
   const sections = splitIntoSections(markdown, sourceFile);
+  
+  if (DEBUG) {
+    console.log(`   Sections found: ${sections.length}`);
+    sections.forEach((s, i) => {
+      console.log(`     ${i + 1}. "${s.header}" (${s.content.length} chars, lines ${s.startLine}-${s.endLine})`);
+    });
+  }
   
   onProgress?.('Splitting into sections', 0, sections.length);
   
@@ -254,27 +333,101 @@ export async function chunkMarkdownFile(
   for (let i = 0; i < sections.length; i++) {
     const section = sections[i];
     
+    if (DEBUG) {
+      console.log(`\n🔍 [CHUNKER DEBUG] Processing section ${i + 1}/${sections.length}`);
+      console.log(`   Header: "${section.header}"`);
+      console.log(`   Content preview: ${section.content.substring(0, 200)}...`);
+    }
+    
     onProgress?.(`Chunking section: ${section.header}`, i + 1, sections.length);
     
     try {
+      const startTime = Date.now();
+      const prompt = buildChunkingPrompt(section.content, concepts);
+      
+      if (DEBUG) {
+        console.log(`   🔄 Calling Gemini API (model: gemini-3-flash-preview)...`);
+        console.log(`   Prompt length: ${prompt.length} chars`);
+        console.log(`   Prompt preview (first 500 chars):\n${prompt.substring(0, 500)}\n...`);
+        console.log(`   Prompt preview (last 500 chars):\n...${prompt.substring(prompt.length - 500)}`);
+        
+        // Save full prompt to file for curl testing
+        const fs = await import('fs');
+        const promptFile = `/tmp/chunker-prompt-section-${i + 1}.txt`;
+        fs.writeFileSync(promptFile, prompt);
+        console.log(`   💾 Full prompt saved to: ${promptFile}`);
+        
+        // Also save curl command
+        const curlCmd = `curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent" \\
+  -H "x-goog-api-key: $GEMINI_API_KEY" \\
+  -H 'Content-Type: application/json' \\
+  -X POST \\
+  -d '{
+    "contents": [{"parts": [{"text": ${JSON.stringify(prompt)}}]}],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "temperature": 0.3
+    }
+  }'`;
+        fs.writeFileSync(`/tmp/chunker-curl-section-${i + 1}.sh`, curlCmd);
+        console.log(`   💾 Curl command saved to: /tmp/chunker-curl-section-${i + 1}.sh`);
+      }
+      
+      if (DEBUG) {
+        console.log(`   🔄 Calling API with 120s timeout...`);
+      }
+      
       const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash-exp',
-        contents: buildChunkingPrompt(section.content, concepts),
+        model: 'gemini-3-flash-preview',
+        contents: prompt,
         config: {
           responseMimeType: 'application/json',
           responseSchema: zodToGeminiSchema(chunkResponseSchema),
           temperature: 0.3,
+          timeout: 120000, // 120 seconds
         },
+      }).catch((error: any) => {
+        if (DEBUG) {
+          console.log(`   ❌ API call threw error:`, error);
+          console.log(`   Error type: ${error.constructor.name}`);
+          console.log(`   Error message: ${error.message}`);
+          if (error.response) {
+            console.log(`   Response status: ${error.response.status}`);
+            console.log(`   Response data:`, error.response.data);
+          }
+        }
+        throw error;
       });
+      
+      const elapsed = Date.now() - startTime;
+      
+      if (DEBUG) {
+        console.log(`   ✅ API call completed in ${elapsed}ms`);
+      }
       
       const resultText = response.text;
       if (!resultText) {
-        console.warn(`No response for section: ${section.header} - skipping`);
+        console.warn(`⚠️  No response for section: ${section.header} - skipping`);
+        if (DEBUG) {
+          console.log(`   Response object:`, response);
+        }
         continue;
+      }
+      
+      if (DEBUG) {
+        console.log(`   Response length: ${resultText.length} chars`);
+        console.log(`   Response preview: ${resultText.substring(0, 200)}...`);
       }
       
       // Parse JSON - responseSchema ensures proper escaping
       const result: { chunks: MarkdownChunk[] } = JSON.parse(resultText);
+      
+      if (DEBUG) {
+        console.log(`   ✅ Parsed ${result.chunks.length} chunks from section`);
+        result.chunks.forEach((c, idx) => {
+          console.log(`      ${idx + 1}. ${c.chunk_type}: "${c.topic}" (${c.text.length} chars)`);
+        });
+      }
       
       // Add provenance metadata and ensure unique IDs
       result.chunks.forEach(chunk => {
@@ -291,13 +444,27 @@ export async function chunkMarkdownFile(
       
       // Rate limiting - be nice to the API
       if (i < sections.length - 1) {
+        if (DEBUG) {
+          console.log(`   ⏳ Rate limiting: waiting 1s before next section...`);
+        }
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
     } catch (error) {
-      console.error(`Failed to chunk section "${section.header}":`, error);
+      console.error(`❌ Failed to chunk section "${section.header}":`, error);
+      if (DEBUG) {
+        console.error(`   Error details:`, error);
+        console.error(`   Section content length: ${section.content.length}`);
+        console.error(`   First 500 chars of section:`, section.content.substring(0, 500));
+      }
       // Continue with other sections
     }
+  }
+  
+  if (DEBUG) {
+    console.log(`\n🔍 [CHUNKER DEBUG] Chunking complete`);
+    console.log(`   Total chunks: ${allChunks.length}`);
+    console.log(`   Sections processed: ${sections.length}`);
   }
   
   return allChunks;

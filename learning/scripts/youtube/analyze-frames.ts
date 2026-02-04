@@ -132,7 +132,7 @@ Focus on technical content that would help someone understand what's being taugh
   `.trim();
   
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
+    model: "gemini-3-flash-preview",
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: zodToGeminiSchema(frameAnalysisSchema),

@@ -15,7 +15,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getLibraryBySlug, searchSegments } from '@/lib/db';
+import { getLibraryBySlug, getLibraryById, searchSegments } from '@/lib/db';
 
 type Message = {
   role: 'system' | 'user' | 'assistant';
@@ -58,14 +58,28 @@ async function loadConceptContext(
   conceptId: string, 
   conceptData: any,
   apiKey: string,
-  libraryId: string,
+  libraryId: string,  // Can be UUID or slug
   topK: number = 5
 ): Promise<{text: string; chunks: any[]}> {
   try {
-    console.log(`   🔍 Looking up library by slug: ${libraryId}`);
+    console.log(`   🔍 Looking up library: ${libraryId}`);
     
-    // Get library from database using human-readable slug
-    const library = await getLibraryBySlug(libraryId);
+    // Try to get library by UUID first, then fall back to slug
+    let library;
+    
+    // Check if it's a UUID (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(libraryId);
+    
+    if (isUUID) {
+      // Look up by UUID
+      library = await getLibraryById(libraryId);
+      console.log(`   🔑 Looked up by UUID`);
+    } else {
+      // Look up by slug
+      library = await getLibraryBySlug(libraryId);
+      console.log(`   🏷️  Looked up by slug`);
+    }
+    
     if (!library) {
       console.log(`   ⚠️ Library not found in database: ${libraryId}`);
       return {text: '(No textbook sections found for this concept)', chunks: []};
@@ -327,7 +341,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Call Google Gemini API with structured output
-    const model = 'gemini-2.5-flash'; // Fast and intelligent model with best price-performance
+    const model = 'gemini-3-flash-preview'; // Latest and fastest model with best performance
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
@@ -456,7 +470,9 @@ export async function POST(request: NextRequest) {
     // Fetch library to get markdown_content (only if we have sources to display)
     let markdownContent = null;
     if (sourceChunks.length > 0) {
-      const library = await getLibraryBySlug(libraryId);
+      // Use the same UUID/slug detection logic as loadConceptContext
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(libraryId);
+      const library = isUUID ? await getLibraryById(libraryId) : await getLibraryBySlug(libraryId);
       markdownContent = library?.markdown_content || null;
     }
 

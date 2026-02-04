@@ -18,10 +18,28 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Edit, MoreVertical } from 'lucide-react';
+import { Edit, MoreVertical, RefreshCw, Trash2 } from 'lucide-react';
 import LibraryEditModal from '@/app/components/LibraryEditModal';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type Library = {
   id: string;
@@ -42,8 +60,11 @@ type LibrariesGridProps = {
 };
 
 export default function LibrariesGrid({ libraries: initialLibraries, username, isOwnProfile }: LibrariesGridProps) {
+  const router = useRouter();
   const [libraries, setLibraries] = useState(initialLibraries);
   const [editingLibrary, setEditingLibrary] = useState<Library | null>(null);
+  const [deletingLibrary, setDeletingLibrary] = useState<Library | null>(null);
+  const [reimportingId, setReimportingId] = useState<string | null>(null);
 
   const handleSave = (updated: Partial<Library>) => {
     // Update the library in the list
@@ -53,25 +74,106 @@ export default function LibrariesGrid({ libraries: initialLibraries, username, i
     setEditingLibrary(null);
   };
 
+  const handleDelete = async (library: Library) => {
+    try {
+      const response = await fetch(`/api/libraries/${library.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete library');
+      }
+
+      // Remove from list
+      setLibraries(libs => libs.filter(lib => lib.id !== library.id));
+      setDeletingLibrary(null);
+    } catch (error) {
+      console.error('Error deleting library:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete library');
+    }
+  };
+
+  const handleReimport = async (library: Library) => {
+    setReimportingId(library.id);
+    try {
+      const response = await fetch(`/api/libraries/${library.id}/reimport`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to reimport library');
+      }
+
+      const result = await response.json();
+      
+      // Redirect to library page to watch progress
+      router.push(`/users/${username}/${library.slug}`);
+    } catch (error) {
+      console.error('Error reimporting library:', error);
+      alert(error instanceof Error ? error.message : 'Failed to reimport library');
+      setReimportingId(null);
+    }
+  };
+
   return (
     <>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {libraries.map((library) => (
           <Card key={library.id} className="h-full hover:shadow-lg transition-shadow relative group">
-            {/* Edit Button - Only shown on hover and for own profile */}
+            {/* Menu Button - Only shown on hover and for own profile */}
             {isOwnProfile && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setEditingLibrary(library);
-                }}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setEditingLibrary(library);
+                    }}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Metadata
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleReimport(library);
+                    }}
+                    disabled={reimportingId === library.id}
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${reimportingId === library.id ? 'animate-spin' : ''}`} />
+                    {reimportingId === library.id ? 'Reimporting...' : 'Reimport Library'}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setDeletingLibrary(library);
+                    }}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Library
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
 
             <Link href={`/users/${username}/${library.slug}`}>
@@ -115,6 +217,37 @@ export default function LibrariesGrid({ libraries: initialLibraries, username, i
           isAdmin={false} // TODO: Add admin check from session
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deletingLibrary !== null} onOpenChange={(open) => !open && setDeletingLibrary(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Library?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{deletingLibrary?.title}&quot;?
+              <br /><br />
+              This will permanently delete:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>The library and all its metadata</li>
+                <li>All concepts and their relationships</li>
+                <li>All embeddings and processed data</li>
+                <li>Learning progress for all users</li>
+              </ul>
+              <br />
+              <strong>This action cannot be undone.</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingLibrary && handleDelete(deletingLibrary)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete Library
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

@@ -8,6 +8,77 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2026-02-03 - Metadata Extraction, Graph Navigation, and Bug Fixes 🐛
+
+#### Fixed
+- **Metadata extraction bug** - Fixed `ReferenceError: sourceUrl is not defined` preventing LLM-extracted metadata (title, description, author) from being saved to database
+  - Changed `sourceUrl` → `urlOrPath` in `lib/processing.ts:787`
+  - Metadata extraction now works correctly on first import
+- **UUID/Slug lookup issue** - Socratic dialogue showing "No textbook sections found" despite chunks existing
+  - Updated `loadConceptContext()` to auto-detect UUID vs slug format
+  - Semantic search now works correctly
+- **Notebook tab empty on dialogue open** - Source material not loading until first message
+  - Added useEffect to fetch library markdown immediately when dialogue opens
+  - Notebook content now displays right away
+
+#### Added
+- **Graph modal button in dialogue** - Users can now view concept map from within lesson
+  - "🗺️ Map" button in dialogue header (both dialog and inline modes)
+  - Click to see full concept graph with mastery progress
+  - Click any unlocked concept to switch to learning it
+  - Shows mastered (green), recommended (blue), ready (yellow), locked (gray) states
+- **LLM-powered metadata extraction** (`lib/metadata-extractor.ts`)
+  - Extracts title, description, author, topics, difficulty level, estimated hours
+  - Uses `gemini-3-flash-preview` with 30s timeout
+  - Tries to extract author from URL (GitHub usernames)
+  - Only runs on first import (preserves manual edits on reimport)
+- **Library CRUD operations** - Full create, read, update, delete support
+  - DELETE endpoint: `/api/libraries/[id]` with CASCADE cleanup
+  - Reimport endpoint: `/api/libraries/[id]/reimport` (reset + reprocess)
+  - Edit metadata modal in LibrariesGrid (three-dot menu)
+  - Confirmation dialogs for destructive actions
+- **Retry button for stuck processing** - Libraries stuck in "pending" can be retried
+  - Added "Retry Processing" button to library status page
+  - Fixed React hooks error (moved useState to top level)
+- **UI components for library management**
+  - `components/ui/dropdown-menu.tsx` - Three-dot menu for library actions
+  - `components/ui/alert-dialog.tsx` - Confirmation dialogs
+- **Debug infrastructure**
+  - `scripts/debug-process-library.sh` - Convenience wrapper
+  - `DEBUG_PROCESSING=true` - Enables verbose logging
+  - `KEEP_TEMP_FILES=true` - Preserves temp directories for inspection
+- **Model migration documentation** (`MODELS.md`)
+  - Tracks migration from `gemini-2.5-flash` → `gemini-3-flash-preview`
+  - Documents all files updated with new model
+
+#### Changed
+- **Parallel concept enrichment** - Process 3 concepts at a time instead of sequentially
+  - Configurable via `ENRICHMENT_BATCH_SIZE` env var
+  - Automatic retry with exponential backoff for rate limits
+  - Performance metrics (total time, avg per concept, throttle count)
+  - `scripts/markdown/enrich-concepts.ts` updated
+- **Improved markdown chunking** - Fixed notebook processing failures
+  - Removes empty code blocks before chunking (regex: `/```\w*\s*```/g`)
+  - Skips empty sections (prevents "Introduction" sections from whitespace)
+  - Uses native SDK timeout instead of custom Promise.race wrapper
+  - Extensive debug logging when `DEBUG_PROCESSING=true`
+  - Saves prompts and curl commands to `/tmp/chunker-*.txt` for debugging
+
+#### Research
+- **PageIndex evaluation** - Added research section to TODO for vectorless RAG alternative
+  - Tree-based hierarchical indexing instead of chunking + embeddings
+  - Reasoning-based retrieval instead of similarity search
+  - 98.7% accuracy on FinanceBench (SOTA)
+  - Recommendation: Prototype with one notebook before migration decision
+
+#### Known Issues Documented
+- Metadata extraction not applied (FIXED this session)
+- YouTube import untested recently (needs Karpathy lesson)
+- Too many concepts (~20 per notebook regardless of complexity)
+- Missing graph view in dialogue (FIXED this session)
+- Need library hierarchies/grouping (courses with chapters)
+- Need shorter lessons (5-10 min micro-learning support)
+
 ### 2026-01-16 - Function Extraction Pipeline - Phase 1 Complete 🎉
 
 **Major Milestone:** Built prototype and infrastructure for extracting programs from notebooks and mapping functions to concepts for unit-test-based mastery exercises.

@@ -223,7 +223,7 @@ async function enrichConcept(
   
   // 4. Call Gemini with structured output (ONLY pedagogical enrichment)
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-3-flash-preview",
     contents: prompt,
     config: {
       responseMimeType: "application/json",

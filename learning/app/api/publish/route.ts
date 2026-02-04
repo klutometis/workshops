@@ -33,13 +33,13 @@ function detectSourceType(url: string): { type: 'youtube' | 'notebook' | 'markdo
     return { type: 'youtube', videoId: youtubeMatch[1] };
   }
 
-  // GitHub notebook detection
-  if (url.includes('github.com') && url.endsWith('.ipynb')) {
+  // Jupyter notebook detection (.ipynb files from any source)
+  if (url.endsWith('.ipynb')) {
     return { type: 'notebook' };
   }
 
   // Markdown detection (GitHub, gists, raw URLs)
-  if (url.endsWith('.md') || url.includes('raw.githubusercontent.com')) {
+  if (url.endsWith('.md')) {
     return { type: 'markdown' };
   }
 

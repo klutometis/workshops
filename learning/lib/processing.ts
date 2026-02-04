@@ -34,6 +34,14 @@ export interface ProcessingResult {
     sourceFile?: string;
     processedAt: string;
   };
+  // Extracted metadata from LLM analysis (optional - only on first import)
+  extractedMetadata?: {
+    description?: string;
+    author?: string;
+    topics?: string[];
+    level?: 'beginner' | 'intermediate' | 'advanced';
+    estimated_hours?: number;
+  };
 }
 
 /**
@@ -676,7 +684,8 @@ function convertNotebookToMarkdown(notebookPath: string): { raw: string; cleaned
 export async function processJupyterNotebook(
   urlOrPath: string,
   libraryId: string,
-  onProgress?: ProgressCallback
+  onProgress?: ProgressCallback,
+  extractMetadata: boolean = true  // Skip on reimport to preserve manual edits
 ): Promise<ProcessingResult> {
   const isUrl = urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://');
   
@@ -765,6 +774,40 @@ export async function processJupyterNotebook(
     
     await onProgress?.('Markdown saved', 25, `Temp dir: ${workDir}`);
     
+    // Stage 2.5: Extract metadata from full document (only on first import)
+    // This gives us better title, description, author before processing begins
+    // On reimport, we skip this to preserve manual edits
+    if (extractMetadata) {
+      try {
+        await onProgress?.('Extracting metadata', 27);
+        const { extractMetadata: extractMetadataFn } = await import('./metadata-extractor');
+        
+        const metadata = await extractMetadataFn(
+          cleanedMarkdown,
+          urlOrPath,
+          process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || ''
+        );
+        
+        console.log(`📋 Extracted metadata:`);
+        console.log(`   Title: ${metadata.title}`);
+        console.log(`   Description: ${metadata.description}`);
+        console.log(`   Author: ${metadata.author || 'Not identified'}`);
+        console.log(`   Topics: ${metadata.topics.join(', ')}`);
+        console.log(`   Level: ${metadata.level}`);
+        console.log(`   Estimated: ${metadata.estimated_hours || 'N/A'} hours`);
+        
+        // Save metadata to work directory for later use
+        const metadataPath = path.join(workDir, 'extracted-metadata.json');
+        fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
+        
+      } catch (error) {
+        console.warn(`⚠️  Failed to extract metadata (continuing anyway):`, error);
+        // Non-fatal - processing can continue without metadata
+      }
+    } else {
+      console.log(`📋 Skipping metadata extraction (preserving existing metadata)`);
+    }
+    
     // Stage 3: Process cleaned markdown through pipeline (30-90%)
     // Use cleaned version for LLM processing (concepts, chunks, embeddings)
     
@@ -801,6 +844,25 @@ export async function processJupyterNotebook(
         
         if (!fs.existsSync(chunksPath)) {
           throw new Error(`Chunking completed but output not found: ${chunksPath}`);
+        }
+      }
+      
+      // Debug: Check chunk count
+      if (process.env.DEBUG_PROCESSING === 'true') {
+        try {
+          const chunksData = JSON.parse(fs.readFileSync(chunksPath, 'utf-8'));
+          const chunkCount = chunksData.chunks?.length || 0;
+          console.log(`🔍 [DEBUG] Chunking produced ${chunkCount} chunks`);
+          if (chunkCount === 0) {
+            console.log(`⚠️  [DEBUG] Zero chunks - checking markdown file size...`);
+            const stats = fs.statSync(cleanedMarkdownPath);
+            console.log(`   Markdown file: ${stats.size} bytes`);
+            if (stats.size > 0) {
+              console.log(`   ⚠️  File has content but no chunks extracted!`);
+            }
+          }
+        } catch (e) {
+          console.log(`⚠️  [DEBUG] Could not read chunks file: ${e}`);
         }
       }
       
@@ -879,15 +941,26 @@ export async function processJupyterNotebook(
     // Read results
     const enrichedPath = path.join(workDir, 'concept-graph-enriched.json');
     const embeddingsPath = path.join(workDir, 'chunk-embeddings.json');
+    const extractedMetadataPath = path.join(workDir, 'extracted-metadata.json');
     
     const conceptGraph = JSON.parse(fs.readFileSync(enrichedPath, 'utf-8'));
     const embeddings = JSON.parse(fs.readFileSync(embeddingsPath, 'utf-8'));
     
+    // Read extracted metadata if available
+    let extractedMetadata: any = undefined;
+    if (fs.existsSync(extractedMetadataPath)) {
+      try {
+        extractedMetadata = JSON.parse(fs.readFileSync(extractedMetadataPath, 'utf-8'));
+      } catch (error) {
+        console.warn(`⚠️  Could not read extracted metadata:`, error);
+      }
+    }
+    
     await onProgress?.('Complete', 100, 'Processing finished successfully');
     
-    // Extract title: AI metadata > first markdown header > filename
+    // Extract title: Extracted metadata > concept graph > markdown header > filename
     const markdownTitle = extractMarkdownTitle(rawMarkdownPath);
-    const title = conceptGraph.metadata?.title || markdownTitle || fileName;
+    const title = extractedMetadata?.title || conceptGraph.metadata?.title || markdownTitle || fileName;
     
     return {
       libraryId: slug,
@@ -906,6 +979,13 @@ export async function processJupyterNotebook(
         cleanedMarkdown: cleanedMarkdownPath,
         processedAt: new Date().toISOString(),
       },
+      extractedMetadata: extractedMetadata ? {
+        description: extractedMetadata.description,
+        author: extractedMetadata.author,
+        topics: extractedMetadata.topics,
+        level: extractedMetadata.level,
+        estimated_hours: extractedMetadata.estimated_hours,
+      } : undefined,
     };
     
   } catch (error: any) {

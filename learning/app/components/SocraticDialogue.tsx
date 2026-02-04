@@ -20,6 +20,7 @@ import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import PythonScratchpad from './PythonScratchpad';
 import { MarkdownViewer } from './MarkdownViewer';
+import GraphModal from './GraphModal';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -126,6 +127,7 @@ export default function SocraticDialogue({
   );
   const [mobileActiveTab, setMobileActiveTab] = useState<'chat' | 'workspace'>('chat');
   const [objectivesExpanded, setObjectivesExpanded] = useState(false);
+  const [graphModalOpen, setGraphModalOpen] = useState(false);
   const [sourceAnchor, setSourceAnchor] = useState<string | undefined>();
   const [sourceMarkdownContent, setSourceMarkdownContent] = useState<string | undefined>();
   const [sourceVideoId, setSourceVideoId] = useState<string | undefined>();
@@ -204,6 +206,23 @@ ${testCaseCode}
         });
     }
   }, [open, conceptData, libraryId]);
+
+  // Load markdown content for notebook/markdown libraries when dialogue opens
+  useEffect(() => {
+    if (open && (libraryType === 'notebook' || libraryType === 'markdown') && !cachedMarkdownContent) {
+      fetch(`/api/libraries/${libraryId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.markdown_content) {
+            setCachedMarkdownContent(data.markdown_content);
+            console.log('📦 Loaded markdown content on dialogue open:', data.markdown_content.length, 'characters');
+          }
+        })
+        .catch(err => {
+          console.error('Failed to load library markdown:', err);
+        });
+    }
+  }, [open, libraryType, libraryId, cachedMarkdownContent]);
 
   // Auto-load first video source for video libraries (but don't autoplay)
   useEffect(() => {
@@ -628,15 +647,41 @@ ${testCaseCode}
     `}>
         {!inline && (
           <DialogHeader className="pb-2">
-            <DialogTitle className="text-lg md:text-xl">Learning: {conceptData.name}</DialogTitle>
-            <DialogDescription className="text-sm">{conceptData.description}</DialogDescription>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <DialogTitle className="text-lg md:text-xl">Learning: {conceptData.name}</DialogTitle>
+                <DialogDescription className="text-sm">{conceptData.description}</DialogDescription>
+              </div>
+              {conceptGraph && (
+                <button
+                  onClick={() => setGraphModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors shrink-0"
+                  title="View concept map"
+                >
+                  🗺️ Map
+                </button>
+              )}
+            </div>
           </DialogHeader>
         )}
         
         {inline && (
           <div className="pb-4 border-b mb-4">
-            <h2 className="text-2xl font-bold mb-2">Learning: {conceptData.name}</h2>
-            <p className="text-slate-600">{conceptData.description}</p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold mb-2">Learning: {conceptData.name}</h2>
+                <p className="text-slate-600">{conceptData.description}</p>
+              </div>
+              {conceptGraph && (
+                <button
+                  onClick={() => setGraphModalOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200 hover:border-blue-300 shrink-0"
+                  title="View concept map"
+                >
+                  🗺️ View Map
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -1012,16 +1057,82 @@ ${testCaseCode}
     </div>
   );
 
+  // Prepare data for GraphModal
+  const masteredConceptsMap = new Map(
+    (masteredConcepts || []).map(id => [id, { masteredAt: Date.now() }])
+  );
+  
+  // Calculate ready concepts (prerequisites all mastered)
+  const concepts = conceptGraph?.concepts || conceptGraph?.nodes || [];
+  const readyConcepts = concepts.filter((c: any) => {
+    const prereqs = c.prerequisites || [];
+    return prereqs.every((p: string) => masteredConcepts?.includes(p));
+  });
+  
+  // Calculate locked concepts (missing prerequisites)
+  const lockedConcepts = concepts.filter((c: any) => {
+    if (masteredConcepts?.includes(c.id)) return false;
+    const prereqs = c.prerequisites || [];
+    return !prereqs.every((p: string) => masteredConcepts?.includes(p));
+  });
+  
+  // Recommended concepts are ready but not mastered
+  const recommendedConcepts = readyConcepts.filter(
+    (c: any) => !masteredConcepts?.includes(c.id)
+  );
+
   // Wrap in Dialog if not inline, otherwise return content directly
   if (inline) {
-    return open ? mainContent : null;
+    return (
+      <>
+        {open ? mainContent : null}
+        {conceptGraph && (
+          <GraphModal
+            open={graphModalOpen}
+            onClose={() => setGraphModalOpen(false)}
+            onNodeSelect={(conceptId) => {
+              setGraphModalOpen(false);
+              if (onConceptChange) {
+                onConceptChange(conceptId);
+              }
+            }}
+            graphData={conceptGraph}
+            masteredConcepts={masteredConceptsMap}
+            recommendedConcepts={new Set(recommendedConcepts.map((c: any) => c.id))}
+            readyConcepts={new Set(readyConcepts.map((c: any) => c.id))}
+            lockedConcepts={new Set(lockedConcepts.map((c: any) => c.id))}
+            selectedConceptId={conceptData.id}
+          />
+        )}
+      </>
+    );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[100vw] md:max-w-[96vw] w-[100vw] md:w-[96vw] h-[100vh] md:!h-[90vh] flex flex-col p-0">
-        {mainContent}
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-[100vw] md:max-w-[96vw] w-[100vw] md:w-[96vw] h-[100vh] md:!h-[90vh] flex flex-col p-0">
+          {mainContent}
+        </DialogContent>
+      </Dialog>
+      {conceptGraph && (
+        <GraphModal
+          open={graphModalOpen}
+          onClose={() => setGraphModalOpen(false)}
+          onNodeSelect={(conceptId) => {
+            setGraphModalOpen(false);
+            if (onConceptChange) {
+              onConceptChange(conceptId);
+            }
+          }}
+          graphData={conceptGraph}
+          masteredConcepts={masteredConceptsMap}
+          recommendedConcepts={new Set(recommendedConcepts.map((c: any) => c.id))}
+          readyConcepts={new Set(readyConcepts.map((c: any) => c.id))}
+          lockedConcepts={new Set(lockedConcepts.map((c: any) => c.id))}
+          selectedConceptId={conceptData.id}
+        />
+      )}
+    </>
   );
 }
