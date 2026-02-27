@@ -45,7 +45,7 @@ export default function LibraryPage({ params }: { params: Promise<{ slug: string
 
   // Load library metadata
   useEffect(() => {
-    fetch('/api/libraries')
+    fetch('/api/libraries?all=true')
       .then(res => res.json())
       .then(data => {
         const foundLibrary = data.libraries.find((l: Library) => l.id === libraryId);

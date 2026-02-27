@@ -19,6 +19,7 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import PythonScratchpad from './PythonScratchpad';
+import LispScratchpad from './LispScratchpad';
 import { MarkdownViewer } from './MarkdownViewer';
 import GraphModal from './GraphModal';
 import remarkGfm from 'remark-gfm';
@@ -86,6 +87,7 @@ type SocraticDialogueProps = {
   conceptGraph?: any; // Full concept graph for next-node selection
   masteredConcepts?: string[]; // Array of mastered concept IDs
   onConceptChange?: (conceptId: string) => void; // Callback when transitioning to new concept
+  workspaceType?: 'python' | 'lisp'; // Which REPL to show (default: python)
 };
 
 export default function SocraticDialogue({
@@ -99,6 +101,7 @@ export default function SocraticDialogue({
   conceptGraph,
   masteredConcepts,
   onConceptChange,
+  workspaceType = 'python',
 }: SocraticDialogueProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -962,7 +965,7 @@ ${testCaseCode}
                   }`}
                   onClick={() => setActiveTab('python')}
                 >
-                  🐍 Python
+                  {workspaceType === 'lisp' ? '🎨 Lisp' : '🐍 Python'}
                 </button>
                 <button
                   className={`px-4 py-2 text-sm font-medium transition-colors ${
@@ -992,7 +995,7 @@ ${testCaseCode}
                   }`}
                   onClick={() => setActiveTab('python')}
                 >
-                  🐍 Python
+                  {workspaceType === 'lisp' ? '🎨 Lisp' : '🐍 Python'}
                 </button>
                 <button
                   className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
@@ -1014,16 +1017,28 @@ ${testCaseCode}
               {/* Tab Content */}
               <div className="flex-1 overflow-hidden">
                 {activeTab === 'python' ? (
-                  <PythonScratchpad
-                    starterCode={starterCode}
-                    programContext={programCode}
-                    onExecute={(execCode, output, error) => {
-                      setEvaluation({ output, error });
-                    }}
-                    onCodeChange={(newCode) => {
-                      setCode(newCode);
-                    }}
-                  />
+                  workspaceType === 'lisp' ? (
+                    <LispScratchpad
+                      starterCode={`;;; Common Lisp scratchpad for exploring ${conceptData.name}\n`}
+                      onExecute={(execCode, output, error) => {
+                        setEvaluation({ output, error });
+                      }}
+                      onCodeChange={(newCode) => {
+                        setCode(newCode);
+                      }}
+                    />
+                  ) : (
+                    <PythonScratchpad
+                      starterCode={starterCode}
+                      programContext={programCode}
+                      onExecute={(execCode, output, error) => {
+                        setEvaluation({ output, error });
+                      }}
+                      onCodeChange={(newCode) => {
+                        setCode(newCode);
+                      }}
+                    />
+                  )
                 ) : sourceVideoId ? (
                   <div className="w-full h-full flex flex-col bg-black rounded-lg overflow-hidden">
                     <iframe

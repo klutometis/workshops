@@ -16,6 +16,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import type { Library, Chapter } from '@/app/page';
 
@@ -33,6 +34,7 @@ const colorMap: Record<string, string> = {
   orange: 'bg-orange-500',
 };
 
+// Full card for standalone libraries
 function LibraryCard({ lib, onSelect }: { lib: Library; onSelect: (id: string) => void }) {
   return (
     <Card
@@ -54,7 +56,7 @@ function LibraryCard({ lib, onSelect }: { lib: Library; onSelect: (id: string) =
           <div>
             <span className="font-semibold">{lib.stats.totalConcepts}</span> concepts
           </div>
-          <div>•</div>
+          <div>&middot;</div>
           <div>
             <span className="font-semibold">~{lib.stats.estimatedHours}</span> hours
           </div>
@@ -64,11 +66,100 @@ function LibraryCard({ lib, onSelect }: { lib: Library; onSelect: (id: string) =
   );
 }
 
+// Collapsible book section with compact chapter list
+function BookSection({
+  chapter,
+  onSelect,
+  defaultOpen,
+}: {
+  chapter: Chapter;
+  onSelect: (id: string) => void;
+  defaultOpen: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  const libs = [...chapter.libraries].sort(
+    (a, b) => (a.chapterOrder ?? 999) - (b.chapterOrder ?? 999)
+  );
+
+  const totalConcepts = libs.reduce((sum, l) => sum + (l.stats.totalConcepts || 0), 0);
+  const totalHours = libs.reduce((sum, l) => sum + (l.stats.estimatedHours || 0), 0);
+
+  return (
+    <section className="border border-slate-200 rounded-xl bg-white shadow-sm">
+      {/* Clickable header */}
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-slate-50 transition-colors rounded-xl"
+      >
+        <svg
+          className={`w-5 h-5 text-slate-400 transition-transform duration-200 flex-shrink-0 ${
+            open ? 'rotate-90' : ''
+          }`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+        <div className="flex-1 min-w-0">
+          <h2 className="text-xl font-semibold text-slate-800 truncate">{chapter.title}</h2>
+          <p className="text-sm text-slate-500 mt-0.5">
+            {libs.length} chapter{libs.length !== 1 ? 's' : ''}
+            {totalConcepts > 0 && <> &middot; {totalConcepts} concepts</>}
+            {totalHours > 0 && <> &middot; ~{totalHours} hours</>}
+          </p>
+        </div>
+      </button>
+
+      {/* Expanded: compact numbered list */}
+      {open && (
+        <div className="px-6 pb-4">
+          <div className="border-t border-slate-100 pt-3">
+            {libs.map((lib, idx) => {
+              const num = lib.chapterOrder ?? idx + 1;
+              return (
+                <button
+                  key={lib.id}
+                  onClick={() => onSelect(lib.id)}
+                  className="w-full flex items-baseline gap-3 px-3 py-2.5 text-left rounded-lg hover:bg-blue-50 transition-colors group"
+                >
+                  <span className="text-sm text-slate-400 font-mono w-6 text-right flex-shrink-0">
+                    {num}.
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="text-sm font-medium text-slate-700 group-hover:text-blue-700 transition-colors">
+                      {lib.title}
+                    </span>
+                  </span>
+                  <span className="text-xs text-slate-400 flex-shrink-0 tabular-nums">
+                    {lib.stats.totalConcepts > 0 && (
+                      <>{lib.stats.totalConcepts} concepts</>
+                    )}
+                    {lib.stats.totalConcepts > 0 && lib.stats.estimatedHours > 0 && (
+                      <> &middot; </>
+                    )}
+                    {lib.stats.estimatedHours > 0 && (
+                      <>~{lib.stats.estimatedHours} hrs</>
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function LibrarySelector({ libraries, chapters, onSelect }: LibrarySelectorProps) {
-  // Libraries that belong to a chapter are shown inside their chapter section.
-  // The `libraries` prop contains only those NOT in any chapter (standalone).
   const hasChapters = chapters.length > 0;
   const hasStandalone = libraries.length > 0;
+
+  // Always start collapsed so standalone libraries are visible
+  const defaultOpen = false;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -83,28 +174,21 @@ export default function LibrarySelector({ libraries, chapters, onSelect }: Libra
             </p>
           </div>
 
-          {/* Chapters */}
+          {/* Books (collapsible) */}
           {hasChapters && (
-            <div className="space-y-10 mb-10">
+            <div className="space-y-4 mb-10">
               {chapters.map((chapter) => (
-                <section key={chapter.id}>
-                  <div className="mb-4">
-                    <h2 className="text-2xl font-semibold text-slate-800">{chapter.title}</h2>
-                    {chapter.description && (
-                      <p className="text-slate-500 mt-1">{chapter.description}</p>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {chapter.libraries.map((lib) => (
-                      <LibraryCard key={lib.id} lib={lib} onSelect={onSelect} />
-                    ))}
-                  </div>
-                </section>
+                <BookSection
+                  key={chapter.id}
+                  chapter={chapter}
+                  onSelect={onSelect}
+                  defaultOpen={defaultOpen}
+                />
               ))}
             </div>
           )}
 
-          {/* Standalone libraries (not grouped into a chapter) */}
+          {/* Standalone libraries (full cards) */}
           {hasStandalone && (
             <section>
               {hasChapters && (

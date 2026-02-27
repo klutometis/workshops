@@ -488,6 +488,7 @@ export default function InteractiveLibrary({ library, onBack, backLabel = '← B
             conceptGraph={conceptGraphData}
             masteredConcepts={Array.from(masteredConcepts.keys())}
             onConceptChange={handleConceptChange}
+            workspaceType={library.type === 'markdown' ? 'lisp' : 'python'}
           />
         ) : (
           <div className="h-full flex items-center justify-center p-8">

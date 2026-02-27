@@ -29,6 +29,7 @@ export type Library = {
   embeddingsPath: string;
   description: string;
   color: string;
+  chapterOrder?: number;
   stats: {
     totalConcepts: number;
     estimatedHours: number;
