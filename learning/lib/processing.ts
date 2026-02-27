@@ -385,10 +385,54 @@ export async function processYouTubeVideo(
  * @returns Processing result with library ID and stats
  */
 export async function processMarkdownFile(
-  filePath: string,
+  urlOrPath: string,
   libraryId: string,
-  onProgress?: ProgressCallback
+  onProgress?: ProgressCallback,
+  options?: {
+    /** Content type for DB import: 'markdown' (default) or 'notebook' */
+    contentType?: 'markdown' | 'notebook';
+    /** Path to original .ipynb file — stored as notebook_data in DB (notebook only) */
+    notebookPath?: string;
+    /** Override which markdown file gets stored in DB (e.g. raw version with images) */
+    markdownPathForDb?: string;
+    /** Skip LLM metadata extraction (e.g. reimport to preserve manual edits) */
+    skipMetadata?: boolean;
+    /** Original source URL (when caller already downloaded; urlOrPath is a local path) */
+    sourceUrl?: string;
+  }
 ): Promise<ProcessingResult> {
+  const isUrl = urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://');
+
+  let filePath: string;
+
+  // Stage 0: Download if URL
+  if (isUrl) {
+    const urlParts = urlOrPath.split('/');
+    const remoteFileName = decodeURIComponent(urlParts[urlParts.length - 1]);
+    const tempDir = path.join('/tmp', 'markdown', libraryId);
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+    filePath = path.join(tempDir, remoteFileName);
+
+    if (!fs.existsSync(filePath)) {
+      await onProgress?.('Downloading content', 5, urlOrPath);
+      try {
+        await downloadFile(urlOrPath, filePath);
+      } catch (error: any) {
+        throw new ProcessingError(
+          `Failed to download markdown: ${error.message}`,
+          'download-markdown',
+          error
+        );
+      }
+    } else {
+      await onProgress?.('Downloading content', 5, 'Already downloaded (skipping)');
+    }
+  } else {
+    filePath = urlOrPath;
+  }
+
   // Validate file exists
   if (!fs.existsSync(filePath)) {
     throw new ProcessingError(
@@ -409,14 +453,56 @@ export async function processMarkdownFile(
       fs.mkdirSync(workDir, { recursive: true });
     }
     
-    // Stage 1: Extract concepts from full markdown (20%)
+    // Stage 1: Extract metadata via LLM (10%)
+    // Idempotent — if extracted-metadata.json already exists (e.g. pre-computed
+    // at publish time), skip the LLM call.
+    // Can be skipped entirely via options.skipMetadata (e.g. reimport to preserve manual edits).
+    const metadataPath = path.join(workDir, 'extracted-metadata.json');
+    if (options?.skipMetadata) {
+      console.log(`📋 Skipping metadata extraction (preserving existing metadata)`);
+    } else if (fs.existsSync(metadataPath)) {
+      await onProgress?.('Extracting metadata', 10, 'Already extracted (skipping)');
+    } else {
+      await onProgress?.('Extracting metadata', 10);
+      try {
+        const { extractMetadata: extractMetadataFn } = await import('./metadata-extractor');
+        const markdownContent = fs.readFileSync(filePath, 'utf-8');
+        const metadata = await extractMetadataFn(
+          markdownContent,
+          isUrl ? urlOrPath : filePath,
+          process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || ''
+        );
+        
+        console.log(`📋 Extracted metadata:`);
+        console.log(`   Title: ${metadata.title}`);
+        console.log(`   Description: ${metadata.description}`);
+        console.log(`   Author: ${metadata.author || 'Not identified'}`);
+        console.log(`   Topics: ${metadata.topics.join(', ')}`);
+        console.log(`   Level: ${metadata.level}`);
+        console.log(`   Estimated: ${metadata.estimated_hours || 'N/A'} hours`);
+        
+        fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
+      } catch (error) {
+        console.warn(`⚠️  Failed to extract metadata (continuing anyway):`, error);
+        // Non-fatal — processing can continue without metadata
+      }
+    }
+    
+    // Stage 2: Extract concepts from full markdown (25%)
     const conceptGraphPath = path.join(workDir, 'concept-graph.json');
     if (fs.existsSync(conceptGraphPath)) {
-      await onProgress?.('Extracting concepts', 20, 'Already extracted (skipping)');
+      await onProgress?.('Extracting concepts', 25, 'Already extracted (skipping)');
     } else {
-      await onProgress?.('Extracting concepts', 20);
+      await onProgress?.('Extracting concepts', 25);
       try {
         runScript('scripts/markdown/extract-concepts.ts', [filePath]);
+        if (!fs.existsSync(conceptGraphPath)) {
+          throw new Error(
+            `Concept extraction completed but output not found: ${conceptGraphPath}\n` +
+            `Work dir: ${workDir}\n` +
+            `Markdown: ${filePath}`
+          );
+        }
       } catch (error: any) {
         throw new ProcessingError(
           'Failed to extract concepts',
@@ -426,14 +512,17 @@ export async function processMarkdownFile(
       }
     }
     
-    // Stage 2: Chunk markdown into segments (40%)
+    // Stage 3: Chunk markdown into segments (40%)
     const chunksPath = path.join(workDir, 'chunks.json');
     if (fs.existsSync(chunksPath)) {
       await onProgress?.('Chunking markdown', 40, 'Already chunked (skipping)');
     } else {
-      await onProgress?.('Chunking markdown', 40, `Processing ${fileName}`);
+      await onProgress?.('Chunking markdown', 40);
       try {
         runScript('scripts/markdown/chunk-markdown.ts', [filePath]);
+        if (!fs.existsSync(chunksPath)) {
+          throw new Error(`Chunking completed but output not found: ${chunksPath}`);
+        }
       } catch (error: any) {
         throw new ProcessingError(
           'Failed to chunk markdown',
@@ -443,7 +532,7 @@ export async function processMarkdownFile(
       }
     }
     
-    // Stage 3: Enrich concepts with pedagogy (60%)
+    // Stage 4: Enrich concepts with pedagogy (60%)
     const enrichedConceptPath = path.join(workDir, 'concept-graph-enriched.json');
     if (fs.existsSync(enrichedConceptPath)) {
       await onProgress?.('Enriching concepts', 60, 'Already enriched (skipping)');
@@ -451,6 +540,18 @@ export async function processMarkdownFile(
       await onProgress?.('Enriching concepts', 60);
       try {
         runScript('scripts/markdown/enrich-concepts.ts', [filePath]);
+        if (!fs.existsSync(enrichedConceptPath)) {
+          const debugInfo = [
+            `Enrichment completed but output not found: ${enrichedConceptPath}`,
+            `Work dir: ${workDir}`,
+            `Markdown: ${filePath}`,
+          ];
+          if (fs.existsSync(workDir)) {
+            const files = fs.readdirSync(workDir);
+            debugInfo.push(`Files in work dir: ${files.join(', ')}`);
+          }
+          throw new Error(debugInfo.join('\n'));
+        }
       } catch (error: any) {
         throw new ProcessingError(
           'Failed to enrich concepts',
@@ -460,7 +561,7 @@ export async function processMarkdownFile(
       }
     }
     
-    // Stage 4: Map chunks to concepts (70%)
+    // Stage 5: Map chunks to concepts (70%)
     const mappingsPath = path.join(workDir, 'chunk-concept-mappings.json');
     if (fs.existsSync(mappingsPath)) {
       await onProgress?.('Mapping chunks to concepts', 70, 'Already mapped (skipping)');
@@ -468,6 +569,9 @@ export async function processMarkdownFile(
       await onProgress?.('Mapping chunks to concepts', 70);
       try {
         runScript('scripts/markdown/map-chunks-to-concepts.ts', [filePath]);
+        if (!fs.existsSync(mappingsPath)) {
+          throw new Error(`Mapping completed but output not found: ${mappingsPath}`);
+        }
       } catch (error: any) {
         throw new ProcessingError(
           'Failed to map chunks to concepts',
@@ -477,14 +581,17 @@ export async function processMarkdownFile(
       }
     }
     
-    // Stage 5: Generate embeddings (80%)
+    // Stage 6: Generate embeddings (85%)
     const embeddingsPath = path.join(workDir, 'chunk-embeddings.json');
     if (fs.existsSync(embeddingsPath)) {
-      await onProgress?.('Generating embeddings', 80, 'Already embedded (skipping)');
+      await onProgress?.('Generating embeddings', 85, 'Already embedded (skipping)');
     } else {
-      await onProgress?.('Generating embeddings', 80);
+      await onProgress?.('Generating embeddings', 85);
       try {
         runScript('scripts/markdown/embed-chunks.ts', [filePath]);
+        if (!fs.existsSync(embeddingsPath)) {
+          throw new Error(`Embedding completed but output not found: ${embeddingsPath}`);
+        }
       } catch (error: any) {
         throw new ProcessingError(
           'Failed to generate embeddings',
@@ -494,14 +601,22 @@ export async function processMarkdownFile(
       }
     }
     
-    // Stage 6: Import to database (100%)
+    // Stage 7: Import to database (95%)
+    // Builds import args based on content type. For notebooks, passes the
+    // original .ipynb path and the raw markdown (with images) for DB storage.
     await onProgress?.('Importing to database', 95);
     try {
-      runScript('scripts/import-to-db.ts', [
+      const importType = options?.contentType || 'markdown';
+      const markdownForDb = options?.markdownPathForDb || filePath;
+      const importArgs = [
         '--library-id', libraryId,
-        '--type', 'markdown',
-        '--markdown-path', filePath
-      ]);
+        '--type', importType,
+        '--markdown-path', markdownForDb,
+      ];
+      if (importType === 'notebook' && options?.notebookPath) {
+        importArgs.push('--notebook-path', options.notebookPath);
+      }
+      runScript('scripts/import-to-db.ts', importArgs);
     } catch (error: any) {
       throw new ProcessingError(
         'Failed to import to database',
@@ -513,26 +628,46 @@ export async function processMarkdownFile(
     await onProgress?.('Complete', 100, 'Processing finished successfully');
     
     // Read results
-    const enrichedPath = path.join(workDir, 'concept-graph-enriched.json');
-    // embeddingsPath already declared in Stage 5 above
-    
-    const conceptGraph = JSON.parse(fs.readFileSync(enrichedPath, 'utf-8'));
+    const conceptGraph = JSON.parse(fs.readFileSync(enrichedConceptPath, 'utf-8'));
     const embeddings = JSON.parse(fs.readFileSync(embeddingsPath, 'utf-8'));
     
+    // Read extracted metadata if available
+    let extractedMeta: any = undefined;
+    if (fs.existsSync(metadataPath)) {
+      try {
+        extractedMeta = JSON.parse(fs.readFileSync(metadataPath, 'utf-8'));
+      } catch (error) {
+        console.warn(`⚠️  Could not read extracted metadata:`, error);
+      }
+    }
+    
+    const markdownTitle = extractMarkdownTitle(filePath);
+    const title = extractedMeta?.title || conceptGraph.metadata?.title || markdownTitle || fileName;
+    
+    const sourceUrl = options?.sourceUrl || (isUrl ? urlOrPath : undefined);
+    
     return {
-      libraryId: slug,
-      title: conceptGraph.metadata.title || fileName,
+      libraryId,
+      title,
       slug,
-      contentType: 'markdown',
+      contentType: options?.contentType || 'markdown',
       stats: {
         conceptCount: conceptGraph.nodes?.length || 0,
         segmentCount: embeddings.chunks?.length || 0,
         embeddingCount: embeddings.chunks?.length || 0,
       },
       metadata: {
+        sourceUrl,
         sourceFile: filePath,
         processedAt: new Date().toISOString(),
       },
+      extractedMetadata: extractedMeta ? {
+        description: extractedMeta.description,
+        author: extractedMeta.author,
+        topics: extractedMeta.topics,
+        level: extractedMeta.level,
+        estimated_hours: extractedMeta.estimated_hours,
+      } : undefined,
     };
     
   } catch (error: any) {
@@ -548,18 +683,9 @@ export async function processMarkdownFile(
 }
 
 /**
- * Extract code blocks from markdown text
- */
-function extractCodeBlocks(text: string): string {
-  const codeBlockRegex = /```[\s\S]*?```/g;
-  const matches = text.match(codeBlockRegex);
-  return matches ? matches.join('\n\n') : '';
-}
-
-/**
  * Convert GitHub blob URL to raw URL
  */
-function githubBlobToRaw(url: string): string {
+export function githubBlobToRaw(url: string): string {
   return url
     .replace('github.com', 'raw.githubusercontent.com')
     .replace('/blob/', '/');
@@ -568,7 +694,7 @@ function githubBlobToRaw(url: string): string {
 /**
  * Download file from URL
  */
-async function downloadFile(url: string, outputPath: string): Promise<void> {
+export async function downloadFile(url: string, outputPath: string): Promise<void> {
   const https = await import('https');
   const actualUrl = url.includes('github.com/') ? githubBlobToRaw(url) : url;
   
@@ -604,7 +730,7 @@ async function downloadFile(url: string, outputPath: string): Promise<void> {
 /**
  * Extract title from markdown file (first # header)
  */
-function extractMarkdownTitle(markdownPath: string): string | null {
+export function extractMarkdownTitle(markdownPath: string): string | null {
   try {
     const content = fs.readFileSync(markdownPath, 'utf-8');
     
@@ -620,7 +746,7 @@ function extractMarkdownTitle(markdownPath: string): string | null {
  * Clean markdown for LLM processing
  * Removes images and HTML tags while preserving structure (headers, code blocks, etc.)
  */
-function cleanMarkdownForLLM(markdown: string): string {
+export function cleanMarkdownForLLM(markdown: string): string {
   // Remove markdown image syntax: ![alt](url)
   markdown = markdown.replace(/!\[.*?\]\(.*?\)/g, '');
   
@@ -641,7 +767,7 @@ function cleanMarkdownForLLM(markdown: string): string {
  * Convert Jupyter notebook to markdown using nbconvert
  * Returns both raw (with images) and cleaned (for LLM) versions
  */
-function convertNotebookToMarkdown(notebookPath: string): { raw: string; cleaned: string } {
+export function convertNotebookToMarkdown(notebookPath: string): { raw: string; cleaned: string } {
   try {
     // Use uvx with jupyter-core for robust conversion (no global install needed)
     const rawMarkdown = execSync(
@@ -669,23 +795,22 @@ function convertNotebookToMarkdown(notebookPath: string): { raw: string; cleaned
 }
 
 /**
- * Process a Jupyter notebook through the pipeline
+ * Process a Jupyter notebook through the complete pipeline
  * 
- * Pipeline stages:
- * 1. Download notebook (if URL) (10%)
- * 2. Convert to markdown (20%)
- * 3. Process as markdown (20-100%)
+ * Downloads the notebook (if URL), converts to markdown, then delegates
+ * the entire pipeline to processMarkdownFile() — including DB import.
  * 
  * @param urlOrPath - GitHub URL or local path to .ipynb file
  * @param libraryId - Database library ID (UUID)
  * @param onProgress - Optional progress callback
+ * @param doExtractMetadata - Set false on reimport to preserve manual edits
  * @returns Processing result with library ID and stats
  */
 export async function processJupyterNotebook(
   urlOrPath: string,
   libraryId: string,
   onProgress?: ProgressCallback,
-  extractMetadata: boolean = true  // Skip on reimport to preserve manual edits
+  doExtractMetadata: boolean = true
 ): Promise<ProcessingResult> {
   const isUrl = urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://');
   
@@ -693,11 +818,10 @@ export async function processJupyterNotebook(
   let fileName: string;
   
   try {
-    // Stage 1: Download notebook if URL
+    // Stage 1: Download notebook if URL (5%)
     if (isUrl) {
-      await onProgress?.('Downloading notebook', 10, urlOrPath);
+      await onProgress?.('Downloading notebook', 5, urlOrPath);
       
-      // Extract filename from URL
       const urlParts = urlOrPath.split('/');
       fileName = decodeURIComponent(urlParts[urlParts.length - 1]);
       if (!fileName.endsWith('.ipynb')) {
@@ -708,12 +832,10 @@ export async function processJupyterNotebook(
         );
       }
       
-      // Create temp directory (use libraryId for isolation)
       const tempDir = path.join('/tmp', 'notebooks', libraryId);
       if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir, { recursive: true });
       }
-      
       notebookPath = path.join(tempDir, fileName);
       
       try {
@@ -726,7 +848,6 @@ export async function processJupyterNotebook(
         );
       }
     } else {
-      // Local path
       notebookPath = path.resolve(urlOrPath);
       fileName = path.basename(notebookPath);
       
@@ -739,254 +860,45 @@ export async function processJupyterNotebook(
       }
     }
     
-    // Stage 2: Convert to markdown (both raw and cleaned versions)
-    await onProgress?.('Converting to markdown', 20, fileName);
+    // Stage 2: Convert to markdown (15%)
+    await onProgress?.('Converting to markdown', 15, fileName);
     
-    let rawMarkdown: string;
-    let cleanedMarkdown: string;
-    try {
-      const converted = convertNotebookToMarkdown(notebookPath);
-      rawMarkdown = converted.raw;
-      cleanedMarkdown = converted.cleaned;
-    } catch (error: any) {
-      throw new ProcessingError(
-        `Failed to convert notebook to markdown: ${error.message}`,
-        'convert-notebook',
-        error
-      );
-    }
+    const converted = convertNotebookToMarkdown(notebookPath);
     
-    // Save both versions to work directory (use libraryId for isolation)
+    // Save both raw (with images, for DB) and cleaned (for LLM pipeline)
     const slug = path.basename(fileName, '.ipynb')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-');
     const workDir = path.join('/tmp', 'markdown', libraryId);
-    
     if (!fs.existsSync(workDir)) {
       fs.mkdirSync(workDir, { recursive: true });
     }
     
     const rawMarkdownPath = path.join(workDir, `${slug}-raw.md`);
-    const cleanedMarkdownPath = path.join(workDir, `${slug}.md`);  // Use slug so scripts derive correct work directory
+    const cleanedMarkdownPath = path.join(workDir, `${slug}.md`);
+    fs.writeFileSync(rawMarkdownPath, converted.raw, 'utf-8');
+    fs.writeFileSync(cleanedMarkdownPath, converted.cleaned, 'utf-8');
     
-    fs.writeFileSync(rawMarkdownPath, rawMarkdown, 'utf-8');
-    fs.writeFileSync(cleanedMarkdownPath, cleanedMarkdown, 'utf-8');
-    
-    await onProgress?.('Markdown saved', 25, `Temp dir: ${workDir}`);
-    
-    // Stage 2.5: Extract metadata from full document (only on first import)
-    // This gives us better title, description, author before processing begins
-    // On reimport, we skip this to preserve manual edits
-    if (extractMetadata) {
-      try {
-        await onProgress?.('Extracting metadata', 27);
-        const { extractMetadata: extractMetadataFn } = await import('./metadata-extractor');
-        
-        const metadata = await extractMetadataFn(
-          cleanedMarkdown,
-          urlOrPath,
-          process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || ''
-        );
-        
-        console.log(`📋 Extracted metadata:`);
-        console.log(`   Title: ${metadata.title}`);
-        console.log(`   Description: ${metadata.description}`);
-        console.log(`   Author: ${metadata.author || 'Not identified'}`);
-        console.log(`   Topics: ${metadata.topics.join(', ')}`);
-        console.log(`   Level: ${metadata.level}`);
-        console.log(`   Estimated: ${metadata.estimated_hours || 'N/A'} hours`);
-        
-        // Save metadata to work directory for later use
-        const metadataPath = path.join(workDir, 'extracted-metadata.json');
-        fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
-        
-      } catch (error) {
-        console.warn(`⚠️  Failed to extract metadata (continuing anyway):`, error);
-        // Non-fatal - processing can continue without metadata
-      }
-    } else {
-      console.log(`📋 Skipping metadata extraction (preserving existing metadata)`);
-    }
-    
-    // Stage 3: Process cleaned markdown through pipeline (30-90%)
-    // Use cleaned version for LLM processing (concepts, chunks, embeddings)
-    
-    // Wrap the markdown progress callback to offset percentages (30-90%)
+    // Stage 3: Delegate everything to processMarkdownFile()
+    // It handles: metadata → concepts → chunk → enrich → map → embed → DB import
     const wrappedProgress: ProgressCallback = async (stage, percent, message) => {
-      // Map 0-95 from markdown processing to 30-90 in notebook processing
-      const adjustedPercent = 30 + Math.floor(percent * 0.63);
-      await onProgress?.(stage, adjustedPercent);
+      // Map markdown's 0-100% into notebook's 20-100% range
+      const adjusted = 20 + Math.floor(percent * 0.8);
+      await onProgress?.(stage, adjusted, message);
     };
     
-    // Run all markdown processing steps on cleaned version (no images)
-    try {
-      // Extract concepts
-      const conceptGraphPath = path.join(workDir, 'concept-graph.json');
-      if (!fs.existsSync(conceptGraphPath)) {
-        await wrappedProgress('Extracting concepts', 20);
-        runScript('scripts/markdown/extract-concepts.ts', [cleanedMarkdownPath]);
-        
-        // Verify the script actually created the file
-        if (!fs.existsSync(conceptGraphPath)) {
-          throw new Error(
-            `Concept extraction completed but output not found: ${conceptGraphPath}\n` +
-            `Work dir: ${workDir}\n` +
-            `Markdown: ${cleanedMarkdownPath}`
-          );
-        }
-      }
-      
-      // Chunk markdown
-      const chunksPath = path.join(workDir, 'chunks.json');
-      if (!fs.existsSync(chunksPath)) {
-        await wrappedProgress('Chunking markdown', 40);
-        runScript('scripts/markdown/chunk-markdown.ts', [cleanedMarkdownPath]);
-        
-        if (!fs.existsSync(chunksPath)) {
-          throw new Error(`Chunking completed but output not found: ${chunksPath}`);
-        }
-      }
-      
-      // Debug: Check chunk count
-      if (process.env.DEBUG_PROCESSING === 'true') {
-        try {
-          const chunksData = JSON.parse(fs.readFileSync(chunksPath, 'utf-8'));
-          const chunkCount = chunksData.chunks?.length || 0;
-          console.log(`🔍 [DEBUG] Chunking produced ${chunkCount} chunks`);
-          if (chunkCount === 0) {
-            console.log(`⚠️  [DEBUG] Zero chunks - checking markdown file size...`);
-            const stats = fs.statSync(cleanedMarkdownPath);
-            console.log(`   Markdown file: ${stats.size} bytes`);
-            if (stats.size > 0) {
-              console.log(`   ⚠️  File has content but no chunks extracted!`);
-            }
-          }
-        } catch (e) {
-          console.log(`⚠️  [DEBUG] Could not read chunks file: ${e}`);
-        }
-      }
-      
-      // Enrich concepts
-      const enrichedConceptPath = path.join(workDir, 'concept-graph-enriched.json');
-      if (!fs.existsSync(enrichedConceptPath)) {
-        await wrappedProgress('Enriching concepts', 60);
-        runScript('scripts/markdown/enrich-concepts.ts', [cleanedMarkdownPath]);
-        
-        if (!fs.existsSync(enrichedConceptPath)) {
-          // List what files ARE in the work directory to help debug
-          const debugInfo = [
-            `Enrichment completed but output not found: ${enrichedConceptPath}`,
-            `Work dir: ${workDir}`,
-            `Markdown: ${cleanedMarkdownPath}`,
-          ];
-          
-          if (fs.existsSync(workDir)) {
-            const files = fs.readdirSync(workDir);
-            debugInfo.push(`Files in work dir: ${files.join(', ')}`);
-          } else {
-            debugInfo.push('Work dir does not exist!');
-          }
-          
-          throw new Error(debugInfo.join('\n'));
-        }
-      }
-      
-      // Map chunks to concepts
-      const mappingsPath = path.join(workDir, 'chunk-concept-mappings.json');
-      if (!fs.existsSync(mappingsPath)) {
-        await wrappedProgress('Mapping chunks to concepts', 70);
-        runScript('scripts/markdown/map-chunks-to-concepts.ts', [cleanedMarkdownPath]);
-        
-        if (!fs.existsSync(mappingsPath)) {
-          throw new Error(`Mapping completed but output not found: ${mappingsPath}`);
-        }
-      }
-      
-      // Generate embeddings
-      const embeddingsPath = path.join(workDir, 'chunk-embeddings.json');
-      if (!fs.existsSync(embeddingsPath)) {
-        await wrappedProgress('Generating embeddings', 80);
-        runScript('scripts/markdown/embed-chunks.ts', [cleanedMarkdownPath]);
-        
-        if (!fs.existsSync(embeddingsPath)) {
-          throw new Error(`Embedding completed but output not found: ${embeddingsPath}`);
-        }
-      }
-    } catch (error: any) {
-      throw new ProcessingError(
-        'Failed during markdown processing',
-        'markdown-pipeline',
-        error
-      );
-    }
-    
-    // Stage 4: Import to database (90-100%)
-    // Pass raw markdown for storage (with images) but embeddings use cleaned version
-    await onProgress?.('Importing to database', 95);
-    try {
-      runScript('scripts/import-to-db.ts', [
-        '--library-id', libraryId,
-        '--type', 'notebook',
-        '--notebook-path', notebookPath,
-        '--markdown-path', rawMarkdownPath  // Store raw version in DB (with images)
-      ]);
-    } catch (error: any) {
-      throw new ProcessingError(
-        'Failed to import to database',
-        'import-to-db',
-        error
-      );
-    }
-    
-    // Read results
-    const enrichedPath = path.join(workDir, 'concept-graph-enriched.json');
-    const embeddingsPath = path.join(workDir, 'chunk-embeddings.json');
-    const extractedMetadataPath = path.join(workDir, 'extracted-metadata.json');
-    
-    const conceptGraph = JSON.parse(fs.readFileSync(enrichedPath, 'utf-8'));
-    const embeddings = JSON.parse(fs.readFileSync(embeddingsPath, 'utf-8'));
-    
-    // Read extracted metadata if available
-    let extractedMetadata: any = undefined;
-    if (fs.existsSync(extractedMetadataPath)) {
-      try {
-        extractedMetadata = JSON.parse(fs.readFileSync(extractedMetadataPath, 'utf-8'));
-      } catch (error) {
-        console.warn(`⚠️  Could not read extracted metadata:`, error);
-      }
-    }
-    
-    await onProgress?.('Complete', 100, 'Processing finished successfully');
-    
-    // Extract title: Extracted metadata > concept graph > markdown header > filename
-    const markdownTitle = extractMarkdownTitle(rawMarkdownPath);
-    const title = extractedMetadata?.title || conceptGraph.metadata?.title || markdownTitle || fileName;
-    
-    return {
-      libraryId: slug,
-      title,
-      slug,
-      contentType: 'notebook',
-      stats: {
-        conceptCount: conceptGraph.nodes?.length || 0,
-        segmentCount: embeddings.chunks?.length || 0,
-        embeddingCount: embeddings.chunks?.length || 0,
-      },
-      metadata: {
+    return await processMarkdownFile(
+      cleanedMarkdownPath,
+      libraryId,
+      wrappedProgress,
+      {
+        contentType: 'notebook',
+        notebookPath,
+        markdownPathForDb: rawMarkdownPath,
+        skipMetadata: !doExtractMetadata,
         sourceUrl: isUrl ? urlOrPath : undefined,
-        sourceFile: notebookPath,
-        convertedMarkdown: rawMarkdownPath,
-        cleanedMarkdown: cleanedMarkdownPath,
-        processedAt: new Date().toISOString(),
-      },
-      extractedMetadata: extractedMetadata ? {
-        description: extractedMetadata.description,
-        author: extractedMetadata.author,
-        topics: extractedMetadata.topics,
-        level: extractedMetadata.level,
-        estimated_hours: extractedMetadata.estimated_hours,
-      } : undefined,
-    };
+      }
+    );
     
   } catch (error: any) {
     if (error instanceof ProcessingError) {

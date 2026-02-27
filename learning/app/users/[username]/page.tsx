@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { authOptions, isAdmin } from '@/lib/auth';
 import { ArrowLeft, Plus } from 'lucide-react';
 import LibrariesGrid from './LibrariesGrid';
 
@@ -118,6 +118,7 @@ export default async function UserPage({ params }: { params: Promise<{ username:
           libraries={libraries}
           username={username}
           isOwnProfile={isOwnProfile}
+          isAdmin={isAdmin(session?.user?.username)}
         />
       )}
     </div>

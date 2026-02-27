@@ -17,10 +17,15 @@
 import { NextResponse } from 'next/server';
 import { getPublicLibraries } from '@/lib/db';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const libraries = await getPublicLibraries();
-    
+    const { searchParams } = new URL(request.url);
+    // ?all=true → return every public library (including chapter-grouped ones)
+    // default     → return only standalone libraries (chapter_id IS NULL)
+    const includeAll = searchParams.get('all') === 'true';
+
+    const libraries = await getPublicLibraries(includeAll ? undefined : true);
+
     // Transform database format to frontend format
     const formatted = libraries.map(lib => ({
       id: lib.slug, // Use slug as the ID for frontend

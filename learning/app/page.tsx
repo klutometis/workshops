@@ -20,7 +20,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import LibrarySelector from './components/LibrarySelector';
 
-type Library = {
+export type Library = {
   id: string;
   title: string;
   author: string;
@@ -35,22 +35,38 @@ type Library = {
   };
 };
 
+export type Chapter = {
+  id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  orderIndex?: number;
+  libraries: Library[];
+};
+
 export default function Home() {
   const router = useRouter();
   const [libraries, setLibraries] = useState<Library[]>([]);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
 
   useEffect(() => {
-    fetch('/api/libraries')
-      .then(res => res.json())
-      .then(data => setLibraries(data.libraries))
-      .catch(err => console.error('Failed to load libraries:', err));
+    // Fetch standalone libraries and chapters in parallel
+    Promise.all([
+      fetch('/api/libraries').then(res => res.json()),
+      fetch('/api/chapters').then(res => res.json()),
+    ])
+      .then(([libData, chapterData]) => {
+        setLibraries(libData.libraries ?? []);
+        setChapters(chapterData.chapters ?? []);
+      })
+      .catch(err => console.error('Failed to load content:', err));
   }, []);
 
   return (
-    <LibrarySelector 
+    <LibrarySelector
       libraries={libraries}
+      chapters={chapters}
       onSelect={(libraryId) => {
-        // Navigate to the library detail page
         router.push(`/library/${libraryId}`);
       }}
     />

@@ -8,6 +8,54 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 2026-02-26 - Chapters/Books, Pipeline Refactor, Frontloaded Metadata, Admin System
+
+#### Added
+- **Chapters/Books feature** — group libraries into ordered chapters under a book
+  - DB migration `008-add-chapters.sql` — `chapters` table + `chapter_id`/`chapter_order` on `libraries`
+  - `GET/POST /api/chapters` — public chapters with libraries, `?mine=true` for user's books
+  - `PATCH /api/libraries/[id]` — accepts `chapter_id`, `chapter_order`
+  - Home page renders books as expanded sections with chapter libraries beneath
+  - `LibraryEditModal` — Book dropdown (None / existing / Create new...), Chapter Order field
+- **`scripts/process-url.ts`** — end-to-end CLI: URL in → processed library in DB
+  - Supports `--user`, `--book`, `--chapter-order`, `--public`, `--public-book`
+  - Frontloads LLM metadata extraction for good slugs
+- **Admin system** — only `klutometis` and `norvig` can toggle library visibility
+  - `ADMIN_USERNAMES` constant + `isAdmin()` helper in `lib/auth.ts`
+  - PATCH endpoint returns 403 for non-admin `is_public` changes
+  - Frontend only renders public toggle for admins
+- **Frontloaded metadata extraction** — publish route and CLI now download + extract
+  metadata via LLM *before* creating the library row, so slugs come from the real
+  title ("introduction-to-lisp") instead of the filename ("chapter1")
+  - `extracted-metadata.json` saved to work dir; pipeline skips re-extraction
+  - Fallback chain: LLM → `#` header → filename
+- **Python REPL implicit print** — last expression in scratchpad auto-prints its value
+  (like Python's interactive REPL / Scheme)
+- **GitHub export feature** — `POST /api/export-github` endpoint + documentation
+  (creates portfolio repo with student's implementations)
+- **TypeScript type augmentation** — `types/next-auth.d.ts` for session user fields
+
+#### Changed
+- **Pipeline refactor** — `processMarkdownFile()` is now the single source of truth
+  - Handles URL download, LLM metadata extraction, all 6 processing stages, DB import
+  - Accepts options: `contentType`, `notebookPath`, `markdownPathForDb`, `skipMetadata`, `sourceUrl`
+  - `processJupyterNotebook()` reduced from ~315 lines to ~104 lines — just download,
+    convert to markdown, delegate to `processMarkdownFile()`
+  - Deleted dead `extractCodeBlocks()` function
+  - Fixed `ProcessingResult.libraryId` to return actual UUID instead of slug
+- **Processing stages renumbered** — markdown now includes "Downloading content" (5%)
+  and "Extracting metadata" (10%) as early stages; notebook stages updated to match
+- **Publish page** — button text changed from "Publishing..." to "Analyzing content..."
+  to reflect the ~5-10s metadata extraction delay
+- **`LibrariesGrid`** — `Library` type extended with `chapter_id`/`chapter_order`
+
+#### Fixed
+- **`getServerSession()` missing `authOptions`** in `PATCH/DELETE /api/libraries/[id]`
+- **Progress UI** — `LibraryStatusPage.tsx` line 325 used `>` instead of `>=` for
+  stage completion check, causing stages to appear skipped
+
+---
+
 ### 2026-02-03 - Metadata Extraction, Graph Navigation, and Bug Fixes 🐛
 
 #### Fixed

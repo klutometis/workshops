@@ -49,11 +49,10 @@ export async function extractMetadata(
       responseMimeType: 'application/json',
       responseSchema: zodToGeminiSchema(metadataSchema),
       temperature: 0.3,
-      timeout: 30000, // 30 seconds
     },
   });
   
-  const metadata = metadataSchema.parse(JSON.parse(response.text));
+  const metadata = metadataSchema.parse(JSON.parse(response.text || '{}'));
   
   // Use URL-extracted author if LLM didn't find one
   if (!metadata.author && urlAuthor) {

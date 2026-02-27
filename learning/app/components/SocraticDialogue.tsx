@@ -169,7 +169,7 @@ export default function SocraticDialogue({
                 }).join('\n\n')}`
               : '';
             
-            const code = `# ${conceptData.name}
+            const generatedCode = `# ${conceptData.name}
 # ${conceptData.description || ''}
 
 ${data.function.function_signature}
@@ -177,10 +177,20 @@ ${data.function.function_signature}
     pass  # TODO: Replace this with your implementation
 ${testCaseCode}
 `;
-            setStarterCode(code);
+            setStarterCode(generatedCode);
+            
+            // Load saved user code from localStorage, or use starter code
+            const storageKey = `user-code-${libraryId}-${conceptData.id}`;
+            const savedCode = localStorage.getItem(storageKey);
+            if (savedCode) {
+              setCode(savedCode);
+              console.log('📂 Loaded saved code from localStorage');
+            } else {
+              setCode(generatedCode);
+            }
           } else {
             // No function found, use default starter code
-            setStarterCode(`# 🧮 Python scratchpad for exploring ${conceptData.name}
+            const defaultCode = `# 🧮 Python scratchpad for exploring ${conceptData.name}
 # 
 # Feel free to experiment here! You can:
 # - Test out ideas in code
@@ -188,13 +198,24 @@ ${testCaseCode}
 # - Work through examples
 # 
 # Your code and output will be visible to your tutor.
-`);
+`;
+            setStarterCode(defaultCode);
+            
+            // Load saved user code or use default
+            const storageKey = `user-code-${libraryId}-${conceptData.id}`;
+            const savedCode = localStorage.getItem(storageKey);
+            if (savedCode) {
+              setCode(savedCode);
+              console.log('📂 Loaded saved code from localStorage');
+            } else {
+              setCode(defaultCode);
+            }
           }
         })
         .catch(err => {
           console.error('Failed to load function data:', err);
           // Use default starter code on error
-          setStarterCode(`# 🧮 Python scratchpad for exploring ${conceptData.name}
+          const defaultCode = `# 🧮 Python scratchpad for exploring ${conceptData.name}
 # 
 # Feel free to experiment here! You can:
 # - Test out ideas in code
@@ -202,7 +223,9 @@ ${testCaseCode}
 # - Work through examples
 # 
 # Your code and output will be visible to your tutor.
-`);
+`;
+          setStarterCode(defaultCode);
+          setCode(defaultCode);
         });
     }
   }, [open, conceptData, libraryId]);
@@ -270,6 +293,15 @@ ${testCaseCode}
       textareaRef.current.focus();
     }
   }, [isLoading]);
+
+  // Save user code to localStorage whenever it changes
+  useEffect(() => {
+    if (code && conceptData?.id && code !== starterCode) {
+      const storageKey = `user-code-${libraryId}-${conceptData.id}`;
+      localStorage.setItem(storageKey, code);
+      console.log('💾 Saved code to localStorage');
+    }
+  }, [code, conceptData?.id, libraryId, starterCode]);
 
   // Start the dialogue when modal opens
   useEffect(() => {

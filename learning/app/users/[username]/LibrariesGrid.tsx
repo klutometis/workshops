@@ -51,15 +51,18 @@ type Library = {
   status: string;
   total_concepts: number;
   is_public: boolean;
+  chapter_id?: string | null;
+  chapter_order?: number | null;
 };
 
 type LibrariesGridProps = {
   libraries: Library[];
   username: string;
   isOwnProfile: boolean;
+  isAdmin?: boolean;
 };
 
-export default function LibrariesGrid({ libraries: initialLibraries, username, isOwnProfile }: LibrariesGridProps) {
+export default function LibrariesGrid({ libraries: initialLibraries, username, isOwnProfile, isAdmin = false }: LibrariesGridProps) {
   const router = useRouter();
   const [libraries, setLibraries] = useState(initialLibraries);
   const [editingLibrary, setEditingLibrary] = useState<Library | null>(null);
@@ -214,7 +217,7 @@ export default function LibrariesGrid({ libraries: initialLibraries, username, i
           open={true}
           onOpenChange={(open) => !open && setEditingLibrary(null)}
           onSave={handleSave}
-          isAdmin={false} // TODO: Add admin check from session
+          isAdmin={isAdmin}
         />
       )}
 

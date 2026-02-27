@@ -67,10 +67,13 @@ export async function getAllLibraries() {
 }
 
 // Helper: Get all public libraries (for home page)
-export async function getPublicLibraries() {
-  const result = await pool.query(
-    'SELECT * FROM libraries WHERE is_public = true ORDER BY title'
-  );
+// standaloneOnly = true  → only libraries NOT assigned to a chapter
+// standaloneOnly = false/undefined → all public libraries
+export async function getPublicLibraries(standaloneOnly?: boolean) {
+  const query = standaloneOnly
+    ? 'SELECT * FROM libraries WHERE is_public = true AND chapter_id IS NULL ORDER BY title'
+    : 'SELECT * FROM libraries WHERE is_public = true ORDER BY title';
+  const result = await pool.query(query);
   return result.rows;
 }
 
@@ -195,6 +198,8 @@ export async function updateLibrary(
     title?: string;
     description?: string | null;
     is_public?: boolean;
+    chapter_id?: string | null;
+    chapter_order?: number | null;
   }
 ) {
   // Build dynamic update query
@@ -215,6 +220,16 @@ export async function updateLibrary(
   if (updates.is_public !== undefined) {
     setClauses.push(`is_public = $${paramIndex++}`);
     values.push(updates.is_public);
+  }
+
+  if (updates.chapter_id !== undefined) {
+    setClauses.push(`chapter_id = $${paramIndex++}`);
+    values.push(updates.chapter_id);
+  }
+
+  if (updates.chapter_order !== undefined) {
+    setClauses.push(`chapter_order = $${paramIndex++}`);
+    values.push(updates.chapter_order);
   }
 
   if (setClauses.length === 0) {
@@ -243,4 +258,95 @@ export async function isSlugTaken(slug: string, userId?: number) {
     [slug, userId || null]
   );
   return result.rows.length > 0;
+}
+
+// ============================================================================
+// CHAPTER HELPERS
+// ============================================================================
+
+// Helper: Get all public chapters with their ordered libraries
+export async function getPublicChaptersWithLibraries() {
+  // Fetch chapters
+  const chaptersResult = await pool.query(
+    `SELECT * FROM chapters WHERE is_public = true ORDER BY order_index ASC NULLS LAST, title ASC`
+  );
+  const chapters = chaptersResult.rows;
+
+  if (chapters.length === 0) return [];
+
+  const chapterIds = chapters.map((c: any) => c.id);
+
+  // Fetch libraries that belong to any of these chapters
+  const libsResult = await pool.query(
+    `SELECT * FROM libraries
+     WHERE is_public = true AND chapter_id = ANY($1::uuid[])
+     ORDER BY chapter_order ASC NULLS LAST, title ASC`,
+    [chapterIds]
+  );
+  const libs = libsResult.rows;
+
+  // Group libraries under their chapter
+  return chapters.map((chapter: any) => ({
+    ...chapter,
+    libraries: libs.filter((lib: any) => lib.chapter_id === chapter.id),
+  }));
+}
+
+// Helper: Get all chapters owned by a user
+export async function getChaptersByUserId(userId: number) {
+  const result = await pool.query(
+    'SELECT * FROM chapters WHERE user_id = $1 ORDER BY order_index ASC NULLS LAST, title ASC',
+    [userId]
+  );
+  return result.rows;
+}
+
+// Helper: Get a chapter by slug
+export async function getChapterBySlug(slug: string) {
+  const result = await pool.query(
+    'SELECT * FROM chapters WHERE slug = $1',
+    [slug]
+  );
+  return result.rows[0] || null;
+}
+
+// Helper: Create a new chapter
+export async function createChapter(data: {
+  title: string;
+  slug: string;
+  description?: string;
+  order_index?: number;
+  user_id?: number;
+  is_public?: boolean;
+}) {
+  const result = await pool.query(
+    `INSERT INTO chapters (title, slug, description, order_index, user_id, is_public, created_at)
+     VALUES ($1, $2, $3, $4, $5, $6, NOW())
+     RETURNING *`,
+    [
+      data.title,
+      data.slug,
+      data.description || null,
+      data.order_index ?? null,
+      data.user_id || null,
+      data.is_public !== undefined ? data.is_public : false,
+    ]
+  );
+  return result.rows[0];
+}
+
+// Helper: Assign a library to a chapter (and set its order within that chapter)
+export async function assignLibraryToChapter(
+  libraryId: string,
+  chapterId: string | null,
+  chapterOrder?: number
+) {
+  const result = await pool.query(
+    `UPDATE libraries
+     SET chapter_id = $1, chapter_order = $2
+     WHERE id = $3
+     RETURNING *`,
+    [chapterId, chapterOrder ?? null, libraryId]
+  );
+  return result.rows[0] || null;
 }

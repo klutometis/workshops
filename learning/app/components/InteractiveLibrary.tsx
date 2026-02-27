@@ -21,7 +21,7 @@ import ConceptGraph from './ConceptGraph';
 import ConceptDetails from './ConceptDetails';
 import SocraticDialogue from './SocraticDialogue';
 import GraphModal from './GraphModal';
-import { Map as MapIcon } from 'lucide-react';
+import { Map as MapIcon, Github, Loader2 } from 'lucide-react';
 
 type Library = {
   id: string;
@@ -60,6 +60,8 @@ export default function InteractiveLibrary({ library, onBack, backLabel = '← B
   const [loading, setLoading] = useState(true);
   const [autoStarted, setAutoStarted] = useState(false);
   const [graphModalOpen, setGraphModalOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportStatus, setExportStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
   // Load concept graph when library is loaded
   useEffect(() => {
@@ -277,6 +279,63 @@ export default function InteractiveLibrary({ library, onBack, backLabel = '← B
     }
   };
 
+  // Handle export to GitHub
+  const handleExportToGitHub = async () => {
+    setExporting(true);
+    setExportStatus(null);
+
+    try {
+      // Collect user code from localStorage for all mastered concepts
+      const userCodeMap: Record<string, string> = {};
+      const masteredConceptIds = Array.from(masteredConcepts.keys());
+      
+      for (const conceptId of masteredConceptIds) {
+        const storageKey = `user-code-${library.id}-${conceptId}`;
+        const code = localStorage.getItem(storageKey);
+        if (code) {
+          userCodeMap[conceptId] = code;
+        }
+      }
+
+      // Call export API
+      const response = await fetch('/api/export-github', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          libraryId: library.id,
+          masteredConcepts: masteredConceptIds,
+          userCodeMap,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to export to GitHub');
+      }
+
+      setExportStatus({
+        type: 'success',
+        message: `Successfully exported to GitHub! View at: ${data.lessonPath}`,
+      });
+
+      // Open the repo in a new tab
+      if (data.lessonPath) {
+        window.open(data.lessonPath, '_blank');
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+      setExportStatus({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Failed to export to GitHub',
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   // All concepts mastered - show completion
   if (!loading && masteredConcepts.size === concepts.length && concepts.length > 0) {
     return (
@@ -351,13 +410,34 @@ export default function InteractiveLibrary({ library, onBack, backLabel = '← B
             )}
           </div>
 
-          <button
-            onClick={() => setGraphModalOpen(true)}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2"
-          >
-            <MapIcon className="w-4 h-4" />
-            <span>Show Map</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {masteredCount > 0 && (
+              <button
+                onClick={handleExportToGitHub}
+                disabled={exporting}
+                className="px-4 py-2 bg-green-700 hover:bg-green-600 disabled:bg-green-800 disabled:opacity-50 rounded-lg transition-colors flex items-center gap-2"
+              >
+                {exporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Exporting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Github className="w-4 h-4" />
+                    <span>Export to GitHub</span>
+                  </>
+                )}
+              </button>
+            )}
+            <button
+              onClick={() => setGraphModalOpen(true)}
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2"
+            >
+              <MapIcon className="w-4 h-4" />
+              <span>Show Map</span>
+            </button>
+          </div>
         </div>
 
         {/* Progress Bar */}
@@ -375,6 +455,23 @@ export default function InteractiveLibrary({ library, onBack, backLabel = '← B
             />
           </div>
         </div>
+
+        {/* Export Status */}
+        {exportStatus && (
+          <div className={`mt-3 p-3 rounded-lg text-sm ${
+            exportStatus.type === 'success' 
+              ? 'bg-green-900/50 text-green-100 border border-green-700' 
+              : 'bg-red-900/50 text-red-100 border border-red-700'
+          }`}>
+            {exportStatus.message}
+            <button 
+              onClick={() => setExportStatus(null)}
+              className="ml-2 text-xs underline hover:no-underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
       </header>
 
       {/* Main content - Full screen lesson */}

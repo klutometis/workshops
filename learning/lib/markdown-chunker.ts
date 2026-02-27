@@ -384,7 +384,6 @@ export async function chunkMarkdownFile(
           responseMimeType: 'application/json',
           responseSchema: zodToGeminiSchema(chunkResponseSchema),
           temperature: 0.3,
-          timeout: 120000, // 120 seconds
         },
       }).catch((error: any) => {
         if (DEBUG) {

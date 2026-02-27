@@ -94,9 +94,31 @@ from io import StringIO
 sys.stdout = StringIO()
       `);
 
-      // Prepend program context if available, then run user code
-      const fullCode = programContext ? `${programContext}\n\n${code}` : code;
-      await pyodide.runPythonAsync(fullCode);
+      // Prepend program context if available, then run user code.
+      // The last statement is evaluated and its value printed implicitly
+      // (like Python's interactive REPL / Scheme).
+      const userCode = programContext ? `${programContext}\n\n${code}` : code;
+
+      await pyodide.runPythonAsync(`
+import ast as _ast, sys as _sys
+
+_source = ${JSON.stringify(userCode)}
+_tree = _ast.parse(_source, mode='exec')
+
+if _tree.body and isinstance(_tree.body[-1], _ast.Expr):
+    # Split: run all-but-last in exec mode, eval the last expression
+    _last_expr = _tree.body[-1]
+    _rest = _ast.Module(body=_tree.body[:-1], type_ignores=[])
+    _last = _ast.Expression(body=_last_expr.value)
+    _ast.fix_missing_locations(_rest)
+    _ast.fix_missing_locations(_last)
+    exec(compile(_rest, '<scratchpad>', 'exec'), globals())
+    _result = eval(compile(_last, '<scratchpad>', 'eval'), globals())
+    if _result is not None:
+        print(repr(_result))
+else:
+    exec(compile(_tree, '<scratchpad>', 'exec'), globals())
+`);
 
       // Get captured output
       const stdout = pyodide.runPython('sys.stdout.getvalue()');

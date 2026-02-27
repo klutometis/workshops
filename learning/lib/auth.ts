@@ -2,6 +2,13 @@ import { NextAuthOptions } from "next-auth"
 import GitHubProvider from "next-auth/providers/github"
 import { Pool } from "pg"
 
+/** GitHub usernames with admin privileges (can toggle library/book visibility) */
+export const ADMIN_USERNAMES = ['klutometis', 'norvig'] as const;
+
+export function isAdmin(username: string | undefined | null): boolean {
+  return !!username && (ADMIN_USERNAMES as readonly string[]).includes(username);
+}
+
 // Database connection for auth
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -12,6 +19,11 @@ export const authOptions: NextAuthOptions = {
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          scope: 'read:user user:email repo', // Add repo scope for GitHub export
+        },
+      },
     })
   ],
   secret: process.env.NEXTAUTH_SECRET,
@@ -49,20 +61,24 @@ export const authOptions: NextAuthOptions = {
       return true
     },
     async jwt({ token, account, profile }) {
-      // Add GitHub username to token when user first signs in
+      // Add GitHub username and access token when user first signs in
       if (account?.provider === "github" && profile) {
         const githubProfile = profile as any
         token.username = githubProfile.login
+        token.accessToken = account.access_token
       }
       return token
     },
     async session({ session, token }) {
-      // Add user ID and username to session
+      // Add user ID, username, and access token to session
       if (token.sub && session.user) {
         session.user.id = token.sub
       }
       if (token.username && session.user) {
         session.user.username = token.username as string
+      }
+      if (token.accessToken && session.user) {
+        session.user.accessToken = token.accessToken as string
       }
       return session
     },

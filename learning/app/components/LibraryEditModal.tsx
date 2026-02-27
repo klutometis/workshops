@@ -16,7 +16,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -29,12 +29,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
+type Chapter = {
+  id: string;
+  title: string;
+  slug: string;
+};
+
 type Library = {
   id: string;
   title: string;
   author: string;
   description?: string;
   is_public: boolean;
+  chapter_id?: string | null;
+  chapter_order?: number | null;
 };
 
 type LibraryEditModalProps = {
@@ -44,6 +52,8 @@ type LibraryEditModalProps = {
   onSave: (updated: Partial<Library>) => void;
   isAdmin?: boolean;
 };
+
+const CREATE_NEW_VALUE = '__create_new__';
 
 export default function LibraryEditModal({
   library,
@@ -57,6 +67,52 @@ export default function LibraryEditModal({
   const [isPublic, setIsPublic] = useState(library.is_public);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Book (chapter) state
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [loadingChapters, setLoadingChapters] = useState(true);
+  const [selectedChapterId, setSelectedChapterId] = useState<string>(
+    library.chapter_id || ''
+  );
+  const [chapterOrder, setChapterOrder] = useState<string>(
+    library.chapter_order != null ? String(library.chapter_order) : ''
+  );
+  const [isCreatingBook, setIsCreatingBook] = useState(false);
+  const [newBookTitle, setNewBookTitle] = useState('');
+
+  // Fetch user's books when modal opens
+  useEffect(() => {
+    if (!open) return;
+    setLoadingChapters(true);
+    fetch('/api/chapters?mine=true')
+      .then(res => res.json())
+      .then(data => setChapters(data.chapters ?? []))
+      .catch(() => setChapters([]))
+      .finally(() => setLoadingChapters(false));
+  }, [open]);
+
+  // Reset form when library prop changes (e.g. opening modal for a different library)
+  useEffect(() => {
+    setTitle(library.title);
+    setDescription(library.description || '');
+    setIsPublic(library.is_public);
+    setSelectedChapterId(library.chapter_id || '');
+    setChapterOrder(library.chapter_order != null ? String(library.chapter_order) : '');
+    setIsCreatingBook(false);
+    setNewBookTitle('');
+    setError(null);
+  }, [library]);
+
+  const handleChapterSelect = (value: string) => {
+    if (value === CREATE_NEW_VALUE) {
+      setIsCreatingBook(true);
+      setSelectedChapterId('');
+    } else {
+      setIsCreatingBook(false);
+      setNewBookTitle('');
+      setSelectedChapterId(value);
+    }
+  };
 
   const handleSave = async () => {
     // Validation
@@ -75,18 +131,45 @@ export default function LibraryEditModal({
       return;
     }
 
+    if (isCreatingBook && !newBookTitle.trim()) {
+      setError('Book title is required');
+      return;
+    }
+
     setError(null);
     setIsSaving(true);
 
     try {
+      // If creating a new book, do that first
+      let chapterId: string | null = selectedChapterId || null;
+
+      if (isCreatingBook) {
+        const createRes = await fetch('/api/chapters', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: newBookTitle.trim() }),
+        });
+
+        if (!createRes.ok) {
+          const data = await createRes.json();
+          throw new Error(data.error || 'Failed to create book');
+        }
+
+        const newChapter = await createRes.json();
+        chapterId = newChapter.id;
+      }
+
+      // Now PATCH the library
+      const parsedOrder = chapterOrder.trim() !== '' ? parseInt(chapterOrder, 10) : null;
+
       const response = await fetch(`/api/libraries/${library.id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: title.trim(),
           description: description.trim() || null,
+          chapter_id: chapterId,
+          chapter_order: parsedOrder,
           ...(isAdmin && { is_public: isPublic }),
         }),
       });
@@ -112,7 +195,7 @@ export default function LibraryEditModal({
         <DialogHeader>
           <DialogTitle>Edit Library Metadata</DialogTitle>
           <DialogDescription>
-            Update the title and description for your library. Changes will be visible immediately.
+            Update the title, description, and book assignment for your library.
           </DialogDescription>
         </DialogHeader>
 
@@ -168,6 +251,68 @@ export default function LibraryEditModal({
             />
             <p className="text-xs text-gray-500">
               {description.length}/1000 characters
+            </p>
+          </div>
+
+          {/* Book assignment */}
+          <div className="space-y-2 pt-2 border-t">
+            <label htmlFor="book" className="text-sm font-medium">
+              Book
+            </label>
+            <select
+              id="book"
+              value={isCreatingBook ? CREATE_NEW_VALUE : selectedChapterId}
+              onChange={(e) => handleChapterSelect(e.target.value)}
+              disabled={isSaving || loadingChapters}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">None (standalone library)</option>
+              {chapters.map((ch) => (
+                <option key={ch.id} value={ch.id}>
+                  {ch.title}
+                </option>
+              ))}
+              <option value={CREATE_NEW_VALUE}>Create new book...</option>
+            </select>
+            {loadingChapters && (
+              <p className="text-xs text-gray-400">Loading books...</p>
+            )}
+
+            {/* New book title input */}
+            {isCreatingBook && (
+              <div className="space-y-1 pl-2 border-l-2 border-blue-200">
+                <label htmlFor="new-book-title" className="text-xs font-medium text-blue-700">
+                  New book title
+                </label>
+                <Input
+                  id="new-book-title"
+                  value={newBookTitle}
+                  onChange={(e) => setNewBookTitle(e.target.value)}
+                  placeholder="e.g. Paradigms of AI Programming"
+                  maxLength={200}
+                  disabled={isSaving}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Chapter order */}
+          <div className="space-y-2">
+            <label htmlFor="chapter-order" className="text-sm font-medium">
+              Chapter number
+            </label>
+            <Input
+              id="chapter-order"
+              type="number"
+              min={1}
+              value={chapterOrder}
+              onChange={(e) => setChapterOrder(e.target.value)}
+              placeholder="e.g. 1"
+              disabled={isSaving || (!selectedChapterId && !isCreatingBook)}
+              className={!selectedChapterId && !isCreatingBook ? 'bg-gray-50 text-gray-400' : ''}
+            />
+            <p className="text-xs text-gray-500">
+              Position of this library within its book (optional)
             </p>
           </div>
 

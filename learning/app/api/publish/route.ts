@@ -23,6 +23,8 @@ import { execSync } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
+import { downloadFile, githubBlobToRaw, extractMarkdownTitle, convertNotebookToMarkdown } from '@/lib/processing';
+import type { DocumentMetadata } from '@/lib/metadata-extractor';
 
 // URL type detection
 function detectSourceType(url: string): { type: 'youtube' | 'notebook' | 'markdown'; videoId?: string } | null {
@@ -157,12 +159,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5. Generate title and slug
-    // For YouTube videos, fetch real metadata first to get semantic title
+    // 5. Extract metadata — LLM for markdown/notebook, YouTube API for videos
+    // This is the key improvement: we get a good title BEFORE creating the
+    // library row, so the slug is derived from the real title ("introduction-
+    // to-lisp") instead of the filename ("chapter1").
     let title: string;
     let author: string = user.github_name || user.github_login;
+    let extractedMetadata: DocumentMetadata | null = null;
+    let tempLibraryId: string | null = null;  // Pre-generated for work dir
     
     if (detected.type === 'youtube' && detected.videoId) {
+      // YouTube: use existing metadata flow (fast, no LLM needed)
       console.log(`📹 Fetching YouTube metadata for: ${detected.videoId}`);
       const metadata = fetchYouTubeMetadata(detected.videoId);
       if (metadata) {
@@ -173,8 +180,75 @@ export async function POST(request: NextRequest) {
         console.log('⚠️  Using fallback title');
         title = customTitle || extractTitleFromUrl(url, detected.type);
       }
+    } else if (!customTitle) {
+      // Markdown/Notebook: download + extract metadata via LLM
+      // This takes ~5-10s but gives us a real title for the slug
+      console.log(`📋 Extracting metadata from ${detected.type} content...`);
+      
+      // Pre-generate a library ID so we can save metadata to the right work dir
+      tempLibraryId = crypto.randomUUID();
+      const workDir = path.join('/tmp', 'markdown', tempLibraryId);
+      fs.mkdirSync(workDir, { recursive: true });
+      
+      try {
+        let markdownContent: string;
+        
+        // Convert GitHub blob URLs to raw URLs
+        let downloadUrl = url;
+        if (url.includes('github.com') && url.includes('/blob/')) {
+          downloadUrl = githubBlobToRaw(url);
+        }
+        
+        if (detected.type === 'notebook') {
+          // Download .ipynb, convert to markdown, read content
+          const urlParts = url.split('/');
+          const fileName = decodeURIComponent(urlParts[urlParts.length - 1]);
+          const notebookDir = path.join('/tmp', 'notebooks', tempLibraryId);
+          fs.mkdirSync(notebookDir, { recursive: true });
+          const notebookPath = path.join(notebookDir, fileName);
+          
+          await downloadFile(downloadUrl, notebookPath);
+          const converted = convertNotebookToMarkdown(notebookPath);
+          markdownContent = converted.cleaned;
+        } else {
+          // Markdown: download and read
+          const urlParts = url.split('/');
+          const fileName = decodeURIComponent(urlParts[urlParts.length - 1]);
+          const filePath = path.join(workDir, fileName);
+          
+          await downloadFile(downloadUrl, filePath);
+          markdownContent = fs.readFileSync(filePath, 'utf-8');
+        }
+        
+        // Call LLM metadata extraction
+        const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || '';
+        if (apiKey) {
+          const { extractMetadata } = await import('@/lib/metadata-extractor');
+          extractedMetadata = await extractMetadata(markdownContent, url, apiKey);
+          
+          console.log(`📋 Extracted: "${extractedMetadata.title}" by ${extractedMetadata.author || 'unknown'}`);
+          
+          // Save to work dir so the pipeline skips re-extraction
+          const metadataPath = path.join(workDir, 'extracted-metadata.json');
+          fs.writeFileSync(metadataPath, JSON.stringify(extractedMetadata, null, 2));
+          
+          title = extractedMetadata.title;
+          if (extractedMetadata.author) {
+            author = extractedMetadata.author;
+          }
+        } else {
+          console.warn('⚠️  No API key — falling back to markdown title extraction');
+          // Fallback: try to extract # header from content
+          const headerMatch = markdownContent.match(/^#\s+(.+)$/m);
+          title = headerMatch ? headerMatch[1].trim() : extractTitleFromUrl(url, detected.type);
+        }
+      } catch (error) {
+        console.warn('⚠️  Metadata extraction failed, using fallback:', error);
+        title = extractTitleFromUrl(url, detected.type);
+      }
     } else {
-      title = customTitle || extractTitleFromUrl(url, detected.type);
+      // Custom title provided by user
+      title = customTitle;
     }
     
     // 6. Check if library already exists (for re-import)
@@ -213,29 +287,59 @@ export async function POST(request: NextRequest) {
     
     // If re-importing, reset the existing library to pending
     if (isReimport && library) {
+      // Build metadata update — preserve existing fields, add reimport timestamp
+      const metadataUpdate = extractedMetadata
+        ? {
+            reimported_at: new Date().toISOString(),
+            description: extractedMetadata.description,
+            topics: extractedMetadata.topics,
+            level: extractedMetadata.level,
+            estimated_hours: extractedMetadata.estimated_hours,
+          }
+        : { reimported_at: new Date().toISOString() };
+      
       await pool.query(
         `UPDATE libraries 
          SET title = $1, 
-             is_public = $2,
+             author = $2,
+             is_public = $3,
              status = 'pending',
              progress_message = NULL,
              error_message = NULL,
              processing_logs = '[]'::jsonb,
-             metadata = jsonb_set(
-               COALESCE(metadata, '{}'::jsonb),
-               '{reimported_at}',
-               to_jsonb(NOW())
-             )
-         WHERE id = $3`,
-        [title, isPublic, library.id]
+             metadata = COALESCE(metadata, '{}'::jsonb) || $4::jsonb
+         WHERE id = $5`,
+        [title, author, isPublic, JSON.stringify(metadataUpdate), library.id]
       );
+      
+      // Move pre-computed work dir for re-import too
+      if (tempLibraryId) {
+        const tempDir = path.join('/tmp', 'markdown', tempLibraryId);
+        const realDir = path.join('/tmp', 'markdown', library.id);
+        if (fs.existsSync(tempDir)) {
+          // Remove old work dir if it exists, replace with fresh metadata
+          if (fs.existsSync(realDir)) {
+            fs.rmSync(realDir, { recursive: true });
+          }
+          fs.renameSync(tempDir, realDir);
+          console.log(`📁 Moved work dir: ${tempLibraryId} → ${library.id}`);
+        }
+        const tempNotebookDir = path.join('/tmp', 'notebooks', tempLibraryId);
+        const realNotebookDir = path.join('/tmp', 'notebooks', library.id);
+        if (fs.existsSync(tempNotebookDir)) {
+          if (fs.existsSync(realNotebookDir)) {
+            fs.rmSync(realNotebookDir, { recursive: true });
+          }
+          fs.renameSync(tempNotebookDir, realNotebookDir);
+        }
+      }
     }
     
     // Create new library if not re-importing
     if (!library) {
       library = await createLibrary({
         title,
-        author, // Use fetched author for YouTube, or user's name for other types
+        author,
         type: detected.type,
         slug,
         source_url: url,
@@ -246,8 +350,33 @@ export async function POST(request: NextRequest) {
         metadata: {
           imported_by: user.github_login,
           imported_at: new Date().toISOString(),
+          ...(extractedMetadata ? {
+            description: extractedMetadata.description,
+            topics: extractedMetadata.topics,
+            level: extractedMetadata.level,
+            estimated_hours: extractedMetadata.estimated_hours,
+          } : {}),
         }
       });
+    }
+    
+    // Move pre-computed work dir to match the actual library ID.
+    // The pipeline uses /tmp/markdown/<libraryId>/ — if we pre-generated a
+    // temp ID for metadata extraction, rename it so the pipeline finds the
+    // cached extracted-metadata.json and downloaded files.
+    if (tempLibraryId && tempLibraryId !== library.id) {
+      const tempDir = path.join('/tmp', 'markdown', tempLibraryId);
+      const realDir = path.join('/tmp', 'markdown', library.id);
+      if (fs.existsSync(tempDir)) {
+        fs.renameSync(tempDir, realDir);
+        console.log(`📁 Moved work dir: ${tempLibraryId} → ${library.id}`);
+      }
+      // Also move notebook temp dir if it exists
+      const tempNotebookDir = path.join('/tmp', 'notebooks', tempLibraryId);
+      const realNotebookDir = path.join('/tmp', 'notebooks', library.id);
+      if (fs.existsSync(tempNotebookDir)) {
+        fs.renameSync(tempNotebookDir, realNotebookDir);
+      }
     }
 
     console.log(`📚 Library created: ID=${library.id}, slug=${slug}, type=${detected.type}`);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getLibraryById, updateLibrary } from '@/lib/db';
 import { getServerSession } from 'next-auth';
+import { authOptions, isAdmin } from '@/lib/auth';
 import pool from '@/lib/db';
 
 export async function GET(
@@ -55,7 +56,7 @@ export async function PATCH(
     }
 
     // Check authentication
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session || !session.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -74,7 +75,7 @@ export async function PATCH(
 
     // Parse request body
     const body = await request.json();
-    const { title, description, is_public } = body;
+    const { title, description, is_public, chapter_id, chapter_order } = body;
 
     // Validation
     if (title !== undefined) {
@@ -107,18 +108,41 @@ export async function PATCH(
       }
     }
 
-    // Note: is_public validation would go here (admin-only check)
-    // For now, we'll allow any authenticated user to update their own libraries
-    // TODO: Add admin role check for is_public changes
+    if (chapter_id !== undefined && chapter_id !== null) {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (typeof chapter_id !== 'string' || !uuidRegex.test(chapter_id)) {
+        return NextResponse.json(
+          { error: 'chapter_id must be a valid UUID or null' },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (chapter_order !== undefined && chapter_order !== null) {
+      if (typeof chapter_order !== 'number' || !Number.isInteger(chapter_order)) {
+        return NextResponse.json(
+          { error: 'chapter_order must be an integer or null' },
+          { status: 400 }
+        );
+      }
+    }
 
     // Update library
     const updates: any = {};
     if (title !== undefined) updates.title = title.trim();
     if (description !== undefined) updates.description = description.trim() || null;
     if (is_public !== undefined && typeof is_public === 'boolean') {
-      // TODO: Add admin check here
+      const username = (session.user as any).username;
+      if (!isAdmin(username)) {
+        return NextResponse.json(
+          { error: 'Only administrators can change library visibility' },
+          { status: 403 }
+        );
+      }
       updates.is_public = is_public;
     }
+    if (chapter_id !== undefined) updates.chapter_id = chapter_id;
+    if (chapter_order !== undefined) updates.chapter_order = chapter_order;
 
     const updated = await updateLibrary(id, updates);
 
@@ -156,7 +180,7 @@ export async function DELETE(
     }
 
     // Check authentication
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session || !session.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },

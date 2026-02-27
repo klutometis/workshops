@@ -42,20 +42,22 @@ const PROCESSING_STAGES = {
     { key: 'import', label: 'Importing to database', percent: 95 },
   ],
   markdown: [
-    { key: 'extract', label: 'Extracting concepts', percent: 20 },
+    { key: 'download', label: 'Downloading content', percent: 5 },
+    { key: 'metadata', label: 'Extracting metadata', percent: 10 },
+    { key: 'extract', label: 'Extracting concepts', percent: 25 },
     { key: 'chunk', label: 'Chunking markdown', percent: 40 },
     { key: 'enrich', label: 'Enriching concepts', percent: 60 },
     { key: 'map', label: 'Mapping chunks to concepts', percent: 70 },
-    { key: 'embed', label: 'Generating embeddings', percent: 80 },
+    { key: 'embed', label: 'Generating embeddings', percent: 85 },
     { key: 'import', label: 'Importing to database', percent: 95 },
   ],
   notebook: [
-    { key: 'download', label: 'Downloading notebook', percent: 10 },
-    { key: 'convert', label: 'Converting to markdown', percent: 20 },
-    { key: 'save', label: 'Saving markdown files', percent: 25 },
-    { key: 'extract', label: 'Extracting concepts', percent: 35 },
-    { key: 'chunk', label: 'Chunking content', percent: 50 },
-    { key: 'enrich', label: 'Enriching concepts', percent: 65 },
+    { key: 'download', label: 'Downloading notebook', percent: 5 },
+    { key: 'convert', label: 'Converting to markdown', percent: 15 },
+    { key: 'metadata', label: 'Extracting metadata', percent: 20 },
+    { key: 'extract', label: 'Extracting concepts', percent: 30 },
+    { key: 'chunk', label: 'Chunking content', percent: 45 },
+    { key: 'enrich', label: 'Enriching concepts', percent: 60 },
     { key: 'map', label: 'Mapping chunks to concepts', percent: 75 },
     { key: 'embed', label: 'Generating embeddings', percent: 85 },
     { key: 'import', label: 'Importing to database', percent: 95 },
@@ -322,7 +324,7 @@ export default function LibraryStatusPage({ library: initialLibrary, username }:
                   <div className="space-y-3">
                     {stages.map((stage, index) => {
                       const nextStagePercent = stages[index + 1]?.percent || 100;
-                      const isComplete = percent > nextStagePercent || (percent === 100 && index < stages.length - 1);
+                      const isComplete = percent >= nextStagePercent || (percent === 100 && index < stages.length - 1);
                       const isCurrent = !isComplete && percent >= stage.percent && percent < nextStagePercent;
                       const isPending = percent < stage.percent;
 
