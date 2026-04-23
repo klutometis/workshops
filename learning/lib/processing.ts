@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 import { chunkMarkdownFile, MarkdownChunk } from './markdown-chunker';
@@ -87,18 +87,22 @@ function extractVideoId(input: string): string {
 function runScript(scriptPath: string, args: string[] = []): string {
   try {
     const fullPath = path.join(process.cwd(), scriptPath);
-    
-    // Determine how to run based on file extension
-    let command: string;
+
+    // Use execFileSync (no shell) so special characters in args (apostrophes,
+    // spaces, $, backticks, etc.) are passed through safely without quoting.
+    let cmd: string;
+    let cmdArgs: string[];
     if (scriptPath.endsWith('.sh')) {
-      command = `bash ${fullPath} ${args.join(' ')}`;
+      cmd = 'bash';
+      cmdArgs = [fullPath, ...args];
     } else if (scriptPath.endsWith('.ts')) {
-      command = `npx tsx ${fullPath} ${args.join(' ')}`;
+      cmd = 'npx';
+      cmdArgs = ['tsx', fullPath, ...args];
     } else {
       throw new Error(`Unsupported script type: ${scriptPath}`);
     }
-    
-    return execSync(command, { 
+
+    return execFileSync(cmd, cmdArgs, {
       encoding: 'utf-8',
       stdio: ['inherit', 'pipe', 'inherit'],  // Inherit stderr so errors are visible
       maxBuffer: 50 * 1024 * 1024 // 50MB buffer for large outputs
@@ -770,9 +774,10 @@ export function cleanMarkdownForLLM(markdown: string): string {
 export function convertNotebookToMarkdown(notebookPath: string): { raw: string; cleaned: string } {
   try {
     // Use uvx with jupyter-core for robust conversion (no global install needed)
-    const rawMarkdown = execSync(
-      `uvx --from nbconvert jupyter nbconvert --to markdown --stdout --no-prompt "${notebookPath}"`,
-      { 
+    const rawMarkdown = execFileSync(
+      'uvx',
+      ['--from', 'nbconvert', 'jupyter', 'nbconvert', '--to', 'markdown', '--stdout', '--no-prompt', notebookPath],
+      {
         encoding: 'utf-8',
         maxBuffer: 50 * 1024 * 1024 // 50MB buffer for large notebooks
       }

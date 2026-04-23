@@ -11,10 +11,12 @@
  *   npx tsx scripts/import-pytudes.ts
  *   npx tsx scripts/import-pytudes.ts --parallel 2
  *   npx tsx scripts/import-pytudes.ts --user klutometis --parallel 3
+ *   npx tsx scripts/import-pytudes.ts --skip-ready   # skip notebooks already status='ready' in DB
  */
 
 import { spawn } from 'child_process';
 import path from 'path';
+import pg from 'pg';
 
 // ============================================================================
 // Config
@@ -23,6 +25,30 @@ import path from 'path';
 const BASE_URL = 'https://github.com/norvig/pytudes/blob/main/ipynb';
 const DEFAULT_USER = 'klutometis';
 const DEFAULT_PARALLEL = 3;
+
+// DB pool (only used when --skip-ready is set)
+let pool: pg.Pool | null = null;
+
+function getPool(): pg.Pool {
+  if (!pool) {
+    pool = new pg.Pool({
+      host: 'localhost',
+      port: 5432,
+      user: 'postgres',
+      password: process.env.PGPASSWORD || 'Dae5aiRa',
+      database: 'learning',
+    });
+  }
+  return pool;
+}
+
+async function isReady(url: string): Promise<boolean> {
+  const result = await getPool().query(
+    `SELECT status FROM libraries WHERE source_url = $1`,
+    [url]
+  );
+  return result.rows.length > 0 && result.rows[0].status === 'ready';
+}
 
 interface Book {
   title: string;
@@ -184,11 +210,12 @@ const PYTUDES_BOOKS: Book[] = [
 // Arg parsing
 // ============================================================================
 
-function parseArgs(argv: string[]): { user: string; parallel: number } {
-  const args = { user: DEFAULT_USER, parallel: DEFAULT_PARALLEL };
+function parseArgs(argv: string[]): { user: string; parallel: number; skipReady: boolean } {
+  const args = { user: DEFAULT_USER, parallel: DEFAULT_PARALLEL, skipReady: false };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--user') args.user = argv[++i];
     else if (argv[i] === '--parallel') args.parallel = parseInt(argv[++i], 10);
+    else if (argv[i] === '--skip-ready') args.skipReady = true;
   }
   return args;
 }
@@ -233,24 +260,36 @@ function runProcessUrl(
 // Process one book with internal parallelism
 // ============================================================================
 
-async function processBook(book: Book, user: string, parallel: number) {
+async function processBook(book: Book, user: string, parallel: number, skipReady: boolean) {
   console.log(`\n${'═'.repeat(60)}`);
   console.log(`📚 Book: ${book.title}`);
-  console.log(`   ${book.notebooks.length} notebooks, parallel=${parallel}`);
+  console.log(`   ${book.notebooks.length} notebooks, parallel=${parallel}${skipReady ? ', skip-ready=true' : ''}`);
   console.log(`${'═'.repeat(60)}\n`);
 
-  const results: { file: string; success: boolean }[] = [];
+  const results: { file: string; success: boolean; skipped?: boolean }[] = [];
   let index = 0;
   let running = 0;
 
   await new Promise<void>((resolve) => {
-    function launchNext() {
+    async function launchNext() {
       while (running < parallel && index < book.notebooks.length) {
         const notebook = book.notebooks[index];
         const order = index + 1;
         index++;
-        running++;
 
+        if (skipReady) {
+          const url = `${BASE_URL}/${encodeURIComponent(notebook)}`;
+          const ready = await isReady(url);
+          if (ready) {
+            console.log(`  ⏭  [${order}/${book.notebooks.length}] ${notebook} (already ready, skipping)`);
+            results.push({ file: notebook, success: true, skipped: true });
+            if (running === 0 && index >= book.notebooks.length) resolve();
+            launchNext();
+            continue;
+          }
+        }
+
+        running++;
         console.log(`  → [${order}/${book.notebooks.length}] ${notebook}`);
 
         runProcessUrl(notebook, book.title, order, user).then((result) => {
@@ -296,23 +335,27 @@ async function main() {
   console.log(`  Books:       ${PYTUDES_BOOKS.length}`);
   console.log(`  Notebooks:   ${totalNotebooks} entries (incl. cross-category duplicates)`);
   console.log(`  Parallel:    ${args.parallel} per book`);
+  console.log(`  Skip ready:  ${args.skipReady}`);
   console.log(`  Est. time:   ${Math.round(totalNotebooks / args.parallel * 4 / 60)}–${Math.round(totalNotebooks / args.parallel * 6 / 60)} hours`);
   console.log(`${'━'.repeat(60)}\n`);
 
   const startTime = Date.now();
-  const allResults: { book: string; file: string; success: boolean }[] = [];
+  const allResults: { book: string; file: string; success: boolean; skipped?: boolean }[] = [];
 
   for (const book of PYTUDES_BOOKS) {
-    const results = await processBook(book, args.user, args.parallel);
+    const results = await processBook(book, args.user, args.parallel, args.skipReady);
     for (const r of results) allResults.push({ book: book.title, ...r });
   }
 
+  if (pool) await pool.end();
+
   const duration = ((Date.now() - startTime) / 1000 / 60).toFixed(1);
-  const succeeded = allResults.filter((r) => r.success).length;
+  const skipped = allResults.filter((r) => r.skipped).length;
+  const succeeded = allResults.filter((r) => r.success && !r.skipped).length;
   const failed = allResults.filter((r) => !r.success);
 
   console.log(`\n${'━'.repeat(60)}`);
-  console.log(`🐍 Pytudes import complete: ${succeeded}/${allResults.length} in ${duration}min`);
+  console.log(`🐍 Pytudes import complete: ${succeeded} imported, ${skipped} skipped, ${failed.length} failed — ${duration}min`);
 
   if (failed.length > 0) {
     console.log(`\n❌ Failed (${failed.length}):`);
