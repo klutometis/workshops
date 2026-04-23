@@ -193,14 +193,16 @@ ${testCaseCode}
             }
           } else {
             // No function found, use default starter code
-            const defaultCode = `# 🧮 Python scratchpad for exploring ${conceptData.name}
-# 
-# Feel free to experiment here! You can:
-# - Test out ideas in code
-# - Answer questions by implementing solutions
-# - Work through examples
-# 
-# Your code and output will be visible to your tutor.
+            const commentChar = workspaceType === 'lisp' ? ';' : '#';
+            const langName = workspaceType === 'lisp' ? 'Lisp' : 'Python';
+            const defaultCode = `${commentChar} 🧮 ${langName} scratchpad for exploring ${conceptData.name}
+${commentChar}
+${commentChar} Feel free to experiment here! You can:
+${commentChar} - Test out ideas in code
+${commentChar} - Answer questions by implementing solutions
+${commentChar} - Work through examples
+${commentChar}
+${commentChar} Your code and output will be visible to your tutor.
 `;
             setStarterCode(defaultCode);
             
@@ -218,14 +220,16 @@ ${testCaseCode}
         .catch(err => {
           console.error('Failed to load function data:', err);
           // Use default starter code on error
-          const defaultCode = `# 🧮 Python scratchpad for exploring ${conceptData.name}
-# 
-# Feel free to experiment here! You can:
-# - Test out ideas in code
-# - Answer questions by implementing solutions
-# - Work through examples
-# 
-# Your code and output will be visible to your tutor.
+          const commentChar = workspaceType === 'lisp' ? ';' : '#';
+          const langName = workspaceType === 'lisp' ? 'Lisp' : 'Python';
+          const defaultCode = `${commentChar} 🧮 ${langName} scratchpad for exploring ${conceptData.name}
+${commentChar}
+${commentChar} Feel free to experiment here! You can:
+${commentChar} - Test out ideas in code
+${commentChar} - Answer questions by implementing solutions
+${commentChar} - Work through examples
+${commentChar}
+${commentChar} Your code and output will be visible to your tutor.
 `;
           setStarterCode(defaultCode);
           setCode(defaultCode);
@@ -353,6 +357,7 @@ ${testCaseCode}
           libraryId,
           conceptGraph,
           masteredConcepts,
+          workspaceType,
         }),
       });
 
@@ -426,13 +431,13 @@ ${testCaseCode}
     const evalChanged = JSON.stringify(currentEval) !== JSON.stringify(lastSentEvaluation);
 
     // For UI display: just show the text (code is already visible in workspace)
-    const displayContent = hasText ? currentInput : '(working in Python workspace)';
+    const displayContent = hasText ? currentInput : `(working in ${workspaceType === 'lisp' ? 'Lisp' : 'Python'} workspace)`;
     
     // For API: only include code/evaluation if they changed
     let apiContent = currentInput || '(sharing code)';
     
     if (codeChanged && currentCode) {
-      apiContent += `\n\n**My Code:**\n\`\`\`python\n${currentCode}\n\`\`\``;
+      apiContent += `\n\n**My Code:**\n\`\`\`${workspaceType === 'lisp' ? 'lisp' : 'python'}\n${currentCode}\n\`\`\``;
     }
     
     if (evalChanged && currentEval) {
@@ -483,6 +488,7 @@ ${testCaseCode}
           libraryId,
           conceptGraph,
           masteredConcepts,
+          workspaceType,
         }),
       });
 
@@ -554,6 +560,7 @@ ${testCaseCode}
                     conceptGraph,
                     masteredConcepts: [...(masteredConcepts || []), conceptData.id], // Add just-mastered concept
                     transition: true, // Flag to indicate this is a transition
+                    workspaceType,
                   }),
                 });
                 

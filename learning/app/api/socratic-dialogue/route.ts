@@ -269,7 +269,7 @@ async function loadConceptContext(
 
 export async function POST(request: NextRequest) {
   try {
-    const { conceptId, conversationHistory, conceptData, textbookContext, libraryId, conceptGraph, masteredConcepts } = await request.json();
+    const { conceptId, conversationHistory, conceptData, textbookContext, libraryId, conceptGraph, masteredConcepts, workspaceType } = await request.json();
 
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('🎓 NEW SOCRATIC DIALOGUE REQUEST');
@@ -317,7 +317,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build system prompt with textbook grounding
-    const systemPrompt = buildSocraticPrompt(conceptData, textbookSections, conceptGraph, masteredConcepts);
+    const systemPrompt = buildSocraticPrompt(conceptData, textbookSections, conceptGraph, masteredConcepts, workspaceType);
     
     console.log('\n📝 SYSTEM PROMPT CONSTRUCTED:');
     console.log(`   - Total length: ${systemPrompt.length} characters`);
@@ -549,8 +549,11 @@ function buildSocraticPrompt(
   conceptData: any, 
   textbookSections?: string,
   conceptGraph?: any,
-  masteredConcepts?: string[]
+  masteredConcepts?: string[],
+  workspaceType?: string
 ): string {
+  const workspaceName = workspaceType === 'lisp' ? 'Lisp' : 'Python';
+  const workspaceTab = workspaceType === 'lisp' ? 'Lisp' : 'Python';
   const { name, description, learning_objectives, mastery_indicators, examples, misconceptions } = conceptData;
 
   return `You are a Socratic tutor teaching the concept: "${name}".
@@ -588,7 +591,7 @@ ${misconceptions?.map((m: any) => `- "${m.misconception}" → Reality: ${m.reali
 3. Check understanding of each learning objective through dialogue
 4. Gently correct misconceptions when they arise
 5. Reference specific passages from the textbook content when helpful
-6. When discussing code or asking students to implement something, encourage them to switch to the **Python** tab to write and test code interactively
+6. When discussing code or asking students to implement something, encourage them to switch to the **${workspaceTab}** tab to write and test code interactively
 7. If student shares code/output, reference it directly and suggest experiments
 8. Be encouraging and patient
 9. Avoid overly complimentary language or excessive praise; focus on constructive feedback and guiding discovery.
@@ -613,7 +616,7 @@ After each student response, evaluate which mastery indicators they demonstrated
 
 2. **Code Implementation Concepts:**
    - If mastery indicators mention implementation or the concept has associated code
-   - Ask student to implement it in the Python scratchpad
+   - Ask student to implement it in the ${workspaceName} scratchpad
    - If implementation works correctly, set ready_for_mastery: true immediately
    - Don't require additional questioning beyond working code
 
