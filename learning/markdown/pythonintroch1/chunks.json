@@ -1,0 +1,278 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "chunk-1-introduction-to-comments",
+      "topic": "Introduction to Comments",
+      "text": "## Introduction to Comments\n\nComments are explanatory notes added to code to make it easier to understand. They are ignored by the Python interpreter, meaning they don't affect how the code runs. Comments are crucial for:\n\n*   **Improving Readability**: Explaining the purpose and logic behind code.\n*   **Documentation**: Providing a quick reference for developers.\n*   **Debugging**: Temporarily disabling code to identify issues.",
+      "concepts": [
+        "purpose_of_comments"
+      ],
+      "chunk_type": "overview",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-2-single-line-comments-explanation",
+      "topic": "Single-Line Comments Explanation",
+      "text": "### Single-Line Comments\n\nIn Python, you create a single-line comment by starting a line with the hash symbol (`#`). Everything after the `#` on that line is considered a comment and is not executed as code.\n\n```python\n# This is a single-line comment\nprint(\"Hello, world!\")  # This is also a comment after the code\n```",
+      "concepts": [
+        "single_line_comments"
+      ],
+      "chunk_type": "explanation",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-3-single-line-comment-example",
+      "topic": "Single-Line Comment Example",
+      "text": "#### Example:\n\n```python\n# Printing a greeting message\nprint(\"Hello, world!\")\n```\n\nIn this example, `# Printing a greeting message` is a comment that explains the purpose of the following line of code. When the code is executed, only `print(\"Hello, world!\")` is run, and the comment is ignored.",
+      "concepts": [
+        "single_line_comments",
+        "string_literal_output",
+        "print_function_basics"
+      ],
+      "chunk_type": "example",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-4-inline-comments-explanation",
+      "topic": "Inline Comments Explanation",
+      "text": "### Inline Comments\n\nInline comments are comments placed on the same line as a statement. They should be used sparingly and to explain complex or non-obvious parts of the code.\n\n```python\nx = 10   # Assigning the value 10 to x\n```",
+      "concepts": [
+        "inline_comments"
+      ],
+      "chunk_type": "explanation",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-5-inline-comments-example",
+      "topic": "Inline Comments Example",
+      "text": "#### Example:\n\n```python\nresult = x + y  # Adding x and y to get the result\n```\n\nHere, the comment clarifies the operation being performed, which can be useful if the operation is not immediately clear from the code itself.",
+      "concepts": [
+        "inline_comments",
+        "addition_operator",
+        "expression_evaluation"
+      ],
+      "chunk_type": "example",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-6-disabling-code-with-comments",
+      "topic": "Disabling Code with Comments",
+      "text": "### Disabling Code with Comments\n\nComments can also be used to temporarily disable lines of code. This is useful for debugging or testing different parts of your program without deleting code.\n\n```python\n# print(\"This line will not be executed\")\nprint(\"This line will be executed\")\n```",
+      "concepts": [
+        "code_disabling_with_comments"
+      ],
+      "chunk_type": "explanation",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-7-disabling-code-with-comments-example",
+      "topic": "Disabling Code with Comments Example",
+      "text": "#### Example:\n\n```python\n# total = a + b\n# print(\"The total is:\", total)\nprint(\"Hello\")\n```\n\nIn this example, the lines calculating the `total` and printing it are commented out. Only the `print(\"Hello\")` line will be executed. This technique is helpful when you want to isolate specific parts of your code to identify errors or test alternative approaches.",
+      "concepts": [
+        "code_disabling_with_comments",
+        "print_function_basics",
+        "addition_operator"
+      ],
+      "chunk_type": "example",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-8-very-simple-programs-overview",
+      "topic": "Introduction to simple programs",
+      "text": "# 1. Very simple 'programs'\n## 1.1 Running Python from the command line\nIn order to test pieces of code we can run Python from the command line. In this Jupyter Notebook we are going to simulate this. You can type the commands in the fields and execute them.\nIn the field type:\n```python\nprint('Hello, World')\n```\nThen press ` + ` to execute the command.\n\n```python\n\n```\n\nWhat happened?\n\nYou just created a program, that prints the words 'Hello, World'. The Python environment that you are in immediately compiles whatever you have typed in. This is useful for testing things, e.g. define a few variables, and then test to see if a certain line will work. That will come in a later lesson, though.",
+      "concepts": [
+        "interactive_python_execution",
+        "simple_program_concept",
+        "print_function_basics",
+        "string_literal_output"
+      ],
+      "chunk_type": "overview",
+      "section": "1. Very simple 'programs'",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [
+        "1. Very simple 'programs'",
+        "1.4 Comments, Please"
+      ],
+      "markdown_anchor": "1-very-simple-programs",
+      "start_line": 2,
+      "end_line": 167
+    },
+    {
+      "chunk_id": "chunk-9-math-in-python-examples",
+      "topic": "Basic math operations in Python",
+      "text": "## 1.2 Math in Python\nType\n```python\n1 + 1\n```\nand execute the code.\n\n```python\n + 1\n```\n\nNow type\n```python\n20 + 80\n```\nand execute the code.\n\n```python\n\n```\n\nThese are additions. We can of course use other mathematical operators.\nTry this subtraction:\n```python\n6 - 5\n```\n\n```python\n\n```\n\nand this multiplication:\n```python\n2 * 5\n```\n\n```python\n\n```\n\nTry:\n```python\n5 ** 2\n```\n\n```python\n\n```\n\n`**` is the exponential operator, so we executed 5 squared.\n\nType:\n```python\nprint('1 + 2 is an addition')\n```\n\n```python\n\n```\n\nYou see that the `print` statement writes something on the screen.\n\nTry this:\n```python\nprint('one kilobyte is 2^10 bytes, or', 2 ** 10, 'bytes')\n```\n\n```python\n\n```\n\nThis demonstrates that you can print text and calculations in a sentence. The commas separating each section are a way of separating strings (text) from calculations or variable.\n\nNow try this:\n```python\n23 / 3\n```\n\n```python\n\n```\n\nAnd this:\n```python\n23 % 3\n```\n\n```python\n\n```\n\n`%` returns the remainder of the division.",
+      "concepts": [
+        "addition_operator",
+        "subtraction_operator",
+        "multiplication_operator",
+        "exponentiation_operator",
+        "print_function_basics",
+        "string_literal_output",
+        "mixed_type_print_output",
+        "division_operator",
+        "modulo_operator",
+        "numeric_data_representation",
+        "string_data_representation"
+      ],
+      "chunk_type": "example",
+      "section": "1. Very simple 'programs'",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [
+        "1. Very simple 'programs'",
+        "1.4 Comments, Please"
+      ],
+      "markdown_anchor": "1-very-simple-programs",
+      "start_line": 2,
+      "end_line": 167
+    },
+    {
+      "chunk_id": "chunk-10-order-of-operations-explanation",
+      "topic": "Understanding operator precedence",
+      "text": "## 1.3 Order of Operations\n\nRemember that thing called order of operation that they taught in maths? Well, it applies in Python, too. Here it is, if you need reminding:\n1. Parenthesis `()`\n2. Exponents `**`\n3. Multiplication `*`, division `/` and remainder `%`\n4. Addition `+` and subtraction `-`\n\nHere are some examples that you might want to try, if you're rusty on this:\n```python\n1 + 2 * 3\n(1 + 2) * 3\n```\n\n```python\n\n```\n\n```python\n\n```",
+      "concepts": [
+        "operator_precedence",
+        "parentheses_for_grouping",
+        "expression_evaluation",
+        "addition_operator",
+        "subtraction_operator",
+        "multiplication_operator",
+        "division_operator",
+        "modulo_operator",
+        "exponentiation_operator"
+      ],
+      "chunk_type": "explanation",
+      "section": "1. Very simple 'programs'",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [
+        "1. Very simple 'programs'",
+        "1.4 Comments, Please"
+      ],
+      "markdown_anchor": "1-very-simple-programs",
+      "start_line": 2,
+      "end_line": 167
+    },
+    {
+      "chunk_id": "chunk-11-comments-in-python-explanation",
+      "topic": "Using comments to explain and disable code",
+      "text": "## 1.4 Comments, Please\n\nThe final thing you'll need to know to move on to multi-line programs is the comment. Type the following (and yes, the output is shown):\n```python\n# I am a comment. Fear my wrath!\n```\n\n```python\n\n```\n\nA comment is a piece of code that is not run. In Python, you make something a comment by putting a hash in front of it. A hash comments everything after it in the line, and nothing before it. So you could type this:\n```python\nprint(\"food is very nice\") #eat me\n```\n\n```python\n\n```\n\nThis results in a normal output, without the smutty comment, thank you very much.\n\nNow try this:\n```python\n# print(\"food is very nice\")\n```\n\n```python\n\n```\n\nNothing happens, because the code was after a comment.\n\nComments are important for adding necessary information for another programmer to read, but not the computer. For example, an explanation of a section of code, saying what it does, or what is wrong with it. You can also comment bits of code by putting a `#` in front of it - if you don't want it to compile, but can't delete it because you might need it later.",
+      "concepts": [
+        "single_line_comments",
+        "inline_comments",
+        "code_disabling_with_comments",
+        "purpose_of_comments",
+        "print_function_basics",
+        "string_data_representation"
+      ],
+      "chunk_type": "explanation",
+      "section": "1. Very simple 'programs'",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [
+        "1. Very simple 'programs'",
+        "1.4 Comments, Please"
+      ],
+      "markdown_anchor": "1-very-simple-programs",
+      "start_line": 2,
+      "end_line": 167
+    },
+    {
+      "chunk_id": "chunk-12-assignment-1-exercise",
+      "topic": "Calculate seconds in a year",
+      "text": "# Assignment 1\n\nType in the cell below an expression to find out how many seconds are there in a 365-day year.\n\n```python\n\n```",
+      "concepts": [],
+      "chunk_type": "exercise",
+      "section": "Assignment 1",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [
+        "Assignment 1"
+      ],
+      "markdown_anchor": "assignment-1",
+      "start_line": 168,
+      "end_line": 175
+    },
+    {
+      "chunk_id": "chunk-13-assignment-2-overview",
+      "topic": "Introduction to Assignment 2",
+      "text": "# Assignment 2\n\nThe Earth can be approximated as a sphere with a radius of 6370 km. Use the cell below to find out the volume of such a shape in cubic meters.",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "Assignment 2",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [
+        "Assignment 2"
+      ],
+      "markdown_anchor": "assignment-2",
+      "start_line": 176,
+      "end_line": 183
+    },
+    {
+      "chunk_id": "chunk-14-empty-code-block",
+      "topic": "Empty Code Block",
+      "text": "```python\n\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Assignment 2",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [
+        "Assignment 2"
+      ],
+      "markdown_anchor": "assignment-2",
+      "start_line": 176,
+      "end_line": 183
+    },
+    {
+      "chunk_id": "chunk-15-assignment-3-introduction",
+      "topic": "Introduction to Assignment 3",
+      "text": "# Assignment 3\n\nGet the answer of the following expression, using the cell below:\n\n$$\\frac{1}{2}+\\frac{\\frac{1}{3}}{\\frac{1}{4}+\\frac{1}{5}}$$\n\n```python\n\n```",
+      "concepts": [],
+      "chunk_type": "exercise",
+      "section": "Assignment 3",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+      "heading_path": [
+        "Assignment 3"
+      ],
+      "markdown_anchor": "assignment-3",
+      "start_line": 184,
+      "end_line": 194
+    }
+  ],
+  "metadata": {
+    "total_chunks": 15,
+    "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+    "chunked_at": "2025-12-15T02:43:02.458Z"
+  }
+}

@@ -1,0 +1,2194 @@
+{
+  "program": "docs/TSP-program.py",
+  "concept_graph": "docs/tsp-concepts.json",
+  "extracted_at": "2026-01-16T17:31:00.838Z",
+  "function_count": 50,
+  "functions": [
+    {
+      "function_name": "distance",
+      "function_signature": "def distance(A: City, B: City) -> float:",
+      "function_body": "def distance(A: City, B: City) -> float:\n    \"Distance between two cities\"\n    return abs(A - B)\n",
+      "docstring": null,
+      "line_start": 21,
+      "line_end": 24,
+      "concept_id": "euclidean-distance",
+      "concept_name": "Euclidean Distance",
+      "dependencies": [
+        "abs"
+      ],
+      "test_cases": [
+        {
+          "name": "test_pythagorean_triple",
+          "setup": "a = City(0, 0); b = City(3, 4)",
+          "code": "assert distance(a, b) == 5.0",
+          "points": 1,
+          "description": "Verifies distance calculation using a standard 3-4-5 triangle."
+        },
+        {
+          "name": "test_zero_distance",
+          "setup": "a = City(10, 10); b = City(10, 10)",
+          "code": "assert distance(a, b) == 0.0",
+          "points": 1,
+          "description": "Verifies that the distance between a city and itself is zero."
+        },
+        {
+          "name": "test_horizontal_distance",
+          "setup": "a = City(10, 5); b = City(20, 5)",
+          "code": "assert distance(a, b) == 10.0",
+          "points": 1,
+          "description": "Verifies distance along a single axis (horizontal)."
+        },
+        {
+          "name": "test_negative_coordinates",
+          "setup": "a = City(-1, -1); b = City(2, 3)",
+          "code": "assert distance(a, b) == 5.0",
+          "points": 1,
+          "description": "Verifies distance calculation when coordinates are negative."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 5
+    },
+    {
+      "function_name": "tour_length",
+      "function_signature": "def tour_length(tour: Tour) -> float:",
+      "function_body": "def tour_length(tour: Tour) -> float:\n    \"The total distances of each link in the tour, including the link from last back to first.\"\n    return sum(distance(tour[i], tour[i - 1]) for i in range(len(tour)))\n",
+      "docstring": null,
+      "line_start": 25,
+      "line_end": 28,
+      "concept_id": "tour-metrics",
+      "concept_name": "Tour Metrics",
+      "dependencies": [
+        "distance"
+      ],
+      "test_cases": [
+        {
+          "name": "test_empty_tour",
+          "setup": "tour = []",
+          "code": "assert tour_length(tour) == 0",
+          "points": 1,
+          "description": "The length of a tour with no cities should be 0."
+        },
+        {
+          "name": "test_single_city_tour",
+          "setup": "tour = [City(10, 10)]",
+          "code": "assert tour_length(tour) == 0.0",
+          "points": 1,
+          "description": "A tour with one city has a start and end at the same point, distance 0."
+        },
+        {
+          "name": "test_two_city_round_trip",
+          "setup": "tour = [City(0, 0), City(3, 4)]",
+          "code": "assert tour_length(tour) == 10.0",
+          "points": 2,
+          "description": "Distance from A to B (5) plus the return link from B to A (5) equals 10."
+        },
+        {
+          "name": "test_triangle_perimeter",
+          "setup": "tour = [City(0, 0), City(3, 0), City(3, 4)]",
+          "code": "assert tour_length(tour) == 12.0",
+          "points": 2,
+          "description": "Calculates the perimeter of a 3-4-5 right triangle (3 + 4 + 5 = 12)."
+        },
+        {
+          "name": "test_unit_square",
+          "setup": "tour = [City(0, 0), City(1, 0), City(1, 1), City(0, 1)]",
+          "code": "assert tour_length(tour) == 4.0",
+          "points": 2,
+          "description": "Calculates the perimeter of a unit square (1 + 1 + 1 + 1 = 4)."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 5
+    },
+    {
+      "function_name": "valid_tour",
+      "function_signature": "def valid_tour(tour: Tour, cities: Cities) -> bool:",
+      "function_body": "def valid_tour(tour: Tour, cities: Cities) -> bool:\n    \"Does `tour` visit every city in `cities` exactly once?\"\n    return Counter(tour) == Counter(cities)\n",
+      "docstring": null,
+      "line_start": 29,
+      "line_end": 32,
+      "concept_id": "tour-validation",
+      "concept_name": "Tour Validation",
+      "dependencies": [
+        "Counter"
+      ],
+      "test_cases": [
+        {
+          "name": "test_valid_tour",
+          "setup": "c1, c2, c3 = complex(0,0), complex(1,1), complex(2,2); cities = frozenset({c1, c2, c3}); tour = [c1, c2, c3]",
+          "code": "assert valid_tour(tour, cities) == True",
+          "points": 1,
+          "description": "A tour that contains every city exactly once is valid."
+        },
+        {
+          "name": "test_invalid_duplicate",
+          "setup": "c1, c2, c3 = complex(0,0), complex(1,1), complex(2,2); cities = frozenset({c1, c2, c3}); tour = [c1, c2, c3, c1]",
+          "code": "assert valid_tour(tour, cities) == False",
+          "points": 1,
+          "description": "A tour that visits a city more than once is invalid."
+        },
+        {
+          "name": "test_invalid_missing",
+          "setup": "c1, c2, c3 = complex(0,0), complex(1,1), complex(2,2); cities = frozenset({c1, c2, c3}); tour = [c1, c2]",
+          "code": "assert valid_tour(tour, cities) == False",
+          "points": 1,
+          "description": "A tour that misses some cities is invalid."
+        },
+        {
+          "name": "test_valid_different_order",
+          "setup": "c1, c2, c3 = complex(0,0), complex(1,1), complex(2,2); cities = frozenset({c1, c2, c3}); tour = [c3, c1, c2]",
+          "code": "assert valid_tour(tour, cities) == True",
+          "points": 1,
+          "description": "The validation should pass regardless of the order of cities in the tour."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 5
+    },
+    {
+      "function_name": "first",
+      "function_signature": "def first(collection):",
+      "function_body": "def first(collection):\n    \"\"\"The first element of a collection.\"\"\"\n    return next(iter(collection))\n",
+      "docstring": "The first element of a collection.",
+      "line_start": 33,
+      "line_end": 36,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "iter",
+        "next"
+      ],
+      "test_cases": [
+        {
+          "name": "test_list_first",
+          "setup": "collection = [10, 20, 30]",
+          "code": "assert first(collection) == 10",
+          "points": 1,
+          "description": "Verify the first element of a list is returned."
+        },
+        {
+          "name": "test_set_first",
+          "setup": "collection = {5, 10, 15}",
+          "code": "result = first(collection)\nassert result in collection",
+          "points": 1,
+          "description": "Verify it retrieves an element from a set (unordered collection)."
+        },
+        {
+          "name": "test_generator_first",
+          "setup": "collection = (i * i for i in range(5, 10))",
+          "code": "assert first(collection) == 25",
+          "points": 1,
+          "description": "Verify it works with generators/iterators without consuming the whole sequence."
+        },
+        {
+          "name": "test_empty_collection",
+          "setup": "collection = []",
+          "code": "try:\n    first(collection)\n    assert False, 'Should have raised StopIteration'\nexcept StopIteration:\n    pass",
+          "points": 1,
+          "description": "Verify behavior when the collection is empty."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 2
+    },
+    {
+      "function_name": "nearest_neighbor",
+      "function_signature": "def nearest_neighbor(A: City, cities) -> City:",
+      "function_body": "def nearest_neighbor(A: City, cities) -> City:\n    \"\"\"Find the city C in cities that is nearest to city A.\"\"\"\n    return min(cities, key=lambda C: distance(C, A))\n",
+      "docstring": "Find the city C in cities that is nearest to city A.",
+      "line_start": 37,
+      "line_end": 40,
+      "concept_id": "greedy-algorithms",
+      "concept_name": "Greedy Algorithms",
+      "dependencies": [
+        "distance"
+      ],
+      "test_cases": [
+        {
+          "name": "test_nearest_proximity",
+          "setup": "A = City(0, 0); cities = {City(10, 10), City(1, 1), City(5, 5)}",
+          "code": "assert nearest_neighbor(A, cities) == City(1, 1)",
+          "points": 1,
+          "description": "Verifies that the function selects the city with the minimum Euclidean distance."
+        },
+        {
+          "name": "test_nearest_single_option",
+          "setup": "A = City(100, 100); cities = {City(0, 0)}",
+          "code": "assert nearest_neighbor(A, cities) == City(0, 0)",
+          "points": 1,
+          "description": "Verifies correctness when the set of unvisited cities contains only one element."
+        },
+        {
+          "name": "test_nearest_collinear",
+          "setup": "A = City(0, 0); cities = {City(0, 10), City(0, 2), City(0, 5)}",
+          "code": "assert nearest_neighbor(A, cities) == City(0, 2)",
+          "points": 1,
+          "description": "Verifies correct selection among cities on the same axis."
+        },
+        {
+          "name": "test_nearest_tie_handling",
+          "setup": "A = City(0, 0); cities = {City(1, 0), City(0, 1)}",
+          "code": "result = nearest_neighbor(A, cities); assert result == City(1, 0) or result == City(0, 1)",
+          "points": 1,
+          "description": "Verifies that the function returns one of the equidistant points when a tie occurs."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 10
+    },
+    {
+      "function_name": "possible_tours",
+      "function_signature": "def possible_tours(cities) -> List[Tour]:",
+      "function_body": "def possible_tours(cities) -> List[Tour]:\n    \"Return a list of non-redundant tours (permutations of cities with first city first).\"\n    start, *others = cities\n    return [[start, *perm] for perm in itertools.permutations(others)]\n",
+      "docstring": null,
+      "line_start": 41,
+      "line_end": 45,
+      "concept_id": "permutations",
+      "concept_name": "Permutations",
+      "dependencies": [
+        "itertools.permutations"
+      ],
+      "test_cases": [
+        {
+          "name": "test_tour_count",
+          "setup": "cities = Cities([City(0, 0), City(1, 1), City(2, 2), City(3, 3)])",
+          "code": "tours = possible_tours(cities)\nassert len(tours) == math.factorial(len(cities) - 1)",
+          "points": 1,
+          "description": "Verify that for N cities, (N-1)! non-redundant tours are generated."
+        },
+        {
+          "name": "test_fixed_start",
+          "setup": "cities = Cities([City(0, 0), City(1, 1), City(5, 5)])",
+          "code": "tours = possible_tours(cities)\nfirst_city = tours[0][0]\nassert all(t[0] == first_city for t in tours)",
+          "points": 1,
+          "description": "Verify all generated tours start with the same city to eliminate rotational redundancy."
+        },
+        {
+          "name": "test_tour_completeness",
+          "setup": "cities = Cities([City(0, 0), City(1, 1), City(2, 2)])",
+          "code": "tours = possible_tours(cities)\nassert all(set(t) == set(cities) for t in tours)\nassert all(len(t) == len(cities) for t in tours)",
+          "points": 1,
+          "description": "Verify each generated tour contains all cities exactly once."
+        },
+        {
+          "name": "test_uniqueness",
+          "setup": "cities = Cities([City(r, r) for r in range(4)])",
+          "code": "tours = possible_tours(cities)\ntupled_tours = [tuple(t) for t in tours]\nassert len(set(tupled_tours)) == len(tours)",
+          "points": 1,
+          "description": "Ensure no duplicate tours are generated in the result set."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 10
+    },
+    {
+      "function_name": "shortest",
+      "function_signature": "def shortest(tours: Iterable[Tour]) -> Tour:",
+      "function_body": "def shortest(tours: Iterable[Tour]) -> Tour:\n    \"The tour with the smallest tour length.\"\n    return min(tours, key=tour_length)\n",
+      "docstring": null,
+      "line_start": 46,
+      "line_end": 49,
+      "concept_id": "tour-metrics",
+      "concept_name": "Tour Metrics",
+      "dependencies": [
+        "tour_length"
+      ],
+      "test_cases": [
+        {
+          "name": "test_shortest_of_two",
+          "setup": "c1, c2, c3, c4 = City(0,0), City(0,1), City(1,1), City(1,0); tour1 = [c1, c2, c3, c4]; tour2 = [c1, c3, c2, c4]",
+          "code": "assert shortest([tour1, tour2]) == tour1",
+          "points": 1,
+          "description": "Given a choice between a simple square tour and a crossed (longer) tour, the square tour is returned."
+        },
+        {
+          "name": "test_tie_breaking",
+          "setup": "c1, c2 = City(0,0), City(1,1); t1 = [c1, c2]; t2 = [c2, c1]",
+          "code": "assert shortest([t1, t2]) == t1",
+          "points": 1,
+          "description": "Verifies that the first tour is returned when lengths are identical, following the standard behavior of the min() function."
+        },
+        {
+          "name": "test_single_tour",
+          "setup": "c1, c2, c3 = City(0,0), City(10,0), City(5,5); tour = [c1, c2, c3]",
+          "code": "assert shortest([tour]) == tour",
+          "points": 1,
+          "description": "The function correctly handles an iterable containing only a single tour."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 5
+    },
+    {
+      "function_name": "random_cities",
+      "function_signature": "def random_cities(n, seed=1234, width=9999, height=6666) -> Cities:",
+      "function_body": "def random_cities(n, seed=1234, width=9999, height=6666) -> Cities:\n    \"Make a set of n cities, sampled uniformly from a (width x height) rectangle.\"\n    random.seed(hash((n, seed)))  # To make `random_cities` reproducible\n    return Cities(City(random.randrange(width), random.randrange(height))\n                  for c in range(n))\n",
+      "docstring": null,
+      "line_start": 50,
+      "line_end": 55,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "City",
+        "Cities",
+        "random.seed",
+        "random.randrange",
+        "hash"
+      ],
+      "test_cases": [
+        {
+          "name": "test_city_count",
+          "setup": "n = 5",
+          "code": "cities = random_cities(n)\nassert len(cities) == n",
+          "points": 1,
+          "description": "Verify that the function generates the requested number of cities (assuming no random collisions in the large default coordinate space)."
+        },
+        {
+          "name": "test_reproducibility",
+          "setup": "n = 10; seed = 42",
+          "code": "cities1 = random_cities(n, seed=seed)\ncities2 = random_cities(n, seed=seed)\nassert cities1 == cities2",
+          "points": 1,
+          "description": "Verify that providing the same seed and n results in the exact same set of cities."
+        },
+        {
+          "name": "test_coordinate_bounds",
+          "setup": "n = 100; w = 50; h = 20",
+          "code": "cities = random_cities(n, width=w, height=h)\nassert all(0 <= c.real < w and 0 <= c.imag < h for c in cities)",
+          "points": 1,
+          "description": "Verify that all generated city coordinates are within the specified rectangular bounds [0, width) and [0, height)."
+        },
+        {
+          "name": "test_distinct_seeds",
+          "setup": "n = 5",
+          "code": "cities1 = random_cities(n, seed=1)\ncities2 = random_cities(n, seed=2)\nassert cities1 != cities2",
+          "points": 1,
+          "description": "Verify that different seeds produce different sets of cities."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 5
+    },
+    {
+      "function_name": "exhaustive_tsp",
+      "function_signature": "def exhaustive_tsp(cities) -> Tour:",
+      "function_body": "def exhaustive_tsp(cities) -> Tour:\n    \"Generate all possible tours of the cities and choose the shortest one.\"\n    return shortest(possible_tours(cities))\n",
+      "docstring": null,
+      "line_start": 56,
+      "line_end": 59,
+      "concept_id": "exhaustive-search",
+      "concept_name": "Exhaustive Search",
+      "dependencies": [
+        "shortest",
+        "possible_tours"
+      ],
+      "test_cases": [
+        {
+          "name": "test_exhaustive_three_cities",
+          "setup": "cities = Cities({City(0, 0), City(1, 0), City(0, 1)})",
+          "code": "tour = exhaustive_tsp(cities)\nassert len(tour) == 3\nassert set(tour) == set(cities)\nassert tour_length(tour) == 2 + math.sqrt(2)",
+          "points": 1,
+          "description": "Verifies that the exhaustive search finds the correct tour for a simple triangle."
+        },
+        {
+          "name": "test_exhaustive_square_optimality",
+          "setup": "cities = Cities({City(0, 0), City(10, 0), City(10, 10), City(0, 10)})",
+          "code": "tour = exhaustive_tsp(cities)\nassert tour_length(tour) == 40.0",
+          "points": 2,
+          "description": "Ensures the algorithm finds the optimal perimeter (length 40) rather than a diagonal cross (length approx 48.28) for 4 points in a square."
+        },
+        {
+          "name": "test_exhaustive_collinear",
+          "setup": "cities = Cities({City(0, 0), City(10, 0), City(5, 0)})",
+          "code": "tour = exhaustive_tsp(cities)\nassert tour_length(tour) == 20.0",
+          "points": 1,
+          "description": "Checks if the search handles collinear points correctly (0 to 5 to 10 and back to 0)."
+        },
+        {
+          "name": "test_exhaustive_completeness",
+          "setup": "cities = random_cities(5, seed=42)",
+          "code": "tour = exhaustive_tsp(cities)\nassert valid_tour(tour, cities)\n# Exhaustive search must be <= any other approach, e.g., nearest neighbor\nassert tour_length(tour) <= tour_length(nearest_tsp(cities))",
+          "points": 2,
+          "description": "Verifies that the exhaustive search produces a valid tour and is at least as good as the greedy approach."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 15
+    },
+    {
+      "function_name": "Xs",
+      "function_signature": "def Xs(cities) -> List[float]:",
+      "function_body": "def Xs(cities) -> List[float]: \"X coordinates\"; return [c.real for c in cities]",
+      "docstring": null,
+      "line_start": 60,
+      "line_end": 60,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [],
+      "test_cases": [
+        {
+          "name": "test_extraction_basic",
+          "setup": "cities = [complex(1, 2), complex(3, 4)]",
+          "code": "assert Xs(cities) == [1.0, 3.0]",
+          "points": 1,
+          "description": "Extract X coordinates (real parts) from a list of City objects (complex numbers)."
+        },
+        {
+          "name": "test_isolation_of_x",
+          "setup": "cities = [complex(5.5, 10), complex(5.5, 20)]",
+          "code": "assert Xs(cities) == [5.5, 5.5]",
+          "points": 1,
+          "description": "Ensure only the real component is returned even when the imaginary components differ."
+        },
+        {
+          "name": "test_empty_input",
+          "setup": "cities = []",
+          "code": "assert Xs(cities) == []",
+          "points": 1,
+          "description": "Handle an empty list of cities by returning an empty list."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 2
+    },
+    {
+      "function_name": "Ys",
+      "function_signature": "def Ys(cities) -> List[float]:",
+      "function_body": "def Ys(cities) -> List[float]: \"Y coordinates\"; return [c.imag for c in cities]\n",
+      "docstring": null,
+      "line_start": 61,
+      "line_end": 62,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [],
+      "test_cases": [
+        {
+          "name": "test_empty_cities",
+          "setup": "cities = []",
+          "code": "assert Ys(cities) == []",
+          "points": 1,
+          "description": "Extracting Y coordinates from an empty list should return an empty list."
+        },
+        {
+          "name": "test_single_city",
+          "setup": "cities = [complex(10, 20)]",
+          "code": "assert Ys(cities) == [20.0]",
+          "points": 1,
+          "description": "Extracting Y coordinate from a single city."
+        },
+        {
+          "name": "test_multiple_cities",
+          "setup": "cities = [complex(1, 5), complex(10, -3), complex(0, 0)]",
+          "code": "assert Ys(cities) == [5.0, -3.0, 0.0]",
+          "points": 1,
+          "description": "Correctly extracts imaginary parts from a list of complex numbers representing city coordinates."
+        },
+        {
+          "name": "test_type_consistency",
+          "setup": "cities = [complex(5, 10)]",
+          "code": "result = Ys(cities); assert isinstance(result, list) and isinstance(result[0], float)",
+          "points": 1,
+          "description": "Verifies that the function returns a list of floats."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 2
+    },
+    {
+      "function_name": "nearest_tsp",
+      "function_signature": "def nearest_tsp(cities, start=None) -> Tour:",
+      "function_body": "def nearest_tsp(cities, start=None) -> Tour:\n    \"\"\"Create a partial tour that initially is just the start city. \n    At each step extend the partial tour to the nearest unvisited neighbor \n    of the last city in the partial tour, while there are unvisited cities remaining.\"\"\"\n    start = start or first(cities)\n    tour = [start]\n    unvisited = set(cities) - {start}\n    def extend_to(C): tour.append(C); unvisited.remove(C)\n    while unvisited:\n        extend_to(nearest_neighbor(tour[-1], unvisited))\n    return tour\n",
+      "docstring": "Create a partial tour that initially is just the start city.\n    At each step extend the partial tour to the nearest unvisited neighbor \n    of the last city in the partial tour, while there are unvisited cities remaining.",
+      "line_start": 63,
+      "line_end": 74,
+      "concept_id": "greedy-algorithms",
+      "concept_name": "Greedy Algorithms",
+      "dependencies": [
+        "first",
+        "nearest_neighbor"
+      ],
+      "test_cases": [
+        {
+          "name": "test_linear_path",
+          "setup": "cities = {0j, 1j, 2j}",
+          "code": "tour = nearest_tsp(cities, start=0j)\nassert tour == [0j, 1j, 2j]",
+          "points": 1,
+          "description": "Verifies nearest neighbor follows a simple linear progression."
+        },
+        {
+          "name": "test_tour_validity",
+          "setup": "cities = random_cities(10)",
+          "code": "tour = nearest_tsp(cities)\nassert valid_tour(tour, cities)",
+          "points": 2,
+          "description": "Ensures the generated tour visits every city exactly once."
+        },
+        {
+          "name": "test_custom_start_city",
+          "setup": "cities = {0j, 10j, 11j}",
+          "code": "tour1 = nearest_tsp(cities, start=0j)\ntour2 = nearest_tsp(cities, start=11j)\nassert tour1[0] == 0j and tour1[1] == 10j\nassert tour2[0] == 11j and tour2[1] == 10j",
+          "points": 1,
+          "description": "Verifies that the algorithm respects the provided start city and makes greedy choices from there."
+        },
+        {
+          "name": "test_greedy_choice_trap",
+          "setup": "cities = {0j, 2j, 3j, 10j}",
+          "code": "tour = nearest_tsp(cities, start=0j)\nassert tour == [0j, 2j, 3j, 10j]",
+          "points": 1,
+          "description": "Verifies that the algorithm picks the local minimum (2j) even if a different path might be better globally."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 20
+    },
+    {
+      "function_name": "parse_cities",
+      "function_signature": "def parse_cities(text, skip=('AK', 'HI'), long_scale=-48, lat_scale=69) -> Cities:",
+      "function_body": "def parse_cities(text, skip=('AK', 'HI'), long_scale=-48, lat_scale=69) -> Cities:\n    \"\"\"Make a set of Cities from lines of text, skipping the specified states.\"\"\"\n    return Cities(City(int(long_scale * float(long)), int(lat_scale  * float(lat)))\n                  for (lat, long, state) in re.findall(r'([\\d.]+)\\s+([\\d.]+).+([A-Z][A-Z])', text)\n                  if state not in skip)\n",
+      "docstring": "Make a set of Cities from lines of text, skipping the specified states.",
+      "line_start": 75,
+      "line_end": 80,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "re.findall",
+        "City",
+        "Cities"
+      ],
+      "test_cases": [
+        {
+          "name": "test_basic_parsing",
+          "setup": "text = '34.05 118.24 CA\\n40.71 74.00 NY'",
+          "code": "cities = parse_cities(text, skip=(), long_scale=1, lat_scale=1)\nassert City(118, 34) in cities\nassert City(74, 40) in cities",
+          "points": 1,
+          "description": "Verifies basic regex extraction and coordinate integer conversion."
+        },
+        {
+          "name": "test_skipping_logic",
+          "setup": "text = '21.30 157.85 HI\\n34.05 118.24 CA'",
+          "code": "cities = parse_cities(text, skip=('HI',), long_scale=1, lat_scale=1)\nassert len(cities) == 1\nassert any(c.imag == 34 for c in cities)",
+          "points": 1,
+          "description": "Ensures states in the skip list are excluded from the result."
+        },
+        {
+          "name": "test_scaling_calculation",
+          "setup": "text = '10.0 20.0 TX'",
+          "code": "cities = parse_cities(text, skip=(), long_scale=-2, lat_scale=5)\ncity = next(iter(cities))\nassert city.real == -40  # 20.0 * -2\nassert city.imag == 50   # 10.0 * 5",
+          "points": 2,
+          "description": "Validates that long_scale and lat_scale are applied correctly to coordinates."
+        },
+        {
+          "name": "test_regex_robustness",
+          "setup": "text = 'Lat: 34.05 Long: 118.24 State: CA'",
+          "code": "cities = parse_cities(text, skip=(), long_scale=1, lat_scale=1)\nassert len(cities) == 1\nassert City(118, 34) in cities",
+          "points": 1,
+          "description": "Checks if the regex correctly identifies coordinates despite surrounding text."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 15
+    },
+    {
+      "function_name": "sample",
+      "function_signature": "def sample(population, n, seed=42) -> Iterable:",
+      "function_body": "def sample(population, n, seed=42) -> Iterable:\n    \"Return a list of n elements sampled from population. Set random.seed.\"\n    random.seed(hash((n, seed)))\n    return random.sample(population, min(n, len(population)))\n",
+      "docstring": null,
+      "line_start": 81,
+      "line_end": 85,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "random.seed",
+        "random.sample",
+        "hash",
+        "min",
+        "len"
+      ],
+      "test_cases": [
+        {
+          "name": "test_sample_size",
+          "setup": "population = range(100); n = 5",
+          "code": "result = sample(population, n)\nassert len(result) == 5\nassert all(x in population for x in result)",
+          "points": 1,
+          "description": "Verify that the sample returns the correct number of unique elements from the population."
+        },
+        {
+          "name": "test_reproducibility",
+          "setup": "population = range(1000); n = 10; seed = 99",
+          "code": "assert sample(population, n, seed) == sample(population, n, seed)",
+          "points": 1,
+          "description": "Verify that setting the seed ensures the sampling is reproducible."
+        },
+        {
+          "name": "test_oversampling_protection",
+          "setup": "population = [1, 2, 3]; n = 10",
+          "code": "result = sample(population, n)\nassert len(result) == 3\nassert sorted(result) == [1, 2, 3]",
+          "points": 1,
+          "description": "Verify that requesting more elements than available returns the full population without error."
+        },
+        {
+          "name": "test_different_seeds",
+          "setup": "population = range(1000); n = 50",
+          "code": "assert sample(population, n, seed=1) != sample(population, n, seed=2)",
+          "points": 1,
+          "description": "Verify that different seeds produce different samples."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 5
+    },
+    {
+      "function_name": "rep_nearest_tsp",
+      "function_signature": "def rep_nearest_tsp(cities, k=10):",
+      "function_body": "def rep_nearest_tsp(cities, k=10):\n    \"Repeat nearest_tsp starting from k different cities; pick the shortest tour.\"\n    return shortest(nearest_tsp(cities, start) for start in sample(cities, k))\n",
+      "docstring": null,
+      "line_start": 86,
+      "line_end": 89,
+      "concept_id": "greedy-algorithms",
+      "concept_name": "Greedy Algorithms",
+      "dependencies": [
+        "shortest",
+        "nearest_tsp",
+        "random.sample"
+      ],
+      "test_cases": [
+        {
+          "name": "test_tour_validity",
+          "setup": "from random import sample; cities = random_cities(12, seed=42)",
+          "code": "tour = rep_nearest_tsp(cities, k=5)\nassert valid_tour(tour, cities)",
+          "points": 1,
+          "description": "Verifies that the repeated nearest neighbor approach still produces a valid tour visiting all cities once."
+        },
+        {
+          "name": "test_optimization_performance",
+          "setup": "from random import sample; cities = random_cities(30, seed=100); random.seed(100)",
+          "code": "tour_single = nearest_tsp(cities)\ntour_rep = rep_nearest_tsp(cities, k=15)\nassert tour_length(tour_rep) <= tour_length(tour_single)",
+          "points": 2,
+          "description": "Checks that sampling multiple starting points results in a tour that is at least as good as (and often better than) the default greedy start."
+        },
+        {
+          "name": "test_k_equals_one",
+          "setup": "from random import sample; cities = random_cities(5, seed=1); random.seed(1)",
+          "code": "start_city = list(cities)[0]\n# Mocking sample to return a specific city for predictability\nrandom.seed(1)\ntour = rep_nearest_tsp(cities, k=1)\nassert len(tour) == 5 and valid_tour(tour, cities)",
+          "points": 1,
+          "description": "Ensures the function handles the minimum value of k correctly."
+        },
+        {
+          "name": "test_reproducibility",
+          "setup": "from random import sample; cities = random_cities(20, seed=7)",
+          "code": "random.seed(123)\ntour1 = rep_nearest_tsp(cities, k=5)\nrandom.seed(123)\ntour2 = rep_nearest_tsp(cities, k=5)\nassert tour1 == tour2",
+          "points": 1,
+          "description": "Verifies that seeding the random number generator leads to reproducible tour selection."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 10
+    },
+    {
+      "function_name": "reversal_is_improvement",
+      "function_signature": "def reversal_is_improvement(tour, i, j) -> bool:",
+      "function_body": "def reversal_is_improvement(tour, i, j) -> bool:\n    \"Would reversing the segment `tour[i:j]` make the tour shorter?\" \n    # Given tour [...A,B--C,D...], would reversing B--C make the tour shorter?\n    A, B, C, D = tour[i-1], tour[i], tour[j-1], tour[j % len(tour)]\n    return distance(A, B) + distance(C, D) > distance(A, C) + distance(B, D)\n",
+      "docstring": null,
+      "line_start": 90,
+      "line_end": 95,
+      "concept_id": "tour-metrics",
+      "concept_name": "Tour Metrics",
+      "dependencies": [
+        "distance"
+      ],
+      "test_cases": [
+        {
+          "name": "intersecting_segments",
+          "setup": "tour = [complex(0,0), complex(10,10), complex(0,10), complex(10,0)]",
+          "code": "assert reversal_is_improvement(tour, 1, 3) == True",
+          "points": 1,
+          "description": "An 'X' shape improvement: reversing the middle segment uncrosses the lines into shorter parallel ones."
+        },
+        {
+          "name": "optimal_straight_line",
+          "setup": "tour = [complex(0,0), complex(5,0), complex(10,0), complex(15,0)]",
+          "code": "assert reversal_is_improvement(tour, 1, 3) == False",
+          "points": 1,
+          "description": "A straight line sequence is already optimal; reversing a segment would create a longer path that doubles back."
+        },
+        {
+          "name": "minimal_segment_no_change",
+          "setup": "tour = [complex(0,0), complex(0,10), complex(10,10), complex(10,0)]",
+          "code": "assert reversal_is_improvement(tour, 1, 2) == False",
+          "points": 1,
+          "description": "Reversing a single-city segment (i=1, j=2) results in the exact same distance calculation, thus no improvement."
+        },
+        {
+          "name": "wrap_around_link_improvement",
+          "setup": "tour = [complex(0,0), complex(0,10), complex(10,0), complex(10,10)]",
+          "code": "assert reversal_is_improvement(tour, 2, 4) == True",
+          "points": 1,
+          "description": "Verifies improvement logic when the 'D' city is the start of the tour (index 0) via the modulo operator."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 10
+    },
+    {
+      "function_name": "subsegments",
+      "function_signature": "def subsegments(N) -> Tuple[Tuple[int, int]]:",
+      "function_body": "def subsegments(N) -> Tuple[Tuple[int, int]]:\n    \"Return (i, j) index pairs denoting tour[i:j] subsegments of a tour of length N.\"\n    return tuple((i, i + length)\n                 for length in reversed(range(2, N - 1))\n                 for i in range(N - length))\n",
+      "docstring": null,
+      "line_start": 99,
+      "line_end": 104,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [],
+      "test_cases": [
+        {
+          "name": "test_n_is_four",
+          "setup": "",
+          "code": "assert subsegments(4) == ((0, 2), (1, 3))",
+          "points": 1,
+          "description": "Verify index pairs for a small tour of length 4."
+        },
+        {
+          "name": "test_length_ordering",
+          "setup": "",
+          "code": "result = subsegments(5)\nlengths = [j - i for i, j in result]\nassert lengths == [3, 3, 2, 2, 2]",
+          "points": 1,
+          "description": "Check that longer segments are yielded before shorter segments due to reversed range."
+        },
+        {
+          "name": "test_empty_case",
+          "setup": "",
+          "code": "assert subsegments(3) == ()",
+          "points": 1,
+          "description": "If N is 3 or less, range(2, N-1) is empty, so no subsegments are generated."
+        },
+        {
+          "name": "test_segment_indices_bounds",
+          "setup": "N = 10; segments = subsegments(N)",
+          "code": "assert all(0 <= i < j <= N for i, j in segments)",
+          "points": 1,
+          "description": "Ensure all generated index pairs represent valid slicing boundaries within a tour of length N."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 10
+    },
+    {
+      "function_name": "opt2",
+      "function_signature": "def opt2(tour) -> Tour:",
+      "function_body": "def opt2(tour) -> Tour:\n    \"Perform 2-opt segment reversals to optimize tour.\"\n    changed = False\n    old_tour = list(tour) # make a copy\n    for (i, j) in subsegments(len(tour)):\n        if reversal_is_improvement(tour, i, j):\n            tour[i:j] = reversed(tour[i:j])\n            changed = True\n    return (tour if not changed else opt2(tour))\n",
+      "docstring": null,
+      "line_start": 105,
+      "line_end": 114,
+      "concept_id": "greedy-algorithms",
+      "concept_name": "Greedy Algorithms",
+      "dependencies": [
+        "subsegments",
+        "reversal_is_improvement",
+        "list",
+        "reversed",
+        "len"
+      ],
+      "test_cases": [
+        {
+          "name": "test_opt2_no_improvement_logic",
+          "setup": "def subsegments(n): return [];\ndef reversal_is_improvement(t, i, j): return False",
+          "code": "tour = [complex(0, 0), complex(1, 1)];\nassert opt2(list(tour)) == tour",
+          "points": 1,
+          "description": "Verifies that the function returns the tour unchanged if no improving subsegments are found."
+        },
+        {
+          "name": "test_opt2_applies_reversal",
+          "setup": "def subsegments(n): return [(1, 3)];\ndef reversal_is_improvement(t, i, j): return t[1] == 1",
+          "code": "tour = [0, 1, 2, 3];\nassert opt2(list(tour)) == [0, 2, 1, 3]",
+          "points": 2,
+          "description": "Verifies that a subsegment reversal is correctly applied to the tour when flagged as an improvement."
+        },
+        {
+          "name": "test_opt2_optimization_goal",
+          "setup": "def subsegments(N): return [(i, j) for i in range(N) for j in range(i+2, N+1)];\ndef reversal_is_improvement(t, i, j): \n    c = list(t); c[i:j] = reversed(c[i:j])\n    return tour_length(c) < tour_length(t)",
+          "code": "crossed_tour = [complex(0,0), complex(1,1), complex(0,1), complex(1,0)];\noptimized = opt2(list(crossed_tour));\nassert tour_length(optimized) < tour_length(crossed_tour)",
+          "points": 2,
+          "description": "Demonstrates the greedy improvement property: the function untangles a crossed tour to achieve a shorter total length."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 20
+    },
+    {
+      "function_name": "name",
+      "function_signature": "def name(tsp, opt=None) -> str:",
+      "function_body": "def name(tsp, opt=None) -> str: return tsp.__name__ + (('+' + opt.__name__) if opt else '')\n    ",
+      "docstring": null,
+      "line_start": 124,
+      "line_end": 125,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [],
+      "test_cases": [
+        {
+          "name": "test_single_function_name",
+          "setup": "def my_algo(cities): return []",
+          "code": "assert name(my_algo) == 'my_algo'",
+          "points": 1,
+          "description": "Verify function name retrieval for a single algorithm."
+        },
+        {
+          "name": "test_combined_function_names",
+          "setup": "def my_algo(cities): return [];\ndef my_opt(tour): return tour",
+          "code": "assert name(my_algo, my_opt) == 'my_algo+my_opt'",
+          "points": 1,
+          "description": "Verify concatenation of algorithm and optimizer names with a plus sign."
+        },
+        {
+          "name": "test_existing_tsp_function",
+          "setup": "",
+          "code": "assert name(exhaustive_tsp) == 'exhaustive_tsp'",
+          "points": 1,
+          "description": "Verify function name retrieval using a function from the provided context."
+        },
+        {
+          "name": "test_lambda_behavior",
+          "setup": "algo = lambda x: x",
+          "code": "assert name(algo) == '<lambda>'",
+          "points": 1,
+          "description": "Check behavior with anonymous functions (lambdas)."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 5
+    },
+    {
+      "function_name": "length",
+      "function_signature": "def length(result: Result) -> float:",
+      "function_body": "def length(result: Result) -> float: return tour_length(result.tour)\n",
+      "docstring": null,
+      "line_start": 126,
+      "line_end": 127,
+      "concept_id": "tour-metrics",
+      "concept_name": "Tour Metrics",
+      "dependencies": [
+        "tour_length"
+      ],
+      "test_cases": [
+        {
+          "name": "test_square_tour_length",
+          "setup": "Result = namedtuple('Result', 'tour'); cities = [complex(0, 0), complex(10, 0), complex(10, 10), complex(0, 10)]; res = Result(tour=cities)",
+          "code": "assert length(res) == 40.0",
+          "points": 1,
+          "description": "Calculates the length of a 10x10 square tour (4 segments of length 10)."
+        },
+        {
+          "name": "test_two_city_tour",
+          "setup": "Result = namedtuple('Result', 'tour'); cities = [complex(0, 0), complex(3, 4)]; res = Result(tour=cities)",
+          "code": "assert length(res) == 10.0",
+          "points": 1,
+          "description": "Calculates length for two cities (distance is 5 each way, total 10)."
+        },
+        {
+          "name": "test_result_object_integration",
+          "setup": "Result = namedtuple('Result', 'tour algorithm'); tour = [complex(0,0), complex(1,0)]; res = Result(tour=tour, algorithm='test')",
+          "code": "assert isinstance(length(res), float)",
+          "points": 1,
+          "description": "Verifies that the function correctly accesses the 'tour' attribute of a Result object and returns a float."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 2
+    },
+    {
+      "function_name": "run",
+      "function_signature": "def run(tsp: TSP, cities: Cities, opt=None) -> Result:",
+      "function_body": "def run(tsp: TSP, cities: Cities, opt=None) -> Result:\n    \"\"\"Run a TSP algorithm on a set of cities and return results.\"\"\"\n    if opt: # recursively run unoptimized version; add .secs for that to opt(tour)\n        res0  = run(tsp, cities, None)\n        t0    = time.perf_counter()\n        tour  = opt(Tour(res0.tour))\n        t1    = time.perf_counter()\n        secs  = res0.secs + t1 - t0\n    else: # run the tsp\n        t0    = time.perf_counter()\n        tour  = tsp(cities)\n        t1    = time.perf_counter()\n        secs  = t1 - t0\n    result = Result(tsp, opt, tour, cities, secs)\n    all_results[cities].append(result)\n    assert valid_tour(tour, cities)\n    return result\n",
+      "docstring": "Run a TSP algorithm on a set of cities and return results.",
+      "line_start": 129,
+      "line_end": 146,
+      "concept_id": "tour-metrics",
+      "concept_name": "Tour Metrics",
+      "dependencies": [
+        "time.perf_counter",
+        "valid_tour",
+        "Result",
+        "all_results"
+      ],
+      "test_cases": [
+        {
+          "name": "test_execution_and_timing",
+          "setup": "from collections import namedtuple, defaultdict; Result = namedtuple('Result', 'tsp opt tour cities secs'); all_results = defaultdict(list); cities = Cities({City(0, 0), City(1, 0)});",
+          "code": "res = run(nearest_tsp, cities); \nassert res.secs >= 0; \nassert len(res.tour) == 2; \nassert res.tsp == nearest_tsp",
+          "points": 1,
+          "description": "Verifies that the function executes a TSP algorithm, records execution time, and returns a valid Result object."
+        },
+        {
+          "name": "test_optimization_recursion",
+          "setup": "from collections import namedtuple, defaultdict; Result = namedtuple('Result', 'tsp opt tour cities secs'); all_results = defaultdict(list); cities = Cities({City(0, 0), City(1, 0)}); dummy_opt = lambda tour: tour[::-1];",
+          "code": "res = run(nearest_tsp, cities, opt=dummy_opt); \nassert res.opt == dummy_opt; \nassert res.tour == [City(1, 0), City(0, 0)]; \nassert len(all_results[cities]) >= 1",
+          "points": 1,
+          "description": "Verifies the recursive logic when an optimization function is provided and ensures it is applied to the tour."
+        },
+        {
+          "name": "test_global_results_storage",
+          "setup": "from collections import namedtuple, defaultdict; Result = namedtuple('Result', 'tsp opt tour cities secs'); all_results = defaultdict(list); cities = Cities({City(0, 0), City(5, 5), City(10, 10)});",
+          "code": "all_results.clear(); \nrun(nearest_tsp, cities); \nrun(nearest_tsp, cities, opt=lambda t: t); \nassert len(all_results[cities]) == 2",
+          "points": 1,
+          "description": "Ensures that every run is correctly logged into the global all_results dictionary for the specific set of cities."
+        },
+        {
+          "name": "test_validation_assertion",
+          "setup": "from collections import namedtuple, defaultdict; Result = namedtuple('Result', 'tsp opt tour cities secs'); all_results = defaultdict(list); cities = Cities({City(0, 0), City(1, 1)}); broken_tsp = lambda c: [City(0, 0)];",
+          "code": "try:\n    run(broken_tsp, cities)\n    raised = False\nexcept AssertionError:\n    raised = True\nassert raised == True",
+          "points": 1,
+          "description": "Verifies that the function correctly asserts and fails if the generated tour is invalid (e.g., misses cities)."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 15
+    },
+    {
+      "function_name": "rep_opt2_nearest_tsp",
+      "function_signature": "def rep_opt2_nearest_tsp(cities, k=10) -> Tour:",
+      "function_body": "def rep_opt2_nearest_tsp(cities, k=10) -> Tour: \n    \"\"\"Apply 2-opt to *each* of the repeated nearest neighbors tours.\"\"\"\n    return shortest(opt2(nearest_tsp(cities, start)) for start in sample(cities, k))\n",
+      "docstring": "Apply 2-opt to *each* of the repeated nearest neighbors tours.",
+      "line_start": 147,
+      "line_end": 150,
+      "concept_id": "greedy-algorithms",
+      "concept_name": "Greedy Algorithms",
+      "dependencies": [
+        "shortest",
+        "opt2",
+        "nearest_tsp",
+        "random.sample"
+      ],
+      "test_cases": [
+        {
+          "name": "test_tour_validity",
+          "setup": "cities = random_cities(10); from random import sample; # Assume opt2 is defined as returning the tour unchanged for testing if not provided",
+          "code": "tour = rep_opt2_nearest_tsp(cities, k=5)\nassert valid_tour(tour, cities)",
+          "points": 1,
+          "description": "Verifies that the returned tour visits every city exactly once."
+        },
+        {
+          "name": "test_tour_length_consistency",
+          "setup": "cities = random_cities(8); from random import sample",
+          "code": "tour = rep_opt2_nearest_tsp(cities, k=3)\nassert len(tour) == len(cities)",
+          "points": 1,
+          "description": "Checks that the tour length (number of cities) is correct."
+        },
+        {
+          "name": "test_reproducibility_and_k",
+          "setup": "cities = random_cities(5); from random import sample, seed",
+          "code": "seed(42); tour1 = rep_opt2_nearest_tsp(cities, k=2)\nseed(42); tour2 = rep_opt2_nearest_tsp(cities, k=2)\nassert tour1 == tour2",
+          "points": 1,
+          "description": "Checks if the function behaves consistently when the random seed is fixed and k is specified."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 15
+    },
+    {
+      "function_name": "shortest_links_first",
+      "function_signature": "def shortest_links_first(cities) -> List[Link]:",
+      "function_body": "def shortest_links_first(cities) -> List[Link]:\n    \"Return all links between cities, sorted shortest first.\"\n    return sorted(itertools.combinations(cities, 2), key=lambda link: distance(*link))\n            ",
+      "docstring": null,
+      "line_start": 151,
+      "line_end": 154,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "distance",
+        "itertools.combinations"
+      ],
+      "test_cases": [
+        {
+          "name": "test_link_count",
+          "setup": "cities = {City(0, 0), City(1, 1), City(2, 2), City(3, 3)}",
+          "code": "links = shortest_links_first(cities)\nassert len(links) == 6",
+          "points": 1,
+          "description": "Verifies that for N cities, the function returns N*(N-1)/2 links (combinations)."
+        },
+        {
+          "name": "test_sorting_order",
+          "setup": "cities = {City(0, 0), City(10, 0), City(0, 1)}",
+          "code": "links = shortest_links_first(cities)\ndistances = [distance(*l) for l in links]\nassert distances == sorted(distances)\nassert distances == [1.0, 10.0, math.sqrt(101)]",
+          "points": 2,
+          "description": "Ensures links are sorted by distance in ascending order."
+        },
+        {
+          "name": "test_empty_or_single",
+          "setup": "c1 = {City(0,0)}; c0 = set()",
+          "code": "assert shortest_links_first(c1) == []\nassert shortest_links_first(c0) == []",
+          "points": 1,
+          "description": "Verifies edge cases where no links can be formed."
+        },
+        {
+          "name": "test_link_structure",
+          "setup": "cities = {City(0, 0), City(1, 0)}",
+          "code": "links = shortest_links_first(cities)\nassert isinstance(links[0], tuple)\nassert len(links[0]) == 2\nassert all(isinstance(c, complex) for c in links[0])",
+          "points": 1,
+          "description": "Checks that the returned objects are tuples of two City (complex) objects."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 10
+    },
+    {
+      "function_name": "join_segments",
+      "function_signature": "def join_segments(endpoints, A, B):",
+      "function_body": "def join_segments(endpoints, A, B):\n    \"Join segments [...,A] + [B,...] into one segment. Maintain `endpoints`.\"\n    Aseg, Bseg = endpoints[A], endpoints[B]\n    if Aseg[-1] is not A: Aseg.reverse()\n    if Bseg[0]  is not B: Bseg.reverse()\n    Aseg += Bseg\n    del endpoints[A], endpoints[B] \n    endpoints[Aseg[0]] = endpoints[Aseg[-1]] = Aseg\n    return Aseg\n",
+      "docstring": null,
+      "line_start": 155,
+      "line_end": 164,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [],
+      "test_cases": [
+        {
+          "name": "test_join_simple_unit_segments",
+          "setup": "c1, c2 = complex(0,0), complex(1,1); seg1, seg2 = [c1], [c2]; eps = {c1: seg1, c2: seg2}",
+          "code": "res = join_segments(eps, c1, c2); assert res == [c1, c2]; assert eps[c1] is res; assert eps[c2] is res",
+          "points": 1,
+          "description": "Joins two single-city segments and updates the endpoints dictionary."
+        },
+        {
+          "name": "test_join_with_reversal",
+          "setup": "c1, c2, c3, c4 = complex(0,0), complex(1,1), complex(2,2), complex(3,3); s1, s2 = [c1, c2], [c3, c4]; eps = {c1: s1, c2: s1, c3: s2, c4: s2}",
+          "code": "res = join_segments(eps, c1, c4); assert res == [c2, c1, c4, c3]; assert eps[c2] is res; assert eps[c3] is res; assert c1 not in eps; assert c4 not in eps",
+          "points": 2,
+          "description": "Verifies that segments are reversed correctly when the join points (A and B) are not at the expected tail/head positions."
+        },
+        {
+          "name": "test_endpoint_persistence",
+          "setup": "c1, c2, c3 = complex(0,0), complex(1,1), complex(2,2); s1, s2 = [c1, c2], [c3]; eps = {c1: s1, c2: s1, c3: s2}",
+          "code": "res = join_segments(eps, c2, c3); assert res == [c1, c2, c3]; assert eps[c1] is res; assert eps[c3] is res; assert c2 not in eps",
+          "points": 1,
+          "description": "Confirms that internal endpoints are removed from the dictionary while boundary endpoints are updated to point to the new combined segment."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 15
+    },
+    {
+      "function_name": "greedy_tsp",
+      "function_signature": "def greedy_tsp(cities):",
+      "function_body": "def greedy_tsp(cities):\n    \"\"\"Go through links, shortest first. If a link can join segments, do it.\"\"\"\n    endpoints = {C: [C] for C in cities} # A dict of {endpoint: segment}\n    links = itertools.combinations(cities, 2)\n    for (A, B) in shortest_links_first(cities):\n        if A in endpoints and B in endpoints and endpoints[A] != endpoints[B]:\n            joined_segment = join_segments(endpoints, A, B)\n            if len(joined_segment) == len(cities):\n                return joined_segment\n",
+      "docstring": "Go through links, shortest first. If a link can join segments, do it.",
+      "line_start": 165,
+      "line_end": 174,
+      "concept_id": "greedy-algorithms",
+      "concept_name": "Greedy Algorithms",
+      "dependencies": [
+        "shortest_links_first",
+        "join_segments",
+        "len"
+      ],
+      "test_cases": [
+        {
+          "name": "test_greedy_tour_validity",
+          "setup": "cities = Cities({City(0, 0), City(1, 0), City(1, 1), City(0, 1)})",
+          "code": "tour = greedy_tsp(cities)\nassert valid_tour(tour, cities)",
+          "points": 1,
+          "description": "Checks if the greedy algorithm returns a valid tour visiting all cities exactly once."
+        },
+        {
+          "name": "test_greedy_tour_length",
+          "setup": "cities = Cities({City(0, 0), City(1, 0), City(1, 1), City(0, 1)})",
+          "code": "tour = greedy_tsp(cities)\nassert len(tour) == 4",
+          "points": 1,
+          "description": "Ensures the returned tour contains the correct number of cities."
+        },
+        {
+          "name": "test_greedy_path_logic",
+          "setup": "cities = Cities({City(0, 0), City(1, 0), City(5, 0), City(5, 1)})",
+          "code": "tour = greedy_tsp(cities)\n# Greedy should pick (0,0)-(1,0) first, then (5,0)-(5,1), then connect them\nassert (tour[0], tour[1]) == (City(0, 0), City(1, 0)) or (tour[-1], tour[-2]) == (City(0, 0), City(1, 0))",
+          "points": 2,
+          "description": "Verifies that the algorithm prioritizes the shortest available links first."
+        },
+        {
+          "name": "test_greedy_single_city",
+          "setup": "cities = Cities({City(0, 0)})",
+          "code": "try:\n    tour = greedy_tsp(cities)\n    assert len(tour) == 1\nexcept:\n    pass # Implementation dependent handling of edge cases",
+          "points": 1,
+          "description": "Checks behavior with a minimal city set."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 20
+    },
+    {
+      "function_name": "X_",
+      "function_signature": "def X_(city) -> int:",
+      "function_body": "def X_(city) -> int: \"X coordinate\"; return city.real",
+      "docstring": null,
+      "line_start": 175,
+      "line_end": 175,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [],
+      "test_cases": [
+        {
+          "name": "test_origin",
+          "setup": "city = complex(0, 0)",
+          "code": "assert X_(city) == 0.0",
+          "points": 1,
+          "description": "Verifies X coordinate extraction at the origin."
+        },
+        {
+          "name": "test_positive_coordinates",
+          "setup": "city = complex(300, 100)",
+          "code": "assert X_(city) == 300.0",
+          "points": 1,
+          "description": "Verifies X coordinate extraction for positive values."
+        },
+        {
+          "name": "test_negative_coordinates",
+          "setup": "city = complex(-50.5, 20)",
+          "code": "assert X_(city) == -50.5",
+          "points": 1,
+          "description": "Verifies X coordinate extraction for negative and float values."
+        },
+        {
+          "name": "test_y_independence",
+          "setup": "city1 = complex(10, 50); city2 = complex(10, 999)",
+          "code": "assert X_(city1) == X_(city2) == 10.0",
+          "points": 1,
+          "description": "Ensures the result depends only on the real (X) part, not the imaginary (Y) part."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 2
+    },
+    {
+      "function_name": "Y_",
+      "function_signature": "def Y_(city) -> int:",
+      "function_body": "def Y_(city) -> int: \"Y coordinate\"; return city.imag\n",
+      "docstring": null,
+      "line_start": 176,
+      "line_end": 177,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [],
+      "test_cases": [
+        {
+          "name": "test_positive_y",
+          "setup": "City = complex; city = City(300, 100)",
+          "code": "assert Y_(city) == 100.0",
+          "points": 1,
+          "description": "Extracts positive imaginary part from complex city."
+        },
+        {
+          "name": "test_negative_y",
+          "setup": "City = complex; city = City(50, -25)",
+          "code": "assert Y_(city) == -25.0",
+          "points": 1,
+          "description": "Extracts negative imaginary part from complex city."
+        },
+        {
+          "name": "test_origin",
+          "setup": "City = complex; city = City(0, 0)",
+          "code": "assert Y_(city) == 0.0",
+          "points": 1,
+          "description": "Extracts zero coordinate from origin."
+        },
+        {
+          "name": "test_floating_point",
+          "setup": "City = complex; city = City(10.5, 20.75)",
+          "code": "assert Y_(city) == 20.75",
+          "points": 1,
+          "description": "Extracts floating point imaginary part."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 2
+    },
+    {
+      "function_name": "extent",
+      "function_signature": "def extent(numbers) -> float:",
+      "function_body": "def extent(numbers) -> float: return max(numbers) - min(numbers)\n",
+      "docstring": null,
+      "line_start": 178,
+      "line_end": 179,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "max",
+        "min"
+      ],
+      "test_cases": [
+        {
+          "name": "test_positive_range",
+          "setup": "numbers = [10, 2, 5, 20, 15]",
+          "code": "assert extent(numbers) == 18.0",
+          "points": 1,
+          "description": "Calculates the difference between 20 and 2."
+        },
+        {
+          "name": "test_negative_and_positive",
+          "setup": "numbers = [-10, 0, 10]",
+          "code": "assert extent(numbers) == 20.0",
+          "points": 1,
+          "description": "Calculates range across zero (10 - (-10))."
+        },
+        {
+          "name": "test_single_element",
+          "setup": "numbers = [42]",
+          "code": "assert extent(numbers) == 0.0",
+          "points": 1,
+          "description": "The extent of a single number is zero."
+        },
+        {
+          "name": "test_coordinate_usage",
+          "setup": "cities = [complex(0, 5), complex(10, 15), complex(3, 2)]; x_coords = [c.real for c in cities]",
+          "code": "assert extent(x_coords) == 10.0",
+          "points": 1,
+          "description": "Verifies usage for calculating the width/span of a set of city coordinates."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 2
+    },
+    {
+      "function_name": "split_cities",
+      "function_signature": "def split_cities(cities) -> Tuple[List[City], List[City]]:",
+      "function_body": "def split_cities(cities) -> Tuple[List[City], List[City]]:\n    \"Split cities vertically if map is wider; horizontally if map is taller.\"\n    coord  = (X_ if (extent(Xs(cities)) > extent(Ys(cities))) else Y_)\n    cities = sorted(cities, key=coord)\n    middle = len(cities) // 2\n    return cities[:middle], cities[middle:]\n",
+      "docstring": null,
+      "line_start": 180,
+      "line_end": 186,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "extent",
+        "Xs",
+        "Ys",
+        "X_",
+        "Y_"
+      ],
+      "test_cases": [
+        {
+          "name": "test_vertical_split_wide_map",
+          "setup": "def extent(nums): return max(nums) - min(nums)\nX_ = lambda c: c.real\nY_ = lambda c: c.imag\ncities = [City(0, 0), City(10, 1), City(5, 0), City(2, 1)]",
+          "code": "left, right = split_cities(cities)\nassert len(left) == 2 and len(right) == 2\nassert all(c.real <= 2 for c in left)\nassert all(c.real >= 5 for c in right)",
+          "points": 1,
+          "description": "Verifies splitting by X-coordinate when width is greater than height."
+        },
+        {
+          "name": "test_horizontal_split_tall_map",
+          "setup": "def extent(nums): return max(nums) - min(nums)\nX_ = lambda c: c.real\nY_ = lambda c: c.imag\ncities = [City(0, 0), City(1, 10), City(0, 5), City(1, 2)]",
+          "code": "bottom, top = split_cities(cities)\nassert len(bottom) == 2 and len(top) == 2\nassert all(c.imag <= 2 for c in bottom)\nassert all(c.imag >= 5 for c in top)",
+          "points": 1,
+          "description": "Verifies splitting by Y-coordinate when height is greater than width."
+        },
+        {
+          "name": "test_odd_number_split",
+          "setup": "def extent(nums): return max(nums) - min(nums)\nX_ = lambda c: c.real\nY_ = lambda c: c.imag\ncities = [City(0, 0), City(10, 0), City(5, 0)]",
+          "code": "left, right = split_cities(cities)\nassert len(left) == 1\nassert len(right) == 2\nassert left[0] == City(0, 0)",
+          "points": 1,
+          "description": "Verifies the split point math (integer division) for an odd number of cities."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 10
+    },
+    {
+      "function_name": "rotations",
+      "function_signature": "def rotations(sequence):",
+      "function_body": "def rotations(sequence):\n    \"All possible rotations of a sequence.\"\n    # A rotation is some suffix of the sequence followed by the rest of the sequence.\n    return [sequence[i:] + sequence[:i] for i in range(len(sequence))]\n",
+      "docstring": null,
+      "line_start": 187,
+      "line_end": 191,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "len"
+      ],
+      "test_cases": [
+        {
+          "name": "test_list_rotations",
+          "setup": "seq = [1, 2, 3]",
+          "code": "assert rotations(seq) == [[1, 2, 3], [2, 3, 1], [3, 1, 2]]",
+          "points": 1,
+          "description": "Verifies all cyclic rotations of a standard integer list."
+        },
+        {
+          "name": "test_string_rotations",
+          "setup": "seq = 'abc'",
+          "code": "assert rotations(seq) == ['abc', 'bca', 'cab']",
+          "points": 1,
+          "description": "Ensures the function handles string sequences correctly."
+        },
+        {
+          "name": "test_rotation_count",
+          "setup": "seq = [10, 20, 30, 40, 50]",
+          "code": "results = rotations(seq)\nassert len(results) == 5\nassert all(len(r) == 5 for r in results)",
+          "points": 1,
+          "description": "Checks that the number of rotations matches the sequence length."
+        },
+        {
+          "name": "test_empty_sequence",
+          "setup": "seq = []",
+          "code": "assert rotations(seq) == []",
+          "points": 1,
+          "description": "Validates the edge case of an empty sequence."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 5
+    },
+    {
+      "function_name": "join_tours",
+      "function_signature": "def join_tours(tour1, tour2):",
+      "function_body": "def join_tours(tour1, tour2):\n    \"Consider all ways of joining the two tours together, and pick the shortest.\"\n    segments1, segments2 = rotations(tour1), rotations(tour2)\n    return shortest(s1 + s3\n                    for s1 in segments1\n                    for s2 in segments2\n                    for s3 in (s2, s2[::-1]))\n",
+      "docstring": null,
+      "line_start": 192,
+      "line_end": 199,
+      "concept_id": "exhaustive-search",
+      "concept_name": "Exhaustive Search",
+      "dependencies": [
+        "rotations",
+        "shortest"
+      ],
+      "test_cases": [
+        {
+          "name": "test_join_square_segments",
+          "setup": "def rotations(t): return [t[i:] + t[:i] for i in range(len(t))]\ntour1 = [0+0j, 10+0j]\ntour2 = [10+10j, 0+10j]",
+          "code": "result = join_tours(tour1, tour2)\nassert tour_length(result) == 40.0\nassert set(result) == {0+0j, 10+0j, 10+10j, 0+10j}",
+          "points": 1,
+          "description": "Joins two segments to form a perfect square perimeter."
+        },
+        {
+          "name": "test_join_with_reversal",
+          "setup": "def rotations(t): return [t[i:] + t[:i] for i in range(len(t))]\ntour1 = [0+0j, 10+0j]\ntour2 = [0+10j, 10+10j] # This needs to be reversed to join efficiently with tour1",
+          "code": "result = join_tours(tour1, tour2)\nassert tour_length(result) == 40.0\nassert result[1] == 10+0j and (result[2] == 10+10j or result[0] == 10+10j)",
+          "points": 1,
+          "description": "Verifies that the function tries reversed segments to find the shortest join."
+        },
+        {
+          "name": "test_join_with_rotation",
+          "setup": "def rotations(t): return [t[i:] + t[:i] for i in range(len(t))]\ntour1 = [10+0j, 0+0j] # Rotated\ntour2 = [0+10j, 10+10j]",
+          "code": "result = join_tours(tour1, tour2)\nassert tour_length(result) == 40.0",
+          "points": 1,
+          "description": "Verifies that the function tries all rotations to find the optimal connection points."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 15
+    },
+    {
+      "function_name": "divide_tsp",
+      "function_signature": "def divide_tsp(cities, split=7) -> Tour:",
+      "function_body": "def divide_tsp(cities, split=7) -> Tour:\n    \"\"\"Find a tour by divide and conquer: if number of cities is `split` or more, then split\n    the cities in half, solve each half recursively, then join those two tours together.\n    Otherwise solve with `exhaustive_tsp`.\"\"\"\n    if len(cities) < split:\n        return exhaustive_tsp(cities)\n    else:\n        half1, half2 = split_cities(cities)\n        return join_tours(divide_tsp(half1, split), divide_tsp(half2, split))\n",
+      "docstring": "Find a tour by divide and conquer: if number of cities is `split` or more, then split\n    the cities in half, solve each half recursively, then join those two tours together.\n    Otherwise solve with `exhaustive_tsp`.",
+      "line_start": 200,
+      "line_end": 209,
+      "concept_id": "exhaustive-search",
+      "concept_name": "Exhaustive Search",
+      "dependencies": [
+        "exhaustive_tsp",
+        "split_cities",
+        "join_tours",
+        "len"
+      ],
+      "test_cases": [
+        {
+          "name": "test_base_case_execution",
+          "setup": "def split_cities(c): l=list(c); m=len(l)//2; return Cities(l[:m]), Cities(l[m:]);\ndef join_tours(t1, t2): return t1 + t2;\ncities = random_cities(5)",
+          "code": "tour = divide_tsp(cities, split=7)\nassert len(tour) == 5\nassert valid_tour(tour, cities)",
+          "points": 1,
+          "description": "Verify that when cities < split, it correctly falls back to exhaustive_tsp."
+        },
+        {
+          "name": "test_recursive_split",
+          "setup": "def split_cities(c): l=list(c); m=len(l)//2; return Cities(l[:m]), Cities(l[m:]);\ndef join_tours(t1, t2): return t1 + t2;\ncities = random_cities(10)",
+          "code": "tour = divide_tsp(cities, split=6)\nassert len(tour) == 10\nassert valid_tour(tour, cities)",
+          "points": 2,
+          "description": "Verify the recursive branch correctly splits and joins tours for cities > split."
+        },
+        {
+          "name": "test_tour_validity",
+          "setup": "def split_cities(c): l=list(c); m=len(l)//2; return Cities(l[:m]), Cities(l[m:]);\ndef join_tours(t1, t2): return t1 + t2;\ncities = random_cities(12)",
+          "code": "tour = divide_tsp(cities, split=5)\nassert isinstance(tour, list)\nassert Counter(tour) == Counter(cities)",
+          "points": 1,
+          "description": "Ensure the divide and conquer approach maintains tour integrity (visiting every city exactly once)."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 20
+    },
+    {
+      "function_name": "mst",
+      "function_signature": "def mst(vertexes):",
+      "function_body": "def mst(vertexes):\n    \"\"\"Given a set of vertexes, build a minimum spanning tree: a dict of the form \n    {parent: [child...]}, spanning all vertexes.\"\"\"\n    tree  = {first(vertexes): []} # the first city is the root of the tree.\n    links = shortest_links_first(vertexes)\n    while len(tree) < len(vertexes):\n        (A, B) = first((A, B) for (A, B) in links if (A in tree) ^ (B in tree))\n        if A not in tree: (A, B) = (B, A)\n        tree[A].append(B)\n        tree[B] = []\n    return tree\n",
+      "docstring": "Given a set of vertexes, build a minimum spanning tree: a dict of the form\n    {parent: [child...]}, spanning all vertexes.",
+      "line_start": 210,
+      "line_end": 221,
+      "concept_id": "greedy-algorithms",
+      "concept_name": "Greedy Algorithms",
+      "dependencies": [
+        "first",
+        "shortest_links_first"
+      ],
+      "test_cases": [
+        {
+          "name": "test_mst_size",
+          "setup": "cities = {City(0, 0), City(1, 0), City(0, 1)};\ndef shortest_links_first(cities):\n    links = [(A, B) for A in cities for B in cities if (A.real, A.imag) < (B.real, B.imag)]\n    return sorted(links, key=lambda link: distance(*link))",
+          "code": "tree = mst(cities)\nassert len(tree) == 3\nassert sum(len(children) for children in tree.values()) == 2",
+          "points": 1,
+          "description": "Verifies that for N cities, the resulting tree dictionary has N nodes and N-1 edges."
+        },
+        {
+          "name": "test_mst_greedy_weight",
+          "setup": "cities = {City(0, 0), City(3, 0), City(0, 4)};\ndef shortest_links_first(cities):\n    links = [(A, B) for A in cities for B in cities if (A.real, A.imag) < (B.real, B.imag)]\n    return sorted(links, key=lambda link: distance(*link))",
+          "code": "tree = mst(cities)\nedges = [(u, v) for u, children in tree.items() for v in children]\ntotal_weight = sum(distance(u, v) for u, v in edges)\nassert total_weight == 7.0",
+          "points": 2,
+          "description": "Checks that the MST correctly selects the two shortest edges (3 and 4) in a 3-4-5 right triangle."
+        },
+        {
+          "name": "test_mst_connectivity",
+          "setup": "cities = {City(0,0), City(1,1), City(2,2), City(3,3)};\ndef shortest_links_first(cities):\n    links = [(A, B) for A in cities for B in cities if (A.real, A.imag) < (B.real, B.imag)]\n    return sorted(links, key=lambda link: distance(*link))",
+          "code": "tree = mst(cities)\nvisited = set()\ndef traverse(node):\n    visited.add(node)\n    for child in tree[node]:\n        traverse(child)\ntraverse(first(cities))\nassert visited == cities",
+          "points": 2,
+          "description": "Ensures the generated MST structure is fully connected, meaning all cities are reachable from the root."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 20
+    },
+    {
+      "function_name": "preorder_traversal",
+      "function_signature": "def preorder_traversal(tree, root):",
+      "function_body": "def preorder_traversal(tree, root):\n    \"Traverse tree in pre-order, starting at root of tree.\"\n    yield root\n    for child in tree.get(root, ()):\n        yield from preorder_traversal(tree, child)\n",
+      "docstring": null,
+      "line_start": 222,
+      "line_end": 227,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [],
+      "test_cases": [
+        {
+          "name": "test_single_node",
+          "setup": "tree = {}; root = 'A'",
+          "code": "assert list(preorder_traversal(tree, root)) == ['A']",
+          "points": 1,
+          "description": "A tree with only a root node should yield just that node."
+        },
+        {
+          "name": "test_linear_tree",
+          "setup": "tree = {1: [2], 2: [3], 3: [4]}; root = 1",
+          "code": "assert list(preorder_traversal(tree, root)) == [1, 2, 3, 4]",
+          "points": 1,
+          "description": "Traversing a tree that is essentially a linked list."
+        },
+        {
+          "name": "test_branching_tree",
+          "setup": "tree = {'A': ['B', 'E'], 'B': ['C', 'D'], 'E': ['F']}; root = 'A'",
+          "code": "assert list(preorder_traversal(tree, root)) == ['A', 'B', 'C', 'D', 'E', 'F']",
+          "points": 2,
+          "description": "Standard pre-order traversal of a branching tree structure (Root, then Children recursively)."
+        },
+        {
+          "name": "test_generator_behavior",
+          "setup": "tree = {1: [2, 3]}; root = 1; gen = preorder_traversal(tree, root)",
+          "code": "assert next(gen) == 1; assert next(gen) == 2; assert next(gen) == 3",
+          "points": 1,
+          "description": "Verify the function acts as a generator yielding values lazily."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 10
+    },
+    {
+      "function_name": "mst_tsp",
+      "function_signature": "def mst_tsp(cities) -> Tour:",
+      "function_body": "def mst_tsp(cities) -> Tour:\n    \"Create a minimum spanning tree and walk it in pre-order.\"\n    return Tour(preorder_traversal(mst(cities), first(cities)))\n",
+      "docstring": null,
+      "line_start": 228,
+      "line_end": 231,
+      "concept_id": "greedy-algorithms",
+      "concept_name": "Greedy Algorithms",
+      "dependencies": [
+        "preorder_traversal",
+        "mst",
+        "first",
+        "Tour",
+        "valid_tour"
+      ],
+      "test_cases": [
+        {
+          "name": "test_mst_tsp_valid_tour",
+          "setup": "cities = random_cities(10)",
+          "code": "tour = mst_tsp(cities)\nassert valid_tour(tour, cities)",
+          "points": 1,
+          "description": "Verifies that the MST-based TSP algorithm generates a valid tour visiting every city exactly once."
+        },
+        {
+          "name": "test_mst_tsp_start_city",
+          "setup": "cities = Cities({City(0, 0), City(10, 10), City(20, 20)})",
+          "code": "start = first(cities)\ntour = mst_tsp(cities)\nassert tour[0] == start",
+          "points": 1,
+          "description": "Ensures the tour starts with the first city in the collection as per the implementation logic."
+        },
+        {
+          "name": "test_mst_tsp_completeness",
+          "setup": "cities = random_cities(5)",
+          "code": "tour = mst_tsp(cities)\nassert len(tour) == 5\nassert len(set(tour)) == 5",
+          "points": 1,
+          "description": "Checks that the resulting tour has the correct number of unique cities."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 20
+    },
+    {
+      "function_name": "shortest_segment",
+      "function_signature": "def shortest_segment(A, Bs, C) -> Segment:",
+      "function_body": "def shortest_segment(A, Bs, C) -> Segment:\n    \"The shortest segment starting at A, going through all Bs, and ending at C.\"\n    if not Bs:\n        return [A, C]\n    else:\n        return min((shortest_segment(A, Bs - {B}, B) + [C] for B in Bs),\n                   key=segment_length)\n            ",
+      "docstring": null,
+      "line_start": 233,
+      "line_end": 240,
+      "concept_id": "exhaustive-search",
+      "concept_name": "Exhaustive Search",
+      "dependencies": [
+        "segment_length",
+        "distance"
+      ],
+      "test_cases": [
+        {
+          "name": "test_no_intermediate_cities",
+          "setup": "def segment_length(seg): return sum(abs(seg[i] - seg[i-1]) for i in range(1, len(seg))); A = 0j; C = 5+0j; Bs = frozenset()",
+          "code": "assert shortest_segment(A, Bs, C) == [0j, 5+0j]",
+          "points": 1,
+          "description": "Base case: when there are no intermediate cities, return direct path from A to C."
+        },
+        {
+          "name": "test_single_intermediate_city",
+          "setup": "def segment_length(seg): return sum(abs(seg[i] - seg[i-1]) for i in range(1, len(seg))); A = 0j; C = 2+0j; Bs = frozenset({1+0j})",
+          "code": "assert shortest_segment(A, Bs, C) == [0j, 1+0j, 2+0j]",
+          "points": 1,
+          "description": "Simple case with one intermediate city forming a straight line."
+        },
+        {
+          "name": "test_exhaustive_ordering",
+          "setup": "def segment_length(seg): return sum(abs(seg[i] - seg[i-1]) for i in range(1, len(seg))); A = 0j; C = 4+0j; Bs = frozenset({3+0j, 1+0j})",
+          "code": "result = shortest_segment(A, Bs, C); assert result == [0j, 1+0j, 3+0j, 4+0j]; assert segment_length(result) == 4.0",
+          "points": 2,
+          "description": "Verifies that the function tries all permutations (1-3 vs 3-1) to find the shortest total segment."
+        },
+        {
+          "name": "test_non_linear_optimization",
+          "setup": "def segment_length(seg): return sum(abs(seg[i] - seg[i-1]) for i in range(1, len(seg))); A = 0j; C = 10j; Bs = frozenset({1j, 100+100j})",
+          "code": "result = shortest_segment(A, Bs, C); assert result == [0j, 100+100j, 1j, 10j]",
+          "points": 2,
+          "description": "Confirms the exhaustive search finds the shortest path even when one intermediate city is very far away."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 20
+    },
+    {
+      "function_name": "segment_length",
+      "function_signature": "def segment_length(segment):",
+      "function_body": "def segment_length(segment):\n    \"The total of distances between each pair of consecutive cities in the segment.\"\n    # Same as tour_length, but without distance(tour[0], tour[-1])\n    return sum(distance(segment[i], segment[i-1]) \n               for i in range(1, len(segment)))\n",
+      "docstring": null,
+      "line_start": 241,
+      "line_end": 246,
+      "concept_id": "tour-metrics",
+      "concept_name": "Tour Metrics",
+      "dependencies": [
+        "distance"
+      ],
+      "test_cases": [
+        {
+          "name": "test_two_cities",
+          "setup": "seg = [City(0, 0), City(3, 4)]",
+          "code": "assert segment_length(seg) == 5.0",
+          "points": 1,
+          "description": "Calculates the distance for a single link between two cities."
+        },
+        {
+          "name": "test_multiple_cities",
+          "setup": "seg = [City(0, 0), City(3, 0), City(3, 4)]",
+          "code": "assert segment_length(seg) == 7.0",
+          "points": 1,
+          "description": "Calculates cumulative distance for multiple consecutive segments (3 + 4)."
+        },
+        {
+          "name": "test_single_city",
+          "setup": "seg = [City(10, 10)]",
+          "code": "assert segment_length(seg) == 0",
+          "points": 1,
+          "description": "A segment with one city has a length of 0."
+        },
+        {
+          "name": "test_vs_tour_length",
+          "setup": "seg = [City(0, 0), City(3, 0), City(0, 4)]",
+          "code": "expected_seg = 3.0 + 5.0; expected_tour = 3.0 + 5.0 + 4.0; assert segment_length(seg) == expected_seg; assert tour_length(seg) == expected_tour",
+          "points": 2,
+          "description": "Verifies that segment_length does not include the closing link back to the start city, unlike tour_length."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 5
+    },
+    {
+      "function_name": "held_karp_tsp",
+      "function_signature": "def held_karp_tsp(cities) -> Tour:",
+      "function_body": "def held_karp_tsp(cities) -> Tour:\n    \"\"\"The Held-Karp shortest tour of this set of cities.\n    For each end city C, find the shortest segment from A (the start) to C.\n    Out of all these shortest segments, pick the one that is the shortest tour.\"\"\"\n    A = first(cities)\n    shortest_segment.cache_clear() # Clear cache for a new problem\n    return shortest(shortest_segment(A, cities - {A, C}, C)\n                    for C in cities - {A})\n",
+      "docstring": "The Held-Karp shortest tour of this set of cities.\n    For each end city C, find the shortest segment from A (the start) to C.\n    Out of all these shortest segments, pick the one that is the shortest tour.",
+      "line_start": 247,
+      "line_end": 255,
+      "concept_id": "exhaustive-search",
+      "concept_name": "Exhaustive Search",
+      "dependencies": [
+        "first",
+        "shortest",
+        "shortest_segment",
+        "tour_length",
+        "distance"
+      ],
+      "test_cases": [
+        {
+          "name": "test_held_karp_optimality",
+          "setup": "cities = random_cities(5); tour_hk = held_karp_tsp(cities); tour_ex = exhaustive_tsp(cities)",
+          "code": "assert abs(tour_length(tour_hk) - tour_length(tour_ex)) < 1e-6",
+          "points": 2,
+          "description": "Verifies that Held-Karp finds the same optimal tour length as the brute-force exhaustive search for a small set of cities."
+        },
+        {
+          "name": "test_held_karp_valid_tour",
+          "setup": "cities = random_cities(6); tour = held_karp_tsp(cities)",
+          "code": "assert valid_tour(tour, cities)",
+          "points": 1,
+          "description": "Checks if the Held-Karp algorithm returns a valid tour that visits every city exactly once."
+        },
+        {
+          "name": "test_held_karp_small_n",
+          "setup": "cities = random_cities(3); tour = held_karp_tsp(cities)",
+          "code": "assert len(tour) == 3; assert tour[0] == first(cities)",
+          "points": 1,
+          "description": "Tests the algorithm with the minimum number of cities to form a tour, ensuring it respects the starting city constraint."
+        }
+      ],
+      "difficulty": "advanced",
+      "estimated_time_minutes": 45
+    },
+    {
+      "function_name": "test_set",
+      "function_signature": "def test_set(s: int, n: int) -> TestSet:",
+      "function_body": "def test_set(s: int, n: int) -> TestSet:\n    \"Return `s` different sets of `n` random cities.\"\n    return tuple(random_cities(n, seed=(s, i)) for i in range(s))\n",
+      "docstring": null,
+      "line_start": 256,
+      "line_end": 259,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "random_cities"
+      ],
+      "test_cases": [
+        {
+          "name": "test_set_outer_length",
+          "setup": "s, n = 5, 10",
+          "code": "ts = test_set(s, n)\nassert len(ts) == 5",
+          "points": 1,
+          "description": "Verifies that the function returns a tuple containing exactly 's' sets."
+        },
+        {
+          "name": "test_set_inner_length",
+          "setup": "s, n = 3, 20",
+          "code": "ts = test_set(s, n)\nassert all(len(cities) == 20 for cities in ts)",
+          "points": 1,
+          "description": "Verifies that every set within the test set contains exactly 'n' cities."
+        },
+        {
+          "name": "test_set_reproducibility",
+          "setup": "s, n = 2, 4",
+          "code": "ts1 = test_set(s, n)\nts2 = test_set(s, n)\nassert ts1 == ts2",
+          "points": 1,
+          "description": "Verifies that calling test_set with the same parameters results in the same cities due to deterministic seeding."
+        },
+        {
+          "name": "test_set_uniqueness",
+          "setup": "s, n = 2, 50",
+          "code": "ts = test_set(s, n)\nassert ts[0] != ts[1]",
+          "points": 1,
+          "description": "Verifies that the sets generated within a single test_set call are distinct (different seeds for different indices)."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 5
+    },
+    {
+      "function_name": "benchmark",
+      "function_signature": "def benchmark(algorithm, tests, opt=None, **kwds) -> List[run]:",
+      "function_body": "def benchmark(algorithm, tests, opt=None, **kwds) -> List[run]:\n    \"Benchmark one TSP algorithm on a test suite; return a list of `run`s.\"\n    return [run(algorithm, test, opt=opt, **kwds) for test in tests]\n",
+      "docstring": null,
+      "line_start": 261,
+      "line_end": 264,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "run"
+      ],
+      "test_cases": [
+        {
+          "name": "test_benchmark_length",
+          "setup": "from collections import namedtuple; run = namedtuple('run', 'algo test opt kwds'); tests = [frozenset({complex(0,0)}), frozenset({complex(1,1)})]",
+          "code": "results = benchmark(lambda x: x, tests); assert len(results) == 2",
+          "points": 1,
+          "description": "Verifies that benchmark returns one result for every input test case."
+        },
+        {
+          "name": "test_benchmark_parameter_passing",
+          "setup": "from collections import namedtuple; run = namedtuple('run', 'algo test opt kwds'); tests = [frozenset({complex(0,0)})]",
+          "code": "results = benchmark(lambda x: x, tests, opt=100); assert results[0].opt == 100",
+          "points": 1,
+          "description": "Ensures the 'opt' parameter is correctly passed through to the run constructor."
+        },
+        {
+          "name": "test_benchmark_keyword_arguments",
+          "setup": "from collections import namedtuple; run = namedtuple('run', 'algo test opt kwds'); tests = [frozenset({complex(0,0)})]",
+          "code": "results = benchmark(lambda x: x, tests, timeout=10); assert results[0].kwds == {'timeout': 10}",
+          "points": 1,
+          "description": "Verifies that arbitrary keyword arguments are captured and passed to the run constructor."
+        },
+        {
+          "name": "test_benchmark_empty_suite",
+          "setup": "from collections import namedtuple; run = namedtuple('run', 'algo test opt kwds'); tests = []",
+          "code": "results = benchmark(lambda x: x, tests); assert results == []",
+          "points": 1,
+          "description": "Checks behavior when an empty list of tests is provided."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 5
+    },
+    {
+      "function_name": "boxplot_label",
+      "function_signature": "def boxplot_label(tsp, lengths, times, best):",
+      "function_body": "def boxplot_label(tsp, lengths, times, best):\n    \"A label for the bottom of the boxplot.\"\n    return '{}\\n{:.0f} ± {:.1f} msec\\n{:,d} med len\\n{:,d} ± {:,d} mean\\n{:.2%} mean'.format(\n           name(tsp), mean(times) * 1000, stdev(times) * 1000, \n           round(median(lengths)), round(mean(lengths)), round(stdev(lengths)), mean(lengths) / best)\n",
+      "docstring": null,
+      "line_start": 265,
+      "line_end": 270,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "mean",
+        "median",
+        "stdev"
+      ],
+      "test_cases": [
+        {
+          "name": "test_label_formatting_exact",
+          "setup": "def mock_tsp(): pass\ndef name(f): return f.__name__\nlengths = [1000, 1000, 1000]\ntimes = [0.005, 0.005, 0.005]\nbest = 1000",
+          "code": "label = boxplot_label(mock_tsp, lengths, times, best)\nassert 'mock_tsp' in label\nassert '5 ± 0.0 msec' in label\nassert '1,000 med len' in label\nassert '100.00% mean' in label",
+          "points": 1,
+          "description": "Verifies that the string formatting correctly converts seconds to milliseconds and calculates the percentage of the best tour."
+        },
+        {
+          "name": "test_label_large_numbers",
+          "setup": "def algo(): pass\ndef name(f): return f.__name__\nlengths = [25000, 35000]\ntimes = [0.1, 0.2]\nbest = 20000",
+          "code": "label = boxplot_label(algo, lengths, times, best)\n# Mean length: 30,000; Mean time: 150ms; Ratio: 1.5\nassert '150 ± 70.7 msec' in label\nassert '30,000 med len' in label or '30,000 ± 7,071 mean' in label\nassert '150.00% mean' in label",
+          "points": 1,
+          "description": "Checks for correct comma-separation in large integers and standard deviation calculations for time and length."
+        },
+        {
+          "name": "test_label_precision",
+          "setup": "def fast_tsp(): pass\ndef name(f): return f.__name__\nlengths = [100, 110, 120]\ntimes = [0.0001, 0.0002, 0.0003]\nbest = 100",
+          "code": "label = boxplot_label(fast_tsp, lengths, times, best)\n# Mean time 0.0002s = 0.2ms. {:.0f} rounds to 0.\nassert '0 ± 0.1 msec' in label\nassert '110 ± 10 mean' in label\nassert '110.00% mean' in label",
+          "points": 1,
+          "description": "Verifies rounding behavior for very small time values and basic arithmetic for the mean/best ratio."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 10
+    },
+    {
+      "function_name": "rankings",
+      "function_signature": "def rankings(algorithms, tests: TestSet, opt=None, **kwds):",
+      "function_body": "def rankings(algorithms, tests: TestSet, opt=None, **kwds):\n    \"Print a table of how often each algorithm had each rank: you get a #1 if you were shortest.\"\n    N = len(algorithms)\n    runslists = [benchmark(tsp, tests, opt=opt, **kwds) for tsp in algorithms]\n    lengthlists = [[round(length(r)) for r in runs] for runs in runslists]\n    # ordered[i] is all tour lengths (for all algorithms) for the i-th problem, sorted\n    ordered = [sorted(L) for L in zip(*lengthlists)]\n    fmt = ('{:>4}' * len(algorithms) + ' | {}').format\n    print(fmt(*['#' + str(i + 1) for i in range(N)], 'Algorithm'))\n    print(' ---' * N + ' | ---------')\n    for alg, lengths in zip(algorithms, lengthlists):\n        ranks = Counter(ordered[i].index(lengths[i]) for i in range(len(tests)))\n        print(fmt(*[ranks[i] for i in range(N)], name(alg)))\n",
+      "docstring": null,
+      "line_start": 271,
+      "line_end": 284,
+      "concept_id": "tour-metrics",
+      "concept_name": "Tour Metrics",
+      "dependencies": [
+        "benchmark",
+        "tour_length",
+        "Counter",
+        "name"
+      ],
+      "test_cases": [
+        {
+          "name": "test_rankings_execution",
+          "setup": "import io; from contextlib import redirect_stdout; from collections import Counter; def name(f): return f.__name__; def length(r): return r; def benchmark(tsp, tests, **kw): return [tsp(t) for t in tests]; alg1 = lambda x: 10; alg1.__name__ = 'A1'; tests = [1, 2, 3]",
+          "code": "f = io.StringIO();\nwith redirect_stdout(f):\n    rankings([alg1], tests)\noutput = f.getvalue()\nassert 'A1' in output\nassert '#1' in output",
+          "points": 1,
+          "description": "Verifies that the function executes and prints a table containing the algorithm name."
+        },
+        {
+          "name": "test_ranking_logic_winner",
+          "setup": "import io; from contextlib import redirect_stdout; from collections import Counter; def name(f): return f.__name__; def length(r): return r; def benchmark(tsp, tests, **kw): return [tsp(t) for t in tests]; alg_fast = lambda x: 10; alg_fast.__name__ = 'Fast'; alg_slow = lambda x: 20; alg_slow.__name__ = 'Slow'; tests = [1, 2]",
+          "code": "f = io.StringIO();\nwith redirect_stdout(f):\n    rankings([alg_fast, alg_slow], tests)\noutput = f.getvalue().splitlines()\n# Check if Fast alg has '2' in the #1 column (index 0 of the table data)\nfast_line = [l for l in output if 'Fast' in l][0]\nassert '2' in fast_line",
+          "points": 2,
+          "description": "Checks if the algorithm with shorter tours correctly accumulates #1 ranks."
+        },
+        {
+          "name": "test_ranking_tie_handling",
+          "setup": "import io; from contextlib import redirect_stdout; from collections import Counter; def name(f): return f.__name__; def length(r): return r; def benchmark(tsp, tests, **kw): return [tsp(t) for t in tests]; alg1 = lambda x: 10; alg1.__name__ = 'A1'; alg2 = lambda x: 10; alg2.__name__ = 'A2'; tests = [1, 2, 3]",
+          "code": "f = io.StringIO();\nwith redirect_stdout(f):\n    rankings([alg1, alg2], tests)\noutput = f.getvalue().splitlines()\n# Both should have 3 wins at rank #1 because index() returns the first occurrence of a tie\na1_line = [l for l in output if 'A1' in l][0]\na2_line = [l for l in output if 'A2' in l][0]\nassert '3' in a1_line and '3' in a2_line",
+          "points": 2,
+          "description": "Verifies how ties are handled using the index() method, ensuring both tied algorithms get the top rank."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 20
+    },
+    {
+      "function_name": "runs",
+      "function_signature": "def runs(tsps, cities, opts=(None, opt2)) -> List[Result]:",
+      "function_body": "def runs(tsps, cities, opts=(None, opt2)) -> List[Result]:\n    \"\"\"Run each of the tsps on the cities, and return a list of all results on `cities`.\"\"\"\n    for tsp, opt in itertools.product(tsps, opts):\n        run(tsp, cities, opt)\n    all_results[cities].sort(key=length)\n    return all_results[cities]\n",
+      "docstring": "Run each of the tsps on the cities, and return a list of all results on `cities`.",
+      "line_start": 285,
+      "line_end": 291,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "itertools.product",
+        "run",
+        "all_results",
+        "length"
+      ],
+      "test_cases": [
+        {
+          "name": "test_runs_execution_count",
+          "setup": "from collections import defaultdict; global all_results, run, opt2; all_results = defaultdict(list); opt2 = 'opt2'; def mock_run(tsp, cities, opt): all_results[cities].append(tsp); tsps = ['tsp1', 'tsp2']; cities = frozenset({1, 2}); run = mock_run; global length; length = lambda x: x",
+          "code": "results = runs(tsps, cities, opts=[None]); assert len(results) == 2",
+          "points": 1,
+          "description": "Verifies that the function executes the correct number of TSP-opt combinations using itertools.product."
+        },
+        {
+          "name": "test_runs_sorting",
+          "setup": "from collections import defaultdict, namedtuple; global all_results, run, length, opt2; all_results = defaultdict(list); opt2 = None; Result = namedtuple('Result', 'len'); def mock_run(tsp, cities, opt): all_results[cities].append(Result(len=tsp)); tsps = [50, 10, 30]; cities = 'test_cities'; length = lambda r: r.len; run = mock_run",
+          "code": "results = runs(tsps, cities, opts=[None]); assert [r.len for r in results] == [10, 30, 50]",
+          "points": 2,
+          "description": "Verifies that the returned list of results is sorted by the length property in ascending order."
+        },
+        {
+          "name": "test_runs_cartesian_product",
+          "setup": "from collections import defaultdict; global all_results, run, length, opt2; all_results = defaultdict(list); opt2 = 'opt2'; def mock_run(tsp, cities, opt): all_results[cities].append((tsp, opt)); tsps = ['A']; opts = [1, 2, 3]; cities = 'C'; length = lambda x: 0; run = mock_run",
+          "code": "results = runs(tsps, cities, opts=opts); assert len(results) == 3; assert ('A', 2) in results",
+          "points": 1,
+          "description": "Confirms that every combination of algorithm and optimization strategy is attempted."
+        },
+        {
+          "name": "test_runs_return_value",
+          "setup": "from collections import defaultdict; global all_results, run, length, opt2; all_results = defaultdict(list); opt2 = None; def mock_run(tsp, cities, opt): all_results[cities].append('res'); tsps = ['tsp1']; cities = 'NYC'; length = lambda x: 0; run = mock_run",
+          "code": "results = runs(tsps, cities, opts=[None]); assert results == all_results['NYC']",
+          "points": 1,
+          "description": "Ensures the function returns the specific entry from the global results dictionary associated with the input cities."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 15
+    },
+    {
+      "function_name": "compare",
+      "function_signature": "def compare(algorithms, tests=test_set(50, 200), opt=None):",
+      "function_body": "def compare(algorithms, tests=test_set(50, 200), opt=None):\n    \"\"\"Compare algorithms with boxplots and rankings.\"\"\"\n    rankings(algorithms, tests, opt=opt)\n",
+      "docstring": "Compare algorithms with boxplots and rankings.",
+      "line_start": 292,
+      "line_end": 295,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "rankings",
+        "test_set"
+      ],
+      "test_cases": [
+        {
+          "name": "test_compare_call_structure",
+          "setup": "def rankings(algs, tests, opt=None): rankings.called = True; rankings.args = (algs, tests, opt)\ndef test_set(n, m): return [1, 2, 3]\nrankings.called = False",
+          "code": "compare([lambda x: x]); assert rankings.called == True",
+          "points": 1,
+          "description": "Verifies that the compare function correctly triggers the underlying rankings utility."
+        },
+        {
+          "name": "test_compare_parameter_passing",
+          "setup": "def rankings(algs, tests, opt=None): rankings.opt_val = opt\ndef test_set(n, m): return []",
+          "code": "compare([], opt='optimal_value'); assert rankings.opt_val == 'optimal_value'",
+          "points": 1,
+          "description": "Ensures the 'opt' parameter (optional optimal values) is correctly passed through to the ranking engine."
+        },
+        {
+          "name": "test_compare_default_test_set",
+          "setup": "def rankings(algs, tests, opt=None): rankings.test_len = len(tests)\ndef test_set(n, m): return [i for i in range(n)]",
+          "code": "compare([]); assert rankings.test_len == 50",
+          "points": 1,
+          "description": "Verifies that the default test_set generator is invoked with the expected default size (50) when no tests are provided."
+        },
+        {
+          "name": "test_compare_algorithm_list_handling",
+          "setup": "def rankings(algs, tests, opt=None): rankings.algs_count = len(algs)\ndef test_set(n, m): return []",
+          "code": "algs = [nearest_tsp, exhaustive_tsp]; compare(algs); assert rankings.algs_count == 2",
+          "points": 1,
+          "description": "Checks if the function correctly handles a list of multiple TSP algorithms for comparison."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 10
+    },
+    {
+      "function_name": "plot_tour",
+      "function_signature": "def plot_tour(tour: Tour, style='bo-', hilite='rs', title=''):",
+      "function_body": "def plot_tour(tour: Tour, style='bo-', hilite='rs', title=''): \n    \"Plot every city and link in the tour, and highlight the start city.\"\n    scale = 1 + len(tour) ** 0.5 // 10\n    plt.figure(figsize=((3 * scale, 2 * scale)))\n    start = tour[0]\n    plot_segment([*tour, start], style)\n    plot_segment([start], hilite) \n    plt.title(title)\n",
+      "docstring": null,
+      "line_start": 296,
+      "line_end": 304,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "plt.figure",
+        "plot_segment",
+        "plt.title",
+        "len"
+      ],
+      "test_cases": [
+        {
+          "name": "test_tour_closure_logic",
+          "setup": "tour = [complex(0, 0), complex(1, 1), complex(2, 2)]",
+          "code": "start = tour[0]; closed_tour = [*tour, start]; assert closed_tour == [complex(0, 0), complex(1, 1), complex(2, 2), complex(0, 0)]",
+          "points": 1,
+          "description": "Verify the function correctly appends the start city to the end to close the tour loop."
+        },
+        {
+          "name": "test_figure_scaling_small",
+          "setup": "tour = [complex(0, 0)] * 4",
+          "code": "scale = 1 + len(tour) ** 0.5 // 10; assert scale == 1.0",
+          "points": 1,
+          "description": "Verify the figure scale calculation for a small number of cities."
+        },
+        {
+          "name": "test_figure_scaling_large",
+          "setup": "tour = [complex(0, 0)] * 100",
+          "code": "scale = 1 + len(tour) ** 0.5 // 10; assert scale == 2.0",
+          "points": 1,
+          "description": "Verify the figure scale calculation for a larger number of cities (100 cities should result in scale 2)."
+        },
+        {
+          "name": "test_start_city_selection",
+          "setup": "tour = [complex(5, 5), complex(10, 10)]",
+          "code": "start = tour[0]; assert start == complex(5, 5)",
+          "points": 1,
+          "description": "Ensure the function correctly identifies the first city as the start city for highlighting."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 15
+    },
+    {
+      "function_name": "plot_segment",
+      "function_signature": "def plot_segment(segment: Segment, style='bo:'):",
+      "function_body": "def plot_segment(segment: Segment, style='bo:'):\n    \"Plot every city and link in the segment.\"\n    plt.plot(Xs(segment), Ys(segment), style, linewidth=2/3, markersize=4, clip_on=False)\n    plt.axis('scaled'); plt.axis('off')\n",
+      "docstring": null,
+      "line_start": 305,
+      "line_end": 309,
+      "concept_id": "helper-functions",
+      "concept_name": "Helper Functions",
+      "dependencies": [
+        "Xs",
+        "Ys"
+      ],
+      "test_cases": [
+        {
+          "name": "test_plot_segment_execution",
+          "setup": "import matplotlib.pyplot as plt; segment = [complex(0, 0), complex(1, 2), complex(3, 4)]",
+          "code": "plot_segment(segment)",
+          "points": 1,
+          "description": "Verifies the function executes without error using a list of complex numbers."
+        },
+        {
+          "name": "test_plot_segment_custom_style",
+          "setup": "import matplotlib.pyplot as plt; segment = [complex(10, 10), complex(20, 20)]",
+          "code": "plot_segment(segment, style='rs-')",
+          "points": 1,
+          "description": "Verifies the function handles custom matplotlib style strings."
+        },
+        {
+          "name": "test_coordinate_dependency_logic",
+          "setup": "segment = [complex(5, 10), complex(15, 20)]",
+          "code": "assert Xs(segment) == [5.0, 15.0] and Ys(segment) == [10.0, 20.0]",
+          "points": 1,
+          "description": "Verifies that the coordinate extraction helpers (Xs and Ys) correctly parse the complex numbers."
+        },
+        {
+          "name": "test_empty_segment_safe_fail",
+          "setup": "import matplotlib.pyplot as plt; segment = []",
+          "code": "try:\n    plot_segment(segment)\nexcept Exception as e:\n    assert False, f'Function raised {type(e).__name__} on empty list'",
+          "points": 1,
+          "description": "Ensures the function handles an empty segment gracefully or passes the error from matplotlib."
+        }
+      ],
+      "difficulty": "basic",
+      "estimated_time_minutes": 10
+    },
+    {
+      "function_name": "boxplots",
+      "function_signature": "def boxplots(algorithms, tests: TestSet, opt=None, **kwds):",
+      "function_body": "def boxplots(algorithms, tests: TestSet, opt=None, **kwds):\n    \"Draw a boxplot for each of the algorithms executing the tests.\"\n    runslists = [benchmark(tsp, tests, opt=opt, **kwds) for tsp in algorithms]\n    lengthlists = [[length(r) for r in runs] for runs in runslists]\n    timelists   = [[r.secs for r in runs] for runs in runslists]\n    best   = min(map(mean, lengthlists))\n    labels = [boxplot_label(A, L, T, best) for (A, L, T) in zip(algorithms, lengthlists, timelists)]\n    plt.figure(figsize=(15, 7.5))\n    plt.grid(axis='y'); plt.ylabel('Mean Tour Length')\n    plt.tick_params(axis='x', which='major', labelsize=12)\n    plt.boxplot(lengthlists, labels=labels, showmeans=True, whis=(10, 90), sym='o', notch=True)\n    plt.title(f\"{len(tests)} sets of {len(tests[0])} cities with {opt.__name__ if opt else 'no'} optimization\")\n",
+      "docstring": null,
+      "line_start": 310,
+      "line_end": 322,
+      "concept_id": "tour-metrics",
+      "concept_name": "Tour Metrics",
+      "dependencies": [
+        "benchmark",
+        "length",
+        "mean",
+        "boxplot_label",
+        "plt.figure",
+        "plt.boxplot"
+      ],
+      "test_cases": [
+        {
+          "name": "test_boxplot_title_no_opt",
+          "setup": "import matplotlib.pyplot as plt; from statistics import mean; from collections import namedtuple; Run = namedtuple('Run', 'tour secs'); def length(r): return 10; def benchmark(tsp, tests, **kwds): return [Run([], 1)]; def boxplot_label(a, l, t, b): return 'lab'; tests = [frozenset([1, 2, 3])]",
+          "code": "plt.close('all'); boxplots([lambda x: x], tests); assert plt.gca().get_title() == '1 sets of 3 cities with no optimization'",
+          "points": 1,
+          "description": "Verifies the plot title is correctly generated for a basic test set without optimization."
+        },
+        {
+          "name": "test_boxplot_title_with_opt",
+          "setup": "import matplotlib.pyplot as plt; from statistics import mean; from collections import namedtuple; Run = namedtuple('Run', 'tour secs'); def length(r): return 10; def benchmark(tsp, tests, **kwds): return [Run([], 1)]; def boxplot_label(a, l, t, b): return 'lab'; tests = [frozenset([1, 2, 3])]",
+          "code": "def my_opt(x): return x; boxplots([lambda x: x], tests, opt=my_opt); assert 'my_opt' in plt.gca().get_title()",
+          "points": 1,
+          "description": "Verifies the plot title includes the name of the optimization function."
+        },
+        {
+          "name": "test_boxplot_data_aggregation",
+          "setup": "import matplotlib.pyplot as plt; from statistics import mean; from collections import namedtuple; Run = namedtuple('Run', 'tour secs'); def length(r): return 10; def benchmark(tsp, tests, **kwds): return [Run([], 1)]; def boxplot_label(a, l, t, b): return 'lab'; tests = [frozenset([1, 2])]",
+          "code": "try:\n    boxplots([lambda x: x, lambda x: x], tests)\n    success = True\nexcept Exception:\n    success = False\nassert success",
+          "points": 1,
+          "description": "Ensures the function correctly processes multiple algorithms and aggregates results into a plot."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 25
+    },
+    {
+      "function_name": "greedy_tsp_generator",
+      "function_signature": "def greedy_tsp_generator(cities) -> Iterable[Dict[City, Segment]]:",
+      "function_body": "def greedy_tsp_generator(cities) -> Iterable[Dict[City, Segment]]:\n    \"\"\"Go through links, shortest first. If a link can join segments, do it.\n    Yield the dict of {endpoint: segment} on each iteration.\"\"\"\n    endpoints = {C: [C] for C in cities} # A dict of {endpoint: segment}\n    links = itertools.combinations(cities, 2)\n    for (A, B) in sorted(links, key=lambda link: distance(*link)):\n        if A in endpoints and B in endpoints and endpoints[A] != endpoints[B]:\n            joined_segment = join_segments(endpoints, A, B)\n            yield endpoints\n            if len(joined_segment) == len(cities):\n                return\n",
+      "docstring": "Go through links, shortest first. If a link can join segments, do it.\n    Yield the dict of {endpoint: segment} on each iteration.",
+      "line_start": 323,
+      "line_end": 334,
+      "concept_id": "greedy-algorithms",
+      "concept_name": "Greedy Algorithms",
+      "dependencies": [
+        "distance",
+        "join_segments"
+      ],
+      "test_cases": [
+        {
+          "name": "test_generator_yield_count",
+          "setup": "from itertools import islice; cities = {City(0,0), City(1,0), City(2,0)}; \ndef join_segments(endpoints, A, B):\n    seg = (endpoints[A] + endpoints[B][::-1]) if endpoints[A][-1] == A else (endpoints[A][::-1] + endpoints[B])\n    for p in (seg[0], seg[-1]): endpoints[p] = seg\n    if A != seg[0] and A != seg[-1]: del endpoints[A]\n    if B != seg[0] and B != seg[-1]: del endpoints[B]\n    return seg",
+          "code": "history = list(greedy_tsp_generator(cities))\nassert len(history) == 2",
+          "points": 1,
+          "description": "Verifies that for N cities, the greedy generator yields N-1 times as it joins segments."
+        },
+        {
+          "name": "test_greedy_edge_selection",
+          "setup": "cities = {City(0,0), City(1,0), City(10,10)}; \ndef join_segments(endpoints, A, B):\n    seg = endpoints[A] + endpoints[B]\n    for p in (seg[0], seg[-1]): endpoints[p] = seg\n    del endpoints[A]; del endpoints[B]\n    return seg",
+          "code": "gen = greedy_tsp_generator(cities)\nfirst_step = next(gen)\n# The shortest link should be between (0,0) and (1,0)\nendpoints = list(first_step.values())\nassert any(len(seg) == 2 for seg in endpoints)\nassert any(City(0,0) in seg and City(1,0) in seg for seg in endpoints)",
+          "points": 2,
+          "description": "Ensures the algorithm greedily picks the shortest available link first."
+        },
+        {
+          "name": "test_final_segment_completion",
+          "setup": "cities = {City(0,0), City(1,0), City(1,1), City(0,1)}; \ndef join_segments(endpoints, A, B):\n    seg = endpoints[A] + endpoints[B]\n    for p in (seg[0], seg[-1]): endpoints[p] = seg\n    if A not in [seg[0], seg[-1]]: del endpoints[A]\n    if B not in [seg[0], seg[-1]]: del endpoints[B]\n    return seg",
+          "code": "final_state = list(greedy_tsp_generator(cities))[-1]\nfinal_segment = list(final_state.values())[0]\nassert len(final_segment) == 4\nassert set(final_segment) == set(cities)",
+          "points": 2,
+          "description": "Verifies that the generator terminates when all cities are joined into a single segment."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 25
+    },
+    {
+      "function_name": "plot_greedy_tsp",
+      "function_signature": "def plot_greedy_tsp(cities, plot_sizes=(1000, 500, 250, 125, 60, 30, 15, 10, 5, 2, 1)):",
+      "function_body": "def plot_greedy_tsp(cities, plot_sizes=(1000, 500, 250, 125, 60, 30, 15, 10, 5, 2, 1)):\n    \"\"\"Plot segments during the process of `greedy_tsp`, at specified plot_sizes.\"\"\"\n    for endpoints in greedy_tsp_generator(cities):\n        segments = set(map(tuple, endpoints.values()))\n        if len(segments) in plot_sizes:\n            for s in segments:\n                plot_segment(s, style='o-')\n            plt.title(f'{len(segments)} segments:')\n            plt.show()\n",
+      "docstring": "Plot segments during the process of `greedy_tsp`, at specified plot_sizes.",
+      "line_start": 335,
+      "line_end": 344,
+      "concept_id": "greedy-algorithms",
+      "concept_name": "Greedy Algorithms",
+      "dependencies": [
+        "greedy_tsp_generator",
+        "plot_segment",
+        "plt"
+      ],
+      "test_cases": [
+        {
+          "name": "test_plot_trigger_count",
+          "setup": "from unittest.mock import MagicMock, patch; cities = {complex(0,0), complex(1,1), complex(2,2)}; mock_gen = MagicMock(return_value=iter([ {0: (complex(0,0), complex(1,1))}, {0: (complex(0,0), complex(1,1)), 1: (complex(1,1), complex(2,2))} ]));",
+          "code": "with patch('__main__.greedy_tsp_generator', mock_gen), patch('matplotlib.pyplot.show') as mock_show: plot_greedy_tsp(cities, plot_sizes=(1, 2)); assert mock_show.call_count == 2",
+          "points": 1,
+          "description": "Verifies that plt.show() is called exactly as many times as there are matching plot_sizes in the generator stream."
+        },
+        {
+          "name": "test_segment_deduplication",
+          "setup": "from unittest.mock import MagicMock, patch; cities = {complex(0,0)}; mock_gen = MagicMock(return_value=iter([ {0: (1, 2), 1: (1, 2)} ]));",
+          "code": "with patch('__main__.greedy_tsp_generator', mock_gen), patch('matplotlib.pyplot.show') as mock_show, patch('__main__.plot_segment') as mock_plot: plot_greedy_tsp(cities, plot_sizes=(1,)); assert mock_plot.call_count == 1",
+          "points": 1,
+          "description": "Ensures that segments are treated as a set (deduplicated) before plotting, which is a property of the greedy implementation's endpoint tracking."
+        },
+        {
+          "name": "test_plot_sizes_filtering",
+          "setup": "from unittest.mock import MagicMock, patch; cities = {complex(0,0)}; mock_gen = MagicMock(return_value=iter([ {i: (i, i+1) for i in range(5)} ]));",
+          "code": "with patch('__main__.greedy_tsp_generator', mock_gen), patch('matplotlib.pyplot.show') as mock_show: plot_greedy_tsp(cities, plot_sizes=(10, 20)); assert mock_show.call_count == 0",
+          "points": 1,
+          "description": "Verifies that no plots are generated if the current number of segments does not exist in the plot_sizes filter."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 15
+    },
+    {
+      "function_name": "ensemble_tsp",
+      "function_signature": "def ensemble_tsp(cities, algorithms=[nearest_tsp, rep_nearest_tsp, greedy_tsp, divide_tsp, mst_tsp], opt=opt2):",
+      "function_body": "def ensemble_tsp(cities, algorithms=[nearest_tsp, rep_nearest_tsp, greedy_tsp, divide_tsp, mst_tsp], opt=opt2):\n    \"Apply an ensemble of algorithms to cities and take the shortest resulting tour.\"\n    return shortest(run(tsp, cities, opt=opt).tour for tsp in algorithms)\n",
+      "docstring": null,
+      "line_start": 345,
+      "line_end": 348,
+      "concept_id": "tour-metrics",
+      "concept_name": "Tour Metrics",
+      "dependencies": [
+        "shortest",
+        "run",
+        "tour_length",
+        "distance"
+      ],
+      "test_cases": [
+        {
+          "name": "test_ensemble_picks_shortest",
+          "setup": "from collections import namedtuple; Result = namedtuple('Result', 'tour'); City = complex; def run(tsp, cities, opt=None): return Result(tsp(cities)); A, B, C, D = City(0,0), City(10,0), City(10,10), City(0,10); cities = {A, B, C, D}; def good_tsp(c): return [A, B, C, D]; def bad_tsp(c): return [A, C, B, D]",
+          "code": "assert ensemble_tsp(cities, algorithms=[good_tsp, bad_tsp], opt=None) == [A, B, C, D]",
+          "points": 1,
+          "description": "Verifies that ensemble_tsp uses the tour_length metric (via the shortest function) to select the best tour from multiple algorithm results."
+        },
+        {
+          "name": "test_ensemble_output_validity",
+          "setup": "from collections import namedtuple; Result = namedtuple('Result', 'tour'); City = complex; def run(tsp, cities, opt=None): return Result(tsp(cities)); A, B, C = City(0,0), City(1,1), City(2,2); cities = {A, B, C}; def algo(c): return [A, B, C]",
+          "code": "result = ensemble_tsp(cities, algorithms=[algo], opt=None); assert valid_tour(result, cities)",
+          "points": 1,
+          "description": "Verifies that the ensemble correctly returns a valid tour that visits all provided cities exactly once."
+        },
+        {
+          "name": "test_ensemble_single_algo",
+          "setup": "from collections import namedtuple; Result = namedtuple('Result', 'tour'); City = complex; def run(tsp, cities, opt=None): return Result(tsp(cities)); A, B = City(0,0), City(1,1); cities = {A, B}; def algo(c): return [A, B]",
+          "code": "assert ensemble_tsp(cities, algorithms=[algo], opt=None) == [A, B]",
+          "points": 1,
+          "description": "Checks the behavior of the ensemble when only one algorithm is provided in the input list."
+        }
+      ],
+      "difficulty": "intermediate",
+      "estimated_time_minutes": 15
+    }
+  ]
+}

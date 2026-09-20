@@ -1,0 +1,412 @@
+{
+  "metadata": {
+    "title": "PYTHONINTROCH1",
+    "author": "Unknown",
+    "source": "markdown_document",
+    "video_id": "N/A",
+    "total_duration": 700,
+    "total_concepts": 20,
+    "extracted_at": "2025-12-15T02:42:36.166Z",
+    "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md"
+  },
+  "nodes": [
+    {
+      "id": "interactive_python_execution",
+      "name": "Interactive Python Execution",
+      "description": "Understanding how to execute Python commands line-by-line in an environment like a Jupyter Notebook or command line, where each instruction is processed immediately and its output (if any) is displayed.",
+      "prerequisites": [],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 0,
+          "end": 100
+        }
+      ],
+      "learning_objectives": [
+        "Execute simple Python commands in an interactive environment",
+        "Observe immediate output from Python commands"
+      ]
+    },
+    {
+      "id": "print_function_basics",
+      "name": "Basic Print Function Usage",
+      "description": "Learning to use the `print()` function with a single argument to display text enclosed in quotes (string literals) to the console.",
+      "prerequisites": [
+        "interactive_python_execution"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 20,
+          "end": 120
+        }
+      ],
+      "learning_objectives": [
+        "Use the print() function to display messages",
+        "Understand that print() is used for outputting information"
+      ]
+    },
+    {
+      "id": "simple_program_concept",
+      "name": "Concept of a Simple Program",
+      "description": "Grasping that a single command or a short sequence of commands constitutes a basic program designed to perform a specific action, such as displaying 'Hello, World'.",
+      "prerequisites": [
+        "print_function_basics"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 70,
+          "end": 120
+        }
+      ],
+      "learning_objectives": [
+        "Define what constitutes a basic program in Python",
+        "Recognize that code can be executed to achieve a specific outcome"
+      ]
+    },
+    {
+      "id": "addition_operator",
+      "name": "Addition Operator (+)",
+      "description": "Using the `+` operator to perform addition of numerical values in Python expressions, producing their sum.",
+      "prerequisites": [
+        "interactive_python_execution"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 120,
+          "end": 180
+        }
+      ],
+      "learning_objectives": [
+        "Perform addition using the + operator",
+        "Understand how numerical expressions are evaluated"
+      ]
+    },
+    {
+      "id": "subtraction_operator",
+      "name": "Subtraction Operator (-)",
+      "description": "Using the `-` operator to perform subtraction of numerical values in Python expressions, yielding their difference.",
+      "prerequisites": [
+        "interactive_python_execution",
+        "addition_operator"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 180,
+          "end": 210
+        }
+      ],
+      "learning_objectives": [
+        "Perform subtraction using the - operator"
+      ]
+    },
+    {
+      "id": "multiplication_operator",
+      "name": "Multiplication Operator (*)",
+      "description": "Using the `*` operator to perform multiplication of numerical values in Python expressions, calculating their product.",
+      "prerequisites": [
+        "interactive_python_execution",
+        "addition_operator"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 210,
+          "end": 240
+        }
+      ],
+      "learning_objectives": [
+        "Perform multiplication using the * operator"
+      ]
+    },
+    {
+      "id": "exponentiation_operator",
+      "name": "Exponentiation Operator (**)",
+      "description": "Using the `**` operator to raise a base number to a specified power (e.g., 5 squared or 2 to the power of 10).",
+      "prerequisites": [
+        "interactive_python_execution",
+        "multiplication_operator"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 240,
+          "end": 280
+        }
+      ],
+      "learning_objectives": [
+        "Calculate exponents using the ** operator"
+      ]
+    },
+    {
+      "id": "string_literal_output",
+      "name": "String Literal Output",
+      "description": "Understanding that text enclosed in single or double quotes is treated as a string literal and can be directly printed, distinct from numerical operations.",
+      "prerequisites": [
+        "print_function_basics"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 20,
+          "end": 120
+        },
+        {
+          "start": 280,
+          "end": 310
+        }
+      ],
+      "learning_objectives": [
+        "Recognize strings as textual data in Python",
+        "Print predefined text messages"
+      ]
+    },
+    {
+      "id": "mixed_type_print_output",
+      "name": "Printing Mixed Text and Calculations",
+      "description": "Learning to use commas within the `print()` function to display a combination of string literals and the results of numerical expressions in a single, formatted output line.",
+      "prerequisites": [
+        "print_function_basics",
+        "string_literal_output",
+        "addition_operator",
+        "exponentiation_operator"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 310,
+          "end": 360
+        }
+      ],
+      "learning_objectives": [
+        "Combine text and calculation results in a single print statement",
+        "Understand how commas separate different elements in print()"
+      ]
+    },
+    {
+      "id": "division_operator",
+      "name": "Division Operator (/)",
+      "description": "Using the `/` operator to perform standard floating-point division, resulting in a decimal number even if the operands are integers.",
+      "prerequisites": [
+        "interactive_python_execution",
+        "addition_operator"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 360,
+          "end": 390
+        }
+      ],
+      "learning_objectives": [
+        "Perform division using the / operator",
+        "Understand that division results in a floating-point number"
+      ]
+    },
+    {
+      "id": "modulo_operator",
+      "name": "Modulo Operator (%)",
+      "description": "Using the `%` operator to calculate and return the remainder of an integer division.",
+      "prerequisites": [
+        "interactive_python_execution",
+        "division_operator"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 390,
+          "end": 430
+        }
+      ],
+      "learning_objectives": [
+        "Calculate the remainder of a division using the % operator"
+      ]
+    },
+    {
+      "id": "numeric_data_representation",
+      "name": "Numeric Data Representation",
+      "description": "Understanding that Python can process and display various numerical values (integers, floating-point results from division) for mathematical operations.",
+      "prerequisites": [
+        "interactive_python_execution"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 120,
+          "end": 430
+        }
+      ],
+      "learning_objectives": [
+        "Distinguish between integer and floating-point numbers in Python",
+        "Understand how Python represents numerical data"
+      ]
+    },
+    {
+      "id": "string_data_representation",
+      "name": "String Data Representation",
+      "description": "Understanding that sequences of characters enclosed in quotes are treated as text (strings) by Python and can be displayed, behaving distinctly from numerical data.",
+      "prerequisites": [
+        "interactive_python_execution"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 20,
+          "end": 120
+        },
+        {
+          "start": 280,
+          "end": 360
+        }
+      ],
+      "learning_objectives": [
+        "Identify string data in Python code",
+        "Recognize the purpose of quotes for defining strings"
+      ]
+    },
+    {
+      "id": "operator_precedence",
+      "name": "Order of Operations (Operator Precedence)",
+      "description": "Understanding the established hierarchy (Parentheses, Exponents, Multiplication/Division/Modulo, Addition/Subtraction) in which mathematical operators are evaluated in Python expressions.",
+      "prerequisites": [
+        "addition_operator",
+        "subtraction_operator",
+        "multiplication_operator",
+        "exponentiation_operator",
+        "division_operator",
+        "modulo_operator"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 430,
+          "end": 500
+        }
+      ],
+      "learning_objectives": [
+        "Recall the mathematical order of operations in Python",
+        "Predict the outcome of expressions involving multiple operators"
+      ]
+    },
+    {
+      "id": "parentheses_for_grouping",
+      "name": "Parentheses for Grouping Operations",
+      "description": "Using parentheses `()` to explicitly control the order of evaluation in an expression, overriding the default operator precedence and ensuring specific parts are calculated first.",
+      "prerequisites": [
+        "operator_precedence"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 460,
+          "end": 500
+        }
+      ],
+      "learning_objectives": [
+        "Use parentheses to group operations and control precedence",
+        "Write clear and unambiguous mathematical expressions"
+      ]
+    },
+    {
+      "id": "expression_evaluation",
+      "name": "Expression Evaluation",
+      "description": "The fundamental process by which Python interprets and computes the value of a combination of operators and operands, resulting in a single outcome based on operator precedence rules.",
+      "prerequisites": [
+        "interactive_python_execution",
+        "numeric_data_representation",
+        "operator_precedence"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 120,
+          "end": 500
+        }
+      ],
+      "learning_objectives": [
+        "Understand how Python processes mathematical expressions",
+        "Trace the step-by-step evaluation of an expression"
+      ]
+    },
+    {
+      "id": "single_line_comments",
+      "name": "Single-Line Comments (#)",
+      "description": "Learning to use the hash symbol `#` to create single-line comments in Python code, which are completely ignored by the interpreter and serve for human readability.",
+      "prerequisites": [
+        "interactive_python_execution"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 500,
+          "end": 550
+        }
+      ],
+      "learning_objectives": [
+        "Add comments to Python code using the # symbol",
+        "Differentiate between executable code and comments"
+      ]
+    },
+    {
+      "id": "inline_comments",
+      "name": "Inline Comments",
+      "description": "Understanding how to place a comment on the same line as executable code, where only the text after the hash symbol is ignored by the Python interpreter.",
+      "prerequisites": [
+        "single_line_comments"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 550,
+          "end": 600
+        }
+      ],
+      "learning_objectives": [
+        "Write comments on the same line as code",
+        "Use inline comments for brief explanations"
+      ]
+    },
+    {
+      "id": "code_disabling_with_comments",
+      "name": "Disabling Code with Comments",
+      "description": "Using comments to temporarily prevent lines of code from executing without deleting them, a useful practice for debugging, testing, or archiving code sections for later use.",
+      "prerequisites": [
+        "single_line_comments"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 600,
+          "end": 640
+        }
+      ],
+      "learning_objectives": [
+        "Temporarily disable code execution using comments",
+        "Apply commenting for debugging purposes"
+      ]
+    },
+    {
+      "id": "purpose_of_comments",
+      "name": "Purpose of Comments",
+      "description": "Understanding the primary reasons for using comments, such as improving code readability, explaining complex logic, documenting code for other programmers, and providing context for future self-reference.",
+      "prerequisites": [
+        "single_line_comments"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 640,
+          "end": 700
+        }
+      ],
+      "learning_objectives": [
+        "Articulate the benefits of using comments in programming",
+        "Write effective comments that enhance code understanding"
+      ]
+    }
+  ],
+  "edges": []
+}

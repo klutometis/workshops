@@ -1,0 +1,578 @@
+{
+  "metadata": {
+    "title": "SPELLINGBEE",
+    "author": "Peter Norvig",
+    "source": "Peter Norvig's Spelling Bee Puzzle solution",
+    "video_id": "",
+    "total_duration": 0,
+    "total_concepts": 29,
+    "extracted_at": "2025-12-12T16:13:13.788Z",
+    "enriched_at": "2023-10-27T10:00:00Z",
+    "enrichment_version": "1.0",
+    "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md"
+  },
+  "nodes": [
+    {
+      "id": "spelling_bee_puzzle_game_mechanics",
+      "name": "Spelling Bee Puzzle Game Mechanics",
+      "description": "An introduction to the NYTimes Spelling Bee puzzle, outlining its honeycomb letter arrangement, the objective of finding words, and general gameplay constraints.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "valid_word_criteria",
+      "name": "Valid Word Criteria",
+      "description": "The specific rules defining what constitutes a valid word in the Spelling Bee puzzle: minimum length of four letters, inclusion of the central letter, and use of only the seven given letters.",
+      "prerequisites": [
+        "spelling_bee_puzzle_game_mechanics"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "pangram_spelling_bee",
+      "name": "Pangram in Spelling Bee",
+      "description": "Definition of a 'pangram' as a valid word that uses all seven letters available in the honeycomb, and the associated bonus points earned for such words.",
+      "prerequisites": [
+        "spelling_bee_puzzle_game_mechanics",
+        "valid_word_criteria"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "word_scoring_spelling_bee",
+      "name": "Word Scoring in Spelling Bee",
+      "description": "The point system for words in the Spelling Bee puzzle: 1 point for 4-letter words, word length for longer words, plus a 7-point bonus for pangrams.",
+      "prerequisites": [
+        "spelling_bee_puzzle_game_mechanics",
+        "valid_word_criteria",
+        "pangram_spelling_bee"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "honeycomb_structure",
+      "name": "Honeycomb Structure Representation",
+      "description": "Understanding the honeycomb lattice as a combination of a seven-letter set and a single distinguished center letter, which are crucial attributes for puzzle solving.",
+      "prerequisites": [
+        "spelling_bee_puzzle_game_mechanics"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_basic_syntax",
+      "name": "Python Basic Syntax",
+      "description": "Fundamental Python programming constructs including variables, functions, basic data types (strings, integers, booleans), and control flow.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_string_operations",
+      "name": "Python String Operations",
+      "description": "Common string manipulation techniques in Python such as converting to uppercase, splitting strings, joining characters, and sorting characters within a string.",
+      "prerequisites": [
+        "python_basic_syntax"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_set_operations",
+      "name": "Python Set Operations",
+      "description": "Key operations on Python sets, including checking if one set is a superset of another (`issuperset`), adding elements, and using set comprehensions for concise creation.",
+      "prerequisites": [
+        "python_basic_syntax"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_list_comprehensions",
+      "name": "Python List Comprehensions",
+      "description": "Using a compact syntax to create new lists by iterating over existing iterables and applying conditions or transformations.",
+      "prerequisites": [
+        "python_basic_syntax"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_dictionaries",
+      "name": "Python Dictionaries",
+      "description": "Understanding key-value pairs, dictionary creation, access, modification, and their use as efficient lookup tables.",
+      "prerequisites": [
+        "python_basic_syntax"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_dataclasses",
+      "name": "Python Dataclasses",
+      "description": "Utilizing the `dataclass` decorator for easily creating classes primarily used to store data, providing automatic generation of methods like `__init__`, `__repr__`, `__eq__`, and supporting frozen (immutable) instances.",
+      "prerequisites": [
+        "python_basic_syntax"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "programmatic_word_filtering",
+      "name": "Programmatic Word Filtering",
+      "description": "Implementing Python functions to filter a given word list based on specific criteria derived from the puzzle rules, such as minimum length, allowed letters, and exclusion of certain characters.",
+      "prerequisites": [
+        "valid_word_criteria",
+        "python_string_operations",
+        "python_set_operations",
+        "python_list_comprehensions"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "representing_lettersets",
+      "name": "Representing Lettersets",
+      "description": "Exploring different ways to represent unique sets of letters (e.g., sorted strings vs. frozensets) and evaluating their trade-offs in terms of memory usage, readability, and suitability as dictionary keys.",
+      "prerequisites": [
+        "python_string_operations",
+        "python_set_operations",
+        "python_dictionaries"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "algorithmic_thinking",
+      "name": "Algorithmic Thinking",
+      "description": "The process of designing and analyzing step-by-step procedures to solve computational problems, focusing on problem decomposition, strategy formulation, and efficiency considerations.",
+      "prerequisites": [
+        "python_basic_syntax"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "brute_force_algorithm_design",
+      "name": "Brute-Force Algorithm Design",
+      "description": "Designing an algorithm that systematically checks every possible candidate solution to a problem, understanding its directness and inherent high computational cost.",
+      "prerequisites": [
+        "algorithmic_thinking"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "combinatorial_problem_space",
+      "name": "Combinatorial Problem Space Analysis",
+      "description": "Analyzing problems involving combinations and permutations to understand the total number of possible arrangements or selections, which helps in estimating the complexity of brute-force solutions.",
+      "prerequisites": [
+        "algorithmic_thinking"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "itertools_combinations",
+      "name": "itertools.combinations for Subsets",
+      "description": "Using Python's `itertools.combinations` to efficiently generate all unique combinations (subsets) of elements from a given iterable without repetition.",
+      "prerequisites": [
+        "python_basic_syntax",
+        "combinatorial_problem_space"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "constraint_based_problem_reduction",
+      "name": "Constraint-Based Problem Reduction",
+      "description": "Applying specific rules or constraints of a problem (e.g., 'must have at least one pangram') to drastically reduce the number of candidates an algorithm needs to consider, moving beyond pure brute force.",
+      "prerequisites": [
+        "brute_force_algorithm_design",
+        "combinatorial_problem_space"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "generating_candidate_honeycombs",
+      "name": "Generating Candidate Honeycombs",
+      "description": "Programmatically creating all relevant 'Honeycomb' configurations by leveraging pangram lettersets and iterating through each letter as a potential center, significantly narrowing the search space.",
+      "prerequisites": [
+        "honeycomb_structure",
+        "pangram_spelling_bee",
+        "representing_lettersets",
+        "itertools_combinations",
+        "constraint_based_problem_reduction"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "performance_profiling_basic",
+      "name": "Basic Performance Profiling",
+      "description": "Using simple tools like IPython's `%timeit` magic command to measure the execution time of code snippets, helping identify performance bottlenecks and evaluate optimization efforts.",
+      "prerequisites": [
+        "python_basic_syntax"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "precomputation_for_optimization",
+      "name": "Precomputation for Optimization",
+      "description": "A general optimization strategy involving performing expensive calculations once, storing their results (e.g., in a lookup table), and reusing these stored results to avoid redundant computations.",
+      "prerequisites": [
+        "performance_profiling_basic",
+        "algorithmic_thinking"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "collections_defaultdict",
+      "name": "collections.defaultdict for Aggregation",
+      "description": "Leveraging `collections.defaultdict` to simplify value aggregation in dictionaries by automatically providing a default value for a key if it doesn't exist, reducing boilerplate code.",
+      "prerequisites": [
+        "python_dictionaries"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "points_table_data_structure",
+      "name": "Points Table Data Structure",
+      "description": "An optimized data structure (a dictionary mapping lettersets to aggregated scores) created through precomputation to quickly retrieve total scores for any given letterset, significantly speeding up score calculations.",
+      "prerequisites": [
+        "precomputation_for_optimization",
+        "python_dictionaries",
+        "representing_lettersets",
+        "collections_defaultdict"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "calculating_letter_subsets",
+      "name": "Calculating Letter Subsets for Scoring",
+      "description": "The process of generating all possible subsets of letters from a given honeycomb (ensuring the center letter is always included) to utilize a precomputed 'points table' for faster score calculation.",
+      "prerequisites": [
+        "itertools_combinations",
+        "honeycomb_structure"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "upper_bound_calculation_optimization",
+      "name": "Upper Bound Calculation for Optimization",
+      "description": "A technique to quickly estimate the maximum possible score for a group of candidates (e.g., a pangram letterset regardless of its center) to determine if further detailed computation is necessary, avoiding unproductive search paths.",
+      "prerequisites": [
+        "precomputation_for_optimization",
+        "algorithmic_thinking"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "branch_and_bound_algorithm",
+      "name": "Branch and Bound Algorithm",
+      "description": "An advanced optimization technique that systematically explores a search space, but prunes 'branches' (groups of candidate solutions) if an upper bound calculation indicates they cannot lead to a better solution than the current best found so far.",
+      "prerequisites": [
+        "algorithmic_thinking",
+        "precomputation_for_optimization",
+        "upper_bound_calculation_optimization"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "functools_lru_cache_memoization",
+      "name": "functools.lru_cache for Memoization",
+      "description": "Using the `functools.lru_cache` decorator to automatically cache the results of function calls based on their arguments, thereby avoiding redundant computations for identical inputs (memoization).",
+      "prerequisites": [
+        "python_basic_syntax",
+        "performance_profiling_basic"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "iterative_refinement_of_algorithms",
+      "name": "Iterative Refinement of Algorithms",
+      "description": "A development methodology where an initial simple (e.g., brute-force) algorithm is progressively enhanced and optimized through multiple stages, incorporating advanced techniques like constraint reduction, precomputation, and pruning.",
+      "prerequisites": [
+        "brute_force_algorithm_design",
+        "constraint_based_problem_reduction",
+        "precomputation_for_optimization",
+        "branch_and_bound_algorithm"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "readability_vs_efficiency_tradeoffs",
+      "name": "Readability vs. Efficiency Trade-offs",
+      "description": "Analyzing the choices made in code design, such as data structure representation or algorithmic approach, weighing the benefits of clear, easy-to-understand code against the need for optimal performance.",
+      "prerequisites": [
+        "algorithmic_thinking",
+        "performance_profiling_basic",
+        "representing_lettersets"
+      ],
+      "difficulty": "intermediate"
+    }
+  ],
+  "edges": [
+    {
+      "from": "spelling_bee_puzzle_game_mechanics",
+      "to": "valid_word_criteria",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "spelling_bee_puzzle_game_mechanics",
+      "to": "pangram_spelling_bee",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "valid_word_criteria",
+      "to": "pangram_spelling_bee",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "spelling_bee_puzzle_game_mechanics",
+      "to": "word_scoring_spelling_bee",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "valid_word_criteria",
+      "to": "word_scoring_spelling_bee",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "pangram_spelling_bee",
+      "to": "word_scoring_spelling_bee",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "spelling_bee_puzzle_game_mechanics",
+      "to": "honeycomb_structure",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_basic_syntax",
+      "to": "python_string_operations",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_basic_syntax",
+      "to": "python_set_operations",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_basic_syntax",
+      "to": "python_list_comprehensions",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_basic_syntax",
+      "to": "python_dictionaries",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_basic_syntax",
+      "to": "python_dataclasses",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "valid_word_criteria",
+      "to": "programmatic_word_filtering",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_string_operations",
+      "to": "programmatic_word_filtering",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_set_operations",
+      "to": "programmatic_word_filtering",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_list_comprehensions",
+      "to": "programmatic_word_filtering",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_string_operations",
+      "to": "representing_lettersets",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_set_operations",
+      "to": "representing_lettersets",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_dictionaries",
+      "to": "representing_lettersets",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_basic_syntax",
+      "to": "algorithmic_thinking",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "algorithmic_thinking",
+      "to": "brute_force_algorithm_design",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "algorithmic_thinking",
+      "to": "combinatorial_problem_space",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_basic_syntax",
+      "to": "itertools_combinations",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "combinatorial_problem_space",
+      "to": "itertools_combinations",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "brute_force_algorithm_design",
+      "to": "constraint_based_problem_reduction",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "combinatorial_problem_space",
+      "to": "constraint_based_problem_reduction",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "honeycomb_structure",
+      "to": "generating_candidate_honeycombs",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "pangram_spelling_bee",
+      "to": "generating_candidate_honeycombs",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "representing_lettersets",
+      "to": "generating_candidate_honeycombs",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "itertools_combinations",
+      "to": "generating_candidate_honeycombs",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "constraint_based_problem_reduction",
+      "to": "generating_candidate_honeycombs",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_basic_syntax",
+      "to": "performance_profiling_basic",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "performance_profiling_basic",
+      "to": "precomputation_for_optimization",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "algorithmic_thinking",
+      "to": "precomputation_for_optimization",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_dictionaries",
+      "to": "collections_defaultdict",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "precomputation_for_optimization",
+      "to": "points_table_data_structure",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_dictionaries",
+      "to": "points_table_data_structure",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "representing_lettersets",
+      "to": "points_table_data_structure",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "collections_defaultdict",
+      "to": "points_table_data_structure",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "itertools_combinations",
+      "to": "calculating_letter_subsets",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "honeycomb_structure",
+      "to": "calculating_letter_subsets",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "precomputation_for_optimization",
+      "to": "upper_bound_calculation_optimization",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "algorithmic_thinking",
+      "to": "upper_bound_calculation_optimization",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "algorithmic_thinking",
+      "to": "branch_and_bound_algorithm",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "precomputation_for_optimization",
+      "to": "branch_and_bound_algorithm",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "upper_bound_calculation_optimization",
+      "to": "branch_and_bound_algorithm",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "python_basic_syntax",
+      "to": "functools_lru_cache_memoization",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "performance_profiling_basic",
+      "to": "functools_lru_cache_memoization",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "brute_force_algorithm_design",
+      "to": "iterative_refinement_of_algorithms",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "constraint_based_problem_reduction",
+      "to": "iterative_refinement_of_algorithms",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "precomputation_for_optimization",
+      "to": "iterative_refinement_of_algorithms",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "branch_and_bound_algorithm",
+      "to": "iterative_refinement_of_algorithms",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "algorithmic_thinking",
+      "to": "readability_vs_efficiency_tradeoffs",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "performance_profiling_basic",
+      "to": "readability_vs_efficiency_tradeoffs",
+      "type": "prerequisite_of"
+    },
+    {
+      "from": "representing_lettersets",
+      "to": "readability_vs_efficiency_tradeoffs",
+      "type": "prerequisite_of"
+    }
+  ]
+}

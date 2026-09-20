@@ -1,0 +1,414 @@
+{
+  "metadata": {
+    "title": "01-STRINGS-EXERCISE",
+    "author": "Unknown",
+    "source": "Markdown document",
+    "video_id": "N/A",
+    "total_duration": 1500,
+    "total_concepts": 23,
+    "extracted_at": "2025-12-19T09:25:34.058Z",
+    "source_file": "/tmp/markdown/53bb5e7f-9a4d-4cf1-a926-7e6b7d3d203a/01-strings-exercise.md"
+  },
+  "nodes": [
+    {
+      "id": "python_data_types",
+      "name": "Python Data Types",
+      "description": "Understanding fundamental data types in Python, such as integers, floats, and strings, and how they classify different kinds of values.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_variables",
+      "name": "Python Variables",
+      "description": "How to declare and assign values to variables in Python, acting as named storage locations for data that can be referenced and manipulated.",
+      "prerequisites": [
+        "python_data_types"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "string_literals",
+      "name": "String Literals",
+      "description": "Representing fixed text data directly within Python code using single, double, or triple quotes.",
+      "prerequisites": [
+        "python_data_types"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_strings_introduction",
+      "name": "Python Strings Introduction",
+      "description": "Understanding strings as an immutable sequence data type in Python, specifically designed for storing and manipulating text.",
+      "prerequisites": [
+        "python_data_types",
+        "string_literals"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "string_immutability",
+      "name": "String Immutability",
+      "description": "Learning the concept that once a string is created in Python, its content cannot be altered directly. Any operation that appears to modify a string actually returns a new string.",
+      "prerequisites": [
+        "python_strings_introduction"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "string_methods_overview",
+      "name": "String Methods Overview",
+      "description": "A general introduction to the concept of built-in functions (methods) associated with string objects that perform various operations like case conversion, trimming, and searching.",
+      "prerequisites": [
+        "python_strings_introduction"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "calling_methods",
+      "name": "Calling Methods",
+      "description": "The syntax and mechanism for invoking methods on an object using dot notation (e.g., `object.method()`), passing arguments if required.",
+      "prerequisites": [
+        "python_variables",
+        "string_methods_overview"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "str_lower_method",
+      "name": "str.lower() Method",
+      "description": "Learning how to use the built-in `lower()` method of string objects to convert all alphabetic characters in a string to their lowercase equivalents.",
+      "prerequisites": [
+        "string_methods_overview",
+        "calling_methods"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "str_strip_method",
+      "name": "str.strip() Method",
+      "description": "Understanding and applying the `strip()` method to remove leading and trailing whitespace characters (spaces, tabs, newlines) from a string.",
+      "prerequisites": [
+        "string_methods_overview",
+        "calling_methods"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "str_title_method",
+      "name": "str.title() Method",
+      "description": "Learning to use the `title()` method to convert a string into title case, where the first letter of each word is capitalized and the rest are lowercase.",
+      "prerequisites": [
+        "string_methods_overview",
+        "calling_methods"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "method_return_values",
+      "name": "Method Return Values",
+      "description": "Understanding that many methods, especially string methods, return a new value (e.g., a transformed string) rather than modifying the original object in place.",
+      "prerequisites": [
+        "calling_methods",
+        "string_immutability"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "method_chaining",
+      "name": "Method Chaining",
+      "description": "Combining multiple string methods sequentially on the same string object, where the output of one method becomes the input for the next, enhancing conciseness.",
+      "prerequisites": [
+        "calling_methods",
+        "method_return_values"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "boolean_expressions",
+      "name": "Boolean Expressions",
+      "description": "Understanding expressions that evaluate to a boolean value (`True` or `False`), forming the basis for conditional logic and comparisons.",
+      "prerequisites": [
+        "python_data_types"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "equality_operator",
+      "name": "Equality Operator (==)",
+      "description": "Using the `==` operator to compare if two values are equal, resulting in a boolean `True` or `False`.",
+      "prerequisites": [
+        "boolean_expressions"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "assert_statement",
+      "name": "assert Statement",
+      "description": "Using the `assert` statement in Python to verify that a given condition is true, often employed for debugging or ensuring invariants in code during development.",
+      "prerequisites": [
+        "boolean_expressions",
+        "equality_operator"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "assertion_error_exception",
+      "name": "AssertionError Exception",
+      "description": "Understanding the `AssertionError` exception, which is raised when an `assert` statement's condition evaluates to `False`, indicating an unexpected program state or an incorrect implementation.",
+      "prerequisites": [
+        "assert_statement"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "newline_character",
+      "name": "Newline Character (\\n)",
+      "description": "Recognizing the `\\n` escape sequence as a special character representing a line break within strings, affecting string display and parsing.",
+      "prerequisites": [
+        "string_literals"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "string_transformation_strategy",
+      "name": "String Transformation Strategy",
+      "description": "Developing a methodical approach or plan to apply a sequence of string operations (methods) to achieve a specific formatting or content modification goal for a given string.",
+      "prerequisites": [
+        "string_methods_overview",
+        "method_chaining"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "f_strings_introduction",
+      "name": "F-strings (Formatted String Literals) Introduction",
+      "description": "Introducing f-strings as a modern and efficient way to create formatted strings by embedding Python expressions directly inside string literals.",
+      "prerequisites": [
+        "string_literals",
+        "python_variables"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "variable_interpolation_f_strings",
+      "name": "Variable Interpolation with F-strings",
+      "description": "Utilizing f-strings to directly embed the values of variables within a string by placing their names inside curly braces `{}`.",
+      "prerequisites": [
+        "f_strings_introduction",
+        "python_variables"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "print_function_introduction",
+      "name": "print() Function Introduction",
+      "description": "Learning to use the built-in `print()` function to display output, including strings and variable values, to the console for user feedback or debugging.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "formatted_output",
+      "name": "Formatted Output",
+      "description": "Techniques for presenting program results in a human-readable and structured way, often involving advanced string formatting methods like f-strings to combine text and data.",
+      "prerequisites": [
+        "print_function_introduction",
+        "f_strings_introduction"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "problem_solving_with_strings",
+      "name": "Problem Solving with Strings",
+      "description": "Applying the comprehensive knowledge of string data types, their various methods, and formatting techniques to effectively solve practical programming challenges involving text manipulation and processing.",
+      "prerequisites": [
+        "string_methods_overview",
+        "string_transformation_strategy",
+        "f_strings_introduction",
+        "assert_statement"
+      ],
+      "difficulty": "intermediate"
+    }
+  ],
+  "edges": [
+    {
+      "from": "python_data_types",
+      "to": "python_variables",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_data_types",
+      "to": "string_literals",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_data_types",
+      "to": "python_strings_introduction",
+      "type": "prerequisite"
+    },
+    {
+      "from": "string_literals",
+      "to": "python_strings_introduction",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_strings_introduction",
+      "to": "string_immutability",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_strings_introduction",
+      "to": "string_methods_overview",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_variables",
+      "to": "calling_methods",
+      "type": "prerequisite"
+    },
+    {
+      "from": "string_methods_overview",
+      "to": "calling_methods",
+      "type": "prerequisite"
+    },
+    {
+      "from": "string_methods_overview",
+      "to": "str_lower_method",
+      "type": "prerequisite"
+    },
+    {
+      "from": "calling_methods",
+      "to": "str_lower_method",
+      "type": "prerequisite"
+    },
+    {
+      "from": "string_methods_overview",
+      "to": "str_strip_method",
+      "type": "prerequisite"
+    },
+    {
+      "from": "calling_methods",
+      "to": "str_strip_method",
+      "type": "prerequisite"
+    },
+    {
+      "from": "string_methods_overview",
+      "to": "str_title_method",
+      "type": "prerequisite"
+    },
+    {
+      "from": "calling_methods",
+      "to": "str_title_method",
+      "type": "prerequisite"
+    },
+    {
+      "from": "calling_methods",
+      "to": "method_return_values",
+      "type": "prerequisite"
+    },
+    {
+      "from": "string_immutability",
+      "to": "method_return_values",
+      "type": "prerequisite"
+    },
+    {
+      "from": "calling_methods",
+      "to": "method_chaining",
+      "type": "prerequisite"
+    },
+    {
+      "from": "method_return_values",
+      "to": "method_chaining",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_data_types",
+      "to": "boolean_expressions",
+      "type": "prerequisite"
+    },
+    {
+      "from": "boolean_expressions",
+      "to": "equality_operator",
+      "type": "prerequisite"
+    },
+    {
+      "from": "boolean_expressions",
+      "to": "assert_statement",
+      "type": "prerequisite"
+    },
+    {
+      "from": "equality_operator",
+      "to": "assert_statement",
+      "type": "prerequisite"
+    },
+    {
+      "from": "assert_statement",
+      "to": "assertion_error_exception",
+      "type": "prerequisite"
+    },
+    {
+      "from": "string_literals",
+      "to": "newline_character",
+      "type": "prerequisite"
+    },
+    {
+      "from": "string_methods_overview",
+      "to": "string_transformation_strategy",
+      "type": "prerequisite"
+    },
+    {
+      "from": "method_chaining",
+      "to": "string_transformation_strategy",
+      "type": "prerequisite"
+    },
+    {
+      "from": "string_literals",
+      "to": "f_strings_introduction",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_variables",
+      "to": "f_strings_introduction",
+      "type": "prerequisite"
+    },
+    {
+      "from": "f_strings_introduction",
+      "to": "variable_interpolation_f_strings",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_variables",
+      "to": "variable_interpolation_f_strings",
+      "type": "prerequisite"
+    },
+    {
+      "from": "print_function_introduction",
+      "to": "formatted_output",
+      "type": "prerequisite"
+    },
+    {
+      "from": "f_strings_introduction",
+      "to": "formatted_output",
+      "type": "prerequisite"
+    },
+    {
+      "from": "string_methods_overview",
+      "to": "problem_solving_with_strings",
+      "type": "prerequisite"
+    },
+    {
+      "from": "string_transformation_strategy",
+      "to": "problem_solving_with_strings",
+      "type": "prerequisite"
+    },
+    {
+      "from": "f_strings_introduction",
+      "to": "problem_solving_with_strings",
+      "type": "prerequisite"
+    },
+    {
+      "from": "assert_statement",
+      "to": "problem_solving_with_strings",
+      "type": "prerequisite"
+    }
+  ]
+}

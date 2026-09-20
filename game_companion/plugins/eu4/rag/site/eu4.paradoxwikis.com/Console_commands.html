@@ -1,0 +1,2795 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<html class="client-nojs" lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<title>Console commands - Europa Universalis 4 Wiki</title>
+<script>document.documentElement.className="client-js";RLCONF={"wgBreakFrames":false,"wgSeparatorTransformTable":["",""],"wgDigitTransformTable":["",""],"wgDefaultDateFormat":"dmy","wgMonthNames":["","January","February","March","April","May","June","July","August","September","October","November","December"],"wgRequestId":"d4975b4628d6fdf96b321e14","wgCSPNonce":false,"wgCanonicalNamespace":"","wgCanonicalSpecialPageName":false,"wgNamespaceNumber":0,"wgPageName":"Console_commands","wgTitle":"Console commands","wgCurRevisionId":175122,"wgRevisionId":175122,"wgArticleId":799,"wgIsArticle":true,"wgIsRedirect":false,"wgAction":"view","wgUserName":null,"wgUserGroups":["*"],"wgCategories":["Articles with potentially outdated sections","Potentially outdated","1.28","Interface","Modding"],"wgPageContentLanguage":"en","wgPageContentModel":"wikitext","wgRelevantPageName":"Console_commands","wgRelevantArticleId":799,"wgIsProbablyEditable":true,"wgRelevantPageIsProbablyEditable":true,"wgRestrictionEdit":[
+],"wgRestrictionMove":[],"wgMFDisplayWikibaseDescriptions":{"search":false,"nearby":false,"watchlist":false,"tagline":false},"wgVisualEditor":{"pageLanguageCode":"en","pageLanguageDir":"ltr","pageVariantFallbacks":"en"},"wgULSAcceptLanguageList":[],"wgULSCurrentAutonym":"English","wgMediaViewerOnClick":true,"wgMediaViewerEnabledByDefault":true,"wgPopupsFlags":4,"wgEditSubmitButtonLabelPublish":false,"wgULSPosition":"personal","wgULSisCompactLinksEnabled":true};RLSTATE={"site.styles":"ready","user.styles":"ready","user":"ready","user.options":"loading","skins.vectorparadox.styles.legacy":"ready","jquery.tablesorter.styles":"ready","jquery.makeCollapsible.styles":"ready","ext.visualEditor.desktopArticleTarget.noscript":"ready","ext.uls.pt":"ready"};RLPAGEMODULES=["site","mediawiki.page.ready","jquery.tablesorter","jquery.makeCollapsible","mediawiki.toc","skins.vectorparadox.legacy.js","mmv.head","mmv.bootstrap.autostart","ext.visualEditor.desktopArticleTarget.init",
+"ext.visualEditor.targetLoader","ext.ParadoxBrazeIntegration.braze","ext.uls.compactlinks","ext.uls.interface"];</script>
+<script>(RLQ=window.RLQ||[]).push(function(){mw.loader.implement("user.options@12s5i",function($,jQuery,require,module){mw.user.tokens.set({"patrolToken":"+\\","watchToken":"+\\","csrfToken":"+\\"});});});</script>
+<link rel="stylesheet" href="/load.php?lang=en&amp;modules=ext.uls.pt%7Cext.visualEditor.desktopArticleTarget.noscript%7Cjquery.makeCollapsible.styles%7Cjquery.tablesorter.styles%7Cskins.vectorparadox.styles.legacy&amp;only=styles"/>
+<script async="" src="/load.php?lang=en&amp;modules=startup&amp;only=scripts&amp;raw=1"></script>
+<meta name="ResourceLoaderDynamicStyles" content=""/>
+<link rel="stylesheet" href="/load.php?lang=en&amp;modules=site.styles&amp;only=styles"/>
+<meta name="generator" content="MediaWiki 1.39.4"/>
+<meta name="format-detection" content="telephone=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=0.25, maximum-scale=5.0"/>
+<link rel="alternate" type="application/x-wiki" title="Edit" href="/index.php?title=Console_commands&amp;action=edit"/>
+<link rel="icon" href="/favicon.ico"/>
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="Europa Universalis 4 Wiki (en)"/>
+<link rel="EditURI" type="application/rsd+xml" href="https://eu4.paradoxwikis.com/api.php?action=rsd"/>
+<link rel="license" href="https://central.paradoxwikis.com/Central:Copyrights"/>
+<link rel="alternate" type="application/atom+xml" title="Europa Universalis 4 Wiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom"/>
+<script type="text/javascript" src="https://js.appboycdn.com/web-sdk/4.5/braze.no-module.min.js"></script>
+</head>
+<body class="mediawiki ltr sitedir-ltr mw-hide-empty-elt ns-0 ns-subject mw-editable page-Console_commands rootpage-Console_commands skin-vector action-view skin--responsive">    <div class="pdx_mainNavBar ts-container" id="mw-header-container">
+        <div class="ts-inner" id="mw-header">
+            <div class="pd_menuTrigger">
+                <div class="p-nav-menuTrigger">
+                    <div class="menu-icon">
+                        <div class="menu-icon__bar"></div>
+                        <div class="menu-icon__bar"></div>
+                        <div class="menu-icon__bar"></div>
+                    </div>
+                    <i class="pd-logo-icon uix_logoIcon"></i>
+                </div>
+                <div class="pd_nav">
+                    <div 0="class" 1="header-menu__navigation content">
+                        <div 0="class" 1="navigation-menu nav-active" id="header-menu">
+                            <div class="navigation-menu__list">
+                                <div class="navigation-menu__section">
+                                    <div class="navigation-menu__section-items-container">
+                                        <a class="navigation-menu__section-item"
+                                           href="https://forum.paradoxplaza.com/forum/forums/">Forum list</a>
+                                        <a class="navigation-menu__section-item"
+                                           href="https://forum.paradoxplaza.com/forum/threads/trending">Trending</a>
+                                        <a class="navigation-menu__section-item"
+                                           href="https://forum.paradoxplaza.com/forum/threads/latest">Latest</a>
+                                        <a class="navigation-menu__section-item"
+                                           href="https://forum.paradoxplaza.com/forum/threads/newest">New posts</a>
+                                    </div>
+                                </div>
+                                <div class="content-asset">
+                                    <div class="navigation-menu__section">
+                                        <div class="navigation-menu__section-title">Paradox</div>
+                                        <div class="navigation-menu__section-items-container">
+                                            <div class="navigation-menu__section-items-container">
+                                                <a class="navigation-menu__section-item"
+                                                   href="https://www.paradoxplaza.com/">Store</a>
+                                                <a class="navigation-menu__section-item"
+                                                   href="https://mods.paradoxplaza.com/">Mods</a>
+                                                <a class="navigation-menu__section-item"
+                                                   href="https://forum.paradoxplaza.com/forum/forums/">Forum</a>
+                                                <a class="navigation-menu__section-item"
+                                                   href="https://play.paradoxplaza.com/">Launcher</a>
+                                                <a class="navigation-menu__section-item"
+                                                   href="https://pdxcon.paradoxplaza.com/?utm_source=pdxplaza-owned&amp;utm_medium=web-owned&amp;utm_content=topmenu-banner&amp;utm_campaign=pc18_pdxcon_20190412_cawe_ann">PDXCON
+                                                    2019</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-header-logo p-header-logo--image" style="filter:none!important;">
+                    <a class="uix_logo" href="/Europa_Universalis_4_Wiki">
+                        <div class="uix_logo--text">
+                            <span>Paradox Wikis</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="pdx_siteToggle pdx_hasDropdown">
+                <div class="pdx_siteToggle__trigger pdx_dropdownTrigger"><span><div class="mw-parser-output"><p>Europa Universalis 4 Wiki
+    </p></div></span><i></i></div>
+                <div class="pdx_dropdown pdx_dropdown--extraLarge">
+                    <div class="pdx_gameChanger">
+                        <div class="pdx_gameChanger__title">Active Wikis</div>
+                        <div class="pdx_dropdown__menuList pdx_dropdown__menuList pdx_dropdown__menuList--columns">
+                            <a href="https://aow4.paradoxwikis.com/" class="pdx_menu__link pdx_gameChanger--aow4">Age of Wonders 4</a>
+                            <a href="https://eos.paradoxwikis.com/Empire_of_Sin_Wiki" class="pdx_menu__link pdx_gameChanger--eos">Empire of Sin</a>
+                            <a href="https://cs2.paradoxwikis.com/Cities_Skylines_II_Wiki" class="pdx_menu__link pdx_gameChanger--skylines2">Cities: Skylines 2</a>
+                            <a href="https://ck3.paradoxwikis.com/Crusader_Kings_III_Wiki" class="pdx_menu__link pdx_gameChanger--ck3">Crusader Kings 3</a>
+                            <a href="https://eu4.paradoxwikis.com/Europa_Universalis_4_Wiki" class="pdx_menu__link pdx_gameChanger--eu4">Europa Universalis 4</a>
+                            <a href="https://hoi4.paradoxwikis.com/Hearts_of_Iron_4_Wiki" class="pdx_menu__link pdx_gameChanger--hi4">Hearts of Iron 4</a>
+                            <a href="https://htr.paradoxwikis.com/" class="pdx_menu__link pdx_gameChanger--htr">Hunter: The Reckoning</a>
+                            <a href="https://imperator.paradoxwikis.com/Imperator_Wiki" class="pdx_menu__link pdx_gameChanger--improme">Imperator: Rome</a>
+                            <a href="https://millennia.paradoxwikis.com/Millennia_Wiki" class="pdx_menu__link pdx_gameChanger--mil">Millennia</a>
+                            <a href="https://prisonarchitect.paradoxwikis.com/" class="pdx_menu__link pdx_gameChanger--architect">Prison Architect</a>
+                            <a href="https://stellaris.paradoxwikis.com/Stellaris_Wiki" class="pdx_menu__link pdx_gameChanger--stellaris">Stellaris</a>
+                            <a href="https://survivingmars.paradoxwikis.com/Surviving_Mars_Wiki" class="pdx_menu__link pdx_gameChanger--mars">Surviving Mars</a>
+                            <a href="https://sta.paradoxwikis.com/Surviving_The_Aftermath_Wiki" class="pdx_menu__link pdx_gameChanger--aftermath">Surviving the Aftermath</a>
+                            <a href="https://wta.paradoxwikis.com/Werewolf_The_Apocalypse_Wiki" class="pdx_menu__link pdx_gameChanger--wta">Werewolf: the Apocalypse</a>
+                            <a href="https://vtm.paradoxwikis.com/VTM_Wiki" class="pdx_menu__link pdx_gameChanger--vtm">Vampire: The Masquerade</a>
+                            <a href="https://vic3.paradoxwikis.com/Victoria_3_Wiki" class="pdx_menu__link pdx_gameChanger--vic3">Victoria 3</a>
+                        </div>
+                        <div class="pdx_gameChanger__title">Legacy Wikis</div>
+                        <div class="pdx_dropdown__menuList pdx_dropdown__menuList pdx_dropdown__menuList--columns">
+                            <a href="https://aowplanetfall.paradoxwikis.com/AoW_Planetfall_Wiki" class="pdx_menu__link pdx_gameChanger--planetfall">AoW: Planetfall</a>
+                            <a href="https://skylines.paradoxwikis.com/Cities:_Skylines_Wiki" class="pdx_menu__link pdx_gameChanger--skylines">Cities: Skylines</a>
+                            <a href="https://ck2.paradoxwikis.com/Crusader_Kings_II_Wiki" class="pdx_menu__link pdx_gameChanger--ck2">Crusader Kings 2</a>
+                            <a href="https://aod.paradoxwikis.com/Main_Page" class="pdx_menu__link pdx_gameChanger--arsenal">Arsenal of Democracy</a>
+                            <a href="https://eu2.paradoxwikis.com/Main_Page" class="pdx_menu__link pdx_gameChanger--eu2">Europa Universalis 2</a>
+                            <a href="https://eu3.paradoxwikis.com/Europa_Universalis_3_Wiki" class="pdx_menu__link pdx_gameChanger--eu3">Europa Universalis 3</a>
+                            <a href="https://eurome.paradoxwikis.com/Europa_Universalis:_Rome_Wiki" class="pdx_menu__link pdx_gameChanger--eurome">Europa Universalis: Rome</a>
+                            <a href="https://hoi2.paradoxwikis.com/Main_Page" class="pdx_menu__link pdx_gameChanger--hi2">Hearts of Iron 2</a>
+                            <a href="https://hoi3.paradoxwikis.com/Hearts_of_Iron_3_Wiki" class="pdx_menu__link pdx_gameChanger--hi3">Hearts of Iron 3</a>
+                            <a href="https://tyranny.paradoxwikis.com/Tyranny_Wiki" class="pdx_menu__link pdx_gameChanger--tyranny">Tyranny</a>
+                            <a href="https://vic1.paradoxwikis.com/Main_Page" class="pdx_menu__link pdx_gameChanger--vic1">Victoria 1</a>
+                            <a href="https://vic2.paradoxwikis.com/Victoria_2_Wiki" class="pdx_menu__link pdx_gameChanger--vic2">Victoria 2</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pdx_mainNavBar__opposite">
+                
+<div id="p-search" role="search" class="vectorparadox-search-box-vue  vectorparadox-search-box-show-thumbnail vectorparadox-search-box-auto-expand-width vectorparadox-search-box">
+	<div>
+			<h3 >
+				<label for="searchInput">Search</label>
+			</h3>
+		<form action="/index.php" id="searchform"
+			class="vectorparadox-search-box-form">
+			<div id="simpleSearch"
+				class="vectorparadox-search-box-inner"
+				 data-search-loc="header-navigation">
+				<input class="vectorparadox-search-box-input"
+					 type="search" name="search" placeholder="Search Europa Universalis 4 Wiki" aria-label="Search Europa Universalis 4 Wiki" autocapitalize="sentences" title="Search Europa Universalis 4 Wiki [f]" accesskey="f" id="searchInput"
+				>
+				<input type="hidden" name="title" value="Special:Search">
+				<input id="mw-searchButton"
+					 class="searchButton mw-fallbackSearchButton" type="submit" name="fulltext" title="Search the pages for this text" value="Search">
+				<input id="searchButton"
+					 class="searchButton" type="submit" name="go" title="Go to a page with this exact name if it exists" value="Go">
+			</div>
+		</form>
+	</div>
+</div>
+
+            </div>
+            <div id="p-personal" role="navigation" class="" aria-labelledby="p-personal-label">
+                <h3 id="p-personal-label">Personal tools</h3>
+                <div class="pdx_hasDropdown">
+                    <a class="pdx_dropdownTrigger">Log in</a>
+                    <div class="pdx_dropdown">
+                        
+
+<nav id="p-personal" class="vectorparadox-menu mw-portlet mw-portlet-personal vectorparadox-user-menu-legacy" aria-labelledby="p-personal-label" role="navigation"  >
+	<h3
+		id="p-personal-label"
+		
+		class="vectorparadox-menu-heading "
+	>
+		<span class="vectorparadox-menu-heading-label">Personal tools</span>
+	</h3>
+	<div class="vectorparadox-menu-content">
+		
+		<ul class="vectorparadox-menu-content-list"><li id="pt-uls" class="mw-list-item active"><a class="uls-trigger" href="#"><span>English</span></a></li><li id="pt-anonuserpage" class="mw-list-item"><span title="The user page for the IP address you are editing as">Not logged in</span></li><li id="pt-anontalk" class="mw-list-item"><a href="/Special:MyTalk" title="Discussion about edits from this IP address [n]" accesskey="n"><span>Talk</span></a></li><li id="pt-anoncontribs" class="mw-list-item"><a href="/Special:MyContributions" title="A list of edits made from this IP address [y]" accesskey="y"><span>Contributions</span></a></li><li id="pt-login" class="mw-list-item"><a href="/index.php?title=Special:UserLogin&amp;returnto=Console+commands" title="You are encouraged to log in; however, it is not mandatory [o]" accesskey="o"><span>Log in</span></a></li></ul>
+		
+	</div>
+</nav>
+
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div id="mw-page-base" class="noprint"></div>
+<div id="mw-head-base" class="noprint"></div>
+<div class="pdx_contentWrapper">
+    <div id="mw-navigation">
+        <h2>Navigation menu</h2>
+        <div id="mw-head">
+                <div id="left-navigation">
+                    
+
+<nav id="p-namespaces" class="vectorparadox-menu mw-portlet mw-portlet-namespaces vectorparadox-menu-tabs vectorparadox-menu-tabs-legacy" aria-labelledby="p-namespaces-label" role="navigation"  >
+	<h3
+		id="p-namespaces-label"
+		
+		class="vectorparadox-menu-heading "
+	>
+		<span class="vectorparadox-menu-heading-label">Namespaces</span>
+	</h3>
+	<div class="vectorparadox-menu-content">
+		
+		<ul class="vectorparadox-menu-content-list"><li id="ca-nstab-main" class="selected mw-list-item"><a href="/Console_commands" title="View the content page [c]" accesskey="c"><span>Page</span></a></li><li id="ca-talk" class="mw-list-item"><a href="/Talk:Console_commands" rel="discussion" title="Discussion about the content page [t]" accesskey="t"><span>Discussion</span></a></li></ul>
+		
+	</div>
+</nav>
+
+                    
+
+<nav id="p-variants" class="vectorparadox-menu mw-portlet mw-portlet-variants emptyPortlet vectorparadox-menu-dropdown" aria-labelledby="p-variants-label" role="navigation"  >
+	<input type="checkbox"
+		id="p-variants-checkbox"
+		role="button"
+		aria-haspopup="true"
+		data-event-name="ui.dropdown-p-variants"
+		class="vectorparadox-menu-checkbox"
+		aria-labelledby="p-variants-label"
+	/>
+	<label
+		id="p-variants-label"
+		 aria-label="Change language variant"
+		class="vectorparadox-menu-heading "
+	>
+		<span class="vectorparadox-menu-heading-label">English</span>
+	</label>
+	<div class="vectorparadox-menu-content">
+		
+		<ul class="vectorparadox-menu-content-list"></ul>
+		
+	</div>
+</nav>
+
+                </div>
+                <div id="right-navigation">
+                    
+
+<nav id="p-views" class="vectorparadox-menu mw-portlet mw-portlet-views vectorparadox-menu-tabs vectorparadox-menu-tabs-legacy" aria-labelledby="p-views-label" role="navigation"  >
+	<h3
+		id="p-views-label"
+		
+		class="vectorparadox-menu-heading "
+	>
+		<span class="vectorparadox-menu-heading-label">Views</span>
+	</h3>
+	<div class="vectorparadox-menu-content">
+		
+		<ul class="vectorparadox-menu-content-list"><li id="ca-view" class="selected mw-list-item"><a href="/Console_commands"><span>Read</span></a></li><li id="ca-ve-edit" class="mw-list-item"><a href="/index.php?title=Console_commands&amp;veaction=edit" title="Edit this page [v]" accesskey="v"><span>Edit</span></a></li><li id="ca-edit" class="collapsible mw-list-item"><a href="/index.php?title=Console_commands&amp;action=edit" title="Edit this page [e]" accesskey="e"><span>Edit source</span></a></li><li id="ca-history" class="mw-list-item"><a href="/index.php?title=Console_commands&amp;action=history" title="Past revisions of this page [h]" accesskey="h"><span>View history</span></a></li></ul>
+		
+	</div>
+</nav>
+
+                    
+
+<nav id="p-cactions" class="vectorparadox-menu mw-portlet mw-portlet-cactions emptyPortlet vectorparadox-menu-dropdown" aria-labelledby="p-cactions-label" role="navigation"  title="More options" >
+	<input type="checkbox"
+		id="p-cactions-checkbox"
+		role="button"
+		aria-haspopup="true"
+		data-event-name="ui.dropdown-p-cactions"
+		class="vectorparadox-menu-checkbox"
+		aria-labelledby="p-cactions-label"
+	/>
+	<label
+		id="p-cactions-label"
+		
+		class="vectorparadox-menu-heading "
+	>
+		<span class="vectorparadox-menu-heading-label">More</span>
+	</label>
+	<div class="vectorparadox-menu-content">
+		
+		<ul class="vectorparadox-menu-content-list"></ul>
+		
+	</div>
+</nav>
+
+                </div>
+        </div>
+        
+
+<div id="mw-panel">
+	<div id="p-logo" role="banner">
+		<a class="mw-wiki-logo" href="/Europa_Universalis_4_Wiki"
+			title="Visit the main page"></a>
+	</div>
+	
+
+<nav id="p-navigation" class="vectorparadox-menu mw-portlet mw-portlet-navigation vectorparadox-menu-portal portal" aria-labelledby="p-navigation-label" role="navigation"  >
+	<h3
+		id="p-navigation-label"
+		
+		class="vectorparadox-menu-heading "
+	>
+		<span class="vectorparadox-menu-heading-label">Navigation</span>
+	</h3>
+	<div class="vectorparadox-menu-content">
+		
+		<ul class="vectorparadox-menu-content-list"><li id="n-mainpage-description" class="mw-list-item"><a href="/Europa_Universalis_4_Wiki" title="Visit the Europa Universalis 4 Wiki main page [z]" accesskey="z"><span>EU4 Wiki</span></a></li><li id="n-recentchanges" class="mw-list-item"><a href="/Special:RecentChanges" title="A list of recent changes in the wiki [r]" accesskey="r"><span>Recent changes</span></a></li><li id="n-randompage" class="mw-list-item"><a href="/Special:Random" title="Load a random page [x]" accesskey="x"><span>Random page</span></a></li></ul>
+		
+	</div>
+</nav>
+
+	
+
+<nav id="p-Paradox_Wikis" class="vectorparadox-menu mw-portlet mw-portlet-Paradox_Wikis vectorparadox-menu-portal portal" aria-labelledby="p-Paradox_Wikis-label" role="navigation"  >
+	<h3
+		id="p-Paradox_Wikis-label"
+		
+		class="vectorparadox-menu-heading "
+	>
+		<span class="vectorparadox-menu-heading-label">Paradox Wikis</span>
+	</h3>
+	<div class="vectorparadox-menu-content">
+		
+		<ul class="vectorparadox-menu-content-list"><li id="n---Main-portal" class="mw-list-item"><a href="https://paradoxwikis.com/" rel="nofollow"><span>- Main portal</span></a></li><li id="n---Wikis-discord" class="mw-list-item"><a href="https://discord.gg/rUWSHuUwnY" rel="nofollow"><span>- Wikis discord</span></a></li><li id="n---Contact-us" class="mw-list-item"><a href="/Contact_us"><span>- Contact us</span></a></li><li id="n---Style-guidelines" class="mw-list-item"><a href="/Europa_Universalis_4_Wiki:Style"><span>- Style guidelines</span></a></li></ul>
+		
+	</div>
+</nav>
+
+
+<nav id="p-EU4_links" class="vectorparadox-menu mw-portlet mw-portlet-EU4_links vectorparadox-menu-portal portal" aria-labelledby="p-EU4_links-label" role="navigation"  >
+	<h3
+		id="p-EU4_links-label"
+		
+		class="vectorparadox-menu-heading "
+	>
+		<span class="vectorparadox-menu-heading-label">EU4 links</span>
+	</h3>
+	<div class="vectorparadox-menu-content">
+		
+		<ul class="vectorparadox-menu-content-list"><li id="n---Forums" class="mw-list-item"><a href="https://forum.paradoxplaza.com/forum/index.php?forums/europa-universalis-iv.731/" rel="nofollow"><span>- Forums</span></a></li><li id="n---Game-discord" class="mw-list-item"><a href="https://discord.com/invite/europauniversalisofficial" rel="nofollow"><span>- Game discord</span></a></li><li id="n---Mods" class="mw-list-item"><a href="https://mods.paradoxplaza.com/games/eu4?orderBy=desc&amp;sortBy=best" rel="nofollow"><span>- Mods</span></a></li><li id="n---Store" class="mw-list-item"><a href="https://www.paradoxplaza.com/europa-universalis-all/?utm_source=pdxwiki-owned&amp;utm_medium=social-owned&amp;utm_content=link&amp;utm_campaign=eu_eu_20201026_past_noty" rel="nofollow"><span>- Store</span></a></li><li id="n---YouTube" class="mw-list-item"><a href="https://www.youtube.com/@EuropaUniversalisofficial/" rel="nofollow"><span>- YouTube</span></a></li></ul>
+		
+	</div>
+</nav>
+
+
+<nav id="p-tb" class="vectorparadox-menu mw-portlet mw-portlet-tb vectorparadox-menu-portal portal" aria-labelledby="p-tb-label" role="navigation"  >
+	<h3
+		id="p-tb-label"
+		
+		class="vectorparadox-menu-heading "
+	>
+		<span class="vectorparadox-menu-heading-label">Tools</span>
+	</h3>
+	<div class="vectorparadox-menu-content">
+		
+		<ul class="vectorparadox-menu-content-list"><li id="t-whatlinkshere" class="mw-list-item"><a href="/Special:WhatLinksHere/Console_commands" title="A list of all wiki pages that link here [j]" accesskey="j"><span>What links here</span></a></li><li id="t-recentchangeslinked" class="mw-list-item"><a href="/Special:RecentChangesLinked/Console_commands" rel="nofollow" title="Recent changes in pages linked from this page [k]" accesskey="k"><span>Related changes</span></a></li><li id="t-specialpages" class="mw-list-item"><a href="/Special:SpecialPages" title="A list of all special pages [q]" accesskey="q"><span>Special pages</span></a></li><li id="t-print" class="mw-list-item"><a href="javascript:print();" rel="alternate" title="Printable version of this page [p]" accesskey="p"><span>Printable version</span></a></li><li id="t-permalink" class="mw-list-item"><a href="/index.php?title=Console_commands&amp;oldid=175122" title="Permanent link to this revision of this page"><span>Permanent link</span></a></li><li id="t-info" class="mw-list-item"><a href="/index.php?title=Console_commands&amp;action=info" title="More information about this page"><span>Page information</span></a></li></ul>
+		
+	</div>
+</nav>
+
+
+<nav id="p-braze" class="vectorparadox-menu mw-portlet mw-portlet-braze vectorparadox-menu-portal portal" aria-labelledby="p-braze-label" role="navigation"  >
+	<h3
+		id="p-braze-label"
+		
+		class="vectorparadox-menu-heading "
+	>
+		<span class="vectorparadox-menu-heading-label">braze</span>
+	</h3>
+	<div class="vectorparadox-menu-content">
+		
+		<ul class="vectorparadox-menu-content-list"><li id="pdx-braze" class="mw-list-item">
+                <div class="js-braze" data-strict="0" data-filters='{"position":"sidebar","wiki":"Europa Universalis 4 Wiki"}'>
+                    &nbsp;
+                </div></li></ul>
+		
+	</div>
+</nav>
+
+	
+</div>
+
+    </div>
+<div id="content" class="mw-body" role="main">
+	<a id="top"></a>
+	<div id="siteNotice"></div>
+	<div class="mw-indicators">
+	</div>
+	<h1 id="firstHeading" class="firstHeading mw-first-heading"><span class="mw-page-title-main">Console commands</span></h1>
+	<div id="bodyContent" class="vectorparadox-body">
+		<div id="siteSub" class="noprint">From Europa Universalis 4 Wiki</div>
+		<div id="contentSub"></div>
+		<div id="contentSub2"></div>
+		
+		<div id="jump-to-nav"></div>
+		<a class="mw-jump-link" href="#mw-head">Jump to navigation</a>
+		<a class="mw-jump-link" href="#searchInput">Jump to search</a>
+		<div id="mw-content-text" class="mw-body-content mw-content-ltr" lang="en" dir="ltr">
+    <script>
+    // Define dataLayer and the gtag function.
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+
+    // Default ad_storage to "denied".
+    gtag("consent", "default", {
+        "analytics_storage": "denied",
+        "ad_storage": "denied",
+        "ad_user_data": "denied",
+		"ad_personalization": "denied",
+        "wait_for_update": "500"
+    });
+    </script>
+    <!-- OptanonConsentNoticeStart -->
+    <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"  type="text/javascript" charset="UTF-8" data-domain-script="2ba583e7-6068-48ec-9c3a-c06c47106a6e" ></script>
+    <script type="text/javascript">
+    function OptanonWrapper() { }
+    </script>
+    <!-- OptanonConsentNoticeEnd --><div class="mw-parser-output"><div class="eu4box metadata ambox ambox-content mbox-text" style="float:right; clear:right; width:330px; font-size:80%; background: #3c5a6e; border: 2px solid #20303B;">
+<p>Please help with verifying or updating older sections of this article.<br />At least some were last verified for <a href="/Europa_Universalis_4_Wiki:Versioning" title="Europa Universalis 4 Wiki:Versioning">version</a> 1.28.
+</p>
+</div>
+<dl><dd></dd>
+<dd><i>This page deals with commands used in the console. For the <a href="/Modding" title="Modding">modding</a> term, see <a href="/Effects" title="Effects">effects</a>.</i><br /></dd></dl>
+<p>This page lists the codes which may be input into the Console Window, a special debugging window which may be accessed on non-ironman games by pressing <kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">&#8679;Shift</kbd>+<kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">2</kbd>, <kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">Alt</kbd>+<kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">2</kbd>+<kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">1</kbd>, <kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">&#8679;Shift</kbd>+<kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">3</kbd>,<kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">§</kbd>, <kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">~</kbd>, <kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">^</kbd>, <kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">°</kbd>, <kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">²</kbd>, or <kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">`</kbd> (key varies based on keyboard layout). Press the up or down arrow keys to traverse through previously executed commands. Press <kbd style="border: 1px solid #aaa; border-radius: 2px; box-shadow: 1px 2px 2px #ddd; background-color: #f9f9f9; background-image: linear-gradient(top, #eee, #f9f9f9, #eee); padding: 1px 3px; font-family: inherit; font-size: 0.85em;">&#8646;Tab</kbd> after entering the beginning of a command to autocomplete it or display which commands start with the entered sequence. Many codes can be turned off by repeating the command, but sometimes reloading the save or exiting the game is necessary. Adding a | and a filename to the end of a console command, writes the output of the command to the specified file in the game installation folder.
+</p>
+<div id="toc" class="toc" role="navigation" aria-labelledby="mw-toc-heading"><input type="checkbox" role="button" id="toctogglecheckbox" class="toctogglecheckbox" style="display:none" /><div class="toctitle" lang="en" dir="ltr"><h2 id="mw-toc-heading">Contents</h2><span class="toctogglespan"><label class="toctogglelabel" for="toctogglecheckbox"></label></span></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Commonly_used"><span class="tocnumber">1</span> <span class="toctext">Commonly used</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#List_of_commands"><span class="tocnumber">2</span> <span class="toctext">List of commands</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Casus_belli_IDs"><span class="tocnumber">3</span> <span class="toctext">Casus belli IDs</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#List_of_events"><span class="tocnumber">4</span> <span class="toctext">List of events</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Commonly_used">Commonly used</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="/index.php?title=Console_commands&amp;veaction=edit&amp;section=1" class="mw-editsection-visualeditor" title="Edit section: Commonly used">edit</a><span class="mw-editsection-divider"> | </span><a href="/index.php?title=Console_commands&amp;action=edit&amp;section=1" title="Edit section: Commonly used">edit source</a><span class="mw-editsection-bracket">]</span></span></h2>
+<table class="metadata plainlinks ambox mbox-small-left ambox-notice" style="">
+<tbody><tr>
+<td class="mbox-image">
+  <img alt="Ambox outdated info.png" src="https://central.paradoxwikis.com/images/thumb/6/65/Ambox_outdated_info.png/22px-Ambox_outdated_info.png" decoding="async" loading="lazy" width="22" height="22" data-file-width="50" data-file-height="50" /></td>
+<td class="mbox-text" style=""> <div style="font-size:85%;">Please help with verifying or updating this section. It was last verified for <a href="/Europa_Universalis_4_Wiki:Versioning" title="Europa Universalis 4 Wiki:Versioning">version</a> 1.30.</div> </td>
+</tr>
+</tbody></table>
+<table class="wikitable">
+
+<tbody><tr>
+<th>Command</th>
+<th>Effect
+</th></tr>
+<tr>
+<td><b>cash (Insert Number) [&lt;Country tag&gt; OPTIONAL]</b></td>
+<td>Extra Money (if not specified, gives 5000)
+</td></tr>
+<tr>
+<td><b>manpower (Insert Number) [&lt;Country tag&gt; OPTIONAL]</b></td>
+<td>Extra <a href="/Manpower" title="Manpower">manpower</a> (in thousands)
+</td></tr>
+<tr>
+<td><b>sailors (Insert Number) [&lt;Country tag&gt; OPTIONAL]</b></td>
+<td>Extra <a href="/Sailors" title="Sailors">sailors</a>
+</td></tr>
+<tr>
+<td><b>prestige [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</b></td>
+<td>Adds <a href="/Prestige" title="Prestige">prestige</a>. Gives 5 prestige if no amount is given.
+</td></tr>
+<tr>
+<td><b>legitimacy [&lt;AMOUNT&gt;] [&lt;Country tag&gt; OPTIONAL]</b></td>
+<td>Sets the <a href="/Legitimacy" class="mw-redirect" title="Legitimacy">legitimacy</a> of the current ruler
+</td></tr>
+<tr>
+<td><b>adm [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</b></td>
+<td>Get <a href="/Administrative_power" class="mw-redirect" title="Administrative power">administrative power</a> points (if not specified, gives 999)
+</td></tr>
+<tr>
+<td><b>dip [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</b></td>
+<td>Get <a href="/Diplomatic_power" class="mw-redirect" title="Diplomatic power">diplomatic power</a> points (if not specified, gives 999)
+</td></tr>
+<tr>
+<td><b>mil [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</b></td>
+<td>Get <a href="/Military_power" class="mw-redirect" title="Military power">military power</a> points (if not specified, gives 999)
+</td></tr>
+<tr>
+<td><b>powerpoints [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</b></td>
+<td>Get power in all powers.<i><br />Maximizes <a href="/Monarch_points" class="mw-redirect" title="Monarch points">monarch points</a> if no number specified.</i>
+</td></tr>
+<tr>
+<td><b>yesman </b></td>
+<td>Toggle AI diplomatic responses (<b>on</b>: always accept; <b>off</b>: normal response)
+</td></tr>
+<tr>
+<td><b>fow</b></td>
+<td>Toggles <a href="/Fog_of_war" class="mw-redirect" title="Fog of war">fog of war</a> on/off
+</td></tr>
+<tr>
+<td><b>ti</b></td>
+<td>Toggles <a href="/Terra_incognita" class="mw-redirect" title="Terra incognita">terra incognita</a> on/off
+</td></tr>
+<tr>
+<td><b>debug_mode</b></td>
+<td>Displays province ID, country tag, and border distance when mousing over provinces.
+</td></tr>
+<tr>
+<td><b>splendor</b></td>
+<td>ability can be gained.
+</td></tr>
+<tr>
+<td><b>assimilate [&lt;Province&gt;] [&lt;Tag&gt; OPTIONAL]</b></td>
+<td>Change ownership, core, set culture and religion.
+</td></tr></tbody></table>
+<h2><span class="mw-headline" id="List_of_commands">List of commands</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="/index.php?title=Console_commands&amp;veaction=edit&amp;section=2" class="mw-editsection-visualeditor" title="Edit section: List of commands">edit</a><span class="mw-editsection-divider"> | </span><a href="/index.php?title=Console_commands&amp;action=edit&amp;section=2" title="Edit section: List of commands">edit source</a><span class="mw-editsection-bracket">]</span></span></h2>
+<table class="metadata plainlinks ambox mbox-small-left ambox-notice" style="">
+<tbody><tr>
+<td class="mbox-image">
+  <img alt="Ambox outdated info.png" src="https://central.paradoxwikis.com/images/thumb/6/65/Ambox_outdated_info.png/22px-Ambox_outdated_info.png" decoding="async" loading="lazy" width="22" height="22" data-file-width="50" data-file-height="50" /></td>
+<td class="mbox-text" style=""> <div style="font-size:85%;">Please help with verifying or updating this section. It was last verified for <a href="/Europa_Universalis_4_Wiki:Versioning" title="Europa Universalis 4 Wiki:Versioning">version</a> 1.30.</div> </td>
+</tr>
+</tbody></table>
+<table class="wikitable sortable">
+
+<tbody><tr>
+<th>DLC</th>
+<th>Command</th>
+<th>Description
+</th></tr>
+<tr>
+<td></td>
+<td>absolutism [&lt;Amount&gt;] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td><i>Adds <a href="/Absolutism" title="Absolutism">Absolutism</a> to the player</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_backer [&lt;prov id&gt;]</td>
+<td>The province becomes a backer of the current issue in the <a href="/Parliament" title="Parliament">parliament</a>.
+</td></tr>
+<tr>
+<td></td>
+<td>add_baseunrest [&lt;Province ID&gt;] [&lt;Base Unrest&gt;]</td>
+<td><i>Adds base <a href="/Unrest" class="mw-redirect" title="Unrest">unrest</a> to a province</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_cardinal</td>
+<td>Adds 1 new <a href="/Cardinal" class="mw-redirect" title="Cardinal">cardinal</a> to a Catholic nation.
+</td></tr>
+<tr>
+<td></td>
+<td>add_cb [&lt;casus belli tag&gt;] [&lt;target country tag&gt;] [&lt;Actor Country tag&gt; OPTIONAL]</td>
+<td><i>Add <a href="/Casus_belli" title="Casus belli">casus belli</a> against target country</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_claim [&lt;Province ID&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Add <a href="/Claim" title="Claim">claim</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_colonist [&lt;Country tag&gt;]</td>
+<td><i>Adds a <a href="/Colonist" class="mw-redirect" title="Colonist">colonist</a> to a country.</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_consort [&lt;Target Country Tag&gt; OPTIONAL] [&lt;Origin Country Tag&gt; OPTIONAL]</td>
+<td><i>Adds a <a href="/Consort" class="mw-redirect" title="Consort">consort</a> from a tag</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_core [&lt;Province ID&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Add <a href="/Core" title="Core">core</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_devastation [&lt;Province ID&gt;] [&lt;Devastation&gt;]</td>
+<td><i>Adds <a href="/Devastation" class="mw-redirect" title="Devastation">devastation</a> to a province</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_diplo [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Adds diplomatic enroute</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_faction [&lt;factionname&gt;]</td>
+<td><i>Adds a <a href="/Faction" class="mw-redirect" title="Faction">Faction</a> to your country</i><br />
+<ul><li>Celestial Empire Factions: temples / enuchs / bureaucrats<br /></li>
+<li>Merchant Republic Factions: mr_aristocrats / mr_traders / mr_guilds<br /></li>
+<li>Revolutionary Republic Factions: rr_jacobins / rr_royalists / rr_girondists<br /></li>
+<li>Pirate Republic Factions: pr_buccaneers / pr_smugglers / pr_captains</li></ul>
+</td></tr>
+<tr>
+<td></td>
+<td>add_heir [&lt;Target Country Tag&gt; OPTIONAL]</td>
+<td><i>Adds an <a href="/Heir" class="mw-redirect" title="Heir">heir</a> (the current heir is immediately killed) </i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_idea_group [&lt;Idea group key&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Adds the specified <a href="/Idea_group" class="mw-redirect" title="Idea group">idea group</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_interest [&lt;Country tag&gt;]</td>
+<td><i>Add specified country tag to your interest</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_issue [&lt;issue tag&gt;]</td>
+<td>Adds issue to a <a href="/Parliament" title="Parliament">parliament</a>
+</td></tr>
+<tr>
+<td></td>
+<td>add_liberty_desire [&lt;Amount&gt;] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td><i>Add <a href="/Liberty_desire" class="mw-redirect" title="Liberty desire">liberty desire</a> to the player</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_local_autonomy [&lt;Province ID&gt;] [&lt;Amount&gt;]</td>
+<td><i>Adds <a href="/Local_autonomy" title="Local autonomy">local autonomy</a> to a province</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_loyalty [&lt;Target Estate&gt;] [&lt;Amount&gt;]</td>
+<td><i>Adds loyalty to target <a href="/Estate" class="mw-redirect" title="Estate">estate</a></i><br />The estates have the following identifier: <div style="columns:100px 3; column-gap: 10px;-webkit-columns:100px 3; -webkit-column-gap: 10px;-moz-columns:100px 3; -moz-column-gap: 10px;">
+<ul><li>estate_church</li>
+<li>estate_nobles</li>
+<li>estate_burghers</li>
+<li>estate_cossacks</li>
+<li>estate_nomadic_tribes</li>
+<li>estate_dhimmi</li>
+<li>estate_brahmins</li>
+<li>estate_maratha</li>
+<li>estate_vaisyas</li>
+<li>estate_jains</li>
+<li>estate_rajput</li>
+<li>estate_janissaries</li>
+<li>estate_eunuchs</li>
+<li>estate_qizilbash</li>
+<li>estate_ghulams</li></ul></div>
+</td></tr>
+<tr>
+<td></td>
+<td>add_missionary [&lt;Country tag&gt;]</td>
+<td>Sets <a href="/Missionary" class="mw-redirect" title="Missionary">missionary</a> count to 1
+</td></tr>
+<tr>
+<td></td>
+<td>add_monarch [&lt;Target Country Tag&gt; OPTIONAL]</td>
+<td><i>Adds a monarch to a tag</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_natives [&lt;ProvinceID&gt;] [&lt;Amount&gt;]</td>
+<td><i>Add <a href="/Colonization#Natives" title="Colonization">natives</a> to given province</i> (100× [&lt;Amount&gt;])
+</td></tr>
+<tr>
+<td></td>
+<td>add_opinion [&lt;Actor Country tag&gt;] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td><i>Add <a href="/Opinion" class="mw-redirect" title="Opinion">opinion</a> to/from a tag</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_pa [&lt;Country tag&gt;]</td>
+<td><i>Add <a href="/Patriarch_authority" class="mw-redirect" title="Patriarch authority">patriarch authority</a> to tag</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_permanent_claim [&lt;Province ID&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Add <a href="/Permanent_claim" class="mw-redirect" title="Permanent claim">permanent claim</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_pi [&lt;Country tag&gt;]</td>
+<td><i>Add <a href="/Papal_influence" class="mw-redirect" title="Papal influence">papal influence</a> to tag</i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_prosperity [&lt;Province ID&gt;] [&lt;Prosperity&gt;]</td>
+<td>Adds <a href="/Prosperity" class="mw-redirect" title="Prosperity">prosperity</a> to a province's state
+</td></tr>
+<tr>
+<td></td>
+<td>add_republican_tradition [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Get <a href="/Republican_tradition" class="mw-redirect" title="Republican tradition">republican tradition</a></i>
+</td></tr>
+<tr>
+<td><a href="/Emperor_(DLC)" title="Emperor"><img alt="Emperor" src="/images/thumb/c/c5/Emperor.png/24px-Emperor.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>add_to_curia_treasury [&lt;money&gt;]</td>
+<td><i>Add money to the <a href="/Curia_treasury" class="mw-redirect" title="Curia treasury">Curia Treasury</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_trait [&lt;personality tag&gt;, &lt;heir&gt; OPTIONAL, &lt;consort&gt; OPTIONAL]</td>
+<td><i>Add <a href="/Ruler_personality" class="mw-redirect" title="Ruler personality">ruler personality</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>add_unrest [&lt;CID Type&gt;] [&lt;CID Index&gt;] [&lt;Unrest&gt;]</td>
+<td><i>Adds <a href="/Unrest" class="mw-redirect" title="Unrest">unrest</a> to a faction</i>
+</td></tr>
+<tr>
+<td></td>
+<td>adm [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Get <a href="/Administrative_power" class="mw-redirect" title="Administrative power">administrative power</a></i> (default value: 999)
+</td></tr>
+<tr>
+<td></td>
+<td>admiral [&lt;fire&gt;] [&lt;shock&gt;] [&lt;maneuver&gt;] [&lt;siege&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Create an <a href="/Admiral" class="mw-redirect" title="Admiral">admiral</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>age [X]</td>
+<td>Sets the <a href="/Ages" title="Ages">age</a> of the game: 0 is <a href="/Age_of_discovery" class="mw-redirect" title="Age of discovery">Age of Discovery</a>,1 is <a href="/Age_of_Reformation" class="mw-redirect" title="Age of Reformation">Age of Reformation</a>, 2 is <a href="/Age_of_Absolutism" class="mw-redirect" title="Age of Absolutism">Age of Absolutism</a> and 3 is <a href="/Age_of_Revolutions" class="mw-redirect" title="Age of Revolutions">Age of Revolutions</a>
+</td></tr>
+<tr>
+<td></td>
+<td>age_consort [&lt;age&gt; &lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Set <a href="/Consort" class="mw-redirect" title="Consort">consorts</a> age</i>
+</td></tr>
+<tr>
+<td></td>
+<td>age_heir [&lt;age&gt; &lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Set <a href="/Heir" class="mw-redirect" title="Heir">heirs</a> age</i>
+</td></tr>
+<tr>
+<td></td>
+<td>age_ruler [&lt;age&gt; &lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Set <a href="/Ruler" title="Ruler">rulers</a> age</i>
+</td></tr>
+<tr>
+<td></td>
+<td>ai(ai) [&lt;Target Country Tag&gt;]</td>
+<td><i>Enables/Disables AI for all nations or a specific tag</i>
+</td></tr>
+<tr>
+<td></td>
+<td>ai_army_tick [&lt;Country tag&gt; OPTIONAL] [&lt;File name for logging&gt; OPTIONAL]</td>
+<td><i>Makes ai reevaluate all army movements</i>
+</td></tr>
+<tr>
+<td></td>
+<td>ai_budget [&lt;tag&gt; OPTIONAL]</td>
+<td>prints AI budgeting information. Note: the commands always prints the information for the current country. The optional tag argument doesn't work.
+</td></tr>
+<tr>
+<td></td>
+<td>ai_minister [&lt;0 = army, 1 = diplomacy, 2 = trade&gt;]</td>
+<td><i>Enables/Disables specific AI ministers</i>
+</td></tr>
+<tr>
+<td></td>
+<td>ai_plan_regions [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Makes ai reevaluate all region assignments</i>
+</td></tr>
+<tr>
+<td></td>
+<td>ai_recalc_strategy [&lt;Country&gt; OPTIONAL]</td>
+<td><i>Recalculates AI strategy immediately</i>
+</td></tr>
+<tr>
+<td></td>
+<td>aiinvalid</td>
+<td><i>Print invalid AI command counts</i> to <span style="color:DarkSlateGray; font-family: monospace,Courier;">ai.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>aiview</td>
+<td><i>Toggles additional AI info</i>
+</td></tr>
+<tr>
+<td></td>
+<td>annex [&lt;Target Country Tag&gt;] [&lt;Actor Country tag&gt; OPTIONAL]</td>
+<td>Annex the specified tag without adding cores
+</td></tr>
+<tr>
+<td></td>
+<td>annex_all</td>
+<td>Annex all countries in the world as the current tag
+</td></tr>
+<tr>
+<td><a href="/Cradle_of_Civilization" title="Cradle of Civilization"><img alt="Cradle of Civilization.png" src="/images/thumb/2/23/Cradle_of_Civilization.png/24px-Cradle_of_Civilization.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>army_drill [&lt;AMOUNT [0.0, 100.0]&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Sets <a href="/Drill" class="mw-redirect" title="Drill">drill</a> for all your subunits</i>
+</td></tr>
+<tr>
+<td><a href="/Cradle_of_Civilization" title="Cradle of Civilization"><img alt="Cradle of Civilization.png" src="/images/thumb/2/23/Cradle_of_Civilization.png/24px-Cradle_of_Civilization.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>army_professionalism [&lt;Amount&gt;] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td>Sets <a href="/Army_professionalism" class="mw-redirect" title="Army professionalism">army professionalism</a> for the target country (default value: 100)
+</td></tr>
+<tr>
+<td></td>
+<td>army_tradition [&lt;Amount&gt;] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td>Adds <a href="/Army_tradition" class="mw-redirect" title="Army tradition">army tradition</a> to the target country (default value: 50)
+</td></tr>
+<tr>
+<td></td>
+<td>assert []</td>
+<td><i>Asserts trigger (otherwise causes test failure)</i>
+</td></tr>
+<tr>
+<td></td>
+<td>assimilate [&lt;Province&gt;] [&lt;Tag&gt; OPTIONAL]</td>
+<td><i>Change ownership, core, set culture and religion</i>
+</td></tr>
+<tr>
+<td><a href="/El_Dorado" title="El Dorado"><img alt="El Dorado.png" src="/images/thumb/1/16/El_Dorado.png/24px-El_Dorado.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>authority [&lt;AMOUNT&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Add to a country's authority</i> (<a href="/Inti" class="mw-redirect" title="Inti">Inti</a> religion)
+</td></tr>
+<tr>
+<td></td>
+<td>autosave</td>
+<td><i>Triggers an autosave</i>
+</td></tr>
+<tr>
+<td></td>
+<td>balance</td>
+<td>Balance data dumped to <span style="color:DarkSlateGray; font-family: monospace,Courier;">game.log</span>, with regions (development, number of provinces) and countries (tax, manpower, development, number of forts).
+</td></tr>
+<tr>
+<td></td>
+<td>bearhaslanded [&lt;Province ID&gt; OPTIONAL]</td>
+<td><i>An unwise command to use</i><br />Spawns <a href="/Jan_Mayen" title="Jan Mayen">Jan Mayen</a>
+</td></tr>
+<tr>
+<td></td>
+<td>bird_mana [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Get <a href="/Diplomatic_power" class="mw-redirect" title="Diplomatic power">diplomatic power</a></i> (default value: 999)
+</td></tr>
+<tr>
+<td><a href="/Wealth_of_Nations" title="Wealth of Nations"><img alt="Wealth of Nations.png" src="/images/thumb/7/7d/Wealth_of_Nations.png/24px-Wealth_of_Nations.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>canals</td>
+<td><i>Debug <a href="/Canals" class="mw-redirect" title="Canals">canals</a> on map</i>
+</td></tr>
+<tr>
+<td></td>
+<td>cash [&lt;Amount&gt; OPTIONAL] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td>Adds <a href="/Ducats" class="mw-redirect" title="Ducats">ducats</a> to the treasury. Default is 5000 ducats.
+</td></tr>
+<tr>
+<td></td>
+<td>center_of_trade(cot) [CoT Level] [&lt;Province ID&gt;]</td>
+<td><i>Create or upgrade/downgrade a <a href="/Center_of_trade" class="mw-redirect" title="Center of trade">center of trade</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>change_culture_court [&lt;ruler/heir/consort/admadv/dipadv/miladv&gt;] [&lt;Culture&gt;]</td>
+<td><i>Changes the <a href="/Culture" title="Culture">culture</a> of a <a href="/Court" class="mw-redirect" title="Court">court</a> member</i>
+</td></tr>
+<tr>
+<td></td>
+<td>change_religion [&lt;province ID&gt;/&lt;Target Country tag&gt;] [&lt;religion&gt;]</td>
+<td>Change religion of a province or country. If no province id or tag is specified, the state religion of the current country is changed. If only a province id is specified the religion of the province is changed to the state religion of the current country<br />The <a href="/Religions" class="mw-redirect" title="Religions">religions</a> have the following identifier: <div style="columns:100px 3; column-gap: 10px;-webkit-columns:100px 3; -webkit-column-gap: 10px;-moz-columns:100px 3; -moz-column-gap: 10px;">
+<ul><li>Catholic: catholic</li>
+<li>Protestant: protestant</li>
+<li>Hussite: hussite</li>
+<li>Reformed: reformed</li>
+<li>Anglican: anglican</li>
+<li>Orthodox: orthodox</li>
+<li>Coptic: coptic</li>
+<li>Sunni: sunni</li>
+<li>Shia: shiite</li>
+<li>Ibadi: ibadi</li>
+<li>Theravada: buddhism</li>
+<li>Vajrayana: vajrayana</li>
+<li>Mahayana: mahayana</li>
+<li>Confucian: confucianism</li>
+<li>Shinto: shinto</li>
+<li>Hindu: hinduism</li>
+<li>Sikh: sikhism</li>
+<li>Animist: animism</li>
+<li>Fetishist: shamanism</li>
+<li>Totemist: totemism</li>
+<li>Inti: inti</li>
+<li>Nahuatl: nahuatl</li>
+<li>Mayan: mesoamerican_religion</li>
+<li>Norse: norse_pagan_reformed</li>
+<li>Tengri: tengri_pagan_reformed</li>
+<li>Jewish: jewish</li>
+<li>Zoroastrian: zoroastrian</li>
+<li>Alcheringa: dreamtime</li></ul></div>
+<div class="mw-collapsible mw-collapsed">Additional religions in converted CK2 games:
+<div class="mw-collapsible-content">
+<div style="columns:100px 3; column-gap: 10px;-webkit-columns:100px 3; -webkit-column-gap: 10px;-moz-columns:100px 3; -moz-column-gap: 10px;">
+<ul><li>Nestorian: nestorian</li>
+<li>Fraticelli: fraticelli</li>
+<li>Cathar: cathar</li>
+<li>Messalian: messalian</li>
+<li>Waldensian: waldensian</li>
+<li>Lollard: lollard</li>
+<li>Monophysite: monophysite</li>
+<li>Bogomilist: bogomilist</li>
+<li>Monothelite: monothelite</li>
+<li>Iconoclast: iconoclast</li>
+<li>Paulician: paulician</li>
+<li>Zikri: zikri</li>
+<li>Yazidi: yazidi</li>
+<li>Kharijite: kharijite</li>
+<li>Druze: druze</li>
+<li>Hurufi: hurufi</li>
+<li>Mazdaki: mazdaki</li>
+<li>Manichean: manichean</li>
+<li>Samaritan: samaritan_faith</li>
+<li>Karaite: karaite_faith</li>
+<li>Jainism: jain</li>
+<li>Romuva: baltic_pagan_reformed</li>
+<li>Hellenic: hellenic_pagan</li>
+<li>Slavic: slavic_pagan_reformed</li>
+<li>Suomenusko: finnish_pagan_reformed</li>
+<li>Zunist: zun_pagan_reformed</li>
+<li>Bön: bon</li></ul>
+</div>
+</div>
+</div>
+</td></tr>
+<tr>
+<td></td>
+<td>change_religion_court [&lt;ruler/heir/consort/admadv/dipadv/miladv&gt;] [&lt;Religion&gt;]</td>
+<td><i>Changes the religion of a court member</i>
+</td></tr>
+<tr>
+<td></td>
+<td>check_save</td>
+<td><i>Check save and load persistence</i>
+</td></tr>
+<tr>
+<td><a href="/Rule_Britannia" title="Rule Britannia"><img alt="Rule Britannia.png" src="/images/thumb/5/5a/Rule_Britannia.png/24px-Rule_Britannia.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a><a href="/Emperor_(DLC)" title="Emperor"><img alt="Emperor" src="/images/thumb/c/c5/Emperor.png/24px-Emperor.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>church_power [&lt;Amount&gt;] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td><i>Adds <a href="/Church_power" class="mw-redirect" title="Church power">church power</a> to the player</i> (<a href="/Protestant" class="mw-redirect" title="Protestant">Protestant</a>, <a href="/Anglican" class="mw-redirect" title="Anglican">Anglican</a>, <a href="/Hussite" class="mw-redirect" title="Hussite">Hussite</a> and <a href="/Jewish" class="mw-redirect" title="Jewish">Jewish</a> religion)
+</td></tr>
+<tr>
+<td></td>
+<td>clear</td>
+<td><i>Clears the console</i>
+</td></tr>
+<tr>
+<td></td>
+<td>clearae [&lt;Against Country Tag&gt;, &lt;By Country Tag (empty for all)&gt;]</td>
+<td><i>Clears <a href="/Aggressive_Expansion" class="mw-redirect" title="Aggressive Expansion">Aggressive Expansion</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>clearreforms [Target tag &lt;optional&gt;]</td>
+<td><i>Removes all <a href="/Government_reform" class="mw-redirect" title="Government reform">government reforms</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>clr_consort_flag [&lt;Tag&gt;] [&lt;Flag&gt;]</td>
+<td>Clears a <a href="/Flag" class="mw-redirect" title="Flag">flag</a> from a <a href="/Consort" class="mw-redirect" title="Consort">consort</a>
+</td></tr>
+<tr>
+<td></td>
+<td>clr_country_flag [&lt;Flag&gt;]</td>
+<td><i>Clears a country <a href="/Flag" class="mw-redirect" title="Flag">flag</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>clr_flag [&lt;Flag&gt;]</td>
+<td><i>Clears a global <a href="/Flag" class="mw-redirect" title="Flag">flag</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>clr_prov_flag [&lt;Flag&gt;] [&lt;Province&gt;]</td>
+<td><i>Clears a <a href="/Flag" class="mw-redirect" title="Flag">flag</a> from a province</i>
+</td></tr>
+<tr>
+<td></td>
+<td>collision(debug_collision)</td>
+<td><i>Toggles debug display of normals/bounding boxes/collision</i>
+</td></tr>
+<tr>
+<td></td>
+<td>colonize [&lt;province ID/colonial region&gt;]</td>
+<td>Colonizes and cores an unsettled province (and gets some prestige). The province retains its original culture and religion.<br />Note: Works also for settled provinces and keeps any previous owner's core.
+<p>Also works for entire colonial regions at once, as listed in 00_colonial_regions.txt:
+</p>
+<div style="columns:100px 3; column-gap: 10px;-webkit-columns:100px 3; -webkit-column-gap: 10px;-moz-columns:100px 3; -moz-column-gap: 10px;">
+<ul><li>colonial_alaska</li>
+<li>colonial_australia</li>
+<li>colonial_brazil</li>
+<li>colonial_california</li>
+<li>colonial_canada</li>
+<li>colonial_colombia</li>
+<li>colonial_eastern_america</li>
+<li>colonial_la_plata</li>
+<li>colonial_louisiana</li>
+<li>colonial_mexico</li>
+<li>colonial_peru</li>
+<li>colonial_the_carribean</li></ul></div>
+</td></tr>
+<tr>
+<td></td>
+<td>combat_dice [number]</td>
+<td>Fixes combat dice to a number you specify. -1 gives random dicerolls like normal
+</td></tr>
+<tr>
+<td></td>
+<td>combatsound</td>
+<td><i>How often does the combat view give a random sound? 0-50</i>
+</td></tr>
+<tr>
+<td></td>
+<td>control(controll) [&lt;Province ID&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Change controller</i>
+</td></tr>
+<tr>
+<td></td>
+<td>corrupt [&lt;AMOUNT&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td>Sets the <a href="/Corruption" title="Corruption">corruption</a> of the country to said amount
+</td></tr>
+<tr>
+<td></td>
+<td>country_modifier [&lt;country tag&gt;] [&lt;Modifier type&gt;]</td>
+<td><i>Show country modifier values</i>
+</td></tr>
+<tr>
+<td></td>
+<td>CrashReporter.DeleteCrashData [&lt;days&gt;]</td>
+<td><i>Delete local crash dumps older than X days</i>
+</td></tr>
+<tr>
+<td></td>
+<td>CrashReporter.SimulateCrash</td>
+<td><i>Simulates a crash (resulting in the game exiting)</i>
+</td></tr>
+<tr>
+<td></td>
+<td>CrashReporter.UploadCrash</td>
+<td><i>Upload the latest crash dump</i>
+</td></tr>
+<tr>
+<td></td>
+<td>create_march [&lt;Target Country Tag&gt;] [&lt;Actor Country tag&gt; OPTIONAL]</td>
+<td>The specified tag becomes a <a href="/March" title="March">march</a> (of the actor country)
+</td></tr>
+<tr>
+<td></td>
+<td>crownland [&lt;Amount&gt;] [&lt;Target Country Tag&gt;]</td>
+<td>Changes <a href="/Crownland" class="mw-redirect" title="Crownland">crownland</a> to a specified country, otherwise to a player's
+</td></tr>
+<tr>
+<td></td>
+<td>ct</td>
+<td><i>Puts timer info in clipboard</i>
+</td></tr>
+<tr>
+<td></td>
+<td>culture [&lt;Province ID&gt;]</td>
+<td><i>Changes culture on a province to your <a href="/Primary_culture" class="mw-redirect" title="Primary culture">primary culture</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>cv</td>
+<td><i>Prints the game version, and copies to clipboard</i>
+</td></tr>
+<tr>
+<td></td>
+<td>date [date in format yyyy.mm.dd]</td>
+<td><i>Changes current date</i>
+</td></tr>
+<tr>
+<td></td>
+<td>debug_achievements</td>
+<td><i>Enables popups for achievements to debug them</i>. When this command is used, it activates the ingame achievement list and makes its icon look like an ironman game. The list will show all achievements for which the starting conditions were fulfilled at the moment when the command was used(this differs from the behavior in an ironman game which only checks the conditions at the start of the campaign).
+</td></tr>
+<tr>
+<td></td>
+<td>debug_achievements_clear</td>
+<td><i>Clear all achievements and user stats</i>. <b>Warning:</b> Do not use this command, because it removes all the earned achievements from steam account (and other stores)
+</td></tr>
+<tr>
+<td></td>
+<td>debug_budgetall [&lt;tag&gt;]</td>
+<td><i>Will log income and expenditure for all countries. This will result in large files and a slower game&#160;!</i>
+</td></tr>
+<tr>
+<td></td>
+<td>debug_budgettag [&lt;tag&gt;]</td>
+<td><i>Will log income and expenditure for a tag</i>
+</td></tr>
+<tr>
+<td></td>
+<td>debug_crownland [&lt;tag&gt;]</td>
+<td><i>Will log the change in crownland for a tag</i>
+</td></tr>
+<tr>
+<td></td>
+<td>debug_info</td>
+<td><i>Toggles Debug info</i>
+</td></tr>
+<tr>
+<td></td>
+<td>debug_mode</td>
+<td><i>Makes some debug features available</i>. Displays province ID, country tag, and border distance when mousing over provinces. Also shows event ids and AI weight in the tooltip for event options.
+</td></tr>
+<tr>
+<td></td>
+<td>debug_nogui</td>
+<td><i>Toggles GUI on/off</i>
+</td></tr>
+<tr>
+<td></td>
+<td>debug_reload_areas</td>
+<td><i>Reload map areas</i>
+</td></tr>
+<tr>
+<td></td>
+<td>debug_reload_regions</td>
+<td><i>Reload map regions</i>
+</td></tr>
+<tr>
+<td></td>
+<td>declare_war [&lt;attacker tag&gt;] [&lt;defender tag&gt;] [&lt;call willing allies&gt;]</td>
+<td><i>Declares <a href="/War" class="mw-redirect" title="War">war</a> between two nations (no <a href="/CB" class="mw-redirect" title="CB">CB</a>)</i>
+</td></tr>
+<tr>
+<td></td>
+<td>delete_wars [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Delete <a href="/War" class="mw-redirect" title="War">wars</a> without removing truces</i>
+</td></tr>
+<tr>
+<td></td>
+<td>devotion [&lt;AMOUNT&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Set the devotion of a theocracy</i>
+</td></tr>
+<tr>
+<td></td>
+<td>die(kill) [&lt;Target Country Tag&gt; OPTIONAL]</td>
+<td>The <a href="/Ruler" title="Ruler">ruler</a> (of the target) is killed.
+</td></tr>
+<tr>
+<td></td>
+<td>dip [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Get <a href="/Diplomatic_power" class="mw-redirect" title="Diplomatic power">diplomatic power</a></i> (default value: 999)
+</td></tr>
+<tr>
+<td></td>
+<td>diplocount</td>
+<td><i>Prints out global diploaction statistics</i> to <span style="color:DarkSlateGray; font-family: monospace,Courier;">game.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>diplomacy_info</td>
+<td><i>Print summary information about currently active diplomatic relations.</i> to console
+</td></tr>
+<tr>
+<td></td>
+<td>disaster [disaster_key]</td>
+<td><i>Adds 100 progress to a <a href="/Disaster" class="mw-redirect" title="Disaster">disaster</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>discover [&lt;Province ID&gt;] or [&lt;Target Country Tag&gt;] [&lt;Actor Country tag&gt; OPTIONAL]</td>
+<td><i>Discover province or capital of target tag</i>
+</td></tr>
+<tr>
+<td><a href="/El_Dorado" title="El Dorado"><img alt="El Dorado.png" src="/images/thumb/1/16/El_Dorado.png/24px-El_Dorado.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>doom [&lt;AMOUNT&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Add to a country's doom</i> (<a href="/Nahuatl" class="mw-redirect" title="Nahuatl">Nahuatl</a> religion)
+</td></tr>
+<tr>
+<td></td>
+<td>echo [Echo]</td>
+<td><i>Echoes the arguments in the console (also useful for commenting script files)</i>
+</td></tr>
+<tr>
+<td></td>
+<td>economy []</td>
+<td><i>Prints out global economy statistics</i> to <span style="color:DarkSlateGray; font-family: monospace,Courier;">game.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>embrace [&lt;Province ID&gt;] [&lt;institution name&gt; optional]</td>
+<td><i>Embraces an <a href="/Institution" class="mw-redirect" title="Institution">institution</a> in a province. If left blank, all institutions will be embraced.</i><br />The institution has the following identifier: <div style="columns:100px 3; column-gap: 10px;-webkit-columns:100px 3; -webkit-column-gap: 10px;-moz-columns:100px 3; -moz-column-gap: 10px;">
+<ul><li>Feudalism: feudalism</li>
+<li>Renaissance: renaissance</li>
+<li>Colonialism: new_world_i</li>
+<li>Printing Press: printing_press</li>
+<li>Global Trade: global_trade</li>
+<li>Manufactories: manufactories</li>
+<li>Enlightenment: enlightenment</li>
+<li>Industrialization: industrialization</li></ul></div>
+</td></tr>
+<tr>
+<td></td>
+<td>enable_all_commands []</td>
+<td>Seems to have no effect in the release version of the game. It just prints <i>Not Successful</i>
+</td></tr>
+<tr>
+<td></td>
+<td>enable_game_controller</td>
+<td><i>Enables/disables support for game controller</i>
+</td></tr>
+<tr>
+<td></td>
+<td>epicfail [&lt;Target Country Tag&gt; OPTIONAL]</td>
+<td><i>Makes all <a href="/Spies" class="mw-redirect" title="Spies">spies</a> of target country fail</i>
+</td></tr>
+<tr>
+<td></td>
+<td>estate_agenda [&lt;name&gt;]</td>
+<td><i>Start a estate agenda</i>
+</td></tr>
+<tr>
+<td></td>
+<td>event [event id] [&lt;Target Country Tag&gt; OPTIONAL] [&lt;Option id&gt; OPTIONAL]</td>
+<td><i>Executes an <a href="/Event" class="mw-redirect" title="Event">event</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>exhaust [&lt;Amount&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Alter your <a href="/War_exhaustion" title="War exhaustion">war exhaustion</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>fast_colonize</td>
+<td>Toggles the fast colonize cheat (affects AI as well)
+</td></tr>
+<tr>
+<td></td>
+<td>fast_diplo</td>
+<td><i>Ignore the date check for enroute diplomats</i>
+</td></tr>
+<tr>
+<td><a href="/The_Cossacks" title="The Cossacks"><img alt="The Cossacks.png" src="/images/thumb/b/b6/The_Cossacks.png/24px-The_Cossacks.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>favors [&lt;Target Country tag&gt;] [&lt;Amount&gt;]</td>
+<td><i>Adds <a href="/Favors" class="mw-redirect" title="Favors">favors</a> with target country</i>
+</td></tr>
+<tr>
+<td><a href="/Conquest_of_Paradise" title="Conquest of Paradise"><img alt="Conquest of Paradise.png" src="/images/thumb/3/31/Conquest_of_Paradise.png/24px-Conquest_of_Paradise.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>federation_cohesion [&lt;Amount&gt;]</td>
+<td><i>Will change federation cohesion by given value</i> (<a href="/Native_Council" class="mw-redirect" title="Native Council">Native Council</a> federations)
+</td></tr>
+<tr>
+<td><a href="/Wealth_of_Nations" title="Wealth of Nations"><img alt="Wealth of Nations.png" src="/images/thumb/7/7d/Wealth_of_Nations.png/24px-Wealth_of_Nations.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>fervor [&lt;Amount&gt;] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td><i>Adds <a href="/Fervor" class="mw-redirect" title="Fervor">fervor</a> to the player</i> (<a href="/Reformed" class="mw-redirect" title="Reformed">Reformed</a> religion)
+</td></tr>
+<tr>
+<td></td>
+<td>findcommands [&lt;Search string&gt;]</td>
+<td><i>Finds console commands</i>
+</td></tr>
+<tr>
+<td></td>
+<td>flagship_galley [&lt;Ship Name&gt;] [&lt;Ability 1&gt;] [&lt;Ability 2&gt;] [&lt;Ability 3&gt;]</td>
+<td>Creates a <a href="/Galley" class="mw-redirect" title="Galley">galley</a> as <a href="/Flagship" class="mw-redirect" title="Flagship">flagship</a>. Abilities are:
+<div style="columns:100px 3; column-gap: 10px;-webkit-columns:100px 3; -webkit-column-gap: 10px;-moz-columns:100px 3; -moz-column-gap: 10px;">
+<ul><li>Captain's Log: captains_log</li>
+<li>Command Aftercastle: command_aftercastle</li>
+<li>Dutch Courage: dutch_courage</li>
+<li>Flag Officers: flag_officers</li>
+<li>Flagship: base_flagship_modification</li>
+<li>Hull Sheathing: hull_sheating</li>
+<li>Improved Crow's Nest: improved_crows_nest</li>
+<li>Integrated Marines: integrated_marines</li>
+<li>Mass Load Cannons: mass_load_cannons</li>
+<li>Mortars: mortars</li>
+<li>Portuguese Bombardier: portuguese_bombardier</li>
+<li>Portuguese Fusiliers: portuguese_corps_of_fusiliers</li>
+<li>Portuguese Navigators: portuguese_navigators</li>
+<li>Portuguese Trade Route Map: portuguese_trade_route_map</li>
+<li>Scandinavian Flag Officers: scandinavian_flag_officers</li>
+<li>Spanish Grand Armada: spanish_grand_armada</li>
+<li>Spanish Mass Load Cannons: spanish_mass_load_cannons</li>
+<li>Spanish Treasury Convoy: spanish_treasure_fleet</li>
+<li>Spare Jolly Roger: spare_jolly_roger</li>
+<li>Standardized Signal Book: standardized_signal_book</li>
+<li>Trade Route Map: trade_route_map</li></ul></div>
+</td></tr>
+<tr>
+<td></td>
+<td>flagship_heavy [&lt;Ship Name&gt;] [&lt;Ability 1&gt;] [&lt;Ability 2&gt;] [&lt;Ability 3&gt;]</td>
+<td>Creates a <a href="/Heavy_ship" class="mw-redirect" title="Heavy ship">heavy ship</a> as <a href="/Flagship" class="mw-redirect" title="Flagship">flagship</a>. See flagship_galley for a list of abilities.
+</td></tr>
+<tr>
+<td></td>
+<td>flagship_light [&lt;Ship Name&gt;] [&lt;Ability 1&gt;] [&lt;Ability 2&gt;] [&lt;Ability 3&gt;]</td>
+<td>Creates a <a href="/Light_ship" class="mw-redirect" title="Light ship">light ship</a> as <a href="/Flagship" class="mw-redirect" title="Flagship">flagship</a>. See flagship_galley for a list of abilities.
+</td></tr>
+<tr>
+<td></td>
+<td>form_union [&lt;Country tag&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Forms <a href="/Union" class="mw-redirect" title="Union">Union</a> with target with Junior and Senior order</i>
+</td></tr>
+<tr>
+<td></td>
+<td>fow (debug_fow) [&lt;Province ID&gt; OPTIONAL]</td>
+<td><i>Turns off fog of war in a province or in general</i>
+</td></tr>
+<tr>
+<td></td>
+<td>frenzy</td>
+<td><i>Force enable Great Power frenzy!!!</i>
+</td></tr>
+<tr>
+<td></td>
+<td>frenzy_off</td>
+<td><i>Force disable Great Power frenzy!!!</i>
+</td></tr>
+<tr>
+<td></td>
+<td>fullscreen</td>
+<td><i>Toggles fullscreen</i>
+</td></tr>
+<tr>
+<td></td>
+<td>gamespeed(speed) [(0-5)]</td>
+<td><i>Set the current game speed, pausing the game at speed 0</i>
+</td></tr>
+<tr>
+<td><a href="/Leviathan" title="Leviathan"><img alt="Leviathan.png" src="/images/thumb/0/0a/Leviathan.png/24px-Leviathan.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>great_project [&lt;great project tag&gt;]</td>
+<td>Create or destroy a <a href="/Great_project" title="Great project">great project</a>
+</td></tr>
+<tr>
+<td></td>
+<td>god</td>
+<td><i>godmode on/off</i>. One effect is that a battle is automatically won after the first day
+</td></tr>
+<tr>
+<td><a href="/Mandate_of_Heaven" title="Mandate of Heaven"><img alt="Mandate of Heaven.png" src="/images/thumb/7/7c/Mandate_of_Heaven.png/24px-Mandate_of_Heaven.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>golden_age [&lt;Country tag&gt;]</td>
+<td><i>Starts a golden age in that country</i>
+</td></tr>
+<tr>
+<td></td>
+<td>guibounds</td>
+<td>Allows debugging UI elements
+</td></tr>
+<tr>
+<td><a href="/Third_Rome" title="Third Rome"><img alt="Third Rome.png" src="/images/thumb/4/49/Third_Rome.png/24px-Third_Rome.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a><a href="/Cradle_of_Civilization" title="Cradle of Civilization"><img alt="Cradle of Civilization.png" src="/images/thumb/2/23/Cradle_of_Civilization.png/24px-Cradle_of_Civilization.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>government_power [&lt;Amount&gt; OPTIONAL]</td>
+<td>Grants full government ability points or specified amount.<br />Works for Russian government types added in <a href="/Third_Rome" title="Third Rome">Third Rome</a> (e.g. Principality/Tsardom) as well as governments added/updated in <a href="/Cradle_of_Civilization" title="Cradle of Civilization">Cradle of Civilization</a> (e.g. Mamluk)
+</td></tr>
+<tr>
+<td><a href="/Mandate_of_Heaven" title="Mandate of Heaven"><img alt="Mandate of Heaven.png" src="/images/thumb/7/7c/Mandate_of_Heaven.png/24px-Mandate_of_Heaven.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>harmonization [&lt;AMOUNT [0, 100]&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Sets to country's <a href="/Harmonization" class="mw-redirect" title="Harmonization">Harmonization</a> progress</i> (<a href="/Confucian" class="mw-redirect" title="Confucian">Confucian</a> religion)
+</td></tr>
+<tr>
+<td><a href="/Mandate_of_Heaven" title="Mandate of Heaven"><img alt="Mandate of Heaven.png" src="/images/thumb/7/7c/Mandate_of_Heaven.png/24px-Mandate_of_Heaven.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>harmony [&lt;AMOUNT&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Add to a country's <a href="/Harmony" class="mw-redirect" title="Harmony">Harmony</a></i> (<a href="/Confucian" class="mw-redirect" title="Confucian">Confucian</a> religion)
+</td></tr>
+<tr>
+<td></td>
+<td>heir_history []</td>
+<td><i>Prints out heir history</i>
+</td></tr>
+<tr>
+<td></td>
+<td>help [command name]</td>
+<td><i>Print out all console commands or a specific command description</i>
+</td></tr>
+<tr>
+<td></td>
+<td>helphelp</td>
+<td>Displays “No help for you!” in the command box
+</td></tr>
+<tr>
+<td></td>
+<td>helplog</td>
+<td>Print out all console commands to <span style="color:DarkSlateGray; font-family: monospace,Courier;">game.log</span> file
+</td></tr>
+<tr>
+<td></td>
+<td>highlight_islands [&lt;threshold&gt;]</td>
+<td>Highlights provinces that would trigger the <a href="/Island#province_is_on_an_island" title="Island">Province is on an island</a> condition if SIZE_LIMIT_FOR_ISLANDS in defines.lua would be set to the specified threshold
+</td></tr>
+<tr>
+<td><a href="/The_Cossacks" title="The Cossacks"><img alt="The Cossacks.png" src="/images/thumb/b/b6/The_Cossacks.png/24px-The_Cossacks.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>horde_unity [&lt;AMOUNT&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Set the <a href="/Horde_unity" class="mw-redirect" title="Horde unity">unity of a horde</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>ideadump</td>
+<td><i>Dump all countries that have generic national ideas</i> to <span style="color:DarkSlateGray; font-family: monospace,Courier;">game.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>imperial_authority [&lt;Amount&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td>Increases the <a href="/Imperial_authority" class="mw-redirect" title="Imperial authority">imperial authority</a> of the emperor. (Default is 6)
+</td></tr>
+<tr>
+<td><a href="/Emperor_(DLC)" title="Emperor"><img alt="Emperor" src="/images/thumb/c/c5/Emperor.png/24px-Emperor.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>imperial_incident [&lt;name&gt;]</td>
+<td><i>Start an <a href="/Imperial_incident" class="mw-redirect" title="Imperial incident">imperial incident</a></i>
+</td></tr>
+<tr>
+<td><a href="/Mandate_of_Heaven" title="Mandate of Heaven"><img alt="Mandate of Heaven.png" src="/images/thumb/7/7c/Mandate_of_Heaven.png/24px-Mandate_of_Heaven.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>incident [&lt;IncidentTag&gt;, &lt;CountryTag&gt; OPTIONAL]</td>
+<td><i>Trigger an <a href="/Isolationism" class="mw-redirect" title="Isolationism">incident</a> for a country.</i> (<a href="/Shinto" class="mw-redirect" title="Shinto">Shinto</a> religion)
+</td></tr>
+<tr>
+<td></td>
+<td>infinite_combat</td>
+<td>Combat doesn't cause damage anymore
+</td></tr>
+<tr>
+<td></td>
+<td>inflation [&lt;Amount&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td>Changes <a href="/Inflation" class="mw-redirect" title="Inflation">inflation</a> of the country
+</td></tr>
+<tr>
+<td><a href="/Rule_Britannia" title="Rule Britannia"><img alt="Rule Britannia.png" src="/images/thumb/5/5a/Rule_Britannia.png/24px-Rule_Britannia.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>innovativeness [&lt;Amount&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Add <a href="/Innovativeness" title="Innovativeness">Innovativeness</a></i> (Default is 100)
+</td></tr>
+<tr>
+<td></td>
+<td>institution [&lt;Province ID&gt;] [&lt;institution tag&gt;] [&lt;Amount&gt; OPTIONAL]</td>
+<td><i>Add <a href="/Institution" class="mw-redirect" title="Institution">institution</a> embracement to a province.</i> (Default is 100) <br />The institution has the following identifier: <div style="columns:100px 3; column-gap: 10px;-webkit-columns:100px 3; -webkit-column-gap: 10px;-moz-columns:100px 3; -moz-column-gap: 10px;">
+<ul><li>Feudalism: feudalism</li>
+<li>Renaissance: renaissance</li>
+<li>Colonialism: new_world_i</li>
+<li>Printing Press: printing_press</li>
+<li>Global Trade: global_trade</li>
+<li>Manufactories: manufactories</li>
+<li>Enlightenment: enlightenment</li>
+<li>Industrialization: industrialization</li></ul></div>
+</td></tr>
+<tr>
+<td><a href="/Dharma" title="Dharma"><img alt="Dharma.png" src="/images/thumb/f/fc/Dharma.png/24px-Dharma.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>insult [Sender Country tag] [Receiver Country tag] [Insult Index/Key]</td>
+<td>Sends a scornful insult from sender to receiver
+</td></tr>
+<tr>
+<td></td>
+<td>integrate [&lt;Target Country Tag&gt;] [&lt;Actor Country tag&gt; OPTIONAL]</td>
+<td>Integrates the specified tag into actor's country (adds cores)
+</td></tr>
+<tr>
+<td></td>
+<td>invasion_target [&lt;Province ID&gt;]</td>
+<td><i>Force sets AI invasion target to province</i>
+</td></tr>
+<tr>
+<td><a href="/Dharma" title="Dharma"><img alt="Dharma.png" src="/images/thumb/f/fc/Dharma.png/24px-Dharma.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>invest [Investment Key] [Province ID]</td>
+<td><i>Toggles a <a href="/Trade_Company" class="mw-redirect" title="Trade Company">Trade Company</a> Investment defined by investment key in Trade Company defined by Province ID</i>
+</td></tr>
+<tr>
+<td></td>
+<td>isolationism [level]</td>
+<td><i>Set your <a href="/Isolationism" class="mw-redirect" title="Isolationism">isolation</a> level</i> (<a href="/Shinto" class="mw-redirect" title="Shinto">Shinto</a> religion)
+</td></tr>
+<tr>
+<td></td>
+<td>karma [&lt;Amount&gt;] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td><i>Adds <a href="/Karma" class="mw-redirect" title="Karma">karma</a> to the player</i> (<a href="/Buddhist" class="mw-redirect" title="Buddhist">Buddhist</a> religions)
+</td></tr>
+<tr>
+<td></td>
+<td>kill_advisors [&lt;Country tag&gt;]</td>
+<td><i>Kills all <a href="/Advisor" title="Advisor">advisors</a> in the court and from the pool</i>
+</td></tr>
+<tr>
+<td></td>
+<td>kill_cardinal [&lt;Countrytag&gt; OPTIONAL]</td>
+<td>Kills first <a href="/Cardinal" class="mw-redirect" title="Cardinal">cardinal</a> in the list
+</td></tr>
+<tr>
+<td></td>
+<td>kill_consort [&lt;Target Country Tag&gt; OPTIONAL]</td>
+<td><i>Kills your <a href="/Consort" class="mw-redirect" title="Consort">consort</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>kill_heir [&lt;Target Country Tag&gt; OPTIONAL]</td>
+<td><i>Kills the <a href="/Heir" class="mw-redirect" title="Heir">heir</a> of a tag</i>
+</td></tr>
+<tr>
+<td></td>
+<td>kill_leader</td>
+<td><i>Kill a random <a href="/Leader" class="mw-redirect" title="Leader">leader</a> with given death cause</i>
+</td></tr>
+<tr>
+<td></td>
+<td>landing_page [&lt;dlc_key&gt;]</td>
+<td><i>Show Red Queen dlc landing page</i>. The DLC keys can be found in the <a href="/Downloadable_content#File_names" title="Downloadable content">file name section of the DLC page</a>.
+</td></tr>
+<tr>
+<td></td>
+<td>leader [&lt;fire&gt;] [&lt;shock&gt;] [&lt;maneuver&gt;] [&lt;siege&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td>Creates a <a href="/General" class="mw-redirect" title="General">general</a> with the given values
+</td></tr>
+<tr>
+<td></td>
+<td>leak</td>
+<td><i>Leaks memory</i>
+</td></tr>
+<tr>
+<td></td>
+<td>leak_gpu [Chunk size (bytes)] [Number of Chunks]</td>
+<td><i>Leaks GPU memory</i>
+</td></tr>
+<tr>
+<td></td>
+<td>legitimacy [&lt;AMOUNT&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Set the <a href="/Legitimacy" class="mw-redirect" title="Legitimacy">legitimacy</a> of the ruler</i>
+</td></tr>
+<tr>
+<td></td>
+<td>low_memory</td>
+<td><i>Simulates a low memory alert and tries to reduce memory usage</i>
+</td></tr>
+<tr>
+<td></td>
+<td>lucky [&lt;Country tag&gt; OPTIONAL]</td>
+<td>Toggles <a href="/Lucky_nation" class="mw-redirect" title="Lucky nation">lucky nation</a> status
+</td></tr>
+<tr>
+<td></td>
+<td>make_subject [&lt;Tag&gt;] [&lt;Overlord tag&gt; OPTIONAL] [&lt;Subject type&gt;]</td>
+<td><i>Make country a <a href="/Subject" class="mw-redirect" title="Subject">subject</a></i>
+<table class="wikitable">
+<caption>
+</caption>
+<tbody><tr>
+<th>Subject
+</th>
+<th>&lt;Subject Type&gt;
+</th></tr>
+<tr>
+<td>Vassal
+</td>
+<td>vassal
+</td></tr>
+<tr>
+<td>March
+</td>
+<td>march
+</td></tr>
+<tr>
+<td>Daimyo
+</td>
+<td>daimyo_vassal
+</td></tr>
+<tr>
+<td>Junior Partner
+</td>
+<td>personal_union
+</td></tr>
+<tr>
+<td>Client State
+</td>
+<td>client_vassal
+</td></tr>
+<tr>
+<td>Client State March
+</td>
+<td>client_march
+</td></tr>
+<tr>
+<td>Colony
+</td>
+<td>colony
+</td></tr>
+<tr>
+<td>Tributary State
+</td>
+<td>tributary_state
+</td></tr>
+<tr>
+<td>Default
+</td>
+<td>default
+</td></tr>
+<tr>
+<td>Dummy
+</td>
+<td>dummy
+</td></tr></tbody></table>
+</td></tr>
+<tr>
+<td><a href="/Mandate_of_Heaven" title="Mandate of Heaven"><img alt="Mandate of Heaven.png" src="/images/thumb/7/7c/Mandate_of_Heaven.png/24px-Mandate_of_Heaven.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>mandate [&lt;Amount&gt;]</td>
+<td>Changes <a href="/Mandate" class="mw-redirect" title="Mandate">mandate</a> of the <a href="/Emperor_of_China" title="Emperor of China">Emperor of China</a> (to maximum without value)
+</td></tr>
+<tr>
+<td></td>
+<td>manpower [&lt;Amount&gt;] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td>Adds <a href="/Manpower" title="Manpower">manpower</a> to pool (1000× [&lt;Amount&gt;]) (default 50)
+</td></tr>
+<tr>
+<td></td>
+<td>map_random [&lt;seed=-1&gt;] [&lt;restore&gt;] [&lt;nosmooth&gt;] [&lt;nosmoothcoasts&gt;] [&lt;topology&gt;] [&lt;terrain&gt;] [&lt;colormap&gt;] [&lt;minimap&gt;] [&lt;rivers&gt;] [&lt;trees&gt;]</td>
+<td><i>Randomize new world part of map (heightmap, terrain, ...)</i>
+</td></tr>
+<tr>
+<td></td>
+<td>map_vertextextures</td>
+<td><i>Toggle map rendering with vertex textures</i>
+</td></tr>
+<tr>
+<td></td>
+<td>mapmode [Mapmode type]</td>
+<td><i>Change <a href="/Map_mode" class="mw-redirect" title="Map mode">map mode</a>.</i> Some special mapmodes are:
+<table class="wikitable">
+<tbody><tr>
+<th>mapmode type</th>
+<th>description
+</th></tr>
+<tr>
+<td>aieval</td>
+<td>Seems to be an alias for <i>armyeval</i>
+</td></tr>
+<tr>
+<td>aihre</td>
+<td>Toggles an AI mapmode allowing the player to see the logistics behind whether or not the AI will join the HRE
+</td></tr>
+<tr>
+<td>airegion</td>
+<td>
+</td></tr>
+<tr>
+<td>aithreateval</td>
+<td>
+</td></tr>
+<tr>
+<td>armyeval</td>
+<td>
+</td></tr>
+<tr>
+<td>buildingeval</td>
+<td>shows which buildings the AI would build in a province. Selecting a building in the macrobuilder shows the scores for that building
+</td></tr>
+<tr>
+<td>controllerarea</td>
+<td>
+</td></tr>
+<tr>
+<td>ownerarea</td>
+<td>
+</td></tr>
+<tr>
+<td>pathfind</td>
+<td>pathfinding information for the previously selected army towards the currently selected province
+</td></tr>
+<tr>
+<td>province_flags</td>
+<td>the tooltip shows otherwise hidden province flags and the date on which they were set
+</td></tr>
+<tr>
+<td>winterpower</td>
+<td>the tooltip shows a value for the winter
+</td></tr></tbody></table>
+</td></tr>
+<tr>
+<td></td>
+<td>memory</td>
+<td><i>Prints out the used memory</i>
+</td></tr>
+<tr>
+<td><a href="/Mandate_of_Heaven" title="Mandate of Heaven"><img alt="Mandate of Heaven.png" src="/images/thumb/7/7c/Mandate_of_Heaven.png/24px-Mandate_of_Heaven.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>meritocracy [&lt;AMOUNT&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Set the <a href="/Meritocracy" class="mw-redirect" title="Meritocracy">meritocracy</a> of the <a href="/Emperor_of_China" title="Emperor of China">Chinese Emperor</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>mil [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Get <a href="/Military_power" class="mw-redirect" title="Military power">military power</a></i> (default value: 999)
+</td></tr>
+<tr>
+<td></td>
+<td>mission [Mission identifier]</td>
+<td><i>Toggles <a href="/Mission" class="mw-redirect" title="Mission">mission</a> completion</i>
+</td></tr>
+<tr>
+<td></td>
+<td>mission_tree [&lt;true/false&gt;] [&lt;Tag&gt;]</td>
+<td><i>Toggles mission tree completion</i>
+</td></tr>
+<tr>
+<td></td>
+<td>modifiers_debug</td>
+<td><i>Show all modifiers and icons in country modifier view</i>
+</td></tr>
+<tr>
+<td></td>
+<td>morehumans(humans) [num]</td>
+<td><i>Adds more humans</i>
+</td></tr>
+<tr>
+<td></td>
+<td>msg</td>
+<td><i>Toggles all messages popup</i>
+</td></tr>
+<tr>
+<td></td>
+<td>native_uprising [&lt;ProvinceID&gt;]</td>
+<td><i>Create <a href="/Colonization#Native_uprising" title="Colonization">native uprising</a> in given province</i>
+</td></tr>
+<tr>
+<td></td>
+<td>navy_tradition [&lt;Amount&gt;] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td>Adds navy tradition to the specified country
+</td></tr>
+<tr>
+<td></td>
+<td>nextsong</td>
+<td><i>Changes the currently playing soundtrack</i>
+</td></tr>
+<tr>
+<td></td>
+<td>nopausetext</td>
+<td><i>Toggles the pausebanner for nicer screenshots</i>
+</td></tr>
+<tr>
+<td></td>
+<td>norevolts</td>
+<td><i>Toggles revolts</i>
+</td></tr>
+<tr>
+<td></td>
+<td>nowar</td>
+<td><i>Toggles AI war declarations</i>
+</td></tr>
+<tr>
+<td></td>
+<td>nudge</td>
+<td><i>Go to the nudge tool</i>. <b>Note:</b> <a href="https://forum.paradoxplaza.com/forum/index.php?threads/919508" class="extiw" title="forum:919508">Since 1.16</a> it only displays <i>Nudge console command deprecated, launch game with command line option -nudge instead</i> on the console.
+</td></tr>
+<tr>
+<td></td>
+<td>observe (spectator)</td>
+<td><i>Switches to play no country at all, and no longer shows messages or pauses the game</i>
+</td></tr>
+<tr>
+<td></td>
+<td>observe_mode []</td>
+<td><i>Changes to the observe mode</i>
+</td></tr>
+<tr>
+<td></td>
+<td>on_action [&lt;Identifier&gt;]</td>
+<td><i>Will run the giver on_action</i>
+</td></tr>
+<tr>
+<td></td>
+<td>oos</td>
+<td><i>Make the client go oos</i>
+</td></tr>
+<tr>
+<td></td>
+<td>own [&lt;Province ID&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Change ownership</i>
+</td></tr>
+<tr>
+<td></td>
+<td>own_core [&lt;Province ID&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Change ownership + add <a href="/Core" title="Core">core</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>paper_mana [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Get <a href="/Administrative_power" class="mw-redirect" title="Administrative power">administrative power</a></i> (default value: 999)
+</td></tr>
+<tr>
+<td></td>
+<td>pass_next_reform [&lt;reform key&gt; OPTIONAL]</td>
+<td><i>Add reforms to <a href="/Holy_Roman_Empire" class="mw-redirect" title="Holy Roman Empire">empire</a></i>. The reform keys are:
+<div style="columns:100px 3; column-gap: 10px;-webkit-columns:100px 3; -webkit-column-gap: 10px;-moz-columns:100px 3; -moz-column-gap: 10px;">
+<ul><li>Call for Reichsreform: reichsreform / emperor_reichsreform</li>
+<li>Institute Reichsregiment: reichsregiment / emperor_reichsregiment</li>
+<li>Reform the Hofgericht: hofgericht / emperor_hofgericht</li>
+<li>Enact Gemeiner Pfennig: gemeinerpfennig / emperor_gemeinerpfennig</li>
+<li>Ewiger Landfriede: landfriede / emperor_landfriede</li>
+<li>Proclaim Erbkaisertum: erbkaisertum / emperor_erbkaisertum</li>
+<li>Revoke The Privilegia: privilegia_de_non_appelando / emperor_privilegia_de_non_appelando</li>
+<li>Renovatio Imperii: renovatio / emperor_renovatio</li>
+<li>Absolute Reichsstabilität: emperor_reichsstabilitaet</li>
+<li>Perpetual Diet: emperor_perpetual_diet</li>
+<li>Create the Landsknechtswesen: emperor_landsknechtswesen</li>
+<li>Establish the Reichstag Collegia: emperor_reichstag_collegia</li>
+<li>Expand the Gemeiner Pfennig: emperor_expand_gemeiner_pfennig</li>
+<li>Embrace Rechenschaft Measures: emperor_rechenschaft</li>
+<li>Geteilte Macht: emperor_geteilte_macht</li>
+<li>Reichskrieg: emperor_reichskrieg</li>
+<li>Curtail the Imperial Estates: emperor_imperial_estates</li></ul>
+</div>
+</td></tr>
+<tr>
+<td><a href="/Emperor_(DLC)" title="Emperor"><img alt="Emperor" src="/images/thumb/c/c5/Emperor.png/24px-Emperor.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>pick_golden_bull [&lt;name&gt;]</td>
+<td><i>Pick a golden bull</i>
+</td></tr>
+<tr>
+<td></td>
+<td>piety [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</td>
+<td>Adds <a href="/Piety" class="mw-redirect" title="Piety">piety</a> (<a href="/Muslim" class="mw-redirect" title="Muslim">Muslim</a> religions) (default: +10)
+</td></tr>
+<tr>
+<td></td>
+<td>pirate [&lt;Province ID&gt;]</td>
+<td><i>Starts a Pirate in a province</i>
+</td></tr>
+<tr>
+<td></td>
+<td>poll</td>
+<td><i>Polls valid <a href="/Events" title="Events">Events</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>population [&lt;ProvinceID&gt;] [&lt;Amount&gt;]</td>
+<td><i>Adds population to a province.</i> (only for colonies)
+</td></tr>
+<tr>
+<td></td>
+<td>popup_pause_all</td>
+<td><i>Sets all messages to popup and pause</i>
+</td></tr>
+<tr>
+<td></td>
+<td>power [&lt;stability/tech_table_key/idea_key&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Adds the specified <a href="/Idea_group" class="mw-redirect" title="Idea group">idea group</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>powerpoints [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Get power in all powers.</i><br />Maximizes <a href="/Monarch_points" class="mw-redirect" title="Monarch points">monarch points</a> if no number specified.
+</td></tr>
+<tr>
+<td></td>
+<td>powerspend []</td>
+<td><i>Prints out global powerspend statistics</i> to <span style="color:DarkSlateGray; font-family: monospace,Courier;">game.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>powerspend_count []</td>
+<td><i>Prints out number of times powerspend was executed</i> to <span style="color:DarkSlateGray; font-family: monospace,Courier;">game.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>prestige [&lt;Amount&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td>Changes <a href="/Prestige" title="Prestige">prestige</a> of the specified country. (default value: +6)
+</td></tr>
+<tr>
+<td></td>
+<td>prices</td>
+<td><i>Price Info</i> to <span style="color:DarkSlateGray; font-family: monospace,Courier;">game.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>print_estate_land_share [&lt;estate_type&gt; [ &lt;|&gt; percent]]</td>
+<td><i>Prints estates (or crown) land shares</i>
+</td></tr>
+<tr>
+<td></td>
+<td>print_flags</td>
+<td><i>Prints global <a href="/Flag" class="mw-redirect" title="Flag">flags</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>print_modifiers(file)</td>
+<td><i>Print gamestate modifiers to a file</i><br />The file will be in <code>\Documents\Paradox Interactive\Europa Universalis IV\</code>.
+</td></tr>
+<tr>
+<td></td>
+<td>print_prov_flags [&lt;Prov ID&gt;]</td>
+<td><i>Prints province <a href="/Flag" class="mw-redirect" title="Flag">flags</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>PrintSynchStuff</td>
+<td><i>Prints random count and seed</i>
+</td></tr>
+<tr>
+<td></td>
+<td>province_modifier</td>
+<td><i>Show province modifier values</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reform [&lt;Target Province ID&gt;]</td>
+<td><i>Begin <a href="/Reformation" class="mw-redirect" title="Reformation">reformation</a> in the specified province ID</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reform_desire [[&lt;value&gt;]]</td>
+<td><i>Will add <a href="/Reform_desire" class="mw-redirect" title="Reform desire">reform desire</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>reformprogress [Points to add] [Target tag &lt;optional&gt;]</td>
+<td><i>Adds <a href="/Government_reform" class="mw-redirect" title="Government reform">Government reform</a> progress</i> (default is 500)
+</td></tr>
+<tr>
+<td></td>
+<td>refresh_knowledge []</td>
+<td><i>Will recalc bunch of stuff like neighbours, idea rules, etc.</i>
+</td></tr>
+<tr>
+<td></td>
+<td>refreshknowledgecount []</td>
+<td><i>Refresh knowledge perf couner</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reinitchat []</td>
+<td><i>Posts a CChatSyncAllCommand</i>
+</td></tr>
+<tr>
+<td><a href="/Cradle_of_Civilization" title="Cradle of Civilization"><img alt="Cradle of Civilization.png" src="/images/thumb/2/23/Cradle_of_Civilization.png/24px-Cradle_of_Civilization.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>religious_school [School] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td><i>Sets <a href="/Religious_school" class="mw-redirect" title="Religious school">religious school</a> for target country</i><br />The religious schools have the following identifier: <div style="columns:100px 3; column-gap: 10px;-webkit-columns:100px 3; -webkit-column-gap: 10px;-moz-columns:100px 3; -moz-column-gap: 10px;">
+<ul><li>hanafi_school</li>
+<li>hanbali_school</li>
+<li>maliki_school</li>
+<li>shafii_school</li>
+<li>ismaili_school</li>
+<li>jafari_school</li>
+<li>zaidi_school</li></ul></div>
+</td></tr>
+<tr>
+<td></td>
+<td>reload [file name]</td>
+<td><i>Reloads the gui or lua file</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reload_canals</td>
+<td><i>Reload the canal bitmaps</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reload_heightmap</td>
+<td><i>Reloads the heightmap</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reload_lakes</td>
+<td><i>Reloads the lakes</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reload_map</td>
+<td><i>Reloads the map</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reload_provincemap</td>
+<td><i>Reloads the provincemap</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reload_straits</td>
+<td><i>Update strait vertex buffers</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reload_treemap</td>
+<td><i>Reloads the treemap</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reloadfx [Arguments: map/mapname/postfx or *.fx filename]</td>
+<td><i>Reloads the shader</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reloadinterface</td>
+<td><i>Reloads the entire interface</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reloadloc</td>
+<td><i>Reloads the localisation</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reloadtexture [texture file name]</td>
+<td><i>Reloads the specified texture</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reloadtradewinds</td>
+<td><i>Reloads trade winds</i>
+</td></tr>
+<tr>
+<td></td>
+<td>remove_cb [&lt;casus belli tag&gt;] [&lt;target country tag&gt;] [&lt;Actor Country tag&gt; OPTIONAL]</td>
+<td><i>Remove <a href="/Casus_belli" title="Casus belli">casus belli</a> from target country</i>
+</td></tr>
+<tr>
+<td></td>
+<td>remove_claim [&lt;Province ID&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Remove <a href="/Claim" title="Claim">claim</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>remove_core [&lt;Province ID&gt;] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Remove <a href="/Core" title="Core">core</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>remove_country [&lt;Target Country Tag&gt;]</td>
+<td><i>Obliterate a country from the map</i>. All its provinces become uncolonized.
+</td></tr>
+<tr>
+<td></td>
+<td>remove_defender_faith</td>
+<td><i>Removes the <a href="/Defender_of_the_Faith" class="mw-redirect" title="Defender of the Faith">defender of the Faith</a> for the players religion</i>
+</td></tr>
+<tr>
+<td></td>
+<td>remove_interest [&lt;Country tag&gt;]</td>
+<td><i>Removes specified country tag from your interest</i>
+</td></tr>
+<tr>
+<td></td>
+<td>remove_march [&lt;Target Country Tag&gt;] [&lt;Actor Country tag&gt; OPTIONAL]</td>
+<td>Revokes <a href="/March" title="March">march</a> status of the specified country (with its normal effects)
+</td></tr>
+<tr>
+<td></td>
+<td>remove_rival [&lt;Country tag&gt;]</td>
+<td>Removes a <a href="/Rival" class="mw-redirect" title="Rival">rival</a>
+</td></tr>
+<tr>
+<td></td>
+<td>remove_trait [&lt;personality tag&gt;]</td>
+<td><i>Remove <a href="/Ruler_personality" class="mw-redirect" title="Ruler personality">ruler personality</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>rendertype</td>
+<td><i>Reports what render backend is used</i>
+</td></tr>
+<tr>
+<td></td>
+<td>repair [&lt;Country tag&gt;]</td>
+<td><i>Repairs all <a href="/Ship" class="mw-redirect" title="Ship">ships</a> of country</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reset_economy []</td>
+<td><i>Resets global economy statistics</i>
+</td></tr>
+<tr>
+<td><a href="/Wealth_of_Nations" title="Wealth of Nations"><img alt="Wealth of Nations.png" src="/images/thumb/7/7d/Wealth_of_Nations.png/24px-Wealth_of_Nations.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>reset_god</td>
+<td><i>Resets <a href="/Personal_deity" class="mw-redirect" title="Personal deity">personal deity</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>reset_powerspend []</td>
+<td><i>Resets global powerspend statistics</i>
+</td></tr>
+<tr>
+<td></td>
+<td>reshuffle_seat_bribes</td>
+<td><i>Will reshuffle all the seat <a href="/Bribes" class="mw-redirect" title="Bribes">bribes</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>revolt [&lt;Province ID&gt;]</td>
+<td><i>Starts a <a href="/Revolt" class="mw-redirect" title="Revolt">Revolt</a> in a province</i>
+</td></tr>
+<tr>
+<td></td>
+<td>revolution_target [&lt;CountryTag&gt;]</td>
+<td><i>Sets the <a href="/Revolution_target" class="mw-redirect" title="Revolution target">revolution target</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>rgb(rgb) [&lt;Amount&gt;]</td>
+<td><i>Prints desired amount of random color values to <span style="color:DarkSlateGray; font-family: monospace,Courier;">game.log</span></i>
+</td></tr>
+<tr>
+<td></td>
+<td>run []</td>
+<td><i>Runs effects in specified file</i>. <br />Example: <code>run my_script.txt</code><br />By default looks in <code>\Documents\Paradox Interactive\Europa Universalis IV\</code> for files. <br />For mods, the game will look in <code>\Documents\Paradox Interactive\Europa Universalis IV\mod\name_of_mod\</code>.
+<p>See <a href="/Run_files" title="Run files">run files</a> for more details.
+</p>
+</td></tr>
+<tr>
+<td></td>
+<td>run_commands</td>
+<td><i>Runs the specified file with list of console commands</i>
+</td></tr>
+<tr>
+<td></td>
+<td>runyear [&lt;year&gt;] [&lt;command filename&gt;]</td>
+<td><i>Runs command once we reach year</i>
+</td></tr>
+<tr>
+<td></td>
+<td>sailors [&lt;Amount&gt;] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td>Adds <a href="/Sailors" title="Sailors">sailors</a> (default value: 5000)
+</td></tr>
+<tr>
+<td></td>
+<td>savegame</td>
+<td><i>Creates an savefile.</i>
+</td></tr>
+<tr>
+<td></td>
+<td>score</td>
+<td>Score data dumped to <span style="color:DarkSlateGray; font-family: monospace,Courier;">game.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>selflearningai</td>
+<td><i>Enables/Disables Self-Learning AI</i>
+</td></tr>
+<tr>
+<td></td>
+<td>set_base_manpower [&lt;province id&gt;, &lt;value&gt;]</td>
+<td>Sets <a href="/Base_manpower" class="mw-redirect" title="Base manpower">base manpower</a> of province to value
+</td></tr>
+<tr>
+<td></td>
+<td>set_base_production [&lt;province id&gt;, &lt;value&gt;]</td>
+<td>Sets <a href="/Base_production" class="mw-redirect" title="Base production">base production</a> of province to value
+</td></tr>
+<tr>
+<td></td>
+<td>set_base_tax [&lt;province id&gt;, &lt;value&gt;]</td>
+<td>Sets <a href="/Base_tax" class="mw-redirect" title="Base tax">base tax</a> of province to value
+</td></tr>
+<tr>
+<td></td>
+<td>set_consort_flag [&lt;Tag&gt;] [&lt;Flag&gt;]</td>
+<td>Sets a <a href="/Flag" class="mw-redirect" title="Flag">flag</a> for a consort
+</td></tr>
+<tr>
+<td></td>
+<td>set_country_flag [&lt;Flag&gt;]</td>
+<td><i>Sets a country <a href="/Flag" class="mw-redirect" title="Flag">flag</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>set_flag [&lt;Flag&gt;]</td>
+<td><i>Sets a global <a href="/Flag" class="mw-redirect" title="Flag">flag</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>set_leader_trait [&lt;personality&gt;]</td>
+<td><i>Set selected leader's personality trait</i>
+</td></tr>
+<tr>
+<td></td>
+<td>set_prov_flag [&lt;Flag&gt;] [&lt;Province&gt;]</td>
+<td><i>Sets a <a href="/Flag" class="mw-redirect" title="Flag">flag</a> for a province</i>
+</td></tr>
+<tr>
+<td></td>
+<td>setmissionaryprogress [&lt;ProvinceID&gt;] [&lt;Amount&gt;]</td>
+<td><i>Sets the <a href="/Missionary" class="mw-redirect" title="Missionary">missionary</a> progress for a province</i>
+</td></tr>
+<tr>
+<td></td>
+<td>SetRandomCount</td>
+<td><i>Sets the randomcount to 0 or arg</i>
+</td></tr>
+<tr>
+<td></td>
+<td>show_ideas [&lt;Country tag&gt;]</td>
+<td><a href="/National_ideas" title="National ideas">National ideas</a> of the specified country dumped to <span style="color:DarkSlateGray; font-family: monospace,Courier;">game.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>siege [&lt;Province ID&gt;]</td>
+<td><i>Wins the siege in the specified province</i>
+</td></tr>
+<tr>
+<td></td>
+<td>smoothframelog</td>
+<td><i>Toggles smooth frame logging</i>
+</td></tr>
+<tr>
+<td></td>
+<td>spawn [&lt;Province ID&gt;] [&lt;SubUnit Type&gt;]</td>
+<td><i>Spawns an unit in a province.</i> For example, "spawn 1 western_medieval_infantry" spawns a Latin Medieval Infantry in Stockholm. See the file names in the <span style="color:DarkSlateGray; font-family: monospace,Courier;">common/units</span> folder for a complete list of &lt;SubUnit Type&gt;.<i></i>
+</td></tr>
+<tr>
+<td></td>
+<td>spawn_all_units [&lt;Animation state&gt;]</td>
+<td><i>Spawns all units in capital for all existing countries. Requires unit_tester mod under Art/Test Resources enabled.</i>
+</td></tr>
+<tr>
+<td></td>
+<td>spawnactor [&lt;Actorname&gt;] [&lt;Province ID&gt;] [&lt;Animation&gt; OPTIONAL]</td>
+<td><i>Spawns an actor with an optional animation</i>
+</td></tr>
+<tr>
+<td></td>
+<td>spectate(spectate)</td>
+<td><i>Goes into Spectator mode</i>
+</td></tr>
+<tr>
+<td></td>
+<td>splendor [&lt;Amount&gt;] [&lt;Target Country tag&gt; OPTIONAL]</td>
+<td><i>Adds <a href="/Splendor" class="mw-redirect" title="Splendor">splendor</a> to the player</i> (Default: 1000)
+</td></tr>
+<tr>
+<td><a href="/Emperor_(DLC)" title="Emperor"><img alt="Emperor" src="/images/thumb/c/c5/Emperor.png/24px-Emperor.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>spread_revolution [&lt;province ID or tag&gt;]</td>
+<td><i>Spread the Revolution</i>
+</td></tr>
+<tr>
+<td></td>
+<td>sprite_pack_debug [&lt;Country Tag&gt; Optional]</td>
+<td><i>Prints debug data for sprite packs</i>
+</td></tr>
+<tr>
+<td></td>
+<td>spritelevel [&lt;Sprite level&gt;]</td>
+<td><i>Sets a forced sprite level. Specify no argument to reset.</i>
+</td></tr>
+<tr>
+<td></td>
+<td>spynetwork [&lt;Target Country tag&gt;] [&lt;Amount&gt;]</td>
+<td><i>Adds <a href="/Spy_network" class="mw-redirect" title="Spy network">spy network</a> with target country</i>
+</td></tr>
+<tr>
+<td></td>
+<td>stability [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</td>
+<td>Changes the <a href="/Stability" title="Stability">stability</a> of the specified country (to maximum without value)
+</td></tr>
+<tr>
+<td></td>
+<td>startup_screen</td>
+<td><i>Creates a new startup screen</i>
+</td></tr>
+<tr>
+<td></td>
+<td>state [&lt;Province ID&gt;]</td>
+<td><i>Toggles <a href="/State" class="mw-redirect" title="State">State</a> for owner of region of province</i>
+</td></tr>
+<tr>
+<td></td>
+<td>stats</td>
+<td>Stats dumped to <span style="color:DarkSlateGray; font-family: monospace,Courier;">game.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>stop [&lt;YYYY.MM.DD&gt;]</td>
+<td><i>Pauses the game at a specified date</i>
+</td></tr>
+<tr>
+<td></td>
+<td>surrender</td>
+<td><i>Surrender</i>
+</td></tr>
+<tr>
+<td></td>
+<td>sword_mana [&lt;AMOUNT&gt; OPTIONAL] [&lt;Country tag&gt; OPTIONAL]</td>
+<td><i>Get <a href="/Military_power" class="mw-redirect" title="Military power">military power</a></i> (default value: 999)
+</td></tr>
+<tr>
+<td></td>
+<td>syntheticdawn [&lt;Target Tag&gt; OPTIONAL]</td>
+<td>Specified country changes to <a href="/Synthetics" title="Synthetics">Synthetics</a>. This country needs to have more than 10 provinces. Otherwise a random country is selected.
+</td></tr>
+<tr>
+<td></td>
+<td>tag [&lt;Country tag&gt;]</td>
+<td><i>Switch tag to another country</i>
+</td></tr>
+<tr>
+<td></td>
+<td>tech [&lt;AMOUNT&gt;]</td>
+<td>Gets levels in all <a href="/Technology" title="Technology">technology</a> types
+</td></tr>
+<tr>
+<td></td>
+<td>test [&lt;test ID&gt;]</td>
+<td><i>Runs a code test</i>
+</td></tr>
+<tr>
+<td></td>
+<td>test_achievement [&lt;achievement&gt;]</td>
+<td><i>tests a specific <a href="/Achievement" class="mw-redirect" title="Achievement">achievement</a></i>
+</td></tr>
+<tr>
+<td></td>
+<td>test_neighbour [&lt;Tag&gt;]</td>
+<td><i>Will tell you if target Tag counts as neighbour to your country</i>
+</td></tr>
+<tr>
+<td></td>
+<td>testevent [&lt;Event ID&gt;] [&lt;Character ID&gt;]</td>
+<td><i>Tests an <a href="/Event" class="mw-redirect" title="Event">event</a> without triggering it</i>
+</td></tr>
+<tr>
+<td></td>
+<td>texture_usage</td>
+<td><i>Prints texture usage</i> to <span style="color:DarkSlateGray; font-family: monospace,Courier;">memory.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>ti(debug_ti)</td>
+<td><i>Toggles <a href="/Terra_Incognita" class="mw-redirect" title="Terra Incognita">Terra Incognita</a> on/off</i>
+</td></tr>
+<tr>
+<td></td>
+<td>time</td>
+<td>Displays the current time in the command box.
+</td></tr>
+<tr>
+<td></td>
+<td>timer</td>
+<td><i>Prints out debug timing info</i>
+</td></tr>
+<tr>
+<td></td>
+<td>timer_dump</td>
+<td><i>Dumps debug timing info</i> to logs
+</td></tr>
+<tr>
+<td></td>
+<td>timer_reset</td>
+<td><i>Resets debug timing</i>
+</td></tr>
+<tr>
+<td></td>
+<td>timer_restart</td>
+<td><i>Restarts (resets and starts) debug timing</i>
+</td></tr>
+<tr>
+<td></td>
+<td>timer_show</td>
+<td><i>Shows live timing data</i>
+</td></tr>
+<tr>
+<td></td>
+<td>timer_start</td>
+<td><i>Starts debug timing</i>
+</td></tr>
+<tr>
+<td></td>
+<td>timer_stop</td>
+<td><i>Stops debug timing</i>
+</td></tr>
+<tr>
+<td></td>
+<td>touch_test</td>
+<td><i>Testing touch</i>
+</td></tr>
+<tr>
+<td><a href="/Conquest_of_Paradise" title="Conquest of Paradise"><img alt="Conquest of Paradise.png" src="/images/thumb/3/31/Conquest_of_Paradise.png/24px-Conquest_of_Paradise.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>tribal_development [&lt;province id&gt;, &lt;value&gt;]</td>
+<td><i>adds tribal development to the federation</i> Note: the command always adds 1 adm/dip/mil tribal development to the current country if in a <a href="/Native_Council" class="mw-redirect" title="Native Council">Native Council</a>, province id and value arguments don't work
+</td></tr>
+<tr>
+<td><a href="/Mandate_of_Heaven" title="Mandate of Heaven"><img alt="Mandate of Heaven.png" src="/images/thumb/7/7c/Mandate_of_Heaven.png/24px-Mandate_of_Heaven.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>tributary [&lt;Tag&gt;]</td>
+<td><i>Make country a <a href="/Tributary" class="mw-redirect" title="Tributary">Tributary</a> State</i>
+</td></tr>
+<tr>
+<td></td>
+<td>trust [&lt;Target Country tag&gt;] [&lt;Amount&gt;]</td>
+<td><i>Adds <a href="/Trust" class="mw-redirect" title="Trust">trust</a> with target country</i>
+</td></tr>
+<tr>
+<td></td>
+<td>update_loc [localization tag]</td>
+<td><i>Updates the localization tag file</i>
+</td></tr>
+<tr>
+<td></td>
+<td>validateevents</td>
+<td><i>Validates all <a href="/Events" title="Events">events</a> without triggering it</i>
+</td></tr>
+<tr>
+<td></td>
+<td>vassalize [&lt;Target Country Tag&gt;] [&lt;Actor Country tag&gt; OPTIONAL]</td>
+<td><i><a href="/Vassalize" class="mw-redirect" title="Vassalize">Vassalize</a> the specified tag</i>
+</td></tr>
+<tr>
+<td></td>
+<td>verify_loc</td>
+<td><i>Verifies the localization keys</i><br />Unlocalized keys are written to <span style="color:DarkSlateGray; font-family: monospace,Courier;">error.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>version</td>
+<td><i>Prints the game version</i>
+</td></tr>
+<tr>
+<td></td>
+<td>victorycard</td>
+<td><i>Force enables <a href="/Victory_cards" class="mw-redirect" title="Victory cards">victory cards</a> in singleplayer</i>
+</td></tr>
+<tr>
+<td></td>
+<td>window(wnd) [Arguments: open/close] [window gui name]</td>
+<td><i>Opens or closes the specified window</i>
+</td></tr>
+<tr>
+<td></td>
+<td>winwars</td>
+<td><i>Gives max <a href="/War_score" class="mw-redirect" title="War score">war score</a> in all wars for the country</i>
+</td></tr>
+<tr>
+<td></td>
+<td>writetestentities</td>
+<td>Writes test entities for all countries to <span style="color:DarkSlateGray; font-family: monospace,Courier;">local_temp.log</span>
+</td></tr>
+<tr>
+<td></td>
+<td>yesman</td>
+<td><i>Toggles AI positive responses</i> (on: always accept; off: normal response)
+</td></tr>
+<tr>
+<td><a href="/Emperor_(DLC)" title="Emperor"><img alt="Emperor" src="/images/thumb/c/c5/Emperor.png/24px-Emperor.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a></td>
+<td>zeal [&lt;Amount&gt;] [&lt;Target Country Tag&gt;]</td>
+<td><i>Adds <a href="/Revolutionary_zeal" class="mw-redirect" title="Revolutionary zeal">revolutionary zeal</a> to a country</i>
+</td></tr>
+<tr>
+<td></td>
+<td>zombie</td>
+<td><i>Zombie army debug on/off.</i><br />On by default, when turned off, armies will be immediately stackwiped on losing a battle instead of doing a <a href="/Shattered_retreat" class="mw-redirect" title="Shattered retreat">shattered retreat</a>.
+</td></tr></tbody></table>
+<h2><span class="mw-headline" id="Casus_belli_IDs">Casus belli IDs</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="/index.php?title=Console_commands&amp;veaction=edit&amp;section=3" class="mw-editsection-visualeditor" title="Edit section: Casus belli IDs">edit</a><span class="mw-editsection-divider"> | </span><a href="/index.php?title=Console_commands&amp;action=edit&amp;section=3" title="Edit section: Casus belli IDs">edit source</a><span class="mw-editsection-bracket">]</span></span></h2>
+<table class="metadata plainlinks ambox mbox-small-left ambox-notice" style="">
+<tbody><tr>
+<td class="mbox-image">
+  <img alt="Ambox outdated info.png" src="https://central.paradoxwikis.com/images/thumb/6/65/Ambox_outdated_info.png/22px-Ambox_outdated_info.png" decoding="async" loading="lazy" width="22" height="22" data-file-width="50" data-file-height="50" /></td>
+<td class="mbox-text" style=""> <div style="font-size:85%;">Please help with verifying or updating this section. It was last verified for <a href="/Europa_Universalis_4_Wiki:Versioning" title="Europa Universalis 4 Wiki:Versioning">version</a> 1.28.</div> </td>
+</tr>
+</tbody></table>
+<p>For use with add_cb and remove_cb.
+</p>
+<div style="columns:100px 3; column-gap: 10px;-webkit-columns:100px 3; -webkit-column-gap: 10px;-moz-columns:100px 3; -moz-column-gap: 10px;">
+<ul><li>cb_restore_personal_union – <a href="/Restoration_of_Union" class="mw-redirect" title="Restoration of Union">Restoration of Union</a></li>
+<li>cb_defection – <a href="/Casus_belli#Defected_Province" title="Casus belli">Defected Province</a></li>
+<li>cb_loan_cancelled – <a href="/Casus_belli#Canceled_Loan" title="Casus belli">Canceled Loan</a></li>
+<li>cb_spy_discovered – <a href="/Casus_belli#Discovered_Spy" title="Casus belli">Discovered Spy</a></li>
+<li>cb_disloyal_vassal – <a href="/Casus_belli#Disloyal_Vassal" title="Casus belli">Disloyal Vassal</a></li>
+<li>cb_hre_attacked – <a href="/Imperial_Liberation" class="mw-redirect" title="Imperial Liberation">Imperial Liberation</a></li>
+<li>cb_insult – <a href="/Diplomatic_Insult" class="mw-redirect" title="Diplomatic Insult">Diplomatic Insult</a></li>
+<li>cb_dishonored_call – <a href="/Casus_belli#Dishonored_Call" title="Casus belli">Dishonored Call</a></li>
+<li>cb_vassalize_mission – <a href="/Subjugation" class="mw-redirect" title="Subjugation">Subjugation</a></li>
+<li>cb_fabricated_claims – <a href="/Obscure_Documents" class="mw-redirect" title="Obscure Documents">Obscure Documents</a></li>
+<li>cb_religious_conformance – <a href="/Casus_belli#Religious_Unity" title="Casus belli">Religious Unity</a></li>
+<li>cb_border_war – <a href="/Border_Friction" class="mw-redirect" title="Border Friction">Border Friction</a></li>
+<li>cb_trade_war_triggered – <a href="/Casus_belli#Trade_War" title="Casus belli">Trade War</a></li>
+<li>cb_trade_conflict – <a href="/Casus_belli#Trade_Conflict" title="Casus belli">Trade Conflict</a></li>
+<li>cb_trade_league_conflict - <a href="/Casus_belli#Trade_League_Conflict" title="Casus belli">Trade Conflict</a></li>
+<li>cb_annex – <a href="/Casus_belli#Annexation_War" title="Casus belli">Annexation War</a></li>
+<li>cb_change_government – <a href="/Casus_belli#Government_Form_War" title="Casus belli">Government Form War</a></li>
+<li>cb_humiliate – <a href="/Casus_belli#Humiliate" title="Casus belli">Humiliate</a></li>
+<li>cb_conquest – <a href="/Casus_belli#Conquest" title="Casus belli">Conquest</a></li>
+<li>cb_core – <a href="/Reconquest" class="mw-redirect" title="Reconquest">Reconquest</a></li>
+<li>cb_independence_war – <a href="/Casus_belli#Independence" title="Casus belli">Independence</a></li>
+<li>cb_colonial_independance_war – <a href="/Casus_belli#Colonial_Independence" title="Casus belli">Colonial Independence</a></li>
+<li>cb_nationalist – <a href="/Casus_belli#Nationalism" title="Casus belli">Nationalism</a></li>
+<li>cb_imperial – <a href="/Imperialism" class="mw-redirect" title="Imperialism">Imperialism</a></li>
+<li>cb_war_against_the_world - <a href="/War_Against_the_World" class="mw-redirect" title="War Against the World">War Against the World</a></li>
+<li>cb_daimyo_annex – <a href="/War_for_the_Emperor" class="mw-redirect" title="War for the Emperor">War for the Emperor</a></li>
+<li>cb_independent_daimyo_annex – <a href="/Casus_belli#Independent_Daimyo_Attacking_Japan" title="Casus belli">War for the Emperor</a></li>
+<li>cb_shogun_annex – <a href="/Casus_belli#Annex_Daimyo" title="Casus belli">Annex Daimyo</a></li>
+<li>cb_sengoku – <a href="/Casus_belli#Sengoku" title="Casus belli">Sengoku</a></li>
+<li>cb_revolutionary – <a href="/Casus_belli#Revolutionary_War" title="Casus belli">Revolutionary War</a></li>
+<li>cb_colonial – <a href="/Casus_belli#Colonialism" title="Casus belli">Colonialism</a></li>
+<li>cb_liberation – <a href="/Casus_belli#Liberation" title="Casus belli">Liberation</a></li>
+<li>cb_crusade – <a href="/Casus_belli#Holy_War" title="Casus belli">Holy War</a></li>
+<li>cb_defender_of_the_faith – <a href="/Casus_belli#Defender_of_the_Faith" title="Casus belli">Defender of the Faith</a></li>
+<li>cb_heretic – <a href="/Cleansing_of_Heresy" class="mw-redirect" title="Cleansing of Heresy">Cleansing of Heresy</a></li>
+<li>cb_excommunication – <a href="/Casus_belli#Excommunicated_Ruler" title="Casus belli">Excommunicated Ruler</a></li>
+<li>cb_trade_war – <a href="/Casus_belli#Trade_Dispute" title="Casus belli">Trade Dispute</a></li>
+<li>cb_trade_league_dispute – <a href="/Casus_belli#Trade_League_Dispute" title="Casus belli">Trade League Dispute</a></li>
+<li>cb_imperial_ban – <a href="/Casus_belli#Imperial_Ban" title="Casus belli">Imperial Ban</a></li>
+<li>cb_liberate_elector – <a href="/Casus_belli#Liberate_Elector" title="Casus belli">Liberate Elector</a></li>
+<li>cb_super_badboy – <a href="/Casus_belli#Coalition" title="Casus belli">Coalition</a></li>
+<li>cb_claim_throne – <a href="/Casus_belli#Claim_on_Throne" title="Casus belli">Claim on Throne</a></li>
+<li>cb_horde_vs_civ – <a href="/Tribal_Conquest" class="mw-redirect" title="Tribal Conquest">Tribal Conquest</a></li>
+<li>cb_tribal_feud – <a href="/Tribal_Feud" class="mw-redirect" title="Tribal Feud">Tribal Feud</a></li>
+<li>cb_revoke_electorate – <a href="/Casus_belli#Revoke_Electorate" title="Casus belli">Revoke Electorate</a></li>
+<li>cb_privateers – <a href="/Casus_belli#Trade_Protection" title="Casus belli">Trade Protection</a></li>
+<li>cb_support_rebels – <a href="/Casus_belli#Support_Rebels" title="Casus belli">Support Rebels</a></li>
+<li>cb_crush_the_revolution – <a href="/Casus_belli#Crush_the_Revolution" title="Casus belli">Crush the Revolution</a></li>
+<li>cb_spread_the_revolution – <a href="/Casus_belli#Spread_the_Revolution" title="Casus belli">Spread the Revolution</a></li>
+<li>cb_religious_league – <a href="/Casus_belli#Religious_League" title="Casus belli">Religious League</a></li>
+<li>cb_flower_wars – <a href="/Casus_belli#Flower_Wars" title="Casus belli">Flower Wars</a></li>
+<li>cb_maya_expansion – <a href="/Casus_belli#Maya_Confederation" title="Casus belli">Maya Confederation</a></li>
+<li>cb_humiliate_rotw – <a href="/Humiliate_Rival" class="mw-redirect" title="Humiliate Rival">Humiliate Rival</a></li>
+<li>cb_chinese_unification – <a href="/Unify_China" class="mw-redirect" title="Unify China">Unify China</a></li>
+<li>cb_take_mandate - <a href="/Casus_belli#Take_Mandate_of_Heaven" title="Casus belli">Take Mandate of Heaven</a></li>
+<li>cb_force_migration – <a href="/Casus_belli#Force_Migration" title="Casus belli">Force Migration</a></li>
+<li>cb_forced_break_alliance – <a href="/Casus_belli#Forced_ally_to_break_alliance" title="Casus belli">Forced ally to break alliance</a></li>
+<li>cb_force_tributary - <a href="/Force_Tributary_State#Force_Tributary_State" class="mw-redirect" title="Force Tributary State">Force Tributary State</a></li>
+<li>cb_hundred_years_union - <a href="/Force_Union#Force_Union" class="mw-redirect" title="Force Union">Force Union</a></li>
+<li>cb_force_join_hre - <a href="/Expand_Empire#Expand_Empire" class="mw-redirect" title="Expand Empire">Expand Empire</a></li>
+<li>cb_ottoman_subjugation_war - <a href="/Ottoman_Campaign_of_Conquest#Ottoman_Campaign_of_Conquest" class="mw-redirect" title="Ottoman Campaign of Conquest">Ottoman Campaign of Conquest</a></li></ul></div>
+<h2><span class="mw-headline" id="List_of_events">List of events</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="/index.php?title=Console_commands&amp;veaction=edit&amp;section=4" class="mw-editsection-visualeditor" title="Edit section: List of events">edit</a><span class="mw-editsection-divider"> | </span><a href="/index.php?title=Console_commands&amp;action=edit&amp;section=4" title="Edit section: List of events">edit source</a><span class="mw-editsection-bracket">]</span></span></h2>
+<table class="metadata plainlinks ambox mbox-small-left ambox-notice" style="">
+<tbody><tr>
+<td class="mbox-image">
+  <img alt="Ambox outdated info.png" src="https://central.paradoxwikis.com/images/thumb/6/65/Ambox_outdated_info.png/22px-Ambox_outdated_info.png" decoding="async" loading="lazy" width="22" height="22" data-file-width="50" data-file-height="50" /></td>
+<td class="mbox-text" style=""> <div style="font-size:85%;">Please help with verifying or updating this section. It was last verified for <a href="/Europa_Universalis_4_Wiki:Versioning" title="Europa Universalis 4 Wiki:Versioning">version</a> 1.30.</div> </td>
+</tr>
+</tbody></table>
+<table class="wikitable">
+
+<tbody><tr>
+<th>Event ID</th>
+<th>Name of event</th>
+<th>Event's effect
+</th></tr>
+<tr>
+<td><b>700</b></td>
+<td><i><a href="/Election_events#700" title="Election events">Election!</a></i></td>
+<td>Allows player to gain 1<a href="/Military_power" title="Military power"><img alt="Military power.png" src="/images/thumb/9/98/Military_power.png/24px-Military_power.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="28" data-file-height="28" /></a> / 1<a href="/Administrative_power" title="Administrative power"><img alt="Administrative power.png" src="/images/thumb/e/ef/Administrative_power.png/24px-Administrative_power.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="28" data-file-height="28" /></a> / 1<a href="/Diplomatic_power" title="Diplomatic power"><img alt="Diplomatic power.png" src="/images/thumb/d/da/Diplomatic_power.png/24px-Diplomatic_power.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="28" data-file-height="28" /></a> to the current leader (Will Replace Queen Regents and Regency Councils)
+</td></tr>
+<tr>
+<td><b>862</b></td>
+<td><i><a href="/Colonization_events#The_New_World_Beckons!" title="Colonization events">The New World Beckons!</a></i></td>
+<td>Pick between a <a href="/Military_leaders" title="Conquistador"><img alt="Conquistador" src="/images/thumb/9/91/Conquistador.png/28px-Conquistador.png" decoding="async" loading="lazy" width="28" height="28" data-file-width="40" data-file-height="40" /></a> Conquistador with 25 army tradition, or a 5-year bonus to settler chance and global settler increase (or both with Expansionist ruler)
+</td></tr>
+<tr>
+<td><b>881</b></td>
+<td><i><a href="/Colonization_events#Merchant_arranges_an_expedition." title="Colonization events">Merchant arranges an expedition.</a></i></td>
+<td>Gain <a href="/Military_leaders" title="Explorer"><img alt="Explorer" src="/images/thumb/c/ca/Explorer.png/28px-Explorer.png" decoding="async" loading="lazy" width="28" height="28" data-file-width="40" data-file-height="40" /></a> Explorer with 20 naval tradition.
+</td></tr>
+<tr>
+<td><b>2001</b></td>
+<td><i><a href="/The_Protestant_Reformation" class="mw-redirect" title="The Protestant Reformation">The Protestant Reformation</a></i></td>
+<td>Starts the <a href="/Protestant" title="Protestant"><img alt="Protestantism" src="/images/thumb/0/0d/Protestant.png/24px-Protestant.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="64" data-file-height="64" /></a> protestant reformation and spawns a <a href="/Center_of_reformation" title="Center of reformation"><img alt="Center of reformation.png" src="/images/thumb/e/e4/Center_of_reformation.png/24px-Center_of_reformation.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="42" data-file-height="42" /></a> center of reformation in the capital.
+</td></tr>
+<tr>
+<td><b>5056</b></td>
+<td><i><a href="/Diplomatic_events#5056" title="Diplomatic events">Diplomatic Insult</a></i></td>
+<td>Get Diplomatic Insult CB on neighbor / +60 opinion to neighbors
+</td></tr>
+<tr>
+<td><b>9469</b></td>
+<td><i><a href="/Dynastic_events#Lux_Stella" title="Dynastic events">Lux Stella</a></i></td>
+<td>gives choice between heir with at least a 6 in <a href="/Military_power" title="Military power"><img alt="Military power.png" src="/images/thumb/9/98/Military_power.png/24px-Military_power.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="28" data-file-height="28" /></a> / <a href="/Administrative_power" title="Administrative power"><img alt="Administrative power.png" src="/images/thumb/e/ef/Administrative_power.png/24px-Administrative_power.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="28" data-file-height="28" /></a> / <a href="/Diplomatic_power" title="Diplomatic power"><img alt="Diplomatic power.png" src="/images/thumb/d/da/Diplomatic_power.png/24px-Diplomatic_power.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="28" data-file-height="28" /></a>
+</td></tr>
+<tr>
+<td><b>flavor_pol.1 </b></td>
+<td><i><a href="/Polish_events#The_Commonwealth_Navy" title="Polish events">The Commonwealth Navy</a></i></td>
+<td>
+<ul><li>gains <a href="/Navy_tradition" title="Navy tradition"><img alt="Navy tradition.png" src="/images/c/cd/Navy_tradition.png" decoding="async" loading="lazy" width="28" height="28" data-file-width="28" data-file-height="28" /></a><span class="effect-green"><b>20</b></span> navy tradition.</li>
+<li>starts the free construction of <a href="/Heavy_ship" title="Heavy ship"><img alt="Heavy ship.png" src="/images/thumb/5/50/Heavy_ship.png/24px-Heavy_ship.png" decoding="async" loading="lazy" width="24" height="20" data-file-width="38" data-file-height="31" /></a> 5 heavy ships with <a href="/Local_shipbuilding_time" title="Local shipbuilding time"><img alt="Local shipbuilding time.png" src="/images/thumb/d/de/Local_shipbuilding_time.png/24px-Local_shipbuilding_time.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="48" data-file-height="48" /></a> <span class="effect-green"><b>−90%</b></span> ship building time in a random owned coastal province.</li></ul>
+</td></tr>
+<tr>
+<td><b>flavor_sco.8</b></td>
+<td><i><a href="/Scottish_events#The_Glasgow_Chamber_of_Commerce" title="Scottish events">The Glasgow Chamber of Commerce</a></i></td>
+<td><a href="/Mercantilism" title="Mercantilism"><img alt="Mercantilism.png" src="/images/thumb/0/05/Mercantilism.png/24px-Mercantilism.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="32" data-file-height="32" /></a><span class="effect-green"><b>+5%</b></span> mercantilism
+</td></tr>
+<tr>
+<td><b>colonial.1 [&lt;Province ID&gt;]</b></td>
+<td><i><a href="/Colonial_events#colonial.1" title="Colonial events">The [empty_neighbor_target.GetAreaName] Company</a></i></td>
+<td>A new colony with <span class="effect-green"><b>200</b></span> settlers will appear in a random neighbor province and that province gets <a href="/Local_settler_increase" title="Local settler increase"><img alt="Local settler increase.png" src="/images/thumb/f/f6/Local_settler_increase.png/28px-Local_settler_increase.png" decoding="async" loading="lazy" width="28" height="28" data-file-width="48" data-file-height="48" /></a> <span class="effect-green"><b>+15</b></span> local settler increase
+</td></tr>
+<tr>
+<td><b>colonial.12 [&lt;Province ID&gt;]</b></td>
+<td><i><a href="/Colonial_events#The_Call_of_the_Hunt" title="Colonial events">The Call of the Hunt</a></i></td>
+<td>Sets trade good to <a href="/Fur" title="Fur"><img alt="Fur.png" src="/images/thumb/0/00/Fur.png/24px-Fur.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="64" data-file-height="64" /></a>fur
+</td></tr>
+<tr>
+<td><b>colonial.13 [&lt;Province ID&gt;]</b></td>
+<td><i><a href="/Colonial_events#Fur_Trade_Dwindles" title="Colonial events">Fur Trade Dwindles</a></i></td>
+<td>Sets trade good to <a href="/Naval_supplies" title="Naval supplies"><img alt="Naval supplies.png" src="/images/thumb/f/f1/Naval_supplies.png/24px-Naval_supplies.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="64" data-file-height="64" /></a>naval supplies / <a href="/Grain" title="Grain"><img alt="Grain.png" src="/images/thumb/6/66/Grain.png/24px-Grain.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="64" data-file-height="64" /></a>grain
+</td></tr>
+<tr>
+<td><b>colonial.18 [&lt;Province ID&gt;]</b></td>
+<td><i><a href="/Colonial_events#New_World_Coffee" title="Colonial events">New World Coffee</a></i></td>
+<td>Sets trade good to <a href="/Coffee" title="Coffee"><img alt="Coffee.png" src="/images/thumb/e/e9/Coffee.png/24px-Coffee.png" decoding="async" loading="lazy" width="24" height="24" data-file-width="64" data-file-height="64" /></a>coffee
+</td></tr>
+<tr>
+<td><b>flavor_gbr.200</b> <b>[&lt;Province ID&gt;]</b>
+</td>
+<td><i>Colonial Ventures</i>
+</td>
+<td>May change provincial trade good
+</td></tr>
+<tr>
+<td><b>ideagroups.1</b></td>
+<td><i><a href="/Idea_group_events#ideagroups.1" title="Idea group events">New Traditions &amp; Ambitions</a></i></td>
+<td>Changes your national ideas to match your current country tag.
+</td></tr>
+<tr>
+<td><b>ideagroups.606</b></td>
+<td><i><a href="/Diplomatic_idea_group_events#ideagroups.606" title="Diplomatic idea group events">Improved Reputation</a></i></td>
+<td>Increase diplomatic reputation by 1 for 10 years.
+</td></tr>
+<tr>
+<td><b>ideagroups.608</b></td>
+<td><i><a href="/Diplomatic_idea_group_events#ideagroups.608" title="Diplomatic idea group events">Justify my War!</a></i></td>
+<td>"Justified Demands" modifier for 10 years, reducing AE by 5% and Unjustified Demands by 20%
+</td></tr>
+<tr>
+<td><b>ideagroups.1801</b></td>
+<td><i><a href="/Influence_idea_group_events#ideagroups.1801" title="Influence idea group events">Our Cause is Just</a></i></td>
+<td>Gives the "Just Causes" modifier for 10 years, reducing Aggressive Expansion by 20%
+</td></tr>
+<tr>
+<td><b>culture_religion_events.21</b></td>
+<td><i><a href="/Culture_and_religion_events#culture_religion_events.21" title="Culture and religion events">A Question of Faith</a></i></td>
+<td>Changes the state religion of the country to that of the ruler.
+</td></tr>
+<tr>
+<td><b>culture_religion_events.22</b></td>
+<td><i><a href="/Culture_and_religion_events#culture_religion_events.22" title="Culture and religion events">The Court of [Root.Monarch.GetName]</a></i></td>
+<td>Changes the primary culture of country to that of the ruler.
+</td></tr></tbody></table>
+<h2><span class="mw-headline" id="See_also">See also</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="/index.php?title=Console_commands&amp;veaction=edit&amp;section=5" class="mw-editsection-visualeditor" title="Edit section: See also">edit</a><span class="mw-editsection-divider"> | </span><a href="/index.php?title=Console_commands&amp;action=edit&amp;section=5" title="Edit section: See also">edit source</a><span class="mw-editsection-bracket">]</span></span></h2>
+<ul><li><a href="/List_of_provinces" class="mw-redirect" title="List of provinces">List of provinces</a> - Province IDs are used in many commands</li>
+<li><a href="/Countries#Country_descriptions_list" title="Countries">Country tags</a> - Country tags are used in many commands</li>
+<li><a href="/Event_ids" class="mw-redirect" title="Event ids">Event ids</a> - Event IDs used for event and testevent commands</li></ul>
+<!-- 
+NewPP limit report
+Cached time: 20250921234150
+Cache expiry: 86400
+Reduced expiry: false
+Complications: [show‐toc]
+CPU time usage: 0.307 seconds
+Real time usage: 0.392 seconds
+Preprocessor visited node count: 5901/1000000
+Post‐expand include size: 35933/2097152 bytes
+Template argument size: 15035/2097152 bytes
+Highest expansion depth: 11/100
+Expensive parser function count: 0/100
+Unstrip recursion depth: 0/20
+Unstrip post‐expand size: 1/5000000 bytes
+-->
+<!--
+Transclusion expansion time report (%,ms,calls,template)
+100.00%  162.240      1 -total
+ 66.84%  108.440     51 Template:Icon
+ 11.27%   18.291      4 Template:SVersion
+  8.23%   13.347     10 Template:Icon/m
+  7.79%   12.641      9 Template:Icon/c
+  7.45%   12.089      4 Template:Ambox
+  4.57%    7.416     14 Template:Key_press
+  4.50%    7.304      4 Template:Ambox/core
+  4.39%    7.127      3 Template:Icon/l
+  4.28%    6.944      9 Template:Icon/e
+-->
+
+<!-- Saved in parser cache with key wiki_eu4-mweu4_:pcache:idhash:799-0!canonical and timestamp 20250921234150 and revision id 175122.
+ -->
+</div>
+<div class="printfooter" data-nosnippet="">Retrieved from "<a dir="ltr" href="https://eu4.paradoxwikis.com/index.php?title=Console_commands&amp;oldid=175122">https://eu4.paradoxwikis.com/index.php?title=Console_commands&amp;oldid=175122</a>"</div></div>
+		<div id="catlinks" class="catlinks" data-mw="interface"><div id="mw-normal-catlinks" class="mw-normal-catlinks"><a href="/Special:Categories" title="Special:Categories">Categories</a>: <ul><li><a href="/Category:Potentially_outdated" title="Category:Potentially outdated">Potentially outdated</a></li><li><a href="/Category:1.28" title="Category:1.28">1.28</a></li><li><a href="/Category:Interface" title="Category:Interface">Interface</a></li><li><a href="/Category:Modding" title="Category:Modding">Modding</a></li></ul></div><div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="/Category:Articles_with_potentially_outdated_sections" title="Category:Articles with potentially outdated sections">Articles with potentially outdated sections</a></li></ul></div></div>
+	</div>
+</div>
+</div>
+
+
+<footer id="footer" class="mw-footer" role="contentinfo" >
+	<ul id="footer-info">
+	<li id="footer-info-lastmod"> This page was last edited on 15 September 2025, at 08:34.</li>
+	<li id="footer-info-copyright">Content is available under <a href="https://central.paradoxwikis.com/Central:Copyrights" class="extiw" title="central:Central:Copyrights">Attribution-ShareAlike 3.0</a> unless otherwise noted.</li>
+</ul>
+
+	<ul id="footer-places">
+	<li id="footer-places-about"><a href="https://central.paradoxwikis.com/Central:About">About Europa Universalis 4 Wiki</a></li>
+	<li id="footer-places-mobileview"><a href="https://eu4.paradoxwikis.com/index.php?title=Console_commands&amp;mobileaction=toggle_view_mobile" class="noprint stopMobileRedirectToggle">Mobile view</a></li>
+</ul>
+
+	<ul id="footer-icons" class="noprint">
+	<li id="footer-copyrightico"><a href="https://creativecommons.org/licenses/by-sa/3.0/"><img src="https://licensebuttons.net/l/by-sa/3.0/88x31.png" alt="Attribution-ShareAlike 3.0" width="88" height="31" loading="lazy"/></a></li>
+	<li id="footer-poweredbyico"><a href="https://www.mediawiki.org/"><img src="/resources/assets/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" srcset="/resources/assets/poweredby_mediawiki_132x47.png 1.5x, /resources/assets/poweredby_mediawiki_176x62.png 2x" width="88" height="31" loading="lazy"/></a></li>
+</ul>
+
+</footer>
+
+<div class="footer pdx_footer">
+    <div class="footer-container content grid ts-inner">
+        <div class="footer__logo footer-item">
+            <div class="content-asset">
+                <div class="footer__logo-image"><a href="https://www.paradoxinteractive.com"><img
+                        src="https://forum.paradoxplaza.com/forum/styles/paradox/paradox/logotype_white.svg"></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer__games footer-item">
+            <div class="content-asset">
+                <div class="footer_section_title">Games</div>
+                <ul class="footer__menu">
+                    <li class="footer__menu_link"><a href="https://www.paradoxinteractive.com/our-games/discover" title="Discover">Discover</a></li>
+                    <li class="footer__menu_link"><a href="https://www.paradoxinteractive.com/our-games/our-brands" title="Our Brands">Our Brands</a></li>
+                    <li class="footer__menu_link"><a href="https://www.paradoxinteractive.com/our-games/all-games" title="Browse">Browse</a></li>
+                    <li class="footer__menu_link"><a href="https://play.paradoxplaza.com/" title="Paradox Launcher">Play
+                        on Paradox technology</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer__community footer-item">
+            <div class="content-asset">
+                <div class="footer_section_title">Community</div>
+                <ul class="footer__menu">
+                    <li class="footer__menu_link"><a href="https://forum.paradoxplaza.com/forum/index.php"
+                                                     title="Paradox Forums">Paradox Forums</a></li>
+                    <li class="footer__menu_link"><a href="https://paradoxwikis.com/" title="Paradox Wikis">Paradox
+                        Wikis</a></li>
+                    <li class="footer__menu_link"><a href="https://support.paradoxplaza.com/"
+                                                     title="Support">Support</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer__about footer-item">
+            <div class="content-asset">
+                <div class="footer_section_title">About</div>
+                <ul class="footer__menu">
+                    <li class="footer__menu_link"><a href="https://www.paradoxinteractive.com/media/press-releases/news" title="News">News</a></li>
+                    <li class="footer__menu_link"><a href="https://www.paradoxinteractive.com/our-company"
+                                                     title="About us">About us</a></li>
+                    <li class="footer__menu_link"><a href="http://career.paradoxplaza.com/" title="Careers">Careers</a>
+                    </li>
+                    <li class="footer__menu_link"><a href="https://www.paradoxplaza.com/playtest-static-info-ca.html"
+                                                     title="Join our playtests">Join our playtests</a></li>
+                    <li class="footer__menu_link"><a href="https://www.paradoxinteractive.com/contact/review-codes-and-product-pr"
+                                                     title="Media contact">Media contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer__socialmedia footer-item">
+            <div class="content-asset">
+                <div class="footer_section_title">Social Media</div>
+                <ul class="footer__socialmedia-icons">
+                    <li class="footer__social-icon"><a href="https://www.facebook.com/ParadoxInteractive"
+                                                       target="_blank"><span
+                            class="icon icon-facebook-with-circle"></span></a></li>
+                    <li class="footer__social-icon"><a href="https://twitter.com/PdxInteractive" target="_blank"><span
+                            class="icon icon-twitter-with-circle"></span></a></li>
+                    <li class="footer__social-icon"><a href="https://www.youtube.com/user/Paradoxplaza" target="_blank"><span
+                            class="icon icon-youtube-with-circle"></span></a></li>
+                    <li class="footer__social-icon"><a href="https://www.twitch.tv/paradoxinteractive"
+                                                       target="_blank"><span
+                            class="icon icon-twitch-with-circle"></span></a></li>
+                    <li class="footer__social-icon"><a
+                            href="https://www.instagram.com/explore/locations/241319129/paradox-interactive/"
+                            target="_blank"><span class="icon icon-instagram-with-circle"></span></a></li>
+                    <li class="footer__social-icon"><a href="https://open.spotify.com/artist/75N2nC2KNgaQ1e6bGs0wyc"
+                                                       target="_blank"><span
+                            class="icon icon-spotify-with-circle"></span></a></li>
+                </ul>
+            </div>
+            <div class="hide-for-small">
+                <div class="content-asset">
+                    <ul class="footer__menu">
+                        <li class="footer__menu_link-small"><a
+                                href="https://legal.paradoxplaza.com/" title="Legal Information">Legal
+                            Information</a></li>
+                        <li class="footer__menu_link-small"><a
+                                href="https://ec.europa.eu/consumers/odr/main/index.cfm?event=main.home.chooseLanguage"
+                                title="EU Online Dispute Resolution">EU Online Dispute Resolution</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer__legal footer-item show-for-small">
+            <div class="content-asset">
+                <ul class="footer__menu">
+                    <li class="footer__menu_link-small"><a href="https://legal.paradoxplaza.com/"
+                                                           title="Terms &amp; Policies">Terms &amp; Policies</a></li>
+                    <li class="footer__menu_link-small"><a href="https://www.paradoxplaza.com/legal-static-info-ca.html"
+                                                           title="Legal Information">Legal Information</a></li>
+                    <li class="footer__menu_link-small"><a
+                            href="https://ec.europa.eu/consumers/odr/main/index.cfm?event=main.home.chooseLanguage"
+                            title="EU Online Dispute Resolution">EU Online Dispute Resolution</a></li>
+                    <li class="footer__menu_link-small"><a href="https://www.paradoxplaza.com/faq-static-info-ca.html"
+                                                           title="Frequently Asked Questions">Frequently Asked
+                        Questions</a></li>
+                    <li class="footer__menu_link-small"><a href="http://www.paradoxinteractive.com/"
+                                                           title="Paradox Interactive corporate website">Paradox
+                        Interactive corporate website</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>(RLQ=window.RLQ||[]).push(function(){mw.config.set({"wgPageParseReport":{"limitreport":{"cputime":"0.307","walltime":"0.392","ppvisitednodes":{"value":5901,"limit":1000000},"postexpandincludesize":{"value":35933,"limit":2097152},"templateargumentsize":{"value":15035,"limit":2097152},"expansiondepth":{"value":11,"limit":100},"expensivefunctioncount":{"value":0,"limit":100},"unstrip-depth":{"value":0,"limit":20},"unstrip-size":{"value":1,"limit":5000000},"timingprofile":["100.00%  162.240      1 -total"," 66.84%  108.440     51 Template:Icon"," 11.27%   18.291      4 Template:SVersion","  8.23%   13.347     10 Template:Icon/m","  7.79%   12.641      9 Template:Icon/c","  7.45%   12.089      4 Template:Ambox","  4.57%    7.416     14 Template:Key_press","  4.50%    7.304      4 Template:Ambox/core","  4.39%    7.127      3 Template:Icon/l","  4.28%    6.944      9 Template:Icon/e"]},"cachereport":{"timestamp":"20250921234150","ttl":86400,"transientcontent":false}}});});</script>
+<!-- Google Tag Manager (added by extension GoogleTagManager) -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-5QW7SS"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5QW7SS');</script>
+<!-- End Google Tag Manager --><!-- Google Tag Manager (added by extension GoogleTagManager) -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-5QW7SS"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5QW7SS');</script>
+<!-- End Google Tag Manager -->
+<script>(RLQ=window.RLQ||[]).push(function(){mw.config.set({"wgBackendResponseTime":552});});</script>
+</body>
+</html>

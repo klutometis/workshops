@@ -1,0 +1,1570 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "chunk-1-introduction-to-probability",
+      "topic": "Introduction to Probability",
+      "text": "<div style=\"text-align: right\">Peter Norvig, 12 Feb 2016<br>Python 3 updates 2025</div>",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-2-classical-probability-definition",
+      "topic": "Classical Definition of Probability",
+      "text": "The **classical definition of probability** says that if there are *n* possible outcomes, and *a* of them are considered favorable, then:\n\n$$P = \\frac{a}{n}$$\n\nWe can read this as saying \"*P*, the probability of an event, is the number of outcomes that are favorable to the event (*a*) divided by the total number of possible outcomes (*n*).\" I will call this **Laplace's definition of probability**, because Pierre-Simon Laplace did as much as anyone to promote this definition.",
+      "concepts": [
+        "classical_definition_of_probability"
+      ],
+      "chunk_type": "definition",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-3-probability-calculation-laplace",
+      "topic": "Probability Calculation with Laplace's Rule",
+      "text": "To use Laplace's definition, we must be able to enumerate all possible outcomes. Let's start with a simple example: What is the probability of rolling an even number with a six-sided die?  We can enumerate the sample space, the set of possible outcomes, as {1, 2, 3, 4, 5, 6}, and the event (the set of favorable outcomes) as {2, 4, 6}.  So the probability is 3/6 = 1/2.",
+      "concepts": [
+        "sample_space",
+        "event",
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "example",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-4-probability-terminology",
+      "topic": "Probability Terminology",
+      "text": "Here's a review of probability terminology:\n\n*   A **trial** is a single occurrence or experiment with an uncertain outcome.\n*   An **outcome** is a possible result of a trial; one of the things that might happen.\n*   The **sample space** is the set of all possible outcomes for the trial.\n*   An **event** is a subset of the sample space; a set of one or more outcomes that share a specific property. When the outcome of the trial is a member of this set, we say the event has occurred.",
+      "concepts": [
+        "trial",
+        "outcome",
+        "sample_space",
+        "event"
+      ],
+      "chunk_type": "definition",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-5-representing-sample-spaces-with-python-sets",
+      "topic": "Representing Sample Spaces with Python Sets",
+      "text": "We will represent sample spaces and events as Python `set` objects. A `set` is a collection of distinct objects.  Here's how we can represent the sample space for the roll of a die:\n\n```python\nS = {1, 2, 3, 4, 5, 6}\n```\n\nAnd here's how we can define the event \"the roll is an even number:\":\n\n```python\neven = {2, 4, 6}\n```\n\nI will follow the convention of naming sample spaces `S`. Note that the elements of a set must be immutable; you can't have a set of `list` objects, for example.",
+      "concepts": [
+        "python_sets_for_sample_spaces"
+      ],
+      "chunk_type": "example",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-6-probability-calculation-in-python",
+      "topic": "Probability Calculation in Python",
+      "text": "Now we are ready to calculate probabilities. We will implement Laplace's definition of probability with the function `P`, which takes an event and a sample space as input, and returns the probability of the event:\n\n```python\ndef P(event, space):\n    \"\"\"The probability of an event, given a sample space.\"\"\"\n    return len(event & space) / len(space)\n```\n\nThis says that the probability is the `len`gth of the intersection of the event and the sample space, divided by the `len`gth of the sample space.  We can read `event & space` as \"the subset of the sample space that is in the event.\"  (You can also read it as \"event and space\", but remember we are talking about sets, not Boolean logic.)",
+      "concepts": [
+        "probability_calculation_laplace",
+        "counting_cases_len",
+        "favorable_cases_set_intersection"
+      ],
+      "chunk_type": "example",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-7-probability-of-rolling-an-even-number",
+      "topic": "Probability of Rolling an Even Number (Python)",
+      "text": "Let's confirm that the probability of rolling an even number with a die is 1/2:\n\n```python\nP(even, S)\n```\n\n```text\n0.5\n```",
+      "concepts": [
+        "probability_calculation_laplace",
+        "python_sets_for_sample_spaces"
+      ],
+      "chunk_type": "example",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-8-representing-probabilities-as-fractions",
+      "topic": "Representing Probabilities as Fractions",
+      "text": "I said that the probability is 1/2, but the `P` function returned `0.5`. That's because Python by default represents the division of integers with a floating point number.  We can get Python to represent probabilities as exact fractions, using the `Fraction` type from the `fractions` module:\n\n```python\nfrom fractions import Fraction\n\ndef P(event, space):\n    \"\"\"The probability of an event, given a sample space, as a fraction.\"\"\"\n    return Fraction(len(event & space), len(space))\n\nP(even, S)\n```\n\n```text\nFraction(1, 2)\n```",
+      "concepts": [
+        "python_fractions_module",
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "example",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-9-probability-of-rolling-a-prime-number",
+      "topic": "Probability of Rolling a Prime Number",
+      "text": "Let's define `prime` as the event that the roll is a prime number (2, 3, or 5), and confirm that the probability of rolling a prime is 1/2:\n\n```python\nprime = {2, 3, 5}\nP(prime, S)\n```\n\n```text\nFraction(1, 2)\n```",
+      "concepts": [
+        "probability_calculation_laplace",
+        "python_sets_for_sample_spaces"
+      ],
+      "chunk_type": "example",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-10-set-operations-in-probability",
+      "topic": "Set Operations in Probability",
+      "text": "Sometimes we have two events and we want to know the probability that at least one of them occurs. That is, what is the probability of event E *or* event F?  In that case we want to consider the union of the two sets.  Other times we want to know the probability that both events occur. That is, what is the probability of event E *and* event F? In that case we want to consider the intersection of the two sets.\n\nPython gives us set operators for these operations. Suppose we define the event `odd` as the roll being an odd number. Then:\n\n*   `even | odd` is the set of outcomes that are either even or odd (or both): the union.\n*   `even & odd` is the set of outcomes that are both even and odd: the intersection.",
+      "concepts": [
+        "set_operations_probability"
+      ],
+      "chunk_type": "explanation",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-11-example-set-operations",
+      "topic": "Example: Set Operations",
+      "text": "Here's an example:\n\n```python\nodd = {1, 3, 5}\neven | odd\n```\n\n```text\n{1, 2, 3, 4, 5, 6}\n```\n\n```python\neven & odd\n```\n\n```text\nset()\n```\n\nSo we can say that the probability of rolling an even or odd number is 1, and the probability of rolling a number that is both even and odd is 0.",
+      "concepts": [
+        "set_operations_probability",
+        "python_sets_for_sample_spaces"
+      ],
+      "chunk_type": "example",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-12-introduction-to-probability",
+      "topic": "Introduction to Probability with Laplace's Definition",
+      "text": "# A Concrete Introduction to Probability (using Python)\n\nIn 1814, Pierre-Simon Laplace provided a classic [definition](https://en.wikipedia.org/wiki/Classical_definition_of_probability) of probability:\n\n>*Probability theory is nothing but common sense reduced to calculation. ... [Probability] is thus simply a fraction whose numerator is the number of favorable cases and whose denominator is the number of all the cases possible ... when nothing leads us to expect that any one of these cases should occur more than any other.*\n\n| |\n|--|\n|![Laplace](https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/AduC_197_Laplace_%28P.S.%2C_marquis_de%2C_1749-1827%29.JPG/180px-AduC_197_Laplace_%28P.S.%2C_marquis_de%2C_1749-1827%29.JPG)|\n|<a href=\"https://en.wikipedia.org/wiki/Pierre-Simon_Laplace\">Pierre-Simon Laplace</a> (1749–1827)|",
+      "concepts": [
+        "classical_definition_of_probability"
+      ],
+      "chunk_type": "overview",
+      "section": "A Concrete Introduction to Probability (using Python)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "A Concrete Introduction to Probability (using Python)"
+      ],
+      "markdown_anchor": "a-concrete-introduction-to-probability-using-python",
+      "start_line": 2,
+      "end_line": 47
+    },
+    {
+      "chunk_id": "chunk-13-probability-vocabulary",
+      "topic": "Definitions of Probability Terms",
+      "text": "Laplace nailed it. To untangle a probability problem, all you have to do is define exactly what the cases are, and carefully count the favorable and total cases. Let's be clear on our vocabulary words:\n\n\n- **[Trial](https://en.wikipedia.org/wiki/Experiment_%28probability_theory%29):**\n  A single occurrence with an outcome that is uncertain until it happens.\n  <br>*For example, rolling a single die.*\n- **[Outcome](https://en.wikipedia.org/wiki/Outcome_%28probability%29):**\n  A possible result of a trial; one particular state of the world. What Laplace calls a **case.**\n  <br>*For example: the die comes up as* `4`.\n- **[Sample Space](https://en.wikipedia.org/wiki/Sample_space):**\n  The set of all possible outcomes for the trial.\n  <br>*For example,* `{1, 2, 3, 4, 5, 6}`.\n- **[Event](https://en.wikipedia.org/wiki/Event_%28probability_theory%29):**\n  A subset of the sample space, a set of outcomes that together have some property we are interested in.\n  <br>*For example, the event \"even die roll\" is the set of outcomes* `{2, 4, 6}`.\n- **[Probability](https://en.wikipedia.org/wiki/Probability_theory):**\n  As Laplace said, the probability of an event with respect to a sample space is the \"number of favorable cases\" (outcomes from the sample space that are in the event) divided by the \"number of all the cases\" in the sample space, assuming \"nothing leads us to expect that any one of these cases should occur more than any other.\" Since this is a proper fraction, probability will always be a number between 0 (representing an impossible event) and 1 (representing a certain event).\n<br>*For example, the probability of an even die roll is 3/6 = 1/2.*",
+      "concepts": [
+        "trial",
+        "outcome",
+        "sample_space",
+        "event",
+        "classical_definition_of_probability",
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "definition",
+      "section": "A Concrete Introduction to Probability (using Python)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "A Concrete Introduction to Probability (using Python)"
+      ],
+      "markdown_anchor": "a-concrete-introduction-to-probability-using-python",
+      "start_line": 2,
+      "end_line": 47
+    },
+    {
+      "chunk_id": "chunk-14-python-imports-and-type-definitions",
+      "topic": "Python Imports and Type Definitions",
+      "text": "This notebook will explore these concepts in a concrete way using Python code. The code is meant to be succint and explicit, and fast enough to handle sample spaces with millions of outcomes. If you need to handle trillions, you'll want a more efficient implementation. I also have  [another notebook](http://nbviewer.jupyter.org/url/norvig.com/ipython/ProbabilityParadox.ipynb) that covers  paradoxes in Probability Theory.\n\nFirst some imports we will need later, and some type definitions:\n\n\n```python\nfrom fractions import Fraction\nfrom itertools import combinations, product\nfrom typing import *\nimport math\n\nSpace = set # A sample space is a set of all possible outcomes\nEvent = set # An event is a subset of the sample space\n```",
+      "concepts": [
+        "python_fractions_module",
+        "itertools_combinations"
+      ],
+      "chunk_type": "example",
+      "section": "A Concrete Introduction to Probability (using Python)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "A Concrete Introduction to Probability (using Python)"
+      ],
+      "markdown_anchor": "a-concrete-introduction-to-probability-using-python",
+      "start_line": 2,
+      "end_line": 47
+    },
+    {
+      "chunk_id": "chunk-15-probability-definition-and-code",
+      "topic": "Defining probability and implementing it in code",
+      "text": "# P is for Probability\n\nThe code below implements Laplace's quote directly: *Probability is thus simply a fraction whose numerator is the number of favorable cases and whose denominator is the number of all the cases possible.*\n\n\n```python\ndef P(event: Event, cases: Space) -> Fraction:\n    \"\"\"The probability of an event: the number of favorable cases divided by the number of cases.\"\"\"\n    return Fraction(number(favorable(event, cases)),\n                    number(cases))\n```\n\nThe number of cases is just the `len` of a set, and the favorable cases are those that are in the event and in the sample space.\n\n\n```python\nnumber = len # The number of cases is the length, or size, of a set\n\ndef favorable(event: Event, cases: Space) -> Event: \n    \"\"\"The cases that are in the event.\"\"\"\n    return event.intersection(cases)\n```",
+      "concepts": [
+        "classical_definition_of_probability",
+        "event",
+        "sample_space",
+        "probability_calculation_laplace",
+        "python_fractions_module",
+        "counting_cases_len",
+        "favorable_cases_set_intersection"
+      ],
+      "chunk_type": "example",
+      "section": "P is for Probability",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "P is for Probability"
+      ],
+      "markdown_anchor": "p-is-for-probability",
+      "start_line": 48,
+      "end_line": 71
+    },
+    {
+      "chunk_id": "chunk-16-die-roll-warm-up",
+      "topic": "Probability of an even number with a die roll",
+      "text": "# Warm-up Problem: Die Roll\n\nWhat's the probability of an even number with a single roll of a six-sided fair die?",
+      "concepts": [
+        "trial",
+        "outcome",
+        "sample_space",
+        "event",
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "exercise",
+      "section": "Warm-up Problem: Die Roll",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Warm-up Problem: Die Roll"
+      ],
+      "markdown_anchor": "warm-up-problem-die-roll",
+      "start_line": 72,
+      "end_line": 127
+    },
+    {
+      "chunk_id": "chunk-17-die-sample-space-definition",
+      "topic": "Defining the sample space for a die roll",
+      "text": "Mathematicians traditionally use a single capital letter to denote a sample space; I'll use `D` for the die:\n\n```python\nD = {1, 2, 3, 4, 5, 6} # the sample space for the die\n```",
+      "concepts": [
+        "sample_space",
+        "python_sets_for_sample_spaces"
+      ],
+      "chunk_type": "example",
+      "section": "Warm-up Problem: Die Roll",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Warm-up Problem: Die Roll"
+      ],
+      "markdown_anchor": "warm-up-problem-die-roll",
+      "start_line": 72,
+      "end_line": 127
+    },
+    {
+      "chunk_id": "chunk-18-even-number-probability",
+      "topic": "Calculating the probability of rolling an even number",
+      "text": "I can then define the event of rolling an even number, and ask for the probability of that event:\n\n\n```python\neven = {2, 4, 6} # the event of an even roll\n\nP(even, D)\n```\n\n```\nFraction(1, 2)\n```\n\nGood to confirm what we already knew. We can explore some other events:",
+      "concepts": [
+        "event",
+        "probability_calculation_laplace",
+        "python_sets_for_sample_spaces",
+        "python_fractions_module"
+      ],
+      "chunk_type": "example",
+      "section": "Warm-up Problem: Die Roll",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Warm-up Problem: Die Roll"
+      ],
+      "markdown_anchor": "warm-up-problem-die-roll",
+      "start_line": 72,
+      "end_line": 127
+    },
+    {
+      "chunk_id": "chunk-19-exploring-other-events",
+      "topic": "Exploring probabilities of other events: odd, prime, even or prime, odd and prime",
+      "text": "\n```python\nodd = {1, 3, 5, 7, 9, 11, 13}\n\nP(odd, D)\n```\n\n```\nFraction(1, 2)\n```\n\n```python\nprime = {2, 3, 5, 7, 11, 13}\n\nP((even | prime), D) # The probability of an even or prime die roll\n```\n\n```\nFraction(5, 6)\n```\n\n```python\nP((odd & prime), D) # The probability of an odd prime die roll\n```\n\n```\nFraction(1, 3)\n```",
+      "concepts": [
+        "event",
+        "probability_calculation_laplace",
+        "python_sets_for_sample_spaces",
+        "python_fractions_module",
+        "set_operations_probability"
+      ],
+      "chunk_type": "example",
+      "section": "Warm-up Problem: Die Roll",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Warm-up Problem: Die Roll"
+      ],
+      "markdown_anchor": "warm-up-problem-die-roll",
+      "start_line": 72,
+      "end_line": 127
+    },
+    {
+      "chunk_id": "chunk-20-card-problems-introduction",
+      "topic": "Introduction to card probability problems",
+      "text": "# Card Problems\n\nConsider a deck of playiong cards. An individual card has a rank and  suit, and will be represented as a string, like `'A♥'` for the Ace of Hearts. There are 4 suits and 13 ranks, so there are 52 cards in a deck:",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-21-deck-representation-example",
+      "topic": "Representing a deck of cards in Python",
+      "text": "```python\nsuits = '♥♠♦♣'\nranks = 'AKQJT98765432'\ndeck  = [r + s for r in ranks for s in suits]\nlen(deck)\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-22-deck-length-verification",
+      "topic": "Verifying the length of the deck",
+      "text": "```\n52\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-23-hands-sample-space-definition",
+      "topic": "Defining the sample space of 5-card hands",
+      "text": "Now I want to define `Hands` as the sample space of all possible 5-card hands that could be dealt  from a deck. The function `itertools.combinations` does most of the work; we than concatenate the combinations into space-separateds string using `joins`:",
+      "concepts": [
+        "sample_space",
+        "itertools_combinations"
+      ],
+      "chunk_type": "definition",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-24-joins-function-definition",
+      "topic": "Defining the `joins` function",
+      "text": "```python\ndef joins(strings: Set[tuple], sep=' ') -> Set[str]: \n    \"\"\"Join each of the tuples into strings.\"\"\"\n    return {sep.join(s) for s in strings}\n\nHands = joins(combinations(deck, 5))\n\nlen(Hands)\n```",
+      "concepts": [
+        "itertools_combinations"
+      ],
+      "chunk_type": "example",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-25-hands-sample-space-size",
+      "topic": "Calculating the size of the hands sample space",
+      "text": "```\n2598960\n```",
+      "concepts": [
+        "counting_cases_len"
+      ],
+      "chunk_type": "example",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-26-hands-sample-display",
+      "topic": "Displaying a sample of hands",
+      "text": "There are over 2.5 million hands; too many to look at them all, but we can sample a few:\n\n```python\nlist(Hands)[::250000]\n```",
+      "concepts": [
+        "sample_space"
+      ],
+      "chunk_type": "example",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-27-hands-sample-output",
+      "topic": "Output of the hands sample",
+      "text": "```\n['J♥ 9♣ 6♥ 6♦ 4♣',\n 'K♣ T♦ 9♠ 5♠ 3♥',\n 'Q♣ J♥ 9♠ 4♥ 4♣',\n 'K♥ 9♣ 6♣ 3♥ 2♠',\n 'A♦ J♠ 4♥ 4♦ 2♣',\n 'Q♣ J♥ J♦ 9♠ 4♦',\n 'K♠ K♣ 7♣ 6♥ 4♠',\n 'K♦ Q♥ 9♠ 8♦ 3♠',\n 'K♦ Q♠ T♠ 3♥ 2♦',\n 'J♣ T♦ 8♣ 7♥ 3♦',\n 'A♣ J♣ 9♥ 8♦ 7♦']\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-28-flush-probability-calculation",
+      "topic": "Calculating the probability of a flush",
+      "text": "Now we can answer questions like the probability of being dealt a flush (5 cards of the same suit):\n\n```python\nflush = {hand for hand in Hands if any(hand.count(suit) == 5 for suit in suits)}\n\nP(flush, Hands)\n```",
+      "concepts": [
+        "event",
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "example",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-29-flush-probability-output",
+      "topic": "Output of the flush probability calculation",
+      "text": "```\nFraction(33, 16660)\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-30-four-of-a-kind-probability-calculation",
+      "topic": "Calculating the probability of four of a kind",
+      "text": "Or the probability of four of a kind:\n\n```python\nfour_kind = {hand for hand in Hands if any(hand.count(rank) == 4 for rank in ranks)}\n\nP(four_kind, Hands)\n```",
+      "concepts": [
+        "event",
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "example",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-31-four-of-a-kind-probability-output",
+      "topic": "Output of the four of a kind probability calculation",
+      "text": "```\nFraction(1, 4165)\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-32-calculation-efficiency-discussion",
+      "topic": "Discussion of calculation efficiency",
+      "text": "To make these calculations we need to go through all 2.5 million  hands, so this is not the fastest way to compute probabilities, but it is straightforward.",
+      "concepts": [],
+      "chunk_type": "explanation",
+      "section": "Card Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Card Problems"
+      ],
+      "markdown_anchor": "card-problems",
+      "start_line": 128,
+      "end_line": 210
+    },
+    {
+      "chunk_id": "chunk-33-urn-problems-introduction",
+      "topic": "Introduction to Urn Problems",
+      "text": "# Urn Problems\n\nAround 1700, Jacob Bernoulli wrote about removing colored balls from an urn in his landmark treatise *[Ars Conjectandi](https://en.wikipedia.org/wiki/Ars_Conjectandi)*, and ever since then, explanations of probability have relied on [urn problems](https://www.google.com/search?q=probability+ball+urn). (You'd think the urns would be empty by now.)\n\n| |\n|---|\n|![Jacob Bernoulli](https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Jakob_Bernoulli.jpg/205px-Jakob_Bernoulli.jpg)|\n|<a href=\"https://en.wikipedia.org/wiki/Jacob_Bernoulli\">Jacob Bernoulli</a> (1655–1705)|",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-34-urn-problem-example-setup",
+      "topic": "Urn Problem Example Setup",
+      "text": "For example, here is a three-part problem [adapted](http://mathforum.org/library/drmath/view/69151.html)  from mathforum.org:\n\n> *An urn contains 6 blue, 9 red, and 8 white balls.  We select six balls at random. What is the probability of each of these  outcomes:*\n>\n> - *All balls are red*.\n> - *3 are blue, and 1 is red, and 2 are white*.\n> - *Exactly 4 balls are white*.\n\nWe'll start by defining the contents of the urn. We will need a way to name the balls so that we call tell blue from red, but also tell one red ball from another red ball. I'll use the function call `balls('R', 9)` to create 9 red balls:",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-35-defining-balls-function",
+      "topic": "Defining the `balls` function",
+      "text": "```python\ndef balls(name: str, n) -> List[str]:\n    \"\"\"A list of `n` distinct balls.\"\"\"\n    return [name + str(i) for i in range(1, n + 1)]\n\nurn = balls('B', 6) + balls('R', 9) + balls('W', 8)\nurn\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-36-urn-contents-representation",
+      "topic": "Urn Contents Representation",
+      "text": "```\n['B1',\n 'B2',\n 'B3',\n 'B4',\n 'B5',\n 'B6',\n 'R1',\n 'R2',\n 'R3',\n 'R4',\n 'R5',\n 'R6',\n 'R7',\n 'R8',\n 'R9',\n 'W1',\n 'W2',\n 'W3',\n 'W4',\n 'W5',\n 'W6',\n 'W7',\n 'W8']\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-37-defining-sample-space-u6",
+      "topic": "Defining the Sample Space U6",
+      "text": "Now we can define the sample space, `U6`, as the set of all combinations of 6 balls:  \n\n\n```python\nU6 = joins(combinations(urn, 6))\n\nlist(U6)[::10_000] # A sample from the U6 set\n```",
+      "concepts": [
+        "sample_space",
+        "itertools_combinations"
+      ],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-38-sample-from-u6-set",
+      "topic": "Sample from U6 Set",
+      "text": "```\n['B3 R6 W4 W5 W6 W7',\n 'B2 R2 R7 R8 W3 W4',\n 'B1 R2 R4 R5 R9 W5',\n 'B2 R2 R4 W3 W4 W6',\n 'B6 R2 R4 R8 W1 W6',\n 'R2 R5 R7 W1 W7 W8',\n 'B5 R8 R9 W1 W2 W7',\n 'B3 B4 B6 R8 W1 W4',\n 'B4 B6 R4 R6 W1 W6',\n 'B1 B3 B4 B5 R3 R9',\n 'R1 R3 R4 R7 W7 W8']\n```",
+      "concepts": [
+        "sample_space"
+      ],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-39-defining-select-function",
+      "topic": "Defining the `select` function",
+      "text": "Now I will define  `select('R', 6)` to be the event of picking exactly 6 red balls from the urn:\n\n\n```python\ndef select(color, n, space=U6) -> set:\n    \"\"\"The subset of the sample space with exactly `n` balls of given `color`.\"\"\"\n    return {s for s in space if s.count(color) == n}\n```",
+      "concepts": [
+        "event"
+      ],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-40-answering-the-three-questions",
+      "topic": "Answering the Three Questions",
+      "text": "Now I can answer the three questions:\n\n\n```python\nQ1 = select('R', 6)                                   # all 6 balls are red.\nQ2 = select('B', 3) & select('R', 1) & select('W', 2) # 3 balls are blue, 1 is red, and 2 are white\nQ3 = select('W', 4)                                   # exactly 4 balls are white\n```",
+      "concepts": [
+        "event",
+        "set_operations_probability"
+      ],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-41-probability-of-q1",
+      "topic": "Probability of Q1",
+      "text": "```python\nP(Q1, U6)\n```",
+      "concepts": [
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-42-probability-of-q1-result",
+      "topic": "Probability of Q1 Result",
+      "text": "```\nFraction(4, 4807)\n```",
+      "concepts": [
+        "probability_calculation_laplace",
+        "python_fractions_module"
+      ],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-43-probability-of-q2",
+      "topic": "Probability of Q2",
+      "text": "```python\nP(Q2, U6)\n```",
+      "concepts": [
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-44-probability-of-q2-result",
+      "topic": "Probability of Q2 Result",
+      "text": "```\nFraction(240, 4807)\n```",
+      "concepts": [
+        "probability_calculation_laplace",
+        "python_fractions_module"
+      ],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-45-probability-of-q3",
+      "topic": "Probability of Q3",
+      "text": "```python\nP(Q3, U6)\n```",
+      "concepts": [
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-46-probability-of-q3-result",
+      "topic": "Probability of Q3 Result",
+      "text": "```\nFraction(350, 4807)\n```",
+      "concepts": [
+        "probability_calculation_laplace",
+        "python_fractions_module"
+      ],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-47-urn-problems-via-arithmetic-introduction",
+      "topic": "Introduction to Urn Problems via Arithmetic",
+      "text": "## Urn problems via arithmetic\n\nLet's verify these calculations using basic arithmetic, rather than exhaustive counting. First, how many ways can I choose 6 out of 9 red balls? It could be any of the 9 for the first ball, any of 8 remaining for the second, and  so on down to any of the remaining 4 for the sixth and final ball. But we don't care about the *order* of the six balls, so divide that product by the number of permutations of 6 things, which is 6!, giving us\n9 &times; 8 &times; 7 &times; 6 &times; 5 &times; 4 / 6! = 84. In general, the number of ways of choosing *k* out of *n* items is (*n* choose *k*) = *n*! / ((*n* - *k*)! &times; *k*!).\nIn Python 3.8+ that is provided as the `math.comb` function.",
+      "concepts": [
+        "mathematical_combinations"
+      ],
+      "chunk_type": "explanation",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-48-verifying-answers-arithmetically",
+      "topic": "Verifying Answers Arithmetically",
+      "text": "Now we can verify the answers to the three problems. (Since `P` computes a ratio and `choose` computes a count,\nI multiply the left-hand-side by `N`, the length of the sample space, to make both sides be counts.)\n\n\n```python\nN = len(U6)\n\nassert N * P(Q1, U6) == math.comb(9, 6)\nassert N * P(Q2, U6) == math.comb(6, 3) * math.comb(8, 2) * math.comb(9, 1)\nassert N * P(Q3, U6) == math.comb(8, 4) * math.comb(6 + 9, 2)  # (6 + 9 non-white balls)\n```",
+      "concepts": [
+        "mathematical_combinations",
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "example",
+      "section": "Urn Problems",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Urn Problems",
+        "Urn problems via arithmetic"
+      ],
+      "markdown_anchor": "urn-problems",
+      "start_line": 211,
+      "end_line": 349
+    },
+    {
+      "chunk_id": "chunk-49-non-equiprobable-outcomes-intro",
+      "topic": "Introduction to Non-Equiprobable Outcomes",
+      "text": "# Non-Equiprobable Outcomes\n\nSo far, we have accepted Laplace's assumption that *nothing leads us to expect that any one of these cases should occur more than any other*.\nIn real life, we often get outcomes that are not equiprobable--for example, a loaded die favors one side over the others.  We will introduce three more vocabulary items:\n\n* [Frequency](https://en.wikipedia.org/wiki/Frequency_%28statistics%29): a non-negative number describing how often an outcome occurs. It can be a count like 5, or a ratio like 1/6.\n* [Distribution](http://mathworld.wolfram.com/StatisticalDistribution.html): A mapping from outcome to frequency of that outcome. From here on, we will allow a sample space to be either a set (of equi-probable outcomes) or a distribution.\n* [Probability Distribution](https://en.wikipedia.org/wiki/Probability_distribution): A probability distribution\nis a distribution whose frequencies sum to 1, and are each between 0 and 1, inclusive.",
+      "concepts": [
+        "non_equiprobable_outcomes",
+        "frequency",
+        "probability_distribution_concept"
+      ],
+      "chunk_type": "overview",
+      "section": "Non-Equiprobable Outcomes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Non-Equiprobable Outcomes",
+        "Example: Birth Counts"
+      ],
+      "markdown_anchor": "non-equiprobable-outcomes",
+      "start_line": 350,
+      "end_line": 469
+    },
+    {
+      "chunk_id": "chunk-50-dist-class-definition",
+      "topic": "Defining the Dist Class",
+      "text": "I'll implemet `Dist` as a subclass of `Counter`, and re-define the type `Space` to be either a set or a `Dist`.\n\n```python\nclass Dist(Counter):\n    \"\"A Distribution of {outcome: frequency} pairs.\"\"\n\nSpace = Union[set, Dist]\n```\n\nBecause a `Dist` is a `Counter`, we can initialize it three different ways:\n- With a collection of outcomes (equiprobable or not).\n- With a mapping of `{outcome: frequency}` pairs.\n- With keyword arguments, each being assigned a frequency number.\n\nYou can get the same result with any of the three ways:\n\n\n```python\nassert Dist('THHHTTHHT')  ==  Dist({'H': 5, 'T': 4})  ==  Dist(H=5, T=4)\n```",
+      "concepts": [
+        "custom_distribution_class",
+        "python_collections_counter"
+      ],
+      "chunk_type": "definition",
+      "section": "Non-Equiprobable Outcomes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Non-Equiprobable Outcomes",
+        "Example: Birth Counts"
+      ],
+      "markdown_anchor": "non-equiprobable-outcomes",
+      "start_line": 350,
+      "end_line": 469
+    },
+    {
+      "chunk_id": "chunk-51-modifying-code-for-distributions",
+      "topic": "Modifying Code to Handle Distributions",
+      "text": "Now I will modify the code to handle distributions.\nHere's my plan:\n\n- The function `P` is unchanged. Laplace's advice still stands!\n- A sample space can be either a set or a distribution, so I will redefine three helper functions:\n  - `number` now either takes the length of a set or the sum of the values of a `Dist`.\n  - `favorable` now returns a `Dist` of favorable outcomes and their frequencies (not a `set`).\n  - `Fraction` now uses `\"/\"`, not `fractions.Fraction`, because frequencies might be floats.\n\n\n```python\ndef number(cases: Space) -> float:\n    \"\"\"The total frequency of all the cases in the sample space.\"\"\"\n    return len(cases) if isinstance(cases, set) else sum(cases.values())\n\ndef favorable(event: Event, cases: Space) -> Dist:\n    \"\"\"A distribution of outcomes from the sample space that are in the event.\"\"\"\n    return Dist({x: 1 if isinstance(cases, set) else cases[x] \n                 for x in cases if x in event})\n\ndef Fraction(n, d): \"n/d\"; return n / d\n```",
+      "concepts": [
+        "probability_with_distributions",
+        "counting_cases_len"
+      ],
+      "chunk_type": "explanation",
+      "section": "Non-Equiprobable Outcomes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Non-Equiprobable Outcomes",
+        "Example: Birth Counts"
+      ],
+      "markdown_anchor": "non-equiprobable-outcomes",
+      "start_line": 350,
+      "end_line": 469
+    },
+    {
+      "chunk_id": "chunk-52-crooked-die-example",
+      "topic": "Crooked Die Example",
+      "text": "For example, here's the probability of rolling an even number with a crooked die that is loaded to prefer 6:\n\n\n```python\nCrooked = Dist({1: 0.1, 2: 0.1, 3: 0.1, 4: 0.1, 5: 0.1, 6: 0.5})\n\nP(even, Crooked)\n```\n\n```\n0.7\n```",
+      "concepts": [
+        "probability_with_distributions",
+        "non_equiprobable_outcomes"
+      ],
+      "chunk_type": "example",
+      "section": "Non-Equiprobable Outcomes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Non-Equiprobable Outcomes",
+        "Example: Birth Counts"
+      ],
+      "markdown_anchor": "non-equiprobable-outcomes",
+      "start_line": 350,
+      "end_line": 469
+    },
+    {
+      "chunk_id": "chunk-53-birth-counts-example",
+      "topic": "Birth Counts Example",
+      "text": "## Example: Birth Counts\n\nAs another example, an [article](http://people.kzoo.edu/barth/math105/moreboys.pdf) gives the following counts for two-child families in Denmark, where `GB` means a family where the first-born child is a girl and the second a boy (I'm aware that not all births can be classified as the binary \"boy\" or \"girl,\" but this particular data set was reported that way):\n\n\n```python\nDK = Dist(GG=121801, GB=126840,\n          BG=127123, BB=135138)\n```\n\nI can define some events:\n\n\n```python\nfirst_girl  = {'GG', 'GB'}\nsecond_girl = {'GG', 'BG'}\nfirst_boy   = {'BB', 'BG'}\nsecond_boy  = {'BB', 'GB'}\nsame        = {'GG', 'BB'}\n```\n\nAnd ask for the probability that, say, the first or second child is a girl, or that the two children have the same sex:\n\n\n```python\nP(first_girl, DK)\n```\n\n```\n0.48667063350701306\n```\n\n```python\nP(second_girl, DK)\n```\n\n```\n0.4872245557856497\n```\n\n```python\nP(same, DK)\n```\n\n```\n0.5029124959385557\n```\n\nThe numbers say that you are slighltly more likely to have a second child of the same sex, but only by about 0.3%.",
+      "concepts": [
+        "probability_with_distributions",
+        "event"
+      ],
+      "chunk_type": "example",
+      "section": "Non-Equiprobable Outcomes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Non-Equiprobable Outcomes",
+        "Example: Birth Counts"
+      ],
+      "markdown_anchor": "non-equiprobable-outcomes",
+      "start_line": 350,
+      "end_line": 469
+    },
+    {
+      "chunk_id": "chunk-54-events-as-implicit-sets-intro",
+      "topic": "Introduction to Implicit Sets for Events",
+      "text": "To calculate the probability of an even die roll, I originally said\n\n    even = {2, 4, 6}\n    \nBut that's inelegant–I had to explicitly enumerate all the even numbers from one to six. If I ever wanted to deal with a twelve or twenty-sided die, I would have to go back and redefine `even`.  I would prefer to define `even` once and for all like this:\n\n```python\ndef even(n: int) -> bool: return n % 2 == 0\n```\n\nBut that `even` is a function, and an event has to be a `set`. However, we can turn a function into a set with a [decorator](https://peps.python.org/pep-0318/). By annotating `even` with an `ImplicitSet` decorator, we make it act like a set–at least with respect to the set membership and intersection operators.",
+      "concepts": [
+        "event",
+        "python_functions_as_events",
+        "python_sets_for_sample_spaces"
+      ],
+      "chunk_type": "explanation",
+      "section": "Events as Implicit Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Events as Implicit Sets"
+      ],
+      "markdown_anchor": "events-as-implicit-sets",
+      "start_line": 470,
+      "end_line": 646
+    },
+    {
+      "chunk_id": "chunk-55-implicit-set-class-definition",
+      "topic": "Definition of the ImplicitSet Class",
+      "text": "```python\nclass ImplicitSet(set):\n    \"\"\"An ImplicitSet is defined by a set-membership predicate. \n    Membership and intersection operations are supported; you could add more operators.\"\"\"\n    def __init__(self, predicate):           self.predicate = predicate\n    def __contains__(self, outcome) -> bool: return self.predicate(outcome)\n    def intersection(self, other) -> set:    return {x for x in other if x in self}\n```",
+      "concepts": [
+        "implicit_sets_decorator",
+        "set_operations_probability"
+      ],
+      "chunk_type": "example",
+      "section": "Events as Implicit Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Events as Implicit Sets"
+      ],
+      "markdown_anchor": "events-as-implicit-sets",
+      "start_line": 470,
+      "end_line": 646
+    },
+    {
+      "chunk_id": "chunk-56-implicit-set-usage-examples",
+      "topic": "Examples of Using the ImplicitSet Decorator",
+      "text": "Now we can make `even` be an implicit set and use it like this:\n\n```python\n@ImplicitSet\ndef even(n: int) -> bool: return n % 2 == 0\n```\n\n```python\n1_000_000_000 in even\n```\n\n```\nTrue\n```\n\n```python\n1_000_000_001 in even\n```\n\n```\nFalse\n```\n\n```python\neven.intersection(D) # Remember: D == {1, 2, 3, 4, 5, 6}\n```\n\n```\n{2, 4, 6}\n```\n\n```python\nP(even, D)\n```\n\n```\n0.5\n```\n\n```python\nP(even, set(range(100_000)))\n```\n\n```\n0.5\n```\n\n```python\nfavorable(even, D)\n```\n\n```\nDist({2: 1, 4: 1, 6: 1})\n```",
+      "concepts": [
+        "implicit_sets_decorator",
+        "favorable_cases_set_intersection",
+        "probability_calculation_laplace",
+        "python_functions_as_events",
+        "set_operations_probability"
+      ],
+      "chunk_type": "example",
+      "section": "Events as Implicit Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Events as Implicit Sets"
+      ],
+      "markdown_anchor": "events-as-implicit-sets",
+      "start_line": 470,
+      "end_line": 646
+    },
+    {
+      "chunk_id": "chunk-57-dice-sample-space-functions",
+      "topic": "Functions for Creating Dice Sample Spaces",
+      "text": "I'll define `die(s)` to make a sample space for an *s*-sided die, and `roll(r, s)` to make a sample space for the sum of rolling *r* *s*-sided dice:\n\n```python\ndef die(s: int) -> Space: \n    \"\"\"The sample space for an s-sided die.\"\"\"\n    return set(range(1, s + 1))\n\ndef roll(n: int, s: int) -> Space:\n    \"\"\"The sample space for rolling `n` s-sided dice and summing them.\"\"\"\n    return Dist(map(sum, product(die(s), repeat=n)))\n```",
+      "concepts": [
+        "simulating_dice_rolls",
+        "sample_space",
+        "python_sets_for_sample_spaces",
+        "probability_distribution_concept"
+      ],
+      "chunk_type": "example",
+      "section": "Events as Implicit Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Events as Implicit Sets"
+      ],
+      "markdown_anchor": "events-as-implicit-sets",
+      "start_line": 470,
+      "end_line": 646
+    },
+    {
+      "chunk_id": "chunk-58-dice-roll-distribution-example",
+      "topic": "Example of Dice Roll Distribution",
+      "text": "For example, here's the distribution for the sum of two six-sided dice:\n\n```python\nroll(2, 6)\n```\n\n```\nDist({7: 6, 6: 5, 8: 5, 5: 4, 9: 4, 4: 3, 10: 3, 3: 2, 11: 2, 2: 1, 12: 1})\n```",
+      "concepts": [
+        "simulating_dice_rolls",
+        "probability_distribution_concept"
+      ],
+      "chunk_type": "example",
+      "section": "Events as Implicit Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Events as Implicit Sets"
+      ],
+      "markdown_anchor": "events-as-implicit-sets",
+      "start_line": 470,
+      "end_line": 646
+    },
+    {
+      "chunk_id": "chunk-59-prime-even-dice-examples",
+      "topic": "Probability Calculations with Prime and Even Events",
+      "text": "We can check if various dice-related sample spaces are odd or even, or prime:\n\n```python\n@ImplicitSet\ndef is_prime(n) -> bool: return (n > 1 and not any(n % i == 0 for i in range(2, n)))\n```\n\n```python\nP(even, die(12))\n```\n\n```\n0.5\n```\n\n```python\nP(even, die(11))\n```\n\n```\n0.45454545454545453\n```\n\n```python\nP(prime, die(6))\n```\n\n```\n0.5\n```\n\n```python\nP(prime, roll(2, 6))\n```\n\n```\n0.4166666666666667\n```\n\n```python\nP(prime, die(12))\n```\n\n```\n0.4166666666666667\n```\n\n```python\nP(prime, die(20))\n```\n\n```\n0.3\n```\n\n```python\nP(prime, roll(2, 20))\n```\n\n```\n0.0875\n```\n\n```python\nP(prime, roll(4, 20))\n```\n\n```\n0.002275\n```",
+      "concepts": [
+        "implicit_sets_decorator",
+        "probability_calculation_laplace",
+        "simulating_dice_rolls",
+        "python_functions_as_events"
+      ],
+      "chunk_type": "example",
+      "section": "Events as Implicit Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Events as Implicit Sets"
+      ],
+      "markdown_anchor": "events-as-implicit-sets",
+      "start_line": 470,
+      "end_line": 646
+    },
+    {
+      "chunk_id": "chunk-60-conditional-probability-definition",
+      "topic": "Definition of Conditional Probability",
+      "text": "# Conditional Probability\n\nConditional Probability is used to answer questions of the form \"What is the probability of event *X*, given that event *Y* has occurred?\" The \"given *Y* has occurred\" part makes a new sample space, one that is *favorable* to the event *Y*.  So I'll define `given` to be the same function as `favorable`:",
+      "concepts": [
+        "conditional_probability"
+      ],
+      "chunk_type": "definition",
+      "section": "Conditional Probability",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Conditional Probability"
+      ],
+      "markdown_anchor": "conditional-probability",
+      "start_line": 647,
+      "end_line": 682
+    },
+    {
+      "chunk_id": "chunk-61-conditional-probability-python-implementation",
+      "topic": "Python implementation of 'given' as 'favorable'",
+      "text": "```python\ngiven = favorable\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Conditional Probability",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Conditional Probability"
+      ],
+      "markdown_anchor": "conditional-probability",
+      "start_line": 647,
+      "end_line": 682
+    },
+    {
+      "chunk_id": "chunk-62-conditional-probability-examples-denmark-data",
+      "topic": "Examples using Denmark data",
+      "text": "For example, what's the probability that the second child is a girl, given that the first is a girl (with the Denmark data)? And how does that compare to the case where the first is a boy, or is unspecified?\n\n\n```python\nP(second_girl, given(first_girl, DK))\n```\n\n```\n0.4898669165584115\n```\n\n```python\nP(second_girl, given(first_boy, DK))\n```\n\n```\n0.48471942072973107\n```\n\n```python\nP(second_girl, DK)\n```\n\n```\n0.4872245557856497\n```",
+      "concepts": [
+        "conditional_probability"
+      ],
+      "chunk_type": "example",
+      "section": "Conditional Probability",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Conditional Probability"
+      ],
+      "markdown_anchor": "conditional-probability",
+      "start_line": 647,
+      "end_line": 682
+    },
+    {
+      "chunk_id": "chunk-63-fermat-and-pascal-the-unfinished-game-overview",
+      "topic": "Introduction to the problem of dividing stakes in an interrupted game of chance.",
+      "text": "# Fermat and Pascal: The Unfinished Game\n\n<table>\n<tr><td><img width=\"142\" src=\"https://upload.wikimedia.org/wikipedia/commons/f/f3/Pierre_de_Fermat.jpg\"><center><a href=\"https://en.wikipedia.org/wiki/Pierre_de_Fermat\">Pierre de Fermat</a> (1607–1665)\n<td><img width=162 src=\"https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Blaise_Pascal_Versailles.JPG/440px-Blaise_Pascal_Versailles.JPG\"><center><a href=\"https://en.wikipedia.org/wiki/Blaise_Pascal\">Blaise Pascal</a> (1623–1662)\n</table>\n\nConsider a two-player gambling game consisting of tossing a coin repeatedly. Player H wins as soon as a total of 10 heads come up, but player T wins if a total of 10 tails come up first. If the game is interrupted when H has 8 heads and T has 7 tails, how should the pot of money (which happens to be 100 Francs) be split?  Here are some proposals, and arguments against them:\n- It is uncertain, so just split the pot 50-50.\n<br>*No, because surely H is more likely to win and thus deserves more.*\n- In proportion to each player's current score, so H gets a 8/(8+7) share.\n<br>*No, because if the score was 0 heads to 1 tail, H should surely deserve more than 0/1.*\n- In proportion to how many tosses the opponent needs to win, so H gets 3/(3+2).\n<br>*No, because if H is 10 away from winning and T is only 1 away, then it seems that giving H a 1/11 share is too generous.*",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "Fermat and Pascal: The Unfinished Game",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Fermat and Pascal: The Unfinished Game"
+      ],
+      "markdown_anchor": "fermat-and-pascal-the-unfinished-game",
+      "start_line": 683,
+      "end_line": 794
+    },
+    {
+      "chunk_id": "chunk-64-fermat-pascal-correspondence",
+      "topic": "Fermat's proposed solution to the unfinished game problem.",
+      "text": "In 1654, Blaise Pascal and Pierre de Fermat corresponded on this problem, with Fermat [writing](http://mathforum.org/isaac/problems/prob1.html):\n\n>Dearest Blaise,\n>\n>As to the problem of how to divide the 100 Francs, I think I have found a solution that you will find to be fair. Seeing as I needed only two points to win the game, and you needed 3, I think we can establish that after four more tosses of the coin, the game would have been over. For, in those four tosses, if you did not get the necessary 3 points for your victory, this would imply that I had in fact gained the necessary 2 points for my victory. In a similar manner, if I had not achieved the necessary 2 points for my victory, this would imply that you had in fact achieved at least 3 points and had therefore won the game. Thus, I believe the following list of possible endings to the game is exhaustive. I have denoted 'heads' by an 'h', and tails by a 't.' I have starred the outcomes that indicate a win for myself.\n>\n>       h h h h *       h h h t *       h h t h *       h h t t *\n>       h t h h *       h t h t *       h t t h *       h t t t\n>       t h h h *       t h h t *       t h t h *       t h t t\n>       t t h h *       t t h t         t t t h         t t t t\n>          \n>\n>I think you will agree that all of these outcomes are equally likely. Thus I believe that we should divide the stakes by the ratio 11:5 in my favor, that is, I should receive (11/16)&times;100 = 68.75 Francs, while you should receive 31.25 Francs.\n>\n>\n>I hope all is well in Paris,\n>\n>Your friend and colleague,\n>\n>Pierre\n\nPascal agreed with this solution, and [replied](http://mathforum.org/isaac/problems/prob2.html) with a generalization that made use of his previous invention, Pascal's Triangle. There's even [a book](https://smile.amazon.com/Unfinished-Game-Pascal-Fermat-Seventeenth-Century/dp/0465018963?sa-no-redirect=1) about it.",
+      "concepts": [
+        "classical_definition_of_probability",
+        "probability_calculation_laplace",
+        "outcome",
+        "event"
+      ],
+      "chunk_type": "explanation",
+      "section": "Fermat and Pascal: The Unfinished Game",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Fermat and Pascal: The Unfinished Game"
+      ],
+      "markdown_anchor": "fermat-and-pascal-the-unfinished-game",
+      "start_line": 683,
+      "end_line": 794
+    },
+    {
+      "chunk_id": "chunk-65-solving-the-problem-with-python",
+      "topic": "Solving the unfinished game problem using Python code.",
+      "text": "We can solve the problem with the tools we have:\n\n\n```python\ndef at_least(n, item) -> Event:\n    \"\"\"The event of getting at least n instances of item in an outcome.\"\"\"\n    return ImplicitSet(lambda outcome: outcome.count(item) >= n)\n\ndef all_finishes(tosses: int) -> Set[tuple]:\n    \"\"\"All finishes of a game with `tosses` more tosses.\"\"\"\n    return joins(product(*['ht'] * tosses))\n```",
+      "concepts": [
+        "python_functions_as_events",
+        "implicit_sets_decorator",
+        "event"
+      ],
+      "chunk_type": "example",
+      "section": "Fermat and Pascal: The Unfinished Game",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Fermat and Pascal: The Unfinished Game"
+      ],
+      "markdown_anchor": "fermat-and-pascal-the-unfinished-game",
+      "start_line": 683,
+      "end_line": 794
+    },
+    {
+      "chunk_id": "chunk-66-generating-equiprobable-finishes",
+      "topic": "Generating equiprobable finishes using the defined functions.",
+      "text": "We can generate the 16 equiprobable 4-toss finishes that Pierre wrote about:\n\n\n```python\nall_finishes(4)\n```\n\n```\n{'h h h h',\n 'h h h t',\n 'h h t h',\n 'h h t t',\n 'h t h h',\n 'h t h t',\n 'h t t h',\n 'h t t t',\n 't h h h',\n 't h h t',\n 't h t h',\n 't h t t',\n 't t h h',\n 't t h t',\n 't t t h',\n 't t t t'}\n```",
+      "concepts": [
+        "sample_space",
+        "outcome"
+      ],
+      "chunk_type": "example",
+      "section": "Fermat and Pascal: The Unfinished Game",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Fermat and Pascal: The Unfinished Game"
+      ],
+      "markdown_anchor": "fermat-and-pascal-the-unfinished-game",
+      "start_line": 683,
+      "end_line": 794
+    },
+    {
+      "chunk_id": "chunk-67-finding-favorable-outcomes",
+      "topic": "Identifying favorable outcomes for player H.",
+      "text": "And we can find the 11 of them that are favorable to player `H`:\n\n\n```python\nfavorable(at_least(2, 'h'), all_finishes(4))\n```\n\n```\nDist({'h h t h': 1,\n      'h h t t': 1,\n      'h t t h': 1,\n      'h h h t': 1,\n      't h h t': 1,\n      'h t h h': 1,\n      't h t h': 1,\n      't h h h': 1,\n      't t h h': 1,\n      'h h h h': 1,\n      'h t h t': 1})\n```",
+      "concepts": [
+        "favorable_cases_set_intersection",
+        "event"
+      ],
+      "chunk_type": "example",
+      "section": "Fermat and Pascal: The Unfinished Game",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Fermat and Pascal: The Unfinished Game"
+      ],
+      "markdown_anchor": "fermat-and-pascal-the-unfinished-game",
+      "start_line": 683,
+      "end_line": 794
+    },
+    {
+      "chunk_id": "chunk-68-calculating-the-fair-split",
+      "topic": "Calculating the fair split of the pot using probability.",
+      "text": "Finally, we can answer the question:\n\n\n```python\n100 * P(at_least(2, 'h'), all_finishes(4))\n```\n\n```\n68.75\n```\n\nBlaise deserves 68.75 francs. We agree with Pascal and Fermat; we're in good company!",
+      "concepts": [
+        "probability_calculation_laplace",
+        "classical_definition_of_probability"
+      ],
+      "chunk_type": "example",
+      "section": "Fermat and Pascal: The Unfinished Game",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Fermat and Pascal: The Unfinished Game"
+      ],
+      "markdown_anchor": "fermat-and-pascal-the-unfinished-game",
+      "start_line": 683,
+      "end_line": 794
+    },
+    {
+      "chunk_id": "chunk-69-newton-pepys-problem-introduction",
+      "topic": "Introduction to Newton's solution to Pepys' problem",
+      "text": "# Newton's Answer to a Problem by Pepys\n\n<table>\n<tr><td><img width=190 src=\"http://scienceworld.wolfram.com/biography/pics/Newton.jpg\"><center><a href=\"https://en.wikipedia.org/wiki/Isaac_Newton\">Isaac Newton</a> 1693</center>\n<td><img src=\"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Samuel_Pepys_portrait.jpg/148px-Samuel_Pepys_portrait.jpg\"><center><a href=\"https://en.wikipedia.org/wiki/Samuel_Pepys\">Samuel Pepys</a> 1693</center>\n</table>\n\nLet's jump ahead from 1654 all the way to 1693, [when](http://fermatslibrary.com/s/isaac-newton-as-a-probabilist) Samuel Pepys wrote to Isaac Newton posing the problem:\n\n> Which of the following three propositions has the greatest chance of success?\n>   1. Six fair dice are tossed independently and at least one “6” appears.\n>   2. Twelve fair dice are tossed independently and at least two “6”s appear.\n>   3. Eighteen fair dice are tossed independently and at least three “6”s appear.\n  \nNewton was able to answer the question correctly (although his reasoning was not quite right); let's see how we can do. Since we're only interested in whether a die comes up as \"6\" or not, we can define a single die like this:",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "Newton's Answer to a Problem by Pepys",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Newton's Answer to a Problem by Pepys"
+      ],
+      "markdown_anchor": "newtons-answer-to-a-problem-by-pepys",
+      "start_line": 795,
+      "end_line": 907
+    },
+    {
+      "chunk_id": "chunk-70-defining-die6-distribution",
+      "topic": "Defining the die6 distribution",
+      "text": "```python\ndie6 = Dist({'6': 1/6, '.': 5/6})\n```",
+      "concepts": [
+        "custom_distribution_class",
+        "probability_distribution_concept"
+      ],
+      "chunk_type": "example",
+      "section": "Newton's Answer to a Problem by Pepys",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Newton's Answer to a Problem by Pepys"
+      ],
+      "markdown_anchor": "newtons-answer-to-a-problem-by-pepys",
+      "start_line": 795,
+      "end_line": 907
+    },
+    {
+      "chunk_id": "chunk-71-joint2-function-definition",
+      "topic": "Defining the joint2 function for independent distributions",
+      "text": "Next we can define the joint distribution formed by combining two independent distribution like this:\n\n\n```python\ndef joint2(A: Dist, B: Dist, format_fn='{}{}'.format) -> Dist:\n    \"\"\"The joint distribution of two independent distributions.\n    Result is all entries of the form {'ab': frequency(a) * frequency(b)}\"\"\"\n    return Dist({format_fn(a, b): A[a] * B[b]\n                 for a in A for b in B})\n```\n\n(Note we pass in a format function to say how to combine the two outcomes. The default is to just concatenate them together, but it could be any function.)",
+      "concepts": [
+        "joint_probability_distribution",
+        "custom_distribution_class",
+        "independence_probability"
+      ],
+      "chunk_type": "explanation",
+      "section": "Newton's Answer to a Problem by Pepys",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Newton's Answer to a Problem by Pepys"
+      ],
+      "markdown_anchor": "newtons-answer-to-a-problem-by-pepys",
+      "start_line": 795,
+      "end_line": 907
+    },
+    {
+      "chunk_id": "chunk-72-joint2-function-example",
+      "topic": "Example of joint2 function usage",
+      "text": "Here's the joint distribution of outcomes (not the sum) from rolling two dice:\n\n\n```python\njoint2(die6, die6)\n```\n\n```\nDist({'..': 0.6944444444444445,\n      '6.': 0.1388888888888889,\n      '.6': 0.1388888888888889,\n      '66': 0.027777777777777776})\n```",
+      "concepts": [
+        "joint_probability_distribution",
+        "custom_distribution_class",
+        "independence_probability"
+      ],
+      "chunk_type": "example",
+      "section": "Newton's Answer to a Problem by Pepys",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Newton's Answer to a Problem by Pepys"
+      ],
+      "markdown_anchor": "newtons-answer-to-a-problem-by-pepys",
+      "start_line": 795,
+      "end_line": 907
+    },
+    {
+      "chunk_id": "chunk-73-joint-function-definition",
+      "topic": "Defining the joint function for n independent distributions",
+      "text": "And here is the joint distribution for `n` copies of the same distribution:\n\n\n```python\ndef joint(n, dist: Dist, format_fn='{}{}'.format) -> Dist:\n    \"Joint probability distribution from rolling `n` dice.\"\n    if n == 1:\n        return dist\n    else:\n        return joint2(dist, joint(n - 1, dist, format_fn))\n```",
+      "concepts": [
+        "joint_probability_distribution",
+        "custom_distribution_class",
+        "independence_probability"
+      ],
+      "chunk_type": "explanation",
+      "section": "Newton's Answer to a Problem by Pepys",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Newton's Answer to a Problem by Pepys"
+      ],
+      "markdown_anchor": "newtons-answer-to-a-problem-by-pepys",
+      "start_line": 795,
+      "end_line": 907
+    },
+    {
+      "chunk_id": "chunk-74-joint-function-example",
+      "topic": "Example of joint function usage",
+      "text": "```python\njoint(4, die6)\n```\n\n```\nDist({'....': 0.48225308641975323,\n      '6...': 0.09645061728395063,\n      '.6..': 0.09645061728395063,\n      '..6.': 0.09645061728395063,\n      '...6': 0.09645061728395063,\n      '66..': 0.019290123456790126,\n      '6.6.': 0.019290123456790126,\n      '6..6': 0.019290123456790126,\n      '.66.': 0.019290123456790122,\n      '.6.6': 0.019290123456790122,\n      '..66': 0.019290123456790122,\n      '666.': 0.0038580246913580245,\n      '66.6': 0.0038580246913580245,\n      '6.66': 0.0038580246913580245,\n      '.666': 0.0038580246913580245,\n      '6666': 0.0007716049382716049})\n```",
+      "concepts": [
+        "joint_probability_distribution",
+        "custom_distribution_class",
+        "independence_probability"
+      ],
+      "chunk_type": "example",
+      "section": "Newton's Answer to a Problem by Pepys",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Newton's Answer to a Problem by Pepys"
+      ],
+      "markdown_anchor": "newtons-answer-to-a-problem-by-pepys",
+      "start_line": 795,
+      "end_line": 907
+    },
+    {
+      "chunk_id": "chunk-75-solving-pepys-problem",
+      "topic": "Solving Pepys' problem using the defined functions",
+      "text": "Now we are ready to determine which proposition is more likely to have the required number of sixes:\n\n\n```python\nP(at_least(1, '6'), joint(6, die6))\n```\n\n```\n0.665102023319616\n```\n\n```python\nP(at_least(2, '6'), joint(12, die6))\n```\n\n```\n0.6186673737323087\n```\n\n```python\nP(at_least(3, '6'), joint(18, die6))\n```\n\n```\n0.5973456859477232\n```\n\nWe reach the same conclusion Newton did, that the best chance is rolling six dice.",
+      "concepts": [
+        "probability_with_distributions",
+        "joint_probability_distribution",
+        "custom_distribution_class"
+      ],
+      "chunk_type": "example",
+      "section": "Newton's Answer to a Problem by Pepys",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Newton's Answer to a Problem by Pepys"
+      ],
+      "markdown_anchor": "newtons-answer-to-a-problem-by-pepys",
+      "start_line": 795,
+      "end_line": 907
+    },
+    {
+      "chunk_id": "chunk-76-m-ms-and-bayes-overview",
+      "topic": "M&Ms and Bayes Theorem Introduction",
+      "text": "Here's another urn problem (actually a \"bag\" problem) [from](http://allendowney.blogspot.com/2011/10/my-favorite-bayess-theorem-problems.html) prolific Python/Probability pundit [Allen Downey ](http://allendowney.blogspot.com/):\n\n> The blue M&M was introduced in 1995.  Before then, the color mix in a bag of plain M&Ms was (30% Brown, 20% Yellow, 20% Red, 10% Green, 10% Orange, 10% Tan).  Afterward it was (24% Blue , 20% Green, 16% Orange, 14% Yellow, 13% Red, 13% Brown).\nA friend of mine has two bags of M&Ms, and he tells me that one is from 1994 and one from 1996.  He won't tell me which is which, but he randomly selects one M&M from each bag.  One is yellow and one is green.  What is the probability that the yellow M&M came from the 1994 bag?",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "More Urn Problems: M&Ms and Bayes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "More Urn Problems: M&Ms and Bayes"
+      ],
+      "markdown_anchor": "more-urn-problems-mms-and-bayes",
+      "start_line": 908,
+      "end_line": 1051
+    },
+    {
+      "chunk_id": "chunk-77-m-ms-distributions",
+      "topic": "Creating Distributions for M&M Bags",
+      "text": "To solve this problem, we'll first create distributions for each bag: `bag94` and `bag96`:\n\n\n```python\nbag94 = Dist(brown=30, yellow=20, red=20, green=10, orange=10, tan=10)\nbag96 = Dist(blue=24, green=20, orange=16, yellow=14, red=13, brown=13)\n```",
+      "concepts": [
+        "custom_distribution_class"
+      ],
+      "chunk_type": "example",
+      "section": "More Urn Problems: M&Ms and Bayes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "More Urn Problems: M&Ms and Bayes"
+      ],
+      "markdown_anchor": "more-urn-problems-mms-and-bayes",
+      "start_line": 908,
+      "end_line": 1051
+    },
+    {
+      "chunk_id": "chunk-78-joint-distribution-mm",
+      "topic": "Defining the Joint Distribution",
+      "text": "Next, define `MM` as the joint distribution–the sample space for picking one M&M from each bag. The outcome `'94:yellow 96:green'` means that a yellow M&M was selected from the 1994 bag and a green one from the 1996 bag. In this problem we don't get to see the actual outcome; we just see some evidence about the outcome, that it contains a yellow and a green.\n\n\n```python\nMM = joint2(bag94, bag96, '94:{} 96:{}'.format)\nMM\n```",
+      "concepts": [
+        "joint_probability_distribution",
+        "sample_space"
+      ],
+      "chunk_type": "example",
+      "section": "More Urn Problems: M&Ms and Bayes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "More Urn Problems: M&Ms and Bayes"
+      ],
+      "markdown_anchor": "more-urn-problems-mms-and-bayes",
+      "start_line": 908,
+      "end_line": 1051
+    },
+    {
+      "chunk_id": "chunk-79-joint-distribution-mm-output",
+      "topic": "Joint Distribution Output",
+      "text": "```\nDist({'94:brown 96:blue': 720,\n      '94:brown 96:green': 600,\n      '94:brown 96:orange': 480,\n      '94:yellow 96:blue': 480,\n      '94:red 96:blue': 480,\n      '94:brown 96:yellow': 420,\n      '94:yellow 96:green': 400,\n      '94:red 96:green': 400,\n      '94:brown 96:red': 390,\n      '94:brown 96:brown': 390,\n      '94:yellow 96:orange': 320,\n      '94:red 96:orange': 320,\n      '94:yellow 96:yellow': 280,\n      '94:red 96:yellow': 280,\n      '94:yellow 96:red': 260,\n      '94:yellow 96:brown': 260,\n      '94:red 96:red': 260,\n      '94:red 96:brown': 260,\n      '94:green 96:blue': 240,\n      '94:orange 96:blue': 240,\n      '94:tan 96:blue': 240,\n      '94:green 96:green': 200,\n      '94:orange 96:green': 200,\n      '94:tan 96:green': 200,\n      '94:green 96:orange': 160,\n      '94:orange 96:orange': 160,\n      '94:tan 96:orange': 160,\n      '94:green 96:yellow': 140,\n      '94:orange 96:yellow': 140,\n      '94:tan 96:yellow': 140,\n      '94:green 96:red': 130,\n      '94:green 96:brown': 130,\n      '94:orange 96:red': 130,\n      '94:orange 96:brown': 130,\n      '94:tan 96:red': 130,\n      '94:tan 96:brown': 130})\n```",
+      "concepts": [
+        "joint_probability_distribution"
+      ],
+      "chunk_type": "example",
+      "section": "More Urn Problems: M&Ms and Bayes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "More Urn Problems: M&Ms and Bayes"
+      ],
+      "markdown_anchor": "more-urn-problems-mms-and-bayes",
+      "start_line": 908,
+      "end_line": 1051
+    },
+    {
+      "chunk_id": "chunk-80-yellow-and-green-observation",
+      "topic": "Filtering for Yellow and Green M&Ms",
+      "text": "We are given the observation that \"One is yellow and one is green\":\n\n\n```python\n@ImplicitSet\ndef yellow_and_green(outcome: str) -> bool: return 'yellow' in outcome and 'green' in outcome\n\ngiven(yellow_and_green, MM)\n```",
+      "concepts": [
+        "python_functions_as_events",
+        "implicit_sets_decorator",
+        "conditional_probability"
+      ],
+      "chunk_type": "example",
+      "section": "More Urn Problems: M&Ms and Bayes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "More Urn Problems: M&Ms and Bayes"
+      ],
+      "markdown_anchor": "more-urn-problems-mms-and-bayes",
+      "start_line": 908,
+      "end_line": 1051
+    },
+    {
+      "chunk_id": "chunk-81-yellow-and-green-observation-output",
+      "topic": "Filtered Distribution Output",
+      "text": "```\nDist({'94:yellow 96:green': 400, '94:green 96:yellow': 140})\n```",
+      "concepts": [
+        "conditional_probability"
+      ],
+      "chunk_type": "example",
+      "section": "More Urn Problems: M&Ms and Bayes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "More Urn Problems: M&Ms and Bayes"
+      ],
+      "markdown_anchor": "more-urn-problems-mms-and-bayes",
+      "start_line": 908,
+      "end_line": 1051
+    },
+    {
+      "chunk_id": "chunk-82-probability-yellow-from-1994",
+      "topic": "Calculating Probability of Yellow from 1994",
+      "text": "We want to know \"What is the probability that the yellow M&M came from the 1994 bag, given the observation?\"\n\n\n```python\n@ImplicitSet\ndef yellow94(outcome: str) -> bool: return '94:yellow' in outcome\n\nP(yellow94, given(yellow_and_green, MM))\n```",
+      "concepts": [
+        "python_functions_as_events",
+        "implicit_sets_decorator",
+        "conditional_probability",
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "example",
+      "section": "More Urn Problems: M&Ms and Bayes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "More Urn Problems: M&Ms and Bayes"
+      ],
+      "markdown_anchor": "more-urn-problems-mms-and-bayes",
+      "start_line": 908,
+      "end_line": 1051
+    },
+    {
+      "chunk_id": "chunk-83-probability-yellow-from-1994-output",
+      "topic": "Probability Calculation Output",
+      "text": "```\n0.7407407407407407\n```",
+      "concepts": [
+        "conditional_probability",
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "example",
+      "section": "More Urn Problems: M&Ms and Bayes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "More Urn Problems: M&Ms and Bayes"
+      ],
+      "markdown_anchor": "more-urn-problems-mms-and-bayes",
+      "start_line": 908,
+      "end_line": 1051
+    },
+    {
+      "chunk_id": "chunk-84-solution-explanation",
+      "topic": "Explanation of the Solution",
+      "text": "So there is a 74% chance that the yellow M&M comes from the 1994 bag.\n\nAnswering this question was straightforward: just like all the other probability problems, we simply create a sample space, and use `P` to pick out the probability of the event in question, given what we know about the outcome.\n\nBut in a sense it is curious that we were able to solve this problem with the same methodology as the others: this problem comes from a section of Downey's book titled **My favorite Bayes's Theorem Problems**, so one would expect that we'd need to invoke Bayes Theorem to solve it.  The computation above shows that that is not necessary.",
+      "concepts": [
+        "probability_calculation_laplace",
+        "bayes_theorem"
+      ],
+      "chunk_type": "explanation",
+      "section": "More Urn Problems: M&Ms and Bayes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "More Urn Problems: M&Ms and Bayes"
+      ],
+      "markdown_anchor": "more-urn-problems-mms-and-bayes",
+      "start_line": 908,
+      "end_line": 1051
+    },
+    {
+      "chunk_id": "chunk-85-introduction-to-bayes-theorem",
+      "topic": "Introduction to Bayes' Theorem",
+      "text": "| |\n|---|\n|![Bayes](https://upload.wikimedia.org/wikipedia/commons/d/d4/Thomas_Bayes.gif)|\n|<a href=\"https://en.wikipedia.org/wiki/Thomas_Bayes\">Rev. Thomas Bayes</a> (1701-1761)|\n\nOf course, we *could* solve it using Bayes Theorem. Why is Bayes Theorem recommended? Because we are asked about the probability of an outcome given the evidence&mdash;the probability the yellow came from the 94 bag, given that there is a yellow and a green. But the problem statement doesn't directly tell us the probability of that outcome given the evidence; it just tells us the probability of the evidence given the outcome.",
+      "concepts": [
+        "bayes_theorem",
+        "conditional_probability"
+      ],
+      "chunk_type": "explanation",
+      "section": "More Urn Problems: M&Ms and Bayes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "More Urn Problems: M&Ms and Bayes"
+      ],
+      "markdown_anchor": "more-urn-problems-mms-and-bayes",
+      "start_line": 908,
+      "end_line": 1051
+    },
+    {
+      "chunk_id": "chunk-86-bayes-theorem-application",
+      "topic": "Applying Bayes' Theorem to the M&M Problem",
+      "text": "Before we see the colors of the M&Ms, there are two hypotheses, `A` and `B`, both with equal probability:\n\n    A: first M&M from 94 bag, second from 96 bag\n    B: first M&M from 96 bag, second from 94 bag\n    P(A) = P(B) = 0.5\n    \nThen we get some evidence:\n    \n    E: first M&M yellow, second green\n    \nWe want to know the probability of hypothesis `A`, given the evidence:\n    \n    P(A | E)\n    \nThat's not easy to calculate (except by enumerating the sample space, which our `P` function does). But Bayes Theorem says:\n    \n    P(A | E) = P(E | A) * P(A) / P(E)\n    \nThe quantities on the right-hand-side are easier to calculate:\n    \n    P(E | A) = 0.20 * 0.20 = 0.04\n    P(E | B) = 0.10 * 0.14 = 0.014\n    P(A)     = 0.5\n    P(B)     = 0.5\n    P(E)     = P(E | A) * P(A) + P(E | B) * P(B)\n             = 0.04     * 0.5  + 0.014    * 0.5   =   0.027\n    \nAnd we can get a final answer:\n    \n    P(A | E) = P(E | A) * P(A) / P(E)\n             = 0.04     * 0.5  / 0.027\n             = 0.7407407407",
+      "concepts": [
+        "bayes_theorem",
+        "conditional_probability",
+        "probability_calculation_laplace"
+      ],
+      "chunk_type": "explanation",
+      "section": "More Urn Problems: M&Ms and Bayes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "More Urn Problems: M&Ms and Bayes"
+      ],
+      "markdown_anchor": "more-urn-problems-mms-and-bayes",
+      "start_line": 908,
+      "end_line": 1051
+    },
+    {
+      "chunk_id": "chunk-87-bayes-theorem-vs-enumeration",
+      "topic": "Bayes' Theorem vs. Enumeration",
+      "text": "You have a choice: Bayes Theorem allows you to do less calculation at the cost of more algebra; that is a great trade-off if you are working with pencil and paper. \n\nEnumerating the sample space allows you to do less algebra at the cost of more calculation; usually a good trade-off if you have a computer. But regardless of the approach you use, it is important to understand Bayes theorem and how it works.\n\nThere is one important question that Allen Downey does not address: *would you  eat thirty-year-old M&Ms*?\n&#128552;",
+      "concepts": [
+        "bayes_theorem",
+        "sample_space"
+      ],
+      "chunk_type": "explanation",
+      "section": "More Urn Problems: M&Ms and Bayes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "More Urn Problems: M&Ms and Bayes"
+      ],
+      "markdown_anchor": "more-urn-problems-mms-and-bayes",
+      "start_line": 908,
+      "end_line": 1051
+    },
+    {
+      "chunk_id": "chunk-88-conclusion-counting-problems",
+      "topic": "Conclusion and Summary of Probability Concepts",
+      "text": "# Conclusion\n\nWe can solve all these problems just by counting!\n\nAll you ever needed to know about probability problems you learned from Sesame Street:\n\n| |\n|---|\n|![The Count](http://img2.oncoloring.com/count-dracula-number-thir_518b77b54ba6c-p.gif)|\n|<a href=\"https://en.wikipedia.org/wiki/Count_von_Count\">The Count</a> (1972—)|\n\nWe've had an interesting tour of probability and met some giants: Laplace, Bernoulli, Fermat, Pascal, Bayes, Newton, and  The Count.\n\nThe conclusion is: be methodical in defining the sample space and the event(s) of interest, and be careful in counting the number of outcomes in the numerator and denominator. and you can't go wrong. Easy as 1-2-3.",
+      "concepts": [
+        "sample_space",
+        "event",
+        "probability_calculation_laplace",
+        "counting_cases_len"
+      ],
+      "chunk_type": "overview",
+      "section": "Conclusion",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+      "heading_path": [
+        "Conclusion"
+      ],
+      "markdown_anchor": "conclusion",
+      "start_line": 1052,
+      "end_line": 1067
+    }
+  ],
+  "metadata": {
+    "total_chunks": 88,
+    "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md",
+    "chunked_at": "2025-12-12T16:12:19.057Z"
+  }
+}

@@ -1,0 +1,510 @@
+{
+  "metadata": {
+    "title": "POKER: Ranking Hands, etc.",
+    "author": "Peter Norvig",
+    "source": "Markdown document",
+    "video_id": "null",
+    "total_duration": 0,
+    "total_concepts": 28,
+    "extracted_at": "2025-12-12T16:13:46.982Z",
+    "enriched_at": "2023-10-27T10:00:00Z",
+    "enrichment_version": "1.0",
+    "source_file": "/home/danenberg/prg/workshops/learning/markdown/poker/poker.md"
+  },
+  "nodes": [
+    {
+      "id": "card_representation",
+      "name": "Card Representation",
+      "description": "Learning how individual playing cards are digitally represented, typically as a two-character string where the first character denotes rank (e.g., 'A', 'K', 'T', '2') and the second denotes suit (e.g., 's' for spades, 'c' for clubs).",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "poker_hand",
+      "name": "Poker Hand",
+      "description": "Defining a poker hand as a collection of five cards, and understanding common ways to represent it programmatically (e.g., a list or tuple of card strings).",
+      "prerequisites": [
+        "card_representation"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "poker_hand_types",
+      "name": "Poker Hand Types",
+      "description": "Understanding the different categories of poker hands (e.g., high card, one pair, straight, flush, full house, four of a kind, straight flush, five of a kind) and their intrinsic hierarchical ranking from lowest to highest.",
+      "prerequisites": [
+        "poker_hand"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "tiebreaker_logic",
+      "name": "Tiebreaker Logic",
+      "description": "Learning the specific rules used to determine a winner when two poker hands fall into the same type category. This involves comparing the ranks of relevant cards within each hand based on the hand type (e.g., highest card in a straight, rank of the three-of-a-kind in a full house).",
+      "prerequisites": [
+        "poker_hand_types"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "hand_ranking_system_tuple_based",
+      "name": "Hand Ranking System (Tuple-based)",
+      "description": "Developing a robust system to assign a unique, comparable value to any poker hand. This involves constructing a tuple where the first element indicates the hand type and subsequent elements provide tiebreaker information, allowing direct comparison using lexicographical ordering.",
+      "prerequisites": [
+        "poker_hand_types",
+        "tiebreaker_logic"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "integer_partitions_in_poker",
+      "name": "Integer Partitions (in Poker)",
+      "description": "Exploring the mathematical correspondence between poker hand types involving groups of cards (like pairs, three-of-a-kind) and integer partitions of the number 5, providing a conceptual framework for classifying these hands.",
+      "prerequisites": [
+        "poker_hand_types"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "collections_counter_for_grouping",
+      "name": "`collections.Counter` for Grouping",
+      "description": "Utilizing Python's `collections.Counter` to efficiently count the occurrences of card ranks within a hand, thereby identifying groups like pairs, three-of-a-kind, and four-of-a-kind, which are fundamental for determining hand types.",
+      "prerequisites": [
+        "poker_hand",
+        "card_representation"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "data_transformation_zip_star",
+      "name": "Data Transformation (`zip(*)`)",
+      "description": "Learning to use the Python idiom `zip(*)` for transposing lists of tuples. This is demonstrated by converting the output of `collections.Counter` (rank counts) into the (type, tiebreaker) tuple format required for hand ranking.",
+      "prerequisites": [
+        "collections_counter_for_grouping"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "ranking0_algorithm_group_based",
+      "name": "`ranking0` Algorithm (Group-based)",
+      "description": "Implementing an initial poker hand ranking function (`ranking0`) that leverages `collections.Counter` and data transformation to rank hands based on groups (pairs, three-of-a-kind, etc.), aligning with integer partitions but initially omitting straights and flushes.",
+      "prerequisites": [
+        "hand_ranking_system_tuple_based",
+        "collections_counter_for_grouping",
+        "data_transformation_zip_star",
+        "integer_partitions_in_poker"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "handling_special_poker_types",
+      "name": "Handling Special Poker Types",
+      "description": "Developing specific logic to detect and assign types to 'straight' and 'flush' hands, which do not directly correspond to integer partitions of card counts, and integrating this logic into the overall ranking system.",
+      "prerequisites": [
+        "poker_hand_types"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "ace_low_straight_rule",
+      "name": "Ace-Low Straight Rule",
+      "description": "Understanding and implementing the special rule in poker where an Ace can act as the lowest card (rank 1) to form a 5-high straight (A-2-3-4-5), requiring adjustment of card ranks for this specific scenario.",
+      "prerequisites": [
+        "handling_special_poker_types"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "ranking1_algorithm_complete",
+      "name": "`ranking1` Algorithm (Complete)",
+      "description": "Constructing the comprehensive poker hand ranking function (`ranking1`) by combining the group-based ranking with the specialized logic for straights, flushes, and the Ace-low rule, using custom 'type tuples' for these special cases.",
+      "prerequisites": [
+        "ranking0_algorithm_group_based",
+        "handling_special_poker_types",
+        "ace_low_straight_rule"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "unit_testing_for_correctness",
+      "name": "Unit Testing for Correctness",
+      "description": "Learning to write unit tests (`test` function) to verify the correctness of a ranking algorithm. This includes asserting that known hand orders are preserved, that card permutations within a hand don't change its rank, and that suit identity (beyond forming a flush) doesn't affect ranking.",
+      "prerequisites": [
+        "ranking1_algorithm_complete"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "ranking2_algorithm_alternative",
+      "name": "`ranking2` Algorithm (Alternative)",
+      "description": "Exploring an alternative, more concise and often faster implementation of the poker hand ranking function (`ranking2`). This approach uses simple integer codes for hand types and relies on direct comparisons of sorted card ranks and counts to determine tiebreakers.",
+      "prerequisites": [
+        "poker_hand_types",
+        "tiebreaker_logic"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "distinction_ranking_vs_scoring",
+      "name": "Distinction: Ranking vs. Scoring",
+      "description": "Understanding the fundamental difference between ranking (which establishes an ordered hierarchy) and scoring (which assigns a quantitative value). In poker, ranking is about comparison, not arithmetic averaging, which is crucial for correct game logic.",
+      "prerequisites": [
+        "hand_ranking_system_tuple_based"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "winner_determination",
+      "name": "Winner Determination",
+      "description": "Implementing functions (`winner`, `winners`) to identify the best hand(s) from a collection of hands. This process fundamentally relies on the ability to compare hands using a well-defined ranking function, handling single winners and ties.",
+      "prerequisites": [
+        "hand_ranking_system_tuple_based",
+        "distinction_ranking_vs_scoring"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "mapping_numerical_types_to_names",
+      "name": "Mapping Numerical Types to Names",
+      "description": "Creating a mapping (e.g., a tuple or list of strings) to convert the internal numerical or abstract representation of poker hand types back into human-readable names (e.g., 0 to 'high card', 9 to 'five of a kind').",
+      "prerequisites": [
+        "poker_hand_types",
+        "ranking2_algorithm_alternative"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "texas_hold_em_hand_selection_logic",
+      "name": "Texas Hold 'Em Hand Selection Logic",
+      "description": "Implementing the logic for Texas Hold 'Em, where a player chooses the best 5-card hand from a total of 7 available cards (2 hole cards + 5 community cards) by evaluating all possible 5-card combinations.",
+      "prerequisites": [
+        "poker_hand",
+        "winner_determination"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "omaha_hold_em_hand_selection_logic",
+      "name": "Omaha Hold 'Em Hand Selection Logic",
+      "description": "Implementing the more complex hand selection rules for Omaha Hold 'Em, where a player must use exactly 2 of their 4 hole cards and exactly 3 of the 5 community cards to form their best 5-card hand.",
+      "prerequisites": [
+        "texas_hold_em_hand_selection_logic"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "joker_poker_hand_evaluation",
+      "name": "Joker Poker Hand Evaluation",
+      "description": "Developing an algorithm to evaluate poker hands with wildcards (jokers). This involves systematically considering all possible card replacements for jokers to find the highest-ranking hand that can be formed.",
+      "prerequisites": [
+        "winner_determination",
+        "poker_hand"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "probability_concepts_cumulative_distribution",
+      "name": "Probability Concepts (Cumulative Distribution)",
+      "description": "Understanding the basics of probability, specifically how cumulative probability distributions are used to represent the likelihood of outcomes up to a certain point, crucial for estimating win probabilities in poker.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "expected_probability_of_winning",
+      "name": "Expected Probability of Winning",
+      "description": "Calculating the approximate probability that a given poker hand will win in a heads-up scenario, based on its hand type and high card. This involves using cumulative probability distributions of hand types to interpolate win chances.",
+      "prerequisites": [
+        "poker_hand_types",
+        "probability_concepts_cumulative_distribution"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "draw_poker_optimal_discard_strategy",
+      "name": "Draw Poker Optimal Discard Strategy",
+      "description": "Learning to determine the optimal action in Draw Poker: which card(s) to discard (or none) to maximize the expected win probability of the resulting hand, requiring evaluation of potential outcomes.",
+      "prerequisites": [
+        "expected_probability_of_winning"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "simulation_for_probability_estimation",
+      "name": "Simulation for Probability Estimation",
+      "description": "Employing computer simulations (repeated random trials) to estimate the probabilities of various poker hand types occurring in different game variants, especially when combinatorial calculation is complex or impractical.",
+      "prerequisites": [
+        "probability_concepts_cumulative_distribution"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "handmaker_abstraction",
+      "name": "Handmaker Abstraction",
+      "description": "Designing abstract 'handmaker' functions that encapsulate the rules for generating a random best possible hand in specific poker variants. These functions serve as inputs for simulations to collect statistical data.",
+      "prerequisites": [
+        "simulation_for_probability_estimation",
+        "texas_hold_em_hand_selection_logic",
+        "omaha_hold_em_hand_selection_logic"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "iterative_refinement_of_strategy",
+      "name": "Iterative Refinement of Strategy",
+      "description": "Understanding how to improve optimal strategies (like discard choices in Draw Poker) by iteratively updating the expected win probabilities based on simulation results, leading to more accurate decision-making over time.",
+      "prerequisites": [
+        "draw_poker_optimal_discard_strategy",
+        "expected_probability_of_winning",
+        "simulation_for_probability_estimation"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "pigeonhole_principle_application",
+      "name": "Pigeonhole Principle (Application)",
+      "description": "Applying the mathematical Pigeonhole Principle to explain counter-intuitive probabilities in card dealing. For example, demonstrating why a flush might appear earlier than a straight in a sequential card reveal, despite being a rarer hand type in a fixed 5-card deal.",
+      "prerequisites": [
+        "probability_concepts_cumulative_distribution"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "first_occurrence_simulation",
+      "name": "First Occurrence Simulation",
+      "description": "Designing and conducting simulations to determine how many cards, on average, must be dealt from a shuffled deck until a specific poker hand type (e.g., a straight or a flush) first appears among the face-up cards.",
+      "prerequisites": [
+        "simulation_for_probability_estimation",
+        "poker_hand_types",
+        "pigeonhole_principle_application"
+      ],
+      "difficulty": "advanced"
+    }
+  ],
+  "edges": [
+    {
+      "from": "poker_hand",
+      "to": "card_representation",
+      "type": "prerequisite"
+    },
+    {
+      "from": "poker_hand_types",
+      "to": "poker_hand",
+      "type": "prerequisite"
+    },
+    {
+      "from": "tiebreaker_logic",
+      "to": "poker_hand_types",
+      "type": "prerequisite"
+    },
+    {
+      "from": "hand_ranking_system_tuple_based",
+      "to": "poker_hand_types",
+      "type": "prerequisite"
+    },
+    {
+      "from": "hand_ranking_system_tuple_based",
+      "to": "tiebreaker_logic",
+      "type": "prerequisite"
+    },
+    {
+      "from": "integer_partitions_in_poker",
+      "to": "poker_hand_types",
+      "type": "prerequisite"
+    },
+    {
+      "from": "collections_counter_for_grouping",
+      "to": "poker_hand",
+      "type": "prerequisite"
+    },
+    {
+      "from": "collections_counter_for_grouping",
+      "to": "card_representation",
+      "type": "prerequisite"
+    },
+    {
+      "from": "data_transformation_zip_star",
+      "to": "collections_counter_for_grouping",
+      "type": "prerequisite"
+    },
+    {
+      "from": "ranking0_algorithm_group_based",
+      "to": "hand_ranking_system_tuple_based",
+      "type": "prerequisite"
+    },
+    {
+      "from": "ranking0_algorithm_group_based",
+      "to": "collections_counter_for_grouping",
+      "type": "prerequisite"
+    },
+    {
+      "from": "ranking0_algorithm_group_based",
+      "to": "data_transformation_zip_star",
+      "type": "prerequisite"
+    },
+    {
+      "from": "ranking0_algorithm_group_based",
+      "to": "integer_partitions_in_poker",
+      "type": "prerequisite"
+    },
+    {
+      "from": "handling_special_poker_types",
+      "to": "poker_hand_types",
+      "type": "prerequisite"
+    },
+    {
+      "from": "ace_low_straight_rule",
+      "to": "handling_special_poker_types",
+      "type": "prerequisite"
+    },
+    {
+      "from": "ranking1_algorithm_complete",
+      "to": "ranking0_algorithm_group_based",
+      "type": "prerequisite"
+    },
+    {
+      "from": "ranking1_algorithm_complete",
+      "to": "handling_special_poker_types",
+      "type": "prerequisite"
+    },
+    {
+      "from": "ranking1_algorithm_complete",
+      "to": "ace_low_straight_rule",
+      "type": "prerequisite"
+    },
+    {
+      "from": "unit_testing_for_correctness",
+      "to": "ranking1_algorithm_complete",
+      "type": "prerequisite"
+    },
+    {
+      "from": "ranking2_algorithm_alternative",
+      "to": "poker_hand_types",
+      "type": "prerequisite"
+    },
+    {
+      "from": "ranking2_algorithm_alternative",
+      "to": "tiebreaker_logic",
+      "type": "prerequisite"
+    },
+    {
+      "from": "distinction_ranking_vs_scoring",
+      "to": "hand_ranking_system_tuple_based",
+      "type": "prerequisite"
+    },
+    {
+      "from": "winner_determination",
+      "to": "hand_ranking_system_tuple_based",
+      "type": "prerequisite"
+    },
+    {
+      "from": "winner_determination",
+      "to": "distinction_ranking_vs_scoring",
+      "type": "prerequisite"
+    },
+    {
+      "from": "mapping_numerical_types_to_names",
+      "to": "poker_hand_types",
+      "type": "prerequisite"
+    },
+    {
+      "from": "mapping_numerical_types_to_names",
+      "to": "ranking2_algorithm_alternative",
+      "type": "prerequisite"
+    },
+    {
+      "from": "texas_hold_em_hand_selection_logic",
+      "to": "poker_hand",
+      "type": "prerequisite"
+    },
+    {
+      "from": "texas_hold_em_hand_selection_logic",
+      "to": "winner_determination",
+      "type": "prerequisite"
+    },
+    {
+      "from": "omaha_hold_em_hand_selection_logic",
+      "to": "texas_hold_em_hand_selection_logic",
+      "type": "prerequisite"
+    },
+    {
+      "from": "joker_poker_hand_evaluation",
+      "to": "winner_determination",
+      "type": "prerequisite"
+    },
+    {
+      "from": "joker_poker_hand_evaluation",
+      "to": "poker_hand",
+      "type": "prerequisite"
+    },
+    {
+      "from": "expected_probability_of_winning",
+      "to": "poker_hand_types",
+      "type": "prerequisite"
+    },
+    {
+      "from": "expected_probability_of_winning",
+      "to": "probability_concepts_cumulative_distribution",
+      "type": "prerequisite"
+    },
+    {
+      "from": "draw_poker_optimal_discard_strategy",
+      "to": "expected_probability_of_winning",
+      "type": "prerequisite"
+    },
+    {
+      "from": "simulation_for_probability_estimation",
+      "to": "probability_concepts_cumulative_distribution",
+      "type": "prerequisite"
+    },
+    {
+      "from": "handmaker_abstraction",
+      "to": "simulation_for_probability_estimation",
+      "type": "prerequisite"
+    },
+    {
+      "from": "handmaker_abstraction",
+      "to": "texas_hold_em_hand_selection_logic",
+      "type": "prerequisite"
+    },
+    {
+      "from": "handmaker_abstraction",
+      "to": "omaha_hold_em_hand_selection_logic",
+      "type": "prerequisite"
+    },
+    {
+      "from": "iterative_refinement_of_strategy",
+      "to": "draw_poker_optimal_discard_strategy",
+      "type": "prerequisite"
+    },
+    {
+      "from": "iterative_refinement_of_strategy",
+      "to": "expected_probability_of_winning",
+      "type": "prerequisite"
+    },
+    {
+      "from": "iterative_refinement_of_strategy",
+      "to": "simulation_for_probability_estimation",
+      "type": "prerequisite"
+    },
+    {
+      "from": "pigeonhole_principle_application",
+      "to": "probability_concepts_cumulative_distribution",
+      "type": "prerequisite"
+    },
+    {
+      "from": "first_occurrence_simulation",
+      "to": "simulation_for_probability_estimation",
+      "type": "prerequisite"
+    },
+    {
+      "from": "first_occurrence_simulation",
+      "to": "poker_hand_types",
+      "type": "prerequisite"
+    },
+    {
+      "from": "first_occurrence_simulation",
+      "to": "pigeonhole_principle_application",
+      "type": "prerequisite"
+    }
+  ]
+}

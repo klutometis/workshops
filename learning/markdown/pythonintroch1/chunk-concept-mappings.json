@@ -1,0 +1,270 @@
+{
+  "source_file": "/home/danenberg/prg/workshops/learning/markdown/pythonintroch1/pythonintroch1.md",
+  "total_chunks": 15,
+  "mapped_at": "2025-12-15T02:48:22.228Z",
+  "chunks": [
+    {
+      "chunk_id": "chunk-1-introduction-to-comments",
+      "content": "## Introduction to Comments\n\nComments are explanatory notes added to code to make it easier to understand. They are ignored by the Python interpreter, meaning they don't affect how the code runs. Comments are crucial for:\n\n*   **Improving Readability**: Explaining the purpose and logic behind code.\n*   **Documentation**: Providing a quick reference for developers.\n*   **Debugging**: Temporarily disabling code to identify issues.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-1-introduction-to-comments",
+        "concept_id": "purpose_of_comments",
+        "confidence": 1,
+        "reasoning": "This chunk directly explains the importance and various uses of comments in code.",
+        "secondary_concepts": [
+          "single_line_comments",
+          "inline_comments",
+          "code_disabling_with_comments"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-2-single-line-comments-explanation",
+      "content": "### Single-Line Comments\n\nIn Python, you create a single-line comment by starting a line with the hash symbol (`#`). Everything after the `#` on that line is considered a comment and is not executed as code.\n\n```python\n# This is a single-line comment\nprint(\"Hello, world!\")  # This is also a comment after the code\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-2-single-line-comments-explanation",
+        "concept_id": "single_line_comments",
+        "confidence": 1,
+        "reasoning": "This chunk defines what a single-line comment is using the hash symbol (#) and shows examples, including one that demonstrates an inline comment.",
+        "secondary_concepts": [
+          "inline_comments"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-3-single-line-comment-example",
+      "content": "#### Example:\n\n```python\n# Printing a greeting message\nprint(\"Hello, world!\")\n```\n\nIn this example, `# Printing a greeting message` is a comment that explains the purpose of the following line of code. When the code is executed, only `print(\"Hello, world!\")` is run, and the comment is ignored.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-3-single-line-comment-example",
+        "concept_id": "single_line_comments",
+        "confidence": 0.9,
+        "reasoning": "This chunk provides a concrete example illustrating the use of a single-line comment to explain code.",
+        "secondary_concepts": [
+          "print_function_basics"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-4-inline-comments-explanation",
+      "content": "### Inline Comments\n\nInline comments are comments placed on the same line as a statement. They should be used sparingly and to explain complex or non-obvious parts of the code.\n\n```python\nx = 10   # Assigning the value 10 to x\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-4-inline-comments-explanation",
+        "concept_id": "inline_comments",
+        "confidence": 1,
+        "reasoning": "This chunk specifically defines and demonstrates how to create inline comments on the same line as code.",
+        "secondary_concepts": [
+          "single_line_comments"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-5-inline-comments-example",
+      "content": "#### Example:\n\n```python\nresult = x + y  # Adding x and y to get the result\n```\n\nHere, the comment clarifies the operation being performed, which can be useful if the operation is not immediately clear from the code itself.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-5-inline-comments-example",
+        "concept_id": "inline_comments",
+        "confidence": 0.9,
+        "reasoning": "This chunk offers a practical example of an inline comment used to clarify an operation within a line of code.",
+        "secondary_concepts": [
+          "addition_operator",
+          "expression_evaluation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-6-disabling-code-with-comments",
+      "content": "### Disabling Code with Comments\n\nComments can also be used to temporarily disable lines of code. This is useful for debugging or testing different parts of your program without deleting code.\n\n```python\n# print(\"This line will not be executed\")\nprint(\"This line will be executed\")\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-6-disabling-code-with-comments",
+        "concept_id": "code_disabling_with_comments",
+        "confidence": 1,
+        "reasoning": "This chunk explains the technique of using comments to temporarily prevent lines of code from executing, useful for debugging.",
+        "secondary_concepts": [
+          "single_line_comments"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-7-disabling-code-with-comments-example",
+      "content": "#### Example:\n\n```python\n# total = a + b\n# print(\"The total is:\", total)\nprint(\"Hello\")\n```\n\nIn this example, the lines calculating the `total` and printing it are commented out. Only the `print(\"Hello\")` line will be executed. This technique is helpful when you want to isolate specific parts of your code to identify errors or test alternative approaches.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-7-disabling-code-with-comments-example",
+        "concept_id": "code_disabling_with_comments",
+        "confidence": 0.9,
+        "reasoning": "This chunk demonstrates how to disable multiple lines of code using comments for debugging or testing purposes.",
+        "secondary_concepts": [
+          "single_line_comments",
+          "print_function_basics"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-8-very-simple-programs-overview",
+      "content": "# 1. Very simple 'programs'\n## 1.1 Running Python from the command line\nIn order to test pieces of code we can run Python from the command line. In this Jupyter Notebook we are going to simulate this. You can type the commands in the fields and execute them.\nIn the field type:\n```python\nprint('Hello, World')\n```\nThen press ` + ` to execute the command.\n\n```python\n\n```\n\nWhat happened?\n\nYou just created a program, that prints the words 'Hello, World'. The Python environment that you are in immediately compiles whatever you have typed in. This is useful for testing things, e.g. define a few variables, and then test to see if a certain line will work. That will come in a later lesson, though.",
+      "section": "1. Very simple 'programs'",
+      "start_line": 2,
+      "end_line": 167,
+      "concept_mapping": {
+        "chunk_id": "chunk-8-very-simple-programs-overview",
+        "concept_id": "simple_program_concept",
+        "confidence": 1,
+        "reasoning": "The chunk introduces the idea that a single command like 'print' constitutes a basic program and how to execute it interactively.",
+        "secondary_concepts": [
+          "interactive_python_execution",
+          "print_function_basics"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-9-math-in-python-examples",
+      "content": "## 1.2 Math in Python\nType\n```python\n1 + 1\n```\nand execute the code.\n\n```python\n + 1\n```\n\nNow type\n```python\n20 + 80\n```\nand execute the code.\n\n```python\n\n```\n\nThese are additions. We can of course use other mathematical operators.\nTry this subtraction:\n```python\n6 - 5\n```\n\n```python\n\n```\n\nand this multiplication:\n```python\n2 * 5\n```\n\n```python\n\n```\n\nTry:\n```python\n5 ** 2\n```\n\n```python\n\n```\n\n`**` is the exponential operator, so we executed 5 squared.\n\nType:\n```python\nprint('1 + 2 is an addition')\n```\n\n```python\n\n```\n\nYou see that the `print` statement writes something on the screen.\n\nTry this:\n```python\nprint('one kilobyte is 2^10 bytes, or', 2 ** 10, 'bytes')\n```\n\n```python\n\n```\n\nThis demonstrates that you can print text and calculations in a sentence. The commas separating each section are a way of separating strings (text) from calculations or variable.\n\nNow try this:\n```python\n23 / 3\n```\n\n```python\n\n```\n\nAnd this:\n```python\n23 % 3\n```\n\n```python\n\n```\n\n`%` returns the remainder of the division.",
+      "section": "1. Very simple 'programs'",
+      "start_line": 2,
+      "end_line": 167,
+      "concept_mapping": {
+        "chunk_id": "chunk-9-math-in-python-examples",
+        "concept_id": "expression_evaluation",
+        "confidence": 0.8,
+        "reasoning": "This chunk demonstrates various mathematical operations and their immediate evaluation in Python, encompassing several operators and print methods.",
+        "secondary_concepts": [
+          "addition_operator",
+          "subtraction_operator",
+          "multiplication_operator",
+          "exponentiation_operator",
+          "print_function_basics",
+          "string_literal_output",
+          "mixed_type_print_output",
+          "division_operator",
+          "modulo_operator",
+          "numeric_data_representation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-10-order-of-operations-explanation",
+      "content": "## 1.3 Order of Operations\n\nRemember that thing called order of operation that they taught in maths? Well, it applies in Python, too. Here it is, if you need reminding:\n1. Parenthesis `()`\n2. Exponents `**`\n3. Multiplication `*`, division `/` and remainder `%`\n4. Addition `+` and subtraction `-`\n\nHere are some examples that you might want to try, if you're rusty on this:\n```python\n1 + 2 * 3\n(1 + 2) * 3\n```\n\n```python\n\n```\n\n```python\n\n```",
+      "section": "1. Very simple 'programs'",
+      "start_line": 2,
+      "end_line": 167,
+      "concept_mapping": {
+        "chunk_id": "chunk-10-order-of-operations-explanation",
+        "concept_id": "operator_precedence",
+        "confidence": 1,
+        "reasoning": "This chunk explicitly outlines the mathematical order of operations in Python and provides examples including the use of parentheses.",
+        "secondary_concepts": [
+          "parentheses_for_grouping",
+          "addition_operator",
+          "multiplication_operator",
+          "expression_evaluation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-11-comments-in-python-explanation",
+      "content": "## 1.4 Comments, Please\n\nThe final thing you'll need to know to move on to multi-line programs is the comment. Type the following (and yes, the output is shown):\n```python\n# I am a comment. Fear my wrath!\n```\n\n```python\n\n```\n\nA comment is a piece of code that is not run. In Python, you make something a comment by putting a hash in front of it. A hash comments everything after it in the line, and nothing before it. So you could type this:\n```python\nprint(\"food is very nice\") #eat me\n```\n\n```python\n\n```\n\nThis results in a normal output, without the smutty comment, thank you very much.\n\nNow try this:\n```python\n# print(\"food is very nice\")\n```\n\n```python\n\n```\n\nNothing happens, because the code was after a comment.\n\nComments are important for adding necessary information for another programmer to read, but not the computer. For example, an explanation of a section of code, saying what it does, or what is wrong with it. You can also comment bits of code by putting a `#` in front of it - if you don't want it to compile, but can't delete it because you might need it later.",
+      "section": "1. Very simple 'programs'",
+      "start_line": 2,
+      "end_line": 167,
+      "concept_mapping": {
+        "chunk_id": "chunk-11-comments-in-python-explanation",
+        "concept_id": "single_line_comments",
+        "confidence": 0.9,
+        "reasoning": "This chunk re-introduces comments by explaining the use of the hash symbol (#) and its effect, also touching on inline comments and disabling code.",
+        "secondary_concepts": [
+          "inline_comments",
+          "code_disabling_with_comments",
+          "purpose_of_comments"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-12-assignment-1-exercise",
+      "content": "# Assignment 1\n\nType in the cell below an expression to find out how many seconds are there in a 365-day year.\n\n```python\n\n```",
+      "section": "Assignment 1",
+      "start_line": 168,
+      "end_line": 175,
+      "concept_mapping": {
+        "chunk_id": "chunk-12-assignment-1-exercise",
+        "concept_id": "expression_evaluation",
+        "confidence": 0.9,
+        "reasoning": "This chunk presents a problem that requires constructing and evaluating a mathematical expression to find a numerical answer.",
+        "secondary_concepts": [
+          "multiplication_operator",
+          "numeric_data_representation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-13-assignment-2-overview",
+      "content": "# Assignment 2\n\nThe Earth can be approximated as a sphere with a radius of 6370 km. Use the cell below to find out the volume of such a shape in cubic meters.",
+      "section": "Assignment 2",
+      "start_line": 176,
+      "end_line": 183,
+      "concept_mapping": {
+        "chunk_id": "chunk-13-assignment-2-overview",
+        "concept_id": "expression_evaluation",
+        "confidence": 0.9,
+        "reasoning": "This chunk asks the user to calculate a volume, which requires formulating and evaluating a mathematical expression.",
+        "secondary_concepts": [
+          "multiplication_operator",
+          "exponentiation_operator",
+          "numeric_data_representation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-14-empty-code-block",
+      "content": "```python\n\n```",
+      "section": "Assignment 2",
+      "start_line": 176,
+      "end_line": 183,
+      "concept_mapping": {
+        "chunk_id": "chunk-14-empty-code-block",
+        "concept_id": "expression_evaluation",
+        "confidence": 0.6,
+        "reasoning": "Inferred from surrounding context (prev=expression_evaluation, next=expression_evaluation)"
+      }
+    },
+    {
+      "chunk_id": "chunk-15-assignment-3-introduction",
+      "content": "# Assignment 3\n\nGet the answer of the following expression, using the cell below:\n\n$$\\frac{1}{2}+\\frac{\\frac{1}{3}}{\\frac{1}{4}+\\frac{1}{5}}$$\n\n```python\n\n```",
+      "section": "Assignment 3",
+      "start_line": 184,
+      "end_line": 194,
+      "concept_mapping": {
+        "chunk_id": "chunk-15-assignment-3-introduction",
+        "concept_id": "expression_evaluation",
+        "confidence": 1,
+        "reasoning": "This chunk requires evaluating a complex mathematical expression, directly testing the understanding of expression evaluation, operator precedence, and grouping.",
+        "secondary_concepts": [
+          "operator_precedence",
+          "parentheses_for_grouping",
+          "division_operator",
+          "addition_operator",
+          "numeric_data_representation"
+        ]
+      }
+    }
+  ]
+}

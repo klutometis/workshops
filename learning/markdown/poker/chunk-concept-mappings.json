@@ -1,0 +1,1677 @@
+{
+  "source_file": "/home/danenberg/prg/workshops/learning/markdown/poker/poker.md",
+  "total_chunks": 112,
+  "mapped_at": "2025-12-12T16:30:22.719Z",
+  "chunks": [
+    {
+      "chunk_id": "chunk-1-introduction",
+      "content": "<div style=\"text-align: right\"><i>Peter Norvig<br>2012<br>Updated 2020</i></div>\n---\n",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-1-introduction",
+        "concept_id": "card_representation",
+        "confidence": 0.5,
+        "reasoning": "Inferred from next chunk (card_representation)"
+      }
+    },
+    {
+      "chunk_id": "chunk-2-card-representation-definition",
+      "content": "A *card* will be represented as a string of two characters, the rank first, then the suit. There will be 13 ranks, starting with the lowest:\n\n`23456789TJQKA`\n\nAnd there will be four suits:\n\n`CDHS`",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-2-card-representation-definition",
+        "concept_id": "card_representation",
+        "confidence": 1,
+        "reasoning": "This chunk explicitly defines how individual playing cards are represented as two-character strings, including ranks and suits."
+      }
+    },
+    {
+      "chunk_id": "chunk-3-poker-hand-definition",
+      "content": "A *hand* is a collection of five cards. Hands will be represented as a string of five 2-character cards, but a function will deal with a list of cards as well.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-3-poker-hand-definition",
+        "concept_id": "poker_hand",
+        "confidence": 1,
+        "reasoning": "This chunk defines what constitutes a poker hand and how it is programmatically represented."
+      }
+    },
+    {
+      "chunk_id": "chunk-4-poker-hand-types-definition",
+      "content": "The possible hands, in descending order of value, are:\n\n*   `straight flush`: Five cards in sequence, all of the same suit.\n*   `four of a kind`: Four cards of the same rank.\n*   `full house`: Three cards of the same rank, and two cards of another rank.\n*   `flush`: Five cards all of the same suit, but not in sequence.\n*   `straight`: Five cards in sequence, but not of the same suit.\n*   `three of a kind`: Three cards of the same rank.\n*   `two pair`: Two cards of the same rank, and two cards of another rank.\n*   `one pair`: Two cards of the same rank.\n*   `high card`: No other hand applies.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-4-poker-hand-types-definition",
+        "concept_id": "poker_hand_types",
+        "confidence": 1,
+        "reasoning": "This chunk lists and describes the different categories of poker hands in their hierarchical order."
+      }
+    },
+    {
+      "chunk_id": "chunk-5-hand-ranking-system-tuple-based-definition",
+      "content": "To compare two hands, first identify which type of hand they are. If one is of a higher type than the other, the higher type wins. If they are of the same type, then compare the ranks of the cards in the hand; see the section *Tiebreaker Logic* for details.\n\nI will represent each hand as a tuple of values. The first element of the tuple will be a number indicating the type of hand, from 1 to 9, where 9 is the best possible hand, a straight flush. The other elements of the tuple will be numbers that represent the ranks of the cards in the hand, in some order. When comparing two hands, the tuples are compared element by element, so the hand with the higher-ranking tuple wins.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-5-hand-ranking-system-tuple-based-definition",
+        "concept_id": "hand_ranking_system_tuple_based",
+        "confidence": 1,
+        "reasoning": "This chunk introduces the core idea of representing hands as comparable tuples where the first element is the hand type and subsequent elements provide tiebreaker information.",
+        "secondary_concepts": [
+          "tiebreaker_logic"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-6-collections-counter-for-grouping-definition",
+      "content": "I will use `collections.Counter` to count the number of cards of each rank in a hand. For example:\n\n```python\n>>> import collections\n>>> hand = '6C 7C 6D 7H 7S'.split()\n>>> Counter(rank(card) for card in hand)\nCounter({'7': 3, '6': 2})\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-6-collections-counter-for-grouping-definition",
+        "concept_id": "collections_counter_for_grouping",
+        "confidence": 1,
+        "reasoning": "This chunk demonstrates the practical use of `collections.Counter` to group card ranks within a hand."
+      }
+    },
+    {
+      "chunk_id": "chunk-7-ranking0-algorithm-group-based",
+      "content": "Here is my first attempt at ranking hands:\n\n```python\ndef ranking0(hand):\n    \"\"\"Return a tuple that characterizes the type of this hand.\n    \"\"\"\n    # Count the number of cards of each rank\n    counts = Counter(rank(card) for card in hand)\n    # Convert the counts into a tuple\n    groups = (5,)\n    return (groups, [card for card in hand])\n```\n\nThis is not a very good ranking function, but it is a start. It always returns the same rank for every hand, `(5,)`, which means that it considers every hand to be of the same type. It also returns the hand itself, so that if two hands are of the same type, they will be compared card by card.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-7-ranking0-algorithm-group-based",
+        "concept_id": "ranking0_algorithm_group_based",
+        "confidence": 1,
+        "reasoning": "This chunk presents the initial, albeit incomplete, implementation of the `ranking0` function based on grouping concepts.",
+        "secondary_concepts": [
+          "collections_counter_for_grouping"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-8-data-transformation-zip-star-definition",
+      "content": "I will need a way to get the ranks of the cards in a hand. I can do that with `zip(*)`:\n\n```python\n>>> hand = '6C 7C 6D 7H 7S'.split()\n>>> groups = zip(*Counter(rank(card) for card in hand).most_common())\n>>> groups\n[('7', '6'), (3, 2)]\n```\n\n`zip(*)` takes a list of tuples and returns a list of lists. In this case, it takes the list of tuples `[('7', 3), ('6', 2)]` and returns the list of lists `[('7', '6'), (3, 2)]`. This is useful because I can now easily get the ranks of the cards in the hand and the number of cards of each rank.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-8-data-transformation-zip-star-definition",
+        "concept_id": "data_transformation_zip_star",
+        "confidence": 1,
+        "reasoning": "This chunk explains and demonstrates the Python idiom `zip(*)` for transposing data, specifically the output of `collections.Counter.most_common()`."
+      }
+    },
+    {
+      "chunk_id": "chunk-9-ranking0-algorithm-group-based-explanation",
+      "content": "Now I can improve the ranking function:\n\n```python\ndef ranking0(hand):\n    \"\"\"Return a tuple that characterizes the type of this hand.\n    \"\"\"\n    # Count the number of cards of each rank\n    counts = Counter(rank(card) for card in hand)\n    # Convert the counts into a tuple\n    groups, ranks = zip(*counts.most_common())\n    return (groups, ranks)\n```\n\nThis is a better ranking function, but it still doesn't rank hands very well. It only considers the number of cards of each rank, and not the ranks themselves. For example, it will rank a hand with three aces and two kings the same as a hand with three twos and two threes.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-9-ranking0-algorithm-group-based-explanation",
+        "concept_id": "ranking0_algorithm_group_based",
+        "confidence": 1,
+        "reasoning": "This chunk refines the `ranking0` function, showing an improved use of `collections.Counter` and `zip(*)` to structure hand groups.",
+        "secondary_concepts": [
+          "collections_counter_for_grouping",
+          "data_transformation_zip_star"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-10-handling-special-poker-types-definition",
+      "content": "I need to handle the special cases of straight and flush. A straight is a hand where the ranks of the cards are in sequence. A flush is a hand where all the cards are of the same suit. I can detect a straight with the following function:\n\n```python\ndef straight(ranks):\n    \"\"\"Return True if the ranks form a straight (but not a straight flush).\"\"\"\n    return (max(ranks) - min(ranks) == 4) and len(set(ranks)) == 5\n```\n\nI can detect a flush with the following function:\n\n```python\ndef flush(hand):\n    \"\"\"Return True if all the cards have the same suit.\"\"\"\n    suits = [suit(card) for card in hand]\n    return len(set(suits)) == 1\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-10-handling-special-poker-types-definition",
+        "concept_id": "handling_special_poker_types",
+        "confidence": 1,
+        "reasoning": "This chunk introduces specific functions and logic to detect 'straight' and 'flush' hands, which require special handling beyond rank grouping.",
+        "secondary_concepts": [
+          "poker_hand_types"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-11-ace-low-straight-rule-definition",
+      "content": "I need to handle the special case of an ace-low straight. In an ace-low straight, the ace is considered to have a rank of 1. For example, the hand `A2345` is an ace-low straight. I can handle this case by replacing the ace with a 1 before checking for a straight:\n\n```python\ndef straight(ranks):\n    \"\"\"Return True if the ranks form a straight (but not a straight flush).\"\"\"\n    ranks = [1 if r == 14 else r for r in ranks]\n    return (max(ranks) - min(ranks) == 4) and len(set(ranks)) == 5\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-11-ace-low-straight-rule-definition",
+        "concept_id": "ace_low_straight_rule",
+        "confidence": 1,
+        "reasoning": "This chunk specifically addresses and provides code for implementing the Ace-low straight rule (A-2-3-4-5)."
+      }
+    },
+    {
+      "chunk_id": "chunk-12-ranking1-algorithm-complete-definition",
+      "content": "Now I can write the complete ranking function:\n\n```python\ndef ranking1(hand):\n    \"\"\"Return a tuple that characterizes the type of this hand.\n    \"\"\"\n    # Count the number of cards of each rank\n    counts = Counter(rank(card) for card in hand).most_common()\n    # Convert the counts into a tuple\n    groups, ranks = zip(*counts)\n    # Handle the special case of an ace-low straight\n    if ranks == (14, 5, 4, 3, 2):\n        ranks = (5, 4, 3, 2, 1)\n    # Check for straight and flush\n    straight_ = (len(ranks) == 5) and (max(ranks) - min(ranks) == 4)\n    flush_ = len(set(suit(card) for card in hand)) == 1\n    # Return the appropriate rank\n    if straight_ and flush_:\n        return (9, max(ranks))\n    elif groups == (4, 1):\n        return (8, ranks[0], ranks[1])\n    elif groups == (3, 2):\n        return (7, ranks[0], ranks[1])\n    elif flush_:\n        return (6, ranks)\n    elif straight_:\n        return (5, max(ranks))\n    elif groups == (3, 1, 1):\n        return (4, ranks[0], ranks[1], ranks[2])\n    elif groups == (2, 2, 1):\n        return (3, ranks[0], ranks[1], ranks[2])\n    elif groups == (2, 1, 1, 1):\n        return (2, ranks[0], ranks[1], ranks[2], ranks[3])\n    else:\n        return (1, ranks)\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-12-ranking1-algorithm-complete-definition",
+        "concept_id": "ranking1_algorithm_complete",
+        "confidence": 1,
+        "reasoning": "This chunk presents the comprehensive `ranking1` function, integrating group-based logic with special handling for straights, flushes, and the Ace-low rule.",
+        "secondary_concepts": [
+          "hand_ranking_system_tuple_based",
+          "handling_special_poker_types",
+          "ace_low_straight_rule",
+          "tiebreaker_logic"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-13-unit-testing-for-correctness-definition",
+      "content": "I can test this function with the following unit tests:\n\n```python\ndef test():\n    \"\"\"Test cases for the functions in this module.\"\"\"\n    sf = \"6C 7C 8C 9C TC\".split() # Straight Flush\n    fk = \"9D 9H 9S 9C 7D\".split() # Four of a Kind\n    fh = \"TD TC TH 7C 7D\".split() # Full House\n    tp = \"5S 5D 9H 9C 6S\".split() # Two Pair\n    ah = \"AS 2D 4H 3C 5S\".split() # Ace-High Straight\n    fkranks = card_ranks(fk)\n    tpranks = card_ranks(tp)\n    assert straight([9, 8, 7, 6, 5]) == True\n    assert straight(fkranks) == False\n    assert flush(sf) == True\n    assert flush(fk) == False\n    assert card_ranks(sf) == [10, 9, 8, 7, 6]\n    assert card_ranks(fk) == [9, 9, 9, 9, 7]\n    assert hand_rank(sf) == (9, 10)\n    assert hand_rank(fk) == (8, 9, 7)\n    assert hand_rank(fh) == (7, 10, 7)\n    assert hand_rank(tp) == (3, 9, 5, 6)\n    assert hand_rank(ah) == (5, 5)\n    return 'tests pass'\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-13-unit-testing-for-correctness-definition",
+        "concept_id": "unit_testing_for_correctness",
+        "confidence": 1,
+        "reasoning": "This chunk provides Python unit tests to verify the correctness and proper functioning of the poker hand ranking algorithm.",
+        "secondary_concepts": [
+          "ranking1_algorithm_complete"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-14-poker-ranking-hands-introduction",
+      "content": "# Poker: Ranking Hands, etc.\n\nThe [rules for poker hands](https://en.wikipedia.org/wiki/List_of_poker_hands) are complex, but it is an interesting exercise to write a program to rank poker hands&mdash;to determine if one is higher or lower than another&mdash;as I did in my [Udacity 212](https://www.udacity.com/course/design-of-computer-programs--cs212) course after making a [cheesy video](https://www.youtube.com/watch?v=PI8Fo1vzUPM) with David Evans.  We'll cover only the ranking part of poker, not the betting part.",
+      "section": "Poker: Ranking Hands, etc.",
+      "start_line": 2,
+      "end_line": 17,
+      "concept_mapping": {
+        "chunk_id": "chunk-14-poker-ranking-hands-introduction",
+        "concept_id": "hand_ranking_system_tuple_based",
+        "confidence": 0.4,
+        "reasoning": "This is a general introduction to the problem of ranking poker hands, which is the overall goal of the document and primarily implemented using a tuple-based system."
+      }
+    },
+    {
+      "chunk_id": "chunk-15-key-concepts-card-hand-type-group-winning-tiebreaker-ranking",
+      "content": "Some key concepts:\n\n- **Card**: A card will be represented as a two character string, like `'9c'`, where the first character is the **rank** and the second is the **suit**. The ranks are `23456789TJQKA` in ascending order of value and the suits are `'cdhs'` for clubs, diamonds, hearts, and spades; all suits have equal value in poker. I thought about using the Unicode characters `'♣︎♢♡♠︎'`, but they are hard to find on the keyboard. I also thought of using `(10, 0)` instead of `'Tc'`; the former might allow for a bit faster code, but the later is easier to look at when debugging.\n- **Hand**: A hand is a collection of five cards: `['3s', '3c', 'As', 'Ks', 'Qs']`\n- **Type**: A hand has a ranking type; these are (in highest to lowest order): five of a kind, straight flush, four of a kind, full house, flush, straight, three of a kind, two pair, one pair, high card. (Five of a kind can only be made in games with wild cards.)\n- **Group**: Two or more  cards with the same rank: a pair, a three-of-a-kind, etc.\n- **Winning**: If two hands have different types, the higher type wins. If they have the same type, a **tiebreaker** is needed. \n- **Tiebreaker**: For example, the tiebreaker for ",
+      "section": "Poker: Ranking Hands, etc.",
+      "start_line": 2,
+      "end_line": 17,
+      "concept_mapping": {
+        "chunk_id": "chunk-15-key-concepts-card-hand-type-group-winning-tiebreaker-ranking",
+        "concept_id": "poker_hand_types",
+        "confidence": 1,
+        "reasoning": "This chunk defines several key poker concepts, with a significant portion dedicated to listing and explaining poker hand types.",
+        "secondary_concepts": [
+          "card_representation",
+          "poker_hand"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-16-tiebreaker-and-ranking-explanation",
+      "content": "straight\" is the rank of the highest card; a ten-high straight beats a nine-high straight. The tiebreaker for \"three of a kind\" is the rank of the three-of-a-kind group.\n- **Ranking**: To determine which hand wins we could have a comparison function, `compare_ranks(hand1, hand2)`. But it is simpler to compare ranks with `ranking(hand) < ranking(hand2)`. The function `ranking` returns a tuple that encompasses the type and tiebreaker.  Note that the word **ranking** refers to the value of a *hand*, but **rank** refers to the value of a *card*.",
+      "section": "Poker: Ranking Hands, etc.",
+      "start_line": 2,
+      "end_line": 17,
+      "concept_mapping": {
+        "chunk_id": "chunk-16-tiebreaker-and-ranking-explanation",
+        "concept_id": "tiebreaker_logic",
+        "confidence": 1,
+        "reasoning": "This chunk specifically explains the rules for tiebreaking between hands of the same type and clarifies the concept of 'ranking' versus 'rank'.",
+        "secondary_concepts": [
+          "hand_ranking_system_tuple_based"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-17-ranking-and-integer-partitions-ranking0-introduction",
+      "content": "# Ranking and Integer Partitions: `ranking0`\n\nThere is a curious correspondence between the seven types of poker hands that involve groups (that is, all the types except the ones for straights and flushes) and the seven **[integer partitions](https://en.wikipedia.org/wiki/Partition_(number_theory))** of the number 5 (remember, there are 5 cards in a hand).\n\nConsider this table of ranking types, where the straights and flushes are omitted:\n\n\n| Type|  Example &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|Partitions |\n|-|---|---|\n| Five of a kind |`As Ac Ah Ad Aj`| (5,) |\n| Four of a kind |`7s 7c 7d 2d 7h`|  (4, 1)|\n| Full house | `8h 9c 8d 8c 9h`|     (3, 2)|\n| Three of a kind | `Ts Tc Th 9s 7c`| (3, 1, 1)|\n| Two pair |  `Ts Tc 9s 9c 7h`|       (2, 2, 1)  |\n| One pair |  `3s 3c As Ks Qs`|          (2, 1, 1, 1)|\n| High card | `2s 4s 5s 6s 7h`|         (1, 1, 1, 1, 1)|\n\nThe types are sorted from highest to lowest, and the partitions are also sorted in lexicographic order from highest to lowest. The correspondence is that, for example, `(3, 2)` means \"three cards of one rank and two cards of another rank\", which is the definition of a full house.\n\nLet's get some preliminaries out of the way so we can start to program a solution for ranking.",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-17-ranking-and-integer-partitions-ranking0-introduction",
+        "concept_id": "integer_partitions_in_poker",
+        "confidence": 1,
+        "reasoning": "This chunk introduces the mathematical concept of integer partitions and their correspondence to poker hand types, particularly for group-based hands.",
+        "secondary_concepts": [
+          "ranking0_algorithm_group_based",
+          "poker_hand_types"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-18-ranking0-preliminaries",
+      "content": "```python\nimport random\nimport matplotlib.pyplot as plt\nfrom collections import Counter\nfrom statistics  import mean\nfrom itertools   import combinations, permutations, product\nfrom functools   import lru_cache\n```\n\n```python\n# Data Types\nCard = str              # A card is a str of length 2: '7s'\nHand = (list, tuple)    # A hand is 5 cards in either a list or a tuple\n\n# Functions and Objects\njoin    = ' '.join        # Function to join cards together into one string\ncards   = str.split       # Function to split a string apart into a list of cards\nrankstr = '23456789TJQKA' # Card ranks in ascending order\n\ndef rank(card) -> int: return rankstr.index(card[0]) + 2\ndef suit(card) -> str: return card[1]\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-18-ranking0-preliminaries",
+        "concept_id": "card_representation",
+        "confidence": 0.6,
+        "reasoning": "This chunk defines utility functions (`rank`, `suit`) that are fundamental for processing card representations, as well as general setup for the ranking algorithms."
+      }
+    },
+    {
+      "chunk_id": "chunk-19-ranking0-counter-example",
+      "content": "A `collections.Counter` does most of the work of finding  groups and thus partitions. It tells us that the following full house has three 8s and two 9s:\n\n\n```python\nhand = cards('8h 9c 8d 8c 9h')\n\nCounter(map(rank, hand))\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-19-ranking0-counter-example",
+        "concept_id": "collections_counter_for_grouping",
+        "confidence": 1,
+        "reasoning": "This chunk demonstrates the use of `collections.Counter` to effectively count card ranks for grouping in poker hands."
+      }
+    },
+    {
+      "chunk_id": "chunk-20-ranking0-counter-example-output",
+      "content": "```\nCounter({8: 3, 9: 2})\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-20-ranking0-counter-example-output",
+        "concept_id": "collections_counter_for_grouping",
+        "confidence": 0.7,
+        "reasoning": "This chunk shows the output of using `collections.Counter` for grouping card ranks, illustrating the concept directly."
+      }
+    },
+    {
+      "chunk_id": "chunk-21-ranking0-algorithm-explanation",
+      "content": "This gives us all the information we need; the problem is that it is not in the right format to compare rankings. We can't  do `counter1 < counter2` because Counters do not support comparison. But we can reformat the information into a tuple consisting of two components: \n 1. The **type** of hand, full house, which is denoted by the partition `(3, 2)`.\n 2. The **tiebreakers**: among all full houses, ties go to the highest three-of-a-kind rank, and if those are the same, then the highest pair rank. So the tiebreaker for this hand would be `(8, 9)`. (Even though 9 > 8, the 8 comes first because the three-of-a-kind is more important than the pair.)\n\nThus the complete ranking for this hand is the tuple `((3, 2), (8, 9))`. The same information as in the Counter, but in the proper order for sorting.\n\nSo (ignoring straights and flushes for now) here's how we do  `ranking`:",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-21-ranking0-algorithm-explanation",
+        "concept_id": "ranking0_algorithm_group_based",
+        "confidence": 1,
+        "reasoning": "This chunk explains the logic and desired output format for the `ranking0` algorithm, combining hand types (partitions) and tiebreakers into a sortable tuple.",
+        "secondary_concepts": [
+          "integer_partitions_in_poker",
+          "tiebreaker_logic",
+          "hand_ranking_system_tuple_based"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-22-ranking0-algorithm-definition",
+      "content": "```python\ndef ranking0(hand) -> tuple:\n    \"\"\"Return a (type, tiebreaker) tuple indicating how high the hand ranks.\"\"\"\n    counts = Counter(map(rank, hand))\n    groups = sorted(((counts[r], r) for r in counts), reverse=True)\n    return tuple(zip(*groups))\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-22-ranking0-algorithm-definition",
+        "concept_id": "ranking0_algorithm_group_based",
+        "confidence": 1,
+        "reasoning": "This chunk provides the Python code implementation for the `ranking0` algorithm, focusing on grouping card ranks.",
+        "secondary_concepts": [
+          "data_transformation_zip_star",
+          "collections_counter_for_grouping"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-23-ranking0-algorithm-step-by-step",
+      "content": "Here is the process step by step:\n\n\n```python\ncounts = Counter(map(rank, hand))\ncounts\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-23-ranking0-algorithm-step-by-step",
+        "concept_id": "collections_counter_for_grouping",
+        "confidence": 1,
+        "reasoning": "This chunk shows the initial step of the `ranking0` algorithm, specifically the use of `collections.Counter` to process card ranks."
+      }
+    },
+    {
+      "chunk_id": "chunk-24-ranking0-algorithm-step-by-step-counter-output",
+      "content": "```\nCounter({8: 3, 9: 2})\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-24-ranking0-algorithm-step-by-step-counter-output",
+        "concept_id": "collections_counter_for_grouping",
+        "confidence": 0.7,
+        "reasoning": "This chunk displays the output of the `collections.Counter` operation, which is a key part of grouping."
+      }
+    },
+    {
+      "chunk_id": "chunk-25-ranking0-algorithm-step-by-step-groups",
+      "content": "```python\ngroups = sorted(((counts[r], r) for r in counts), reverse=True)\ngroups\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-25-ranking0-algorithm-step-by-step-groups",
+        "concept_id": "ranking0_algorithm_group_based",
+        "confidence": 1,
+        "reasoning": "This chunk illustrates an intermediate step in the `ranking0` algorithm, showing how counts are sorted to form groups."
+      }
+    },
+    {
+      "chunk_id": "chunk-26-ranking0-algorithm-step-by-step-groups-output",
+      "content": "```\n[(3, 8), (2, 9)]\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-26-ranking0-algorithm-step-by-step-groups-output",
+        "concept_id": "ranking0_algorithm_group_based",
+        "confidence": 0.7,
+        "reasoning": "This chunk provides the output of the intermediate grouping step within the `ranking0` algorithm."
+      }
+    },
+    {
+      "chunk_id": "chunk-27-ranking0-algorithm-step-by-step-zip",
+      "content": "```python\ntuple(zip(*groups))\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-27-ranking0-algorithm-step-by-step-zip",
+        "concept_id": "data_transformation_zip_star",
+        "confidence": 1,
+        "reasoning": "This chunk explicitly demonstrates the `zip(*)` idiom for transposing the `groups` data, a core step in `ranking0`."
+      }
+    },
+    {
+      "chunk_id": "chunk-28-ranking0-algorithm-step-by-step-zip-output",
+      "content": "```\n((3, 2), (8, 9))\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-28-ranking0-algorithm-step-by-step-zip-output",
+        "concept_id": "data_transformation_zip_star",
+        "confidence": 0.7,
+        "reasoning": "This chunk shows the final output after applying `zip(*)` in the `ranking0` algorithm, demonstrating the data transformation."
+      }
+    },
+    {
+      "chunk_id": "chunk-29-ranking0-matrix-transpose-explanation",
+      "content": "Notice that this final result is the **matrix transpose** (switching rows and columns) of  `groups`. In Python the transpose of `m` is `zip(*m)`.",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-29-ranking0-matrix-transpose-explanation",
+        "concept_id": "data_transformation_zip_star",
+        "confidence": 1,
+        "reasoning": "This chunk explicitly defines the `zip(*m)` operation as a matrix transpose, linking it directly to the data transformation concept."
+      }
+    },
+    {
+      "chunk_id": "chunk-30-ranking0-comparison-example",
+      "content": "Below we see that the eights-over-nines full house beats a six-over-tens full house (it doesn't matter that 10 > 9; what matters is 8 > 6):\n\n\n```python\nhand2 = cards('6h 6c 6d Tc Th')\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-30-ranking0-comparison-example",
+        "concept_id": "tiebreaker_logic",
+        "confidence": 1,
+        "reasoning": "This chunk sets up an example to demonstrate how `ranking0` output is used for tiebreaker logic between two hands of the same type.",
+        "secondary_concepts": [
+          "ranking0_algorithm_group_based"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-31-ranking0-comparison-example-hand",
+      "content": "```python\nranking0(hand)\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-31-ranking0-comparison-example-hand",
+        "concept_id": "ranking0_algorithm_group_based",
+        "confidence": 1,
+        "reasoning": "This chunk shows the execution of the `ranking0` function for a sample hand."
+      }
+    },
+    {
+      "chunk_id": "chunk-32-ranking0-comparison-example-hand-output",
+      "content": "```\n((3, 2), (8, 9))\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-32-ranking0-comparison-example-hand-output",
+        "concept_id": "ranking0_algorithm_group_based",
+        "confidence": 0.7,
+        "reasoning": "This chunk provides the output tuple from the `ranking0` function for the first sample hand."
+      }
+    },
+    {
+      "chunk_id": "chunk-33-ranking0-comparison-example-hand2",
+      "content": "```python\nranking0(hand2)\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-33-ranking0-comparison-example-hand2",
+        "concept_id": "ranking0_algorithm_group_based",
+        "confidence": 1,
+        "reasoning": "This chunk shows the execution of the `ranking0` function for a second sample hand for comparison."
+      }
+    },
+    {
+      "chunk_id": "chunk-34-ranking0-comparison-example-hand2-output",
+      "content": "```\n((3, 2), (6, 10))\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-34-ranking0-comparison-example-hand2-output",
+        "concept_id": "ranking0_algorithm_group_based",
+        "confidence": 0.7,
+        "reasoning": "This chunk provides the output tuple from the `ranking0` function for the second sample hand."
+      }
+    },
+    {
+      "chunk_id": "chunk-35-ranking0-comparison-example-comparison",
+      "content": "```python\nranking0(hand) > ranking0(hand2)\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-35-ranking0-comparison-example-comparison",
+        "concept_id": "hand_ranking_system_tuple_based",
+        "confidence": 1,
+        "reasoning": "This chunk demonstrates the direct comparison of two ranking tuples, illustrating how the tuple-based system enables ranking.",
+        "secondary_concepts": [
+          "tiebreaker_logic",
+          "ranking0_algorithm_group_based"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-36-ranking0-comparison-example-comparison-output",
+      "content": "```\nTrue\n```",
+      "section": "Ranking and Integer Partitions: `ranking0`",
+      "start_line": 18,
+      "end_line": 154,
+      "concept_mapping": {
+        "chunk_id": "chunk-36-ranking0-comparison-example-comparison-output",
+        "concept_id": "hand_ranking_system_tuple_based",
+        "confidence": 0.7,
+        "reasoning": "This chunk shows the boolean result of comparing two ranking tuples, confirming the ranking logic."
+      }
+    },
+    {
+      "chunk_id": "chunk-37-ranking1-algorithm-complete-introduction",
+      "content": "It is a cute mathematical result that poker rankings correspond to the integer partitions of 5, but the correspondence does not account for straights and flushes. Still, we can salvage the approach by inventing \"type tuples\" for straight, flush, and straight flush that are not partitions but are in the correct sort order with respect to the seven actual partitions of 5. There are many possible choices; my choices, shown in **bold** below, are to look at the type one row below and add 1 to the last digit: one better than `(3, 1, 1)` is `(3, 1, 2)`; one better than `(4, 1)` is `(4, 2)`.",
+      "section": "Complete Ranking: `ranking1`",
+      "start_line": 155,
+      "end_line": 199,
+      "concept_mapping": {
+        "chunk_id": "chunk-37-ranking1-algorithm-complete-introduction",
+        "concept_id": "ranking1_algorithm_complete",
+        "confidence": 1,
+        "reasoning": "This chunk introduces the need to extend the ranking system (towards `ranking1`) to incorporate straights and flushes using 'type tuples'.",
+        "secondary_concepts": [
+          "handling_special_poker_types",
+          "hand_ranking_system_tuple_based"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-38-poker-hand-type-tuple-mapping",
+      "content": "| Type| # | Example &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|Type tuple |\n|-|--|---|---|\n| Five of a kind |9|`As Ac Ah Ad Aj`| (5,) |\n| Straight flush  |8|`As Ks Qs Ts Js`| **(4, 2)**|\n| Four of a kind |7|`7s 7c 7d 2d 7h`|  (4, 1)|\n| Full house |6| `8h 9c 8d 8c 9h`|     (3, 2)|\n| Flush |5| `8c Kc Qc Jc Tc`|  **(3, 1, 3)**        |\n| Straight |4| `Kc Qh Jd Th 9c`| **(3, 1, 2)**      |\n| Three of a kind |3| `Ts Tc Th 9s 7c`| (3, 1, 1)|\n| Two pair |2|  `Ts Tc 9s 9c 7h`|       (2, 2, 1)  |\n| One pair |1|  `3s 3c As Ks Qs`|          (2, 1, 1, 1)|\n| High card |0| `2s 4s 5s 6s 7h`|         (1, 1, 1, 1, 1)|",
+      "section": "Complete Ranking: `ranking1`",
+      "start_line": 155,
+      "end_line": 199,
+      "concept_mapping": {
+        "chunk_id": "chunk-38-poker-hand-type-tuple-mapping",
+        "concept_id": "hand_ranking_system_tuple_based",
+        "confidence": 1,
+        "reasoning": "This chunk provides a table mapping all poker hand types to their specific tuple representations used in the ranking system, including invented 'type tuples' for straights and flushes.",
+        "secondary_concepts": [
+          "poker_hand_types",
+          "integer_partitions_in_poker",
+          "handling_special_poker_types"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-39-ranking1-algorithm-implementation",
+      "content": "It is easy to code this up; the function `special_type` handles  flushes and straights, and `rankings` uses the special type or the regular type. Another complication is that in poker aces are not always high: If we have a 5-4-3-2-A hand, the ace serves as a `1` rather than a `14`; we adjust `ranks` accordingly in `rankings`. To test for a flush, we look at the collection of suits and ask if they are all `the_same`.\n\n```python\ndef ranking1(hand) -> tuple:\n    \"\"\"Return a value indicating how high the hand ranks.\"\"\"\n    counts = Counter(map(rank, hand))\n    groups = sorted(((counts[r], r) for r in counts), reverse=True)\n    type, ranks = zip(*groups)\n    if ranks == (14, 5, 4, 3, 2):\n        ranks = (5, 4, 3, 2, 1)\n    type = special_type(hand, ranks) or type\n    return (type, ranks)\n\ndef special_type(hand, ranks) -> tuple:\n    \"\"\"For a flush or straight, return a tuple comparable with `type` in `ranking`.\"\"\"\n    straight = len(ranks) == 5 and max(ranks) - min(ranks) == 4\n    flush    = the_same(map(suit, hand))\n    return ((4, 2)    if straight and flush else \n            (3, 1, 3) if flush else \n            (3, 1, 2) if straight else ())\n\ndef the_same(things) -> bool: \n    \"\"\"Are all the things actually the same?\"\"\"\n    return len(set(things)) <= 1\n```",
+      "section": "Complete Ranking: `ranking1`",
+      "start_line": 155,
+      "end_line": 199,
+      "concept_mapping": {
+        "chunk_id": "chunk-39-ranking1-algorithm-implementation",
+        "concept_id": "ranking1_algorithm_complete",
+        "confidence": 1,
+        "reasoning": "This chunk presents the full Python implementation of the `ranking1` function, integrating all logic for types, straights, flushes, and Ace-low rule.",
+        "secondary_concepts": [
+          "ace_low_straight_rule",
+          "handling_special_poker_types",
+          "collections_counter_for_grouping",
+          "hand_ranking_system_tuple_based"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-40-ranking2-algorithm-alternative-definition",
+      "content": "# Alternative Definition: `ranking2`\n\nIf you think dealing with integer partitions of 5 was a little too abstract, and/or that fabricating `(3, 1, 3)` as the type for a flush was a little too *ad hoc*, then here's an alternative ranking function, `ranking2`, that you might find more straightforward. Instead of type tuples, it uses the integers 9 to 0 for types, and then does tiebreakers in the same way as `ranking`.\n\nThe one tricky part is the use of `kinds/kind`: for a two-pair hand `8h 9c 8d 9d 4h`, `kinds` will be the list `[[], [4], [9, 8], [], [], []]`, and `kinds[2]` is `[9, 8]` (meaning: what ranks have 2 of a kind? 9 and 8, with the highest rank always first), and `kind(1)` is `4` (meaning: what rank has one of a kind? 4).",
+      "section": "Alternative Definition: `ranking2`",
+      "start_line": 290,
+      "end_line": 381,
+      "concept_mapping": {
+        "chunk_id": "chunk-40-ranking2-algorithm-alternative-definition",
+        "concept_id": "ranking2_algorithm_alternative",
+        "confidence": 1,
+        "reasoning": "This chunk introduces `ranking2` as an alternative, more concise poker hand ranking algorithm that uses integer codes for types."
+      }
+    },
+    {
+      "chunk_id": "chunk-41-ranking2-algorithm-alternative-implementation",
+      "content": "```python\ndef ranking2(hand) -> tuple:\n    \"\"\"Return a value indicating how high the hand ranks.\"\"\"\n    ranks = sorted(map(rank, hand), reverse=True)\n    if ranks == [14, 5, 4, 3, 2]:\n        ranks = [5, 4, 3, 2, 1]\n    straight = len(set(ranks)) == 5 and max(ranks) - min(ranks) == 4\n    flush    = the_same(map(suit, hand))\n    kinds    = [[] for n in range(6)]\n    kind     = lambda n: kinds[n][0]\n    for r in sorted(set(ranks), reverse=True):\n        kinds[ranks.count(r)].append(r)\n    return ((9, max(ranks))         if kinds[5] else\n            (8, max(ranks))         if straight and flush else\n            (7, kind(4), kind(1))   if kinds[4] else\n            (6, kind(3), kind(2))   if kinds[3] and kinds[2] else\n            (5, *ranks)             if flush else\n            (4, max(ranks))         if straight else\n            (3, kind(3), *kinds[1]) if kinds[3] else\n            (2, *kinds[2], kind(1)) if len(kinds[2]) == 2 else\n            (1, kind(2), *kinds[1]) if kinds[2] else\n            (0, *ranks))\n```",
+      "section": "Alternative Definition: `ranking2`",
+      "start_line": 290,
+      "end_line": 381,
+      "concept_mapping": {
+        "chunk_id": "chunk-41-ranking2-algorithm-alternative-implementation",
+        "concept_id": "ranking2_algorithm_alternative",
+        "confidence": 1,
+        "reasoning": "This chunk provides the complete Python code for the `ranking2` algorithm, demonstrating its direct comparison approach for hand types and tiebreakers.",
+        "secondary_concepts": [
+          "ace_low_straight_rule",
+          "handling_special_poker_types",
+          "tiebreaker_logic"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-42-ranking2-algorithm-alternative-testing",
+      "content": "`ranking2` passes the tests:\n\n\n```python\ntest(ranking2, hands)\n```\n\n```\n40\n```",
+      "section": "Alternative Definition: `ranking2`",
+      "start_line": 290,
+      "end_line": 381,
+      "concept_mapping": {
+        "chunk_id": "chunk-42-ranking2-algorithm-alternative-testing",
+        "concept_id": "ranking2_algorithm_alternative",
+        "confidence": 1,
+        "reasoning": "This chunk indicates that the `ranking2` algorithm has passed its tests, implying its functional correctness.",
+        "secondary_concepts": [
+          "unit_testing_for_correctness"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-43-ranking2-algorithm-alternative-rankings",
+      "content": "Here are what the `ranking2` rankings look like&mdash;a little more concise:\n\n\n```python\n{join(h): ranking2(h) for h in hands}\n```\n\n```\n{'As Ac Ah Ad Ad': (9, 14),\n 'Kh Kd Ks Kc Kh': (9, 13),\n '3h 3s 3d 3c 3c': (9, 3),\n '2s 2c 2d 2h 2h': (9, 2),\n 'As Ks Qs Ts Js': (8, 14),\n 'Kc Qc Jc Tc 9c': (8, 13),\n '6d 5d 4d 3d 2d': (8, 6),\n '5h 4h 3h 2h Ah': (8, 5),\n 'As Ac Ad Ah 2s': (7, 14, 2),\n '7s 7c 7d 2d 7h': (7, 7, 2),\n '6s 6c 6d 6h 9s': (7, 6, 9),\n 'As 5h 5c 5d 5s': (7, 5, 14),\n 'Th Tc Td 5h 5c': (6, 10, 5),\n '9h 9c 9d 8c 8h': (6, 9, 8),\n '6h 6c 6d Tc Th': (6, 6, 10),\n '5c 5d 5s As Ah': (6, 5, 14),\n 'As 2s 3s 4s 6s': (5, 14, 6, 4, 3, 2),\n 'Kc Qc Jc Tc 2c': (5, 13, 12, 11, 10, 2),\n 'Qc Jc Tc 9c 7c': (5, 12, 11, 10, 9, 7),\n '4h 5h 6h 7h 9h': (5, 9, 7, 6, 5, 4),\n 'As Kd Qc Td Jh': (4, 14),\n 'Kc Qh Jd Th 9c': (4, 13),\n '6c 5d 4h 3s 2s': (4, 6),\n 'As 2d 3c 4h 5s': (4, 5),\n 'As Ac Ad 2h 3h': (3, 14, 3, 2),\n 'Ts Tc Th 9s 8c': (3, 10, 9, 8),\n 'Ts Tc Th 9s 7c': (3, 10, 9, 7),\n '9h 9s 9d Ah Kh': (3, 9, 14, 13),\n 'Ts Tc 5s 5c 8h': (2, 10, 5, 8),\n 'Ts Tc 5s 5c 7h': (2, 10, 5, 7),\n '9s 9c 8s 8c As': (2, 9, 8, 14),\n '3s 3c 2s 2d Ah': (2, 3, 2, 14),\n 'As Ac 4c 5s 6s': (1, 14, 6, 5, 4),\n '4s 4c As Ks Qs': (1, 4, 14, 13, 12),\n '4h 4d Kh Qd Jd': (1, 4, 13, 12, 11),\n '2d 2c Ad Kd Qd': (1, 2, 14, 13, 12),\n 'Ah 3s 4s 5s 6s': (0, 14, 6, 5, 4, 3),\n 'Kh Qh Jh Th 8d': (0, 13, 12, 11, 10, 8),\n '7d 2s 4s 5s 6s': (0, 7, 6, 5, 4, 2),\n '7h 6s 5d 3s 2d': (0, 7, 6, 5, 3, 2)}\n```",
+      "section": "Alternative Definition: `ranking2`",
+      "start_line": 290,
+      "end_line": 381,
+      "concept_mapping": {
+        "chunk_id": "chunk-43-ranking2-algorithm-alternative-rankings",
+        "concept_id": "ranking2_algorithm_alternative",
+        "confidence": 1,
+        "reasoning": "This chunk showcases example outputs of the `ranking2` function, illustrating its concise integer-based ranking tuples."
+      }
+    },
+    {
+      "chunk_id": "chunk-44-timing-ranking-performance",
+      "content": "Below we see that `ranking2` is about 25% faster than `ranking1`, so use `ranking2` when speed is important.\n\n\n```python\n%timeit test(ranking1,  hands)\n%timeit test(ranking2, hands)\n```\n\n```\n24.5 ms ± 381 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)\n19.6 ms ± 432 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)\n\n```",
+      "section": "Timing",
+      "start_line": 382,
+      "end_line": 397,
+      "concept_mapping": {
+        "chunk_id": "chunk-44-timing-ranking-performance",
+        "concept_id": "ranking2_algorithm_alternative",
+        "confidence": 1,
+        "reasoning": "This chunk compares the execution performance of `ranking1` and `ranking2`, highlighting the speed advantage of the alternative `ranking2` algorithm.",
+        "secondary_concepts": [
+          "ranking1_algorithm_complete"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-45-winner-determination-introduction",
+      "content": "It is tempting to define a function `winner(hands) -> Hand` to see who wins a round, and we will do that, for convenience. But in poker if two hands are exactly the same except for suits, then they tie. So to be more precise we will also define `winners(hand)` to return a *set* of winners (which in most cases will have only one member).",
+      "section": "Winning",
+      "start_line": 398,
+      "end_line": 418,
+      "concept_mapping": {
+        "chunk_id": "chunk-45-winner-determination-introduction",
+        "concept_id": "winner_determination",
+        "confidence": 1,
+        "reasoning": "This chunk introduces the concept of determining winners from a set of hands, including handling ties."
+      }
+    },
+    {
+      "chunk_id": "chunk-46-ranking-vs-winning-explanation",
+      "content": "Note that **ranking** is the fundamental idea, and **winning** is determined by ranking. Some programmers try to answer the question of whether one hand is better than another by defining `better(hand1, hand2)`. They quickly find that it is hopelessly complex to be considering two hands at the same time, asking things like \"this hand has three of a kind; does the other hand have anything better?\"  It is much simpler to compare rankings. \n\nAlso note that using the word **ranking** rather than **scoring** is deliberate. If we were doing scoring, it would make sense to ask for an average score for a set of hands. With ranking, we can sort hands from best to worst, but it makes no sense to say a straight (type 4) and a straight flush (type 8) average out to a full house (type 6).",
+      "section": "Winning",
+      "start_line": 398,
+      "end_line": 418,
+      "concept_mapping": {
+        "chunk_id": "chunk-46-ranking-vs-winning-explanation",
+        "concept_id": "distinction_ranking_vs_scoring",
+        "confidence": 1,
+        "reasoning": "This chunk clearly differentiates between 'ranking' (ordering) and 'scoring' (quantitative value), explaining why ranking is crucial for poker logic.",
+        "secondary_concepts": [
+          "hand_ranking_system_tuple_based"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-47-winner-and-winners-functions",
+      "content": "```python\ndef winner(hands) -> Hand: \n    \"\"\"One of the winning hands (there might be others).\"\"\"\n    return max(hands, key=ranking2)\n\ndef winners(hands) -> set:\n    \"\"\"The set of hands with the best ranking.\"\"\"\n    best = max(map(ranking2, hands))\n    return {h for h in hands if ranking2(h) == best}\n```",
+      "section": "Winning",
+      "start_line": 398,
+      "end_line": 418,
+      "concept_mapping": {
+        "chunk_id": "chunk-47-winner-and-winners-functions",
+        "concept_id": "winner_determination",
+        "confidence": 1,
+        "reasoning": "This chunk provides Python functions (`winner`, `winners`) for identifying the best hand(s) based on the `ranking2` algorithm.",
+        "secondary_concepts": [
+          "ranking2_algorithm_alternative"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-48-type-names",
+      "content": "So far, the names of the types (e.g. \"full house\") have appeared only in prose, not in the code. Let's fix that. The hand type returned by `ranking2` is an integer ranging from 0 to 9 that can be used as an index into a tuple of `type_names`:\n\n\n```python\ntypes = range(10)\n\ntype_names = ('high card', 'one pair', 'two pair', 'three of a kind', 'straight',\n  'flush', 'full house', 'four of a kind', 'straight flush', 'five of a kind')\n\ndef type_name(hand) -> str: return type_names[ranking2(hand)[0]]\n```\n\n```python\n{join(h): type_name(h) for h in hands}\n```\n\n```\n{'As Ac Ah Ad Ad': 'five of a kind',\n 'Kh Kd Ks Kc Kh': 'five of a kind',\n '3h 3s 3d 3c 3c': 'five of a kind',\n '2s 2c 2d 2h 2h': 'five of a kind',\n 'As Ks Qs Ts Js': 'straight flush',\n 'Kc Qc Jc Tc 9c': 'straight flush',\n '6d 5d 4d 3d 2d': 'straight flush',\n '5h 4h 3h 2h Ah': 'straight flush',\n 'As Ac Ad Ah 2s': 'four of a kind',\n '7s 7c 7d 2d 7h': 'four of a kind',\n '6s 6c 6d 6h 9s': 'four of a kind',\n 'As 5h 5c 5d 5s': 'four of a kind',\n 'Th Tc Td 5h 5c': 'full house',\n '9h 9c 9d 8c 8h': 'full house',\n '6h 6c 6d Tc Th': 'full house',\n '5c 5d 5s As Ah': 'full house',\n 'As 2s 3s 4s 6s': 'flush',\n 'Kc Qc Jc Tc 2c': 'flush',\n 'Qc Jc Tc 9c 7c': 'flush',\n '4h 5h 6h 7h 9h': 'flush',\n 'As Kd Qc Td Jh': 'straight',\n 'Kc Qh Jd Th 9c': 'straight',\n '6c 5d 4h 3s 2s': 'straight',\n 'As 2d 3c 4h 5s': 'straight',\n 'As Ac Ad 2h 3h': 'three of a kind',\n 'Ts Tc Th 9s 8c': 'three of a kind',\n 'Ts Tc Th 9s 7c': 'three of a kind',\n '9h 9s 9d Ah Kh': 'three of a kind',\n 'Ts Tc 5s 5c 8h': 'two pair',\n 'Ts Tc 5s 5c 7h': 'two pair',\n '9s 9c 8s 8c As': 'two pair',\n '3s 3c 2s 2d Ah': 'two pair',\n 'As Ac 4c 5s 6s': 'one pair',\n '4s 4c As Ks Qs': 'one pair',\n '4h 4d Kh Qd Jd': 'one pair',\n '2d 2c Ad Kd Qd': 'one pair',\n 'Ah 3s 4s 5s 6s': 'high card',\n 'Kh Qh Jh Th 8d': 'high card',\n '7d 2s 4s 5s 6s': 'high card',\n '7h 6s 5d 3s 2d': 'high card'}\n```",
+      "section": "Type Names",
+      "start_line": 419,
+      "end_line": 479,
+      "concept_mapping": {
+        "chunk_id": "chunk-48-type-names",
+        "concept_id": "mapping_numerical_types_to_names",
+        "confidence": 1,
+        "reasoning": "This chunk defines a mapping to convert the numerical hand types returned by `ranking2` into human-readable names.",
+        "secondary_concepts": [
+          "ranking2_algorithm_alternative"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-49-poker-variants-overview",
+      "content": "# Poker Variants\n\nThere are many variants of poker. In some  variants a player makes a hand by combining face-down private cards that they hold, called **hole cards**, with face-up shared cards in the middle of the table called **community cards**. Let's look at a few variants from the point of view of card ranking. Again, we'll ignore the betting parts.",
+      "section": "Poker Variants",
+      "start_line": 480,
+      "end_line": 483,
+      "concept_mapping": {
+        "chunk_id": "chunk-49-poker-variants-overview",
+        "concept_id": "poker_hand_types",
+        "confidence": 0.4,
+        "reasoning": "This chunk provides a general overview of poker variants involving hole and community cards, which fundamentally impacts how poker hand types are formed and evaluated."
+      }
+    },
+    {
+      "chunk_id": "chunk-50-texas-hold-em-overview",
+      "content": "# Texas Hold 'Em  Poker\n\nIn Texas Hold 'Em, one of the most popular games, each player has two  hole cards, and everyone shares five community cards. A player can choose any subset of the seven cards for their hand.",
+      "section": "Texas Hold 'Em  Poker",
+      "start_line": 484,
+      "end_line": 508,
+      "concept_mapping": {
+        "chunk_id": "chunk-50-texas-hold-em-overview",
+        "concept_id": "texas_hold_em_hand_selection_logic",
+        "confidence": 1,
+        "reasoning": "This chunk describes the specific rules for forming a hand in Texas Hold 'Em, which involves selecting the best 5 cards from 7 available."
+      }
+    },
+    {
+      "chunk_id": "chunk-51-texas-hold-em-best-hand-function",
+      "content": "Finding the best hand from among the hole and community cards is straightforward: just try every combination and choose a hand with the maximum ranking (that's what the function `winner` does):\n\n\n```python\ndef texas_best(hole, community) -> Hand:\n    \"\"\"Find the best hand from any selection of 2 hole and 5 community cards.\"\"\"\n    assert len(hole) == 2 and len(community) == 5\n    return winner(combinations(hole + community, 5))\n```",
+      "section": "Texas Hold 'Em  Poker",
+      "start_line": 484,
+      "end_line": 508,
+      "concept_mapping": {
+        "chunk_id": "chunk-51-texas-hold-em-best-hand-function",
+        "concept_id": "texas_hold_em_hand_selection_logic",
+        "confidence": 1,
+        "reasoning": "This chunk provides the Python code for `texas_best`, which implements the logic for selecting the optimal 5-card hand in Texas Hold 'Em.",
+        "secondary_concepts": [
+          "winner_determination"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-52-texas-hold-em-full-house-example",
+      "content": "A player can make a full house with the following hole cards and community cards:\n\n\n```python\ntexas_best(cards('As 7d'), cards('Ac 8d 9d Ah 7c'))\n```\n\n```\n('As', '7d', 'Ac', 'Ah', '7c')\n```",
+      "section": "Texas Hold 'Em  Poker",
+      "start_line": 484,
+      "end_line": 508,
+      "concept_mapping": {
+        "chunk_id": "chunk-52-texas-hold-em-full-house-example",
+        "concept_id": "texas_hold_em_hand_selection_logic",
+        "confidence": 1,
+        "reasoning": "This chunk provides an example demonstrating the `texas_best` function in action for a specific hand scenario."
+      }
+    },
+    {
+      "chunk_id": "chunk-53-omaha-hold-em-poker-overview",
+      "content": "# Omaha Hold 'Em Poker\n\nIn Omaha Hold 'Em, players get four hole cards, and they have to use exactly two of them, plus three of the five community cards, to make their hand. Not quite as straightforward to find the best hand:",
+      "section": "Omaha Hold 'Em Poker",
+      "start_line": 509,
+      "end_line": 540,
+      "concept_mapping": {
+        "chunk_id": "chunk-53-omaha-hold-em-poker-overview",
+        "concept_id": "omaha_hold_em_hand_selection_logic",
+        "confidence": 1,
+        "reasoning": "This chunk describes the specific, more complex rules for forming a hand in Omaha Hold 'Em, requiring exact usage of hole and community cards."
+      }
+    },
+    {
+      "chunk_id": "chunk-54-omaha-best-function-definition",
+      "content": "```python\ndef omaha_best(hole, community) -> Hand:\n    \"\"\"Find the best hand using 2 of 4 hole cards and 3 of 5 community cards.\"\"\"\n    assert len(hole) == 4 and len(community) == 5\n    return winner(h2 + c3 for h2 in combinations(hole, 2) \n                          for c3 in combinations(community, 3))\n```",
+      "section": "Omaha Hold 'Em Poker",
+      "start_line": 509,
+      "end_line": 540,
+      "concept_mapping": {
+        "chunk_id": "chunk-54-omaha-best-function-definition",
+        "concept_id": "omaha_hold_em_hand_selection_logic",
+        "confidence": 1,
+        "reasoning": "This chunk provides the Python code for `omaha_best`, which implements the intricate hand selection logic for Omaha Hold 'Em.",
+        "secondary_concepts": [
+          "winner_determination"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-55-omaha-best-function-example-1",
+      "content": "```python\nomaha_best(cards('As 7d 6d 5d'), cards('Ac 8d 9d Ah 7c'))\n```\n\n```\n('As', '7d', 'Ac', 'Ah', '7c')\n```",
+      "section": "Omaha Hold 'Em Poker",
+      "start_line": 509,
+      "end_line": 540,
+      "concept_mapping": {
+        "chunk_id": "chunk-55-omaha-best-function-example-1",
+        "concept_id": "omaha_hold_em_hand_selection_logic",
+        "confidence": 1,
+        "reasoning": "This chunk provides a straightforward example demonstrating the `omaha_best` function."
+      }
+    },
+    {
+      "chunk_id": "chunk-56-omaha-best-function-example-2-royal-flush-vs-full-house",
+      "content": "In the following hand, the hole plus community cards include a royal straight flush and a fives-over-tens full house. But neither of these hands can be made because the hand must have exactly two hole cards, so we end up with three fives.\n\n\n```python\nomaha_best(cards('Ad Kd Qd 5d'), cards('Jd Td Tc 5c 5h'))\n```\n\n```\n('Ad', '5d', 'Jd', '5c', '5h')\n```",
+      "section": "Omaha Hold 'Em Poker",
+      "start_line": 509,
+      "end_line": 540,
+      "concept_mapping": {
+        "chunk_id": "chunk-56-omaha-best-function-example-2-royal-flush-vs-full-house",
+        "concept_id": "omaha_hold_em_hand_selection_logic",
+        "confidence": 1,
+        "reasoning": "This chunk illustrates a nuanced example of `omaha_best`, highlighting how the specific card selection rules can prevent formation of higher-ranking hands."
+      }
+    },
+    {
+      "chunk_id": "chunk-57-three-d-poker-definition",
+      "content": "# Three-D Poker\n\nIn this novel variant, due to Bram Cohen, there are two hole cards and 15 community cards arranged in three sets of five. Players must use their two hole cards, plus exactly one card from each of the three sets of community cards.",
+      "section": "Three-D Poker",
+      "start_line": 541,
+      "end_line": 565,
+      "concept_mapping": {
+        "chunk_id": "chunk-57-three-d-poker-definition",
+        "concept_id": "texas_hold_em_hand_selection_logic",
+        "confidence": 0.5,
+        "reasoning": "This chunk defines the hand selection rules for a novel 'Three-D Poker' variant, which is analogous to other hand selection logic concepts like Texas Hold 'Em, though not directly listed.",
+        "secondary_concepts": [
+          "poker_hand"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-58-three-d-poker-best-hand-function",
+      "content": "```python\ndef threeD_best(hole, community) -> Hand:\n    \"\"\"Find the best hand from the 2 hole cards plus 1 each from \n    the first 5, middle 5, and last 5 of the 15 community cards.\"\"\"\n    assert len(hole) == 2 and len(community) == 15\n    A, B, C = community[0:5], community[5:10], community[10:15]\n    return winner([*hole, *c3] for c3 in product(A, B, C))\n```",
+      "section": "Three-D Poker",
+      "start_line": 541,
+      "end_line": 565,
+      "concept_mapping": {
+        "chunk_id": "chunk-58-three-d-poker-best-hand-function",
+        "concept_id": "texas_hold_em_hand_selection_logic",
+        "confidence": 0.5,
+        "reasoning": "This chunk provides the Python code to implement the hand selection logic for the 'Three-D Poker' variant, similar to other hand selection algorithms.",
+        "secondary_concepts": [
+          "winner_determination"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-59-three-d-poker-example-scenario",
+      "content": "In the example below, the player has a queen hole card and there are two queen community cards, but they are in the same set, so the player could only get one of them. It turns out that it is better to give up on the idea of three queens and take two kings and a 4 instead, making two pair.",
+      "section": "Three-D Poker",
+      "start_line": 541,
+      "end_line": 565,
+      "concept_mapping": {
+        "chunk_id": "chunk-59-three-d-poker-example-scenario",
+        "concept_id": "texas_hold_em_hand_selection_logic",
+        "confidence": 0.5,
+        "reasoning": "This chunk describes a scenario demonstrating the specific hand selection strategy for the 'Three-D Poker' variant, highlighting rule-based choices."
+      }
+    },
+    {
+      "chunk_id": "chunk-60-three-d-poker-example-code",
+      "content": "```python\nthreeD_best(cards('Qh 4s'), cards('Qs Qc Kd Ts Ah    5d 4h 7s 9c 6s    5h 7c Kc Kh 9h'))\n```\n\n```\n['Qh', '4s', 'Kd', '4h', 'Kc']\n```",
+      "section": "Three-D Poker",
+      "start_line": 541,
+      "end_line": 565,
+      "concept_mapping": {
+        "chunk_id": "chunk-60-three-d-poker-example-code",
+        "concept_id": "texas_hold_em_hand_selection_logic",
+        "confidence": 0.5,
+        "reasoning": "This chunk provides an example demonstrating the `threeD_best` function for the novel poker variant."
+      }
+    },
+    {
+      "chunk_id": "chunk-61-joker-poker-introduction",
+      "content": "# Joker Poker\n\nSometimes in friendly house games, a joker or two is added to the deck. A joker can serve as any card the player wants it to be, including a card already in their hand (that's how you get five-of-a-kind).",
+      "section": "Joker Poker",
+      "start_line": 566,
+      "end_line": 599,
+      "concept_mapping": {
+        "chunk_id": "chunk-61-joker-poker-introduction",
+        "concept_id": "joker_poker_hand_evaluation",
+        "confidence": 1,
+        "reasoning": "This chunk introduces Joker Poker and the concept of wildcards (jokers) that can substitute for any card, including allowing five-of-a-kind.",
+        "secondary_concepts": [
+          "poker_hand_types"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-62-joker-poker-example-code",
+      "content": "```python\njoker  ='**'\ndeck   = [r + s for r in rankstr for s in 'cdhs'] # Regular Deck of 52 cards\ndeck54 = [joker, joker, *deck] # Deck of 54 cards including two jokers\n\ndef joker_best(hand) -> Hand:\n    \"\"\"Find the best hand by replacing any jokers with any other card.\"\"\"\n    replacements = [deck if card == joker else [card] for card in hand]\n    return winner(product(*replacements))\n```",
+      "section": "Joker Poker",
+      "start_line": 566,
+      "end_line": 599,
+      "concept_mapping": {
+        "chunk_id": "chunk-62-joker-poker-example-code",
+        "concept_id": "joker_poker_hand_evaluation",
+        "confidence": 1,
+        "reasoning": "This chunk provides the Python code for `joker_best`, which implements the algorithm for evaluating hands with jokers by considering all possible replacements.",
+        "secondary_concepts": [
+          "winner_determination"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-63-joker-poker-example-1",
+      "content": "```python\njoker_best(cards('8d ** 7d 6d 8s')) # One Joker used to make three of a kind\n```",
+      "section": "Joker Poker",
+      "start_line": 566,
+      "end_line": 599,
+      "concept_mapping": {
+        "chunk_id": "chunk-63-joker-poker-example-1",
+        "concept_id": "joker_poker_hand_evaluation",
+        "confidence": 1,
+        "reasoning": "This chunk shows an example of `joker_best` using one joker to form a specific hand (three of a kind)."
+      }
+    },
+    {
+      "chunk_id": "chunk-64-joker-poker-example-1-output",
+      "content": "```\n('8d', '8c', '7d', '6d', '8s')\n```",
+      "section": "Joker Poker",
+      "start_line": 566,
+      "end_line": 599,
+      "concept_mapping": {
+        "chunk_id": "chunk-64-joker-poker-example-1-output",
+        "concept_id": "joker_poker_hand_evaluation",
+        "confidence": 0.7,
+        "reasoning": "This chunk displays the output of the `joker_best` function for the first example."
+      }
+    },
+    {
+      "chunk_id": "chunk-65-joker-poker-example-2",
+      "content": "```python\njoker_best(cards('8d ** 7d 6d **')) # Two Jokers used to make a straight flush\n```",
+      "section": "Joker Poker",
+      "start_line": 566,
+      "end_line": 599,
+      "concept_mapping": {
+        "chunk_id": "chunk-65-joker-poker-example-2",
+        "concept_id": "joker_poker_hand_evaluation",
+        "confidence": 1,
+        "reasoning": "This chunk shows an example of `joker_best` using two jokers to form a high-ranking hand (a straight flush)."
+      }
+    },
+    {
+      "chunk_id": "chunk-66-joker-poker-example-2-output",
+      "content": "```\n('8d', '9d', '7d', '6d', 'Td')\n```",
+      "section": "Joker Poker",
+      "start_line": 566,
+      "end_line": 599,
+      "concept_mapping": {
+        "chunk_id": "chunk-66-joker-poker-example-2-output",
+        "concept_id": "joker_poker_hand_evaluation",
+        "confidence": 0.7,
+        "reasoning": "This chunk displays the output of the `joker_best` function for the second example."
+      }
+    },
+    {
+      "chunk_id": "chunk-67-joker-poker-summary",
+      "content": "All the poker variants we have seen so far, even joker poker, were solved by finding a hand with maximum ranking out of all the possible hands that could be made with community cards or jokers. There was always a clear-cut way to do this, and one definitive best hand. Next we will see a variant where that is no longer true.",
+      "section": "Joker Poker",
+      "start_line": 566,
+      "end_line": 599,
+      "concept_mapping": {
+        "chunk_id": "chunk-67-joker-poker-summary",
+        "concept_id": "joker_poker_hand_evaluation",
+        "confidence": 0.6,
+        "reasoning": "This chunk summarizes the approach taken for joker poker and other variants, serving as a transition to a different problem type.",
+        "secondary_concepts": [
+          "winner_determination"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-68-draw-poker-introduction",
+      "content": "# Draw Poker\n\nIn draw poker players are given the option to **discard** one or more card(s) and **replace** them with new one(s) drawn from the deck. But unlike in joker poker where you get to choose the replacement, in draw poker you're at the mercy of the luck of the draw.",
+      "section": "Draw Poker",
+      "start_line": 600,
+      "end_line": 607,
+      "concept_mapping": {
+        "chunk_id": "chunk-68-draw-poker-introduction",
+        "concept_id": "draw_poker_optimal_discard_strategy",
+        "confidence": 1,
+        "reasoning": "This chunk introduces Draw Poker, setting the stage for developing a discard strategy."
+      }
+    },
+    {
+      "chunk_id": "chunk-69-draw-poker-strategy-introduction",
+      "content": "In draw poker there is no **best hand** that you can make with certainty; instead we need to find the **best action** (which card to discard), with the understanding that the action will sometimes work (we hit that straight) and sometimes not. The best action is determined by the best **average** over all possible outcomes of the action (i.e. all possible draws of cards).",
+      "section": "Draw Poker",
+      "start_line": 600,
+      "end_line": 607,
+      "concept_mapping": {
+        "chunk_id": "chunk-69-draw-poker-strategy-introduction",
+        "concept_id": "draw_poker_optimal_discard_strategy",
+        "confidence": 1,
+        "reasoning": "This chunk explains the fundamental shift in Draw Poker: finding the 'best action' (discard) by maximizing the average outcome, rather than a definitive 'best hand'."
+      }
+    },
+    {
+      "chunk_id": "chunk-70-draw-poker-hand-improvement-value",
+      "content": "We could try to find the action that maximizes the average type number of the resulting hands. But that's not quite right: there's a big advantage in going from type 1 (one pair) to type 3 (three of a kind), because that very often makes the difference between losing and winning. There is less of an advantage in going from type 7 (four of a kind) to type 9 (five of a kind) because the four of a kind will win most of the time anyway.",
+      "section": "Draw Poker",
+      "start_line": 600,
+      "end_line": 607,
+      "concept_mapping": {
+        "chunk_id": "chunk-70-draw-poker-hand-improvement-value",
+        "concept_id": "draw_poker_optimal_discard_strategy",
+        "confidence": 1,
+        "reasoning": "This chunk refines the objective for draw poker strategy, explaining why simply maximizing hand 'type number' is insufficient and leading towards maximizing win probability.",
+        "secondary_concepts": [
+          "expected_probability_of_winning"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-71-win-probability-overview",
+      "content": "# Win Probability\n\nWhat we really want to do is **maximize the expected probability of winning**.  The probability of winning depends on many things: the number of other players, the community cards if any, the other rules of the game (e.g. are draws or jokers allowed), the skill of the other players, the hints that the other players have given about their cards through their bets and physical tells, etc.\n\nWe'll simplify by ignoring most of these factors.  We'll assume **heads up** poker, in which there are only two players. A hand's probability of winning is proportional to the percentage of hands that it is better than, out of all hands. Wikipedia [says](https://en.wikipedia.org/wiki/Poker_probability)  that 50.1% of all hands are \"high card\", so we might say that a \"high card\" hand has a 50.1% probability of winning. But that can't be the full story, because an ace high card has a much better chance of winning than a 7 high card. So we'll estimate that the probability of a hand winning is a linear interpolation, based on the value of the high card in the hand, between the cumulative probability of the hand's type and the cumulative probability of one type lower. (This assumption is wrong, again, because the relationship is not exactly linear (e.g. the lowest possible high card for type 0 is actually a 7, because otherwise the hand would be a straight) and because non-high cards also come into play, but maybe it is a close enough approximation.) I'll use Wikipedia's [Frequency of 5-card poker hands](https://en.wikipedia.org/wiki/Poker_probability) to define `deal_win_P`, the cummulative probabilities keyed by hand type numbers:",
+      "section": "Win Probability",
+      "start_line": 608,
+      "end_line": 750,
+      "concept_mapping": {
+        "chunk_id": "chunk-71-win-probability-overview",
+        "concept_id": "expected_probability_of_winning",
+        "confidence": 1,
+        "reasoning": "This chunk introduces and defines the concept of maximizing the expected probability of winning in poker, including simplifying assumptions and how it relates to cumulative hand probabilities.",
+        "secondary_concepts": [
+          "probability_concepts_cumulative_distribution"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-72-deal_win_p-definition-and-example",
+      "content": "```python\ndef cumsum(numbers, normalize=True) -> list:\n    \"\"\"cumsum(numbers)[i] gives the cumulative sum of the first n numbers, \n    optionally normalized to sum to 1.\"\"\"\n    denom = sum(numbers) if normalize else 1\n    return [sum(numbers[:n]) / denom for n in range(len(numbers) + 1)]\n\ndeal_win_P = cumsum([1302540, 1098240, 123552, 54912, 10200, 5108, 3744, 624, 40, 0])\n```",
+      "section": "Win Probability",
+      "start_line": 608,
+      "end_line": 750,
+      "concept_mapping": {
+        "chunk_id": "chunk-72-deal_win_p-definition-and-example",
+        "concept_id": "probability_concepts_cumulative_distribution",
+        "confidence": 1,
+        "reasoning": "This chunk defines the `cumsum` function and uses it to construct `deal_win_P`, a cumulative probability distribution for poker hand types.",
+        "secondary_concepts": [
+          "expected_probability_of_winning"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-73-deal_win_p-example-output",
+      "content": "```python\ndeal_win_P \n```\n\n```\n[0.0,\n 0.5011773940345369,\n 0.9237464216455813,\n 0.9712854372518238,\n 0.992413888632376,\n 0.9963385354141656,\n 0.9983039369593991,\n 0.9997445131898913,\n 0.9999846092283067,\n 1.0,\n 1.0]\n```\n\nThis says that 50.1% of all random hands have the type \"high card\", 92.3% are \"high card\" or \"one pair\", 97.1% are \"two pair\" or worse, and so on. With this I can define `win_probability`:",
+      "section": "Win Probability",
+      "start_line": 608,
+      "end_line": 750,
+      "concept_mapping": {
+        "chunk_id": "chunk-73-deal_win_p-example-output",
+        "concept_id": "probability_concepts_cumulative_distribution",
+        "confidence": 1,
+        "reasoning": "This chunk displays and interprets the numerical output of the cumulative probability distribution for poker hand types."
+      }
+    },
+    {
+      "chunk_id": "chunk-74-win_probability-function-definition",
+      "content": "```python\ndef win_probability(hand, P=deal_win_P) -> float:\n    \"\"\"Approximate win probability for a hand, given a list, P, of win probabilities for types.\"\"\"\n    type, hi, *_ =  ranking2(hand)\n    return P[type] + (hi - 1) / 13 * (P[type + 1] - P[type])\n```",
+      "section": "Win Probability",
+      "start_line": 608,
+      "end_line": 750,
+      "concept_mapping": {
+        "chunk_id": "chunk-74-win_probability-function-definition",
+        "concept_id": "expected_probability_of_winning",
+        "confidence": 1,
+        "reasoning": "This chunk provides the Python function `win_probability` which approximates a hand's winning chance using the cumulative probability distribution and hand details.",
+        "secondary_concepts": [
+          "probability_concepts_cumulative_distribution",
+          "ranking2_algorithm_alternative"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-75-win_probability-example-usage",
+      "content": "Here are win probabilities for all the test hands, expressed in percents. The `deal_win_P` probabilities assume no wild cards, and thus no five-of-a-kind; therefore an ace-high straight flush (royal straight flush) is the highest possible hand, and gets a 100% win probability.\n\n```python\nfor h in hands:\n    print(f'{join(h)}  {win_probability(h):10.5%}  {type_name(h)}')\n```\n\n```\nAs Ac Ah Ad  100.00000%  five of a kind\nKh Kd Ks Kc Kh  100.00000%  five of a kind\n3h 3s 3d 3c 3c  100.00000%  five of a kind\n2s 2c 2d 2h 2h  100.00000%  five of a kind\nAs Ks Qs Ts Js  100.00000%  straight flush\nKc Qc Jc Tc 9c   99.99988%  straight flush\n6d 5d 4d 3d 2d   99.99905%  straight flush\n5h 4h 3h 2h Ah   99.99893%  straight flush\nAs Ac Ad Ah 2s   99.99846%  four of a kind\n7s 7c 7d 2d 7h   99.98553%  four of a kind\n6s 6c 6d 6h 9s   99.98369%  four of a kind\nAs 5h 5c 5d 5s   99.98184%  four of a kind\nTh Tc Td 5h 5c   99.93013%  full house\n9h 9c 9d 8c 8h   99.91904%  full house\n6h 6c 6d Tc Th   99.88580%  full house\n5c 5d 5s As Ah   99.87472%  full house\nAs 2s 3s 4s 6s   99.83039%  flush\nKc Qc Jc Tc 2c   99.81528%  flush\nQc Jc Tc 9c 7c   99.80016%  flush\n4h 5h 6h 7h 9h   99.75480%  flush\nAs Kd Qc Td Jh   99.63385%  straight\nKc Qh Jd Th 9c   99.60366%  straight\n6c 5d 4h 3s 2s   99.39234%  straight\nAs 2d 3c 4h 5s   99.36215%  straight\nAs Ac Ad 2h 3h   99.24139%  three of a kind\nTs Tc Th 9s 8c   98.59128%  three of a kind\nTs Tc Th 9s 7c   98.59128%  three of a kind\n9h 9s 9d Ah Kh   98.42876%  three of a kind\nTs Tc 5s 5c 8h   95.66580%  two pair\nTs Tc 5s 5c 7h   95.66580%  two pair\n9s 9c 8s 8c As   95.30012%  two pair\n3s 3c 2s 2d Ah   93.10601%  two pair\nAs Ac 4c 5s 6s   92.37464%  one pair\n4s 4c As Ks Qs   59.86933%  one pair\n4h 4d Kh Qd Jd   59.86933%  one pair\n2d 2c Ad Kd Qd   53.36827%  one pair\nAh 3s 4s 5s 6s   50.11774%  high card\nKh Qh Jh Th 8d   46.26253%  high card\n7d 2s 4s 5s 6s   23.13126%  high card\n7h 6s 5d 3s 2d   23.13126%  high card\n```",
+      "section": "Win Probability",
+      "start_line": 608,
+      "end_line": 750,
+      "concept_mapping": {
+        "chunk_id": "chunk-75-win_probability-example-usage",
+        "concept_id": "expected_probability_of_winning",
+        "confidence": 1,
+        "reasoning": "This chunk demonstrates the usage of the `win_probability` function with various hands and displays their calculated winning percentages.",
+        "secondary_concepts": [
+          "mapping_numerical_types_to_names"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-76-win_probability-limitations-and-draw-poker",
+      "content": "Do you really expect to win 50% of the time with a high card ace, or 60% of the time with a pair of fours? Not in a game with community cards, or draws, or jokers, or more than two players. But if we're asking \"*two players just got dealt five cards each; what's the probability that my five cards are better than the others?*\" then these numbers are approximately right. If we were playing a different game, we would pass in a different probability list `P` to `win_probability`.\n\nNow we can \"solve\" draw poker. In our simplified variant players are allowed to replace one card only. (It is possible that `nocard` is the best action, e.g. if you already have a full house, straight, or flush.) `draw_best_action` returns the action that maximizes the expected value of the resulting hand. That is, it finds the card that, when discarded, maximizes the expected (mean) win probability over all possible replacement cards. It is traditional to use `E` for expected value.",
+      "section": "Win Probability",
+      "start_line": 608,
+      "end_line": 750,
+      "concept_mapping": {
+        "chunk_id": "chunk-76-win_probability-limitations-and-draw-poker",
+        "concept_id": "draw_poker_optimal_discard_strategy",
+        "confidence": 1,
+        "reasoning": "This chunk transitions back to Draw Poker, explaining how to 'solve' it by maximizing the expected win probability through optimal discard actions.",
+        "secondary_concepts": [
+          "expected_probability_of_winning"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-77-draw_best_action-and-helper-functions",
+      "content": "```python\ndef draw_best_action(hand, P=deal_win_P) -> Card:\n    \"\"\"What card should you discard (or None) from this hand?\"\"\"\n    def E(c): return mean(win_probability(h, P) for h in discard_outcomes(c, hand))\n    return max([nocard, *hand], key=E)\n\ndef discard_outcomes(card, hand) -> list:\n    \"\"\"All the hands that result from replacing `card` in `hand` with a new card from the `deck`.\"\"\"\n    return ([hand] if not card else\n            [replace(card, new, hand)\n             for new in deck if new not in hand])\n\ndef replace(old, new, alist) -> list:\n    \"\"\"Replace old with new in alist.\"\"\"\n    return [new if c == old else c for c in alist]\n\nnocard = ''\n```",
+      "section": "Win Probability",
+      "start_line": 608,
+      "end_line": 750,
+      "concept_mapping": {
+        "chunk_id": "chunk-77-draw_best_action-and-helper-functions",
+        "concept_id": "draw_poker_optimal_discard_strategy",
+        "confidence": 1,
+        "reasoning": "This chunk provides the Python code for `draw_best_action` and its helpers, implementing the logic to determine the optimal card to discard in Draw Poker.",
+        "secondary_concepts": [
+          "expected_probability_of_winning",
+          "simulation_for_probability_estimation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-78-draw_best_action-example-usage",
+      "content": "```python\ndraw_best_action(cards('2d 7d 4d 9d As'))\n```\n\n```\n'2d'\n```\n\nThis says that with the given hand the best action is to discard the low card, the 2 of diamonds. Drawing a new card could give us a pair of 4s, 7s, 9s, or aces, or it could leave us with only an ace high. \n\n```python\ndraw_best_action(cards('2d 3d 4d Kc As'))\n```\n\n```\n'Kc'\n```\n\nThis time the best action is to discard the King, even though it is a high card, to try for the straight.",
+      "section": "Win Probability",
+      "start_line": 608,
+      "end_line": 750,
+      "concept_mapping": {
+        "chunk_id": "chunk-78-draw_best_action-example-usage",
+        "concept_id": "draw_poker_optimal_discard_strategy",
+        "confidence": 1,
+        "reasoning": "This chunk provides examples of the `draw_best_action` function, demonstrating how it advises discarding different cards based on hand context for optimal play."
+      }
+    },
+    {
+      "chunk_id": "chunk-79-gathering-statistics-for-type-probabilities",
+      "content": "# Gathering Statistics for Type Probabilities\n\nI would like to gather some hand-type probabilities for different game variants. When we are just dealing five cards, it is easy enough to use combinatorics to compute exactly the proportion of hands of each type, as [Wikipedia's does](https://en.wikipedia.org/wiki/Poker_probability). But with complex games involving drawing from the deck or choosing community cards it can be easier to estimate probabilities by doing a simulation.",
+      "section": "Gathering Statistics for Type Probabilities",
+      "start_line": 751,
+      "end_line": 846,
+      "concept_mapping": {
+        "chunk_id": "chunk-79-gathering-statistics-for-type-probabilities",
+        "concept_id": "simulation_for_probability_estimation",
+        "confidence": 1,
+        "reasoning": "This chunk introduces the idea of using computer simulations to estimate poker hand type probabilities for complex game variants."
+      }
+    },
+    {
+      "chunk_id": "chunk-80-handmaker-abstraction-definition",
+      "content": "I'll use the notion of a **handmaker**: a function of zero arguments (except maybe optional parameters) that when called returns a random hand, according to the best possible strategy. So `texas_handmaker` deals seven cards, uses `split` to split them into 2 hole cards and 5 community cards, and then determines the best hand that can be made from those cards with `texas_best`. The other handmaker functions do likewise. The `draw_handmaker` samples 5 cards, decides what the optimal action is, and then draws a random card to replace the discard.",
+      "section": "Gathering Statistics for Type Probabilities",
+      "start_line": 751,
+      "end_line": 846,
+      "concept_mapping": {
+        "chunk_id": "chunk-80-handmaker-abstraction-definition",
+        "concept_id": "handmaker_abstraction",
+        "confidence": 1,
+        "reasoning": "This chunk defines the 'handmaker' abstraction: a function that generates a random 'best possible' hand according to specific poker variant rules, serving as input for simulations.",
+        "secondary_concepts": [
+          "simulation_for_probability_estimation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-81-handmaker-function-examples",
+      "content": "```python\ndef deal_handmaker()   -> Hand: return deal(5)\ndef texas_handmaker()  -> Hand: return texas_best(*deal(2, 5))\ndef omaha_handmaker()  -> Hand: return omaha_best(*deal(4, 5))\ndef joker_handmaker()  -> Hand: return joker_best(deal(5, deck=deck54))\ndef threeD_handmaker() -> Hand: return threeD_best(*deal(2, 15))\n\ndef draw_handmaker(P=deal_win_P) -> Hand:\n    hand = deal(5)\n    discard = draw_best_action(hand, P)\n    return replace(discard, draw_card(deck, butnot=hand), hand)\n\nhandmakers = (deal_handmaker, draw_handmaker, joker_handmaker, \n              texas_handmaker, omaha_handmaker, threeD_handmaker)\n```",
+      "section": "Gathering Statistics for Type Probabilities",
+      "start_line": 751,
+      "end_line": 846,
+      "concept_mapping": {
+        "chunk_id": "chunk-81-handmaker-function-examples",
+        "concept_id": "handmaker_abstraction",
+        "confidence": 1,
+        "reasoning": "This chunk provides concrete Python implementations of various `handmaker` functions for different poker variants, illustrating the abstraction.",
+        "secondary_concepts": [
+          "texas_hold_em_hand_selection_logic",
+          "omaha_hold_em_hand_selection_logic",
+          "joker_poker_hand_evaluation",
+          "draw_poker_optimal_discard_strategy"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-82-deal-and-draw-card-functions",
+      "content": "```python\ndef deal(hole, community=0, deck=deck): \n    cards = random.sample(deck, hole + community)\n    return cards if not community else (cards[:hole], cards[hole:])\n\ndef draw_card(deck, butnot=()) -> Card:\n    \"\"\"Randomly draw a card from deck, but make sure it is not in `butnot`.\"\"\"\n    while True:\n        card = random.choice(deck)\n        if card not in butnot:\n            return card\n```",
+      "section": "Gathering Statistics for Type Probabilities",
+      "start_line": 751,
+      "end_line": 846,
+      "concept_mapping": {
+        "chunk_id": "chunk-82-deal-and-draw-card-functions",
+        "concept_id": "simulation_for_probability_estimation",
+        "confidence": 0.6,
+        "reasoning": "This chunk provides helper functions (`deal`, `draw_card`) essential for setting up and running poker simulations by generating and drawing cards.",
+        "secondary_concepts": [
+          "handmaker_abstraction"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-83-estimated-type-frequency-function",
+      "content": "Now we're ready to run a simulation. The function `estimated_type_frequency` runs a handmaker repeatedly and returns a counter of frequencies for hand types. We use a `lru_cache` decorator so that we don't wait a long time if we repeat a calculation in a cell farther down in the notebook.\n\n\n```python\n@lru_cache(None)\ndef estimated_type_frequency(handmaker, n) -> Counter:\n    \"\"\"A counter of hand type names for n hands made by handmaker.\"\"\"\n    return Counter(type_name(handmaker()) for _ in range(n))\n```",
+      "section": "Gathering Statistics for Type Probabilities",
+      "start_line": 751,
+      "end_line": 846,
+      "concept_mapping": {
+        "chunk_id": "chunk-83-estimated-type-frequency-function",
+        "concept_id": "simulation_for_probability_estimation",
+        "confidence": 1,
+        "reasoning": "This chunk defines `estimated_type_frequency`, the core function for running simulations to estimate hand type frequencies using handmakers.",
+        "secondary_concepts": [
+          "handmaker_abstraction"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-84-estimated-type-frequency-example",
+      "content": "```python\nestimated_type_frequency(deal_handmaker, 1000)\n```",
+      "section": "Gathering Statistics for Type Probabilities",
+      "start_line": 751,
+      "end_line": 846,
+      "concept_mapping": {
+        "chunk_id": "chunk-84-estimated-type-frequency-example",
+        "concept_id": "simulation_for_probability_estimation",
+        "confidence": 1,
+        "reasoning": "This chunk shows an example of executing the `estimated_type_frequency` function to perform a simulation."
+      }
+    },
+    {
+      "chunk_id": "chunk-85-estimated-type-frequency-output",
+      "content": "```\nCounter({'high card': 508,\n         'one pair': 421,\n         'flush': 2,\n         'two pair': 44,\n         'full house': 3,\n         'three of a kind': 18,\n         'straight': 3,\n         'four of a kind': 1})\n```",
+      "section": "Gathering Statistics for Type Probabilities",
+      "start_line": 751,
+      "end_line": 846,
+      "concept_mapping": {
+        "chunk_id": "chunk-85-estimated-type-frequency-output",
+        "concept_id": "simulation_for_probability_estimation",
+        "confidence": 0.7,
+        "reasoning": "This chunk displays the output of the `estimated_type_frequency` simulation, showing the computed hand type frequencies."
+      }
+    },
+    {
+      "chunk_id": "chunk-86-stats-function-definition",
+      "content": "```python\ndef stats(handmakers, n=10**5):\n    \"\"\"Print hand type probability statistics for each handmaker.\"\"\"\n    samples = [estimated_type_frequency(h, n) for h in handmakers]\n    def name(h): return h.__name__.split('_')[0]\n    print(f'{\"Type of Hand\":15}  {join(f\"{name(h):>8s}\" for h in handmakers)}')\n    print(f'{\"-\"*15}  {join(\"-\"*8 for h in handmakers)}')\n    for t in reversed(type_names):\n        print(f'{t:15} ', join(f'{s[t]/n:8.4%}' for s in samples))\n```",
+      "section": "Gathering Statistics for Type Probabilities",
+      "start_line": 751,
+      "end_line": 846,
+      "concept_mapping": {
+        "chunk_id": "chunk-86-stats-function-definition",
+        "concept_id": "simulation_for_probability_estimation",
+        "confidence": 1,
+        "reasoning": "This chunk defines the `stats` function, designed to format and print the results of multiple poker simulations for comparative analysis.",
+        "secondary_concepts": [
+          "handmaker_abstraction",
+          "mapping_numerical_types_to_names"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-87-stats-function-execution-and-output",
+      "content": "```python\n%time stats(handmakers)\n```",
+      "section": "Gathering Statistics for Type Probabilities",
+      "start_line": 751,
+      "end_line": 846,
+      "concept_mapping": {
+        "chunk_id": "chunk-87-stats-function-execution-and-output",
+        "concept_id": "simulation_for_probability_estimation",
+        "confidence": 1,
+        "reasoning": "This chunk shows the execution of the `stats` function, triggering the simulations and their analysis."
+      }
+    },
+    {
+      "chunk_id": "chunk-88-stats-function-output",
+      "content": "```\nType of Hand         deal     draw    joker    texas    omaha   threeD\n---------------  -------- -------- -------- -------- -------- --------\nfive of a kind    0.0000%  0.0000%  0.0070%  0.0000%  0.0000%  0.0000%\nstraight flush    0.0000%  0.0050%  0.0190%  0.0410%  0.0990%  0.1790%\nfour of a kind    0.0300%  0.0600%  0.2840%  0.1930%  0.4540%  1.5450%\nfull house        0.1490%  0.6540%  0.3300%  2.5750%  6.3800%  9.7730%\nflush             0.1970%  0.7830%  0.3230%  2.9890%  6.7390%  7.5840%\nstraight          0.3980%  1.2720%  1.0650%  4.5740% 11.2920% 18.6330%\nthree of a kind   2.1880%  3.7060%  7.4280%  4.8560%  8.8300% 25.9350%\ntwo pair          4.7220%  9.6350%  3.8690% 23.6260% 36.7720% 28.3140%\none pair         42.1940% 48.0430% 45.5100% 43.8630% 26.4810%  8.0260%\nhigh card        50.1220% 35.8420% 41.1650% 17.2830%  2.9530%  0.0110%\nCPU times: user 4min 25s, sys: 161 ms, total: 4min 25s\nWall time: 4min 25s\n```",
+      "section": "Gathering Statistics for Type Probabilities",
+      "start_line": 751,
+      "end_line": 846,
+      "concept_mapping": {
+        "chunk_id": "chunk-88-stats-function-output",
+        "concept_id": "simulation_for_probability_estimation",
+        "confidence": 1,
+        "reasoning": "This chunk presents the tabulated results of the poker simulations for various variants, showing estimated hand type probabilities.",
+        "secondary_concepts": [
+          "poker_hand_types",
+          "texas_hold_em_hand_selection_logic",
+          "omaha_hold_em_hand_selection_logic",
+          "joker_poker_hand_evaluation",
+          "draw_poker_optimal_discard_strategy"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-89-analysis-of-simulation-results",
+      "content": "The `deal` column shows good agreement with the [known poker probabilities](https://en.wikipedia.org/wiki/Poker_probability). The other columns show that hands get better as we allow more options in the game, with Omaha yielding much higher hands than Texas, but Three-D yielding the highest hands of all. There is an inversion in Omaha where straights are more probable than three of a kind. It appears that is because many of the three-of-a-kinds become full houses (which are just three-of-a-kinds where the other two cards happen to match). In Three-D, there is an inversion in that full houses are more probable than flushes; perhaps a flush should beat a full house in that game.",
+      "section": "Gathering Statistics for Type Probabilities",
+      "start_line": 751,
+      "end_line": 846,
+      "concept_mapping": {
+        "chunk_id": "chunk-89-analysis-of-simulation-results",
+        "concept_id": "simulation_for_probability_estimation",
+        "confidence": 1,
+        "reasoning": "This chunk analyzes the results obtained from the simulations, discussing observations about hand probabilities in different variants.",
+        "secondary_concepts": [
+          "poker_hand_types"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-90-draw-poker-revisited-introduction",
+      "content": "# Draw Poker Revisited\n\nNow that we have seen the stats for what types of hands we can achieve in draw poker by following `draw_best_action`, it makes sense that we modify the best actions! That is, `draw_best_action` assumed that \"high card\" wins about 50% of the time. But we see in the `draw` column of the stats chart that if players use their draw card properly, a high card will only win about 35% of hands. That should change our actions, making us more willing to take risks to get a pair or higher.",
+      "section": "Draw Poker Revisited",
+      "start_line": 847,
+      "end_line": 985,
+      "concept_mapping": {
+        "chunk_id": "chunk-90-draw-poker-revisited-introduction",
+        "concept_id": "iterative_refinement_of_strategy",
+        "confidence": 1,
+        "reasoning": "This chunk introduces the idea of refining draw poker strategy by updating optimal actions based on the insights gained from simulation results."
+      }
+    },
+    {
+      "chunk_id": "chunk-91-draw-poker-cumulative-winning-percentages",
+      "content": "The new cumulative winning percentages for draw poker, assuming players will chose the best action for their draw, can be computed as follows:\n\n\n```python\nf = estimated_type_frequency(draw_handmaker, 10**5)\ndraw_win_P = cumsum([f[type_names[type]] for type in types])\ndraw_win_P\n```\n\n```\n[0.0,\n 0.35842,\n 0.83885,\n 0.9352,\n 0.97226,\n 0.98498,\n 0.99281,\n 0.99935,\n 0.99995,\n 1.0,\n 1.0]\n```",
+      "section": "Draw Poker Revisited",
+      "start_line": 847,
+      "end_line": 985,
+      "concept_mapping": {
+        "chunk_id": "chunk-91-draw-poker-cumulative-winning-percentages",
+        "concept_id": "iterative_refinement_of_strategy",
+        "confidence": 1,
+        "reasoning": "This chunk calculates new cumulative winning percentages for draw poker based on updated frequencies from simulations, central to strategy refinement.",
+        "secondary_concepts": [
+          "probability_concepts_cumulative_distribution",
+          "simulation_for_probability_estimation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-92-comparing-discard-strategies",
+      "content": "Now let's consider the following hand under both sets of probabilities:\n\n\n```python\nhand = cards('4s Qc 6d 7s 8c')\n\ndraw_best_action(hand, P=deal_win_P)\n```\n\n```\n'4s'\n```\n\nUnder the  old `deal_win_P` probabilities, the best play is the safe play: discard the low card. We'll end up with either a pair or at least a queen high.\n\nBut under the new `draw_win_P` probabilities, the best action has changed:\n\n\n```python\ndraw_best_action(hand, P=draw_win_P)\n```\n\n```\n'Qc'\n```\n\nThis is a risky play: we give up our high card, so our hand could get worse. But there's a 4/47 chance of greatly improving the hand by hitting the inside straight; the same 16/47 chance of getting a pair of some kind (but not a pair of queens), and a 11/47 chance of getting a high card of queen or better. The difference in actions is because under `draw_win_P`, a queen high is much less likely to win, so it is worth sacrificing the queen for a chance at a straight.",
+      "section": "Draw Poker Revisited",
+      "start_line": 847,
+      "end_line": 985,
+      "concept_mapping": {
+        "chunk_id": "chunk-92-comparing-discard-strategies",
+        "concept_id": "iterative_refinement_of_strategy",
+        "confidence": 1,
+        "reasoning": "This chunk demonstrates how the optimal discard strategy changes when using refined win probabilities, illustrating the impact of iterative strategy improvement.",
+        "secondary_concepts": [
+          "draw_poker_optimal_discard_strategy",
+          "expected_probability_of_winning"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-93-new-handmaker-and-stats-chart",
+      "content": "Now I will define a new handmaker that uses these probabilities, and I will regenerate the stats chart (note that the `@lru_cache` dedcorator on `estimated_type_frequency` means that I won't have to wait another five minutes).\n\n\n```python\ndef draw2_handmaker() -> Hand: return draw_handmaker(P=draw_win_P)\n\nstats((draw2_handmaker, *handmakers))\n```\n\n```\nType of Hand        draw2     deal     draw    joker    texas    omaha   threeD\n---------------  -------- -------- -------- -------- -------- -------- --------\nfive of a kind    0.0000%  0.0000%  0.0000%  0.0070%  0.0000%  0.0000%  0.0000%\nstraight flush    0.0050%  0.0000%  0.0050%  0.0190%  0.0410%  0.0990%  0.1790%\nfour of a kind    0.0770%  0.0300%  0.0600%  0.2840%  0.1930%  0.4540%  1.5450%\nfull house        0.7080%  0.1490%  0.6540%  0.3300%  2.5750%  6.3800%  9.7730%\nflush             0.7820%  0.1970%  0.7830%  0.3230%  2.9890%  6.7390%  7.5840%\nstraight          1.3670%  0.3980%  1.2720%  1.0650%  4.5740% 11.2920% 18.6330%\nthree of a kind   3.6240%  2.1880%  3.7060%  7.4280%  4.8560%  8.8300% 25.9350%\ntwo pair          9.5970%  4.7220%  9.6350%  3.8690% 23.6260% 36.7720% 28.3140%\none pair         47.9090% 42.1940% 48.0430% 45.5100% 43.8630% 26.4810%  8.0260%\nhigh card        35.9310% 50.1220% 35.8420% 41.1650% 17.2830%  2.9530%  0.0110%\n```",
+      "section": "Draw Poker Revisited",
+      "start_line": 847,
+      "end_line": 985,
+      "concept_mapping": {
+        "chunk_id": "chunk-93-new-handmaker-and-stats-chart",
+        "concept_id": "iterative_refinement_of_strategy",
+        "confidence": 1,
+        "reasoning": "This chunk defines a new handmaker using the refined probabilities and regenerates the stats chart to show the effect of the updated strategy.",
+        "secondary_concepts": [
+          "handmaker_abstraction",
+          "simulation_for_probability_estimation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-94-comparing-win-probabilities",
+      "content": "To be truly accurate, we should repeat this process of using updated probabilities until we hit a fixpoint. But we can see that there is not that much difference between the `draw` and the `draw2` columns, so I'm not going to bother with that.\n\nBelow I compare the two win probabilities for the test hands, `deal_win_P` on the left and `draw_win_P` on the right. We can see that a three-of-a-kind or better is very likely to win under either condition, but that a pair of 2s, which has a 53% chance of winning on the deal, only has a 39% chance after the draw.\n\n\n```python\nfor h in hands:\n    p1, p2 = win_probability(h, P=deal_win_P), win_probability(h, P=draw_win_P)\n    print(f'{join(h)}  {p1:10.5%}  {p2:10.5%}  {type_name(h)}')\n```\n\n```\nAs Ac Ah Ad Ad  100.00000%  100.00000%  five of a kind\nKh Kd Ks Kc Kh  100.00000%  100.00000%  five of a kind\n3h 3s 3d 3c 3c  100.00000%  100.00000%  five of a kind\n2s 2c 2d 2h 2h  100.00000%  100.00000%  five of a kind\nAs Ks Qs Ts Js  100.00000%  100.00000%  straight flush\nKc Qc Jc Tc 9c   99.99988%   99.99962%  straight flush\n6d 5d 4d 3d 2d   99.99905%   99.99692%  straight flush\n5h 4h 3h 2h Ah   99.99893%   99.99654%  straight flush\nAs Ac Ad Ah 2s   99.99846%   99.99500%  four of a kind\n7s 7c 7d 2d 7h   99.98553%   99.96269%  four of a kind\n6s 6c 6d 6h 9s   99.98369%   99.95808%  four of a kind\nAs 5h 5c 5d 5s   99.98184%   99.95346%  four of a kind\nTh Tc Td 5h 5c   99.93013%   99.73377%  full house\n9h 9c 9d 8c 8h   99.91904%   99.68346%  full house\n6h 6c 6d Tc Th   99.88580%   99.53254%  full house\n5c 5d 5s As Ah   99.87472%   99.48223%  full house\nAs 2s 3s 4s 6s   99.83039%   99.28100%  flush\nKc Qc Jc Tc 2c   99.81528%   99.22077%  flush\nQc Jc Tc 9c 7c   99.80016%   99.16054%  flush\n4h 5h 6h 7h 9h   99.75480%   98.97985%  flush\nAs Kd Qc Td Jh   99.63385%   98.49800%  straight\nKc Qh Jd Th 9c   99.60366%   98.40015%  straight\n6c 5d 4h 3s 2s   99.39234%   97.71523%  straight\nAs 2d 3c 4h 5s   99.36215%   97.61738%  straight\nAs Ac Ad 2h 3h   99.24139%   97.22600%  three of a kind\nTs Tc Th 9s 8c   98.59128%   96.08569%  three of a kind\nTs Tc Th 9s 7c   98.59128%   96.08569%  three of a kind\n9h 9s 9d Ah Kh   98.42876%   95.80062%  three of a kind\nTs Tc 5s 5c 8h   95.66580%   90.55538%  two pair\nTs Tc 5s 5c 7h   95.66580%   90.55538%  two pair\n9s 9c 8s 8c As   95.30012%   89.81423%  two pair\n3s 3c 2s 2d Ah   93.10601%   85.36731%  two pair\nAs Ac 4c 5s 6s   92.37464%   83.88500%  one pair\n4s 4c As Ks Qs   59.86933%   46.92885%  one pair\n4h 4d Kh Qd Jd   59.86933%   46.92885%  one pair\n2d 2c Ad Kd Qd   53.36827%   39.53762%  one pair\nAh 3s 4s 5s 6s   50.11774%   35.84200%  high card\nKh Qh Jh Th 8d   46.26253%   33.08492%  high card\n7d 2s 4s 5s 6s   23.13126%   16.54246%  high card\n7h 6s 5d 3s 2d   23.13126%   16.54246%  high card\n```\n\n______",
+      "section": "Draw Poker Revisited",
+      "start_line": 847,
+      "end_line": 985,
+      "concept_mapping": {
+        "chunk_id": "chunk-94-comparing-win-probabilities",
+        "concept_id": "iterative_refinement_of_strategy",
+        "confidence": 1,
+        "reasoning": "This chunk compares win probabilities under old and new strategies, further illustrating the impact of iterative refinement on expected outcomes.",
+        "secondary_concepts": [
+          "expected_probability_of_winning"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-95-what-comes-first-experiment",
+      "content": "# What Comes First?\n\nBram Cohen suggests an interesting experiment: shuffle a deck and flip over cards one at a time, until either a flush or a straight appears among the face-up cards. Among five-card hands, a straight is more likely, so shouldn't it come up first more often? Let's create a simulation to see:",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-95-what-comes-first-experiment",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 1,
+        "reasoning": "This chunk introduces a simulation experiment designed to determine which poker hand type (flush or straight) appears first when dealing cards sequentially."
+      }
+    },
+    {
+      "chunk_id": "chunk-96-flush-or-straight-first-function",
+      "content": "```python\ndef flush_or_straight_first(deck=deck) -> str:\n    \"\"\"Deal cards randomly until a straight or flush show up among any of the cards.\"\"\"\n    random.shuffle(deck)\n    suits   = Counter() # Count how many we have of each suit\n    rankset = set()     # Set of all the ranks of the cards so far\n    first   = ''        # What came first?\n    for card in deck:\n        suits[suit(card)] += 1\n        rankset.add(rank(card))\n        if is_straight(rankset): first += 'straight'\n        if 5 in suits.values():  first += 'flush'\n        if first:                \n            return first\n        \ndef is_straight(rankset) -> bool:\n    \"\"\"See if any possible straight is a subset of the rankset.\"\"\"\n    return any(straight.issubset(rankset) for straight in straights)\n\nstraights = [set(range(start, start + 5)) for start in range(2, 11)] + [{14, 2, 3, 4, 5}]\n```",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-96-flush-or-straight-first-function",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 1,
+        "reasoning": "This chunk provides the Python code for `flush_or_straight_first`, implementing the simulation to find the first occurrence of a straight or flush.",
+        "secondary_concepts": [
+          "handling_special_poker_types"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-97-flush-or-straight-first-examples",
+      "content": "```python\nflush_or_straight_first()\n```\n\n```\n'flush'\n```\n\n```python\nflush_or_straight_first()\n```\n\n```\n'flush'\n```\n\n```python\nCounter(flush_or_straight_first() for _ in range(10**4))\n```\n\n```\nCounter({'flush': 5191, 'straight': 3809, 'straightflush': 1000})\n```",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-97-flush-or-straight-first-examples",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 1,
+        "reasoning": "This chunk demonstrates running the `flush_or_straight_first` simulation and displays aggregated results over multiple trials."
+      }
+    },
+    {
+      "chunk_id": "chunk-98-flush-more-likely-explanation",
+      "content": "We know that a straight is a more probable hand than a flush in general, but\ncounterintuitively, a flush is more likely to come up first, by about 50% to 40%, with about 10% of the time both of them coming up on the same card (a straight flush). One explanation for this is the [pigeonhole principle](https://en.wikipedia.org/wiki/Pigeonhole_principle): there are only four suits (pigeonholes), each of which can only fit four cards (pigeons) before we get a flush. So that means, in the worst case, the first 16 cards fill all the holes, and the 17th card **must** make a flush. But for a straight, it is possible to go up to 44 cards  without making any straight (every straight must contain either a 5 or a 10; so you could deal the other 11 ranks in all four suits and not have a straight).",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-98-flush-more-likely-explanation",
+        "concept_id": "pigeonhole_principle_application",
+        "confidence": 1,
+        "reasoning": "This chunk explains the counterintuitive simulation results (flush appearing first more often) by applying the mathematical Pigeonhole Principle.",
+        "secondary_concepts": [
+          "first_occurrence_simulation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-99-extending-brams-experiment",
+      "content": "We can extend Bram's experiment to all the  types. The function `what_first` simulates a single pass through the deck, flipping up cards until every type has appeared, and returning as a result a dict of `{type_number: number_of_cards_to_make_that_type}`. We'll leave out type 0, \"high card\", because the very first card always makes a high card.",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-99-extending-brams-experiment",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 1,
+        "reasoning": "This chunk proposes extending the 'first occurrence' experiment to include all poker hand types, continuing the simulation concept."
+      }
+    },
+    {
+      "chunk_id": "chunk-100-what-first-function",
+      "content": "```python\ndef what_first(deck=deck) -> list:\n    \"\"\"Flip cards; record how many cards it took for each type.\"\"\"\n    random.shuffle(deck)\n    suits    = Counter()   # Count how many we have of each suit\n    ranks    = Counter()   # Count how many we have of each rank\n    rankset  = set()       # Set of all the ranks of the cards so far\n    ranksets = {s: set() for s in 'shdc'} # As above, but per suit\n    numbers  = {}          # The number of cards required to make each type\n    kind     = lambda n: sum(ranks[r] >= n for r in ranks)\n    def record(type, i): \n        if type not in numbers: numbers[type] = i\n    for i, card in enumerate(deck, 1):\n        suits[suit(card)]    += 1\n        ranks[rank(card)]    += 1\n        rankset              |= {rank(card)}\n        ranksets[suit(card)] |= {rank(card)}\n        if 8 not in numbers and any(is_straight(ranksets[suit]) for suit in 'sdhc'): \n                                     record(8, i) # straight flush\n        if kind(4):                  record(7, i) # four of a kind  \n        if kind(3) and kind(2) >= 2: record(6, i) # full house\n        if 5 in suits.values():      record(5, i) # flush\n        if 4 not in numbers and is_straight(rankset): \n                                     record(4, i) # straight\n        if kind(3):                  record(3, i) # three of a kind\n        if kind(2) == 2:             record(2, i) # two pair\n        if kind(2):                  record(1, i) # one pair\n        if len(numbers) == 8:\n            return numbers\n```",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-100-what-first-function",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 1,
+        "reasoning": "This chunk provides the Python code for `what_first`, which implements the extended simulation to record the first occurrence of all poker hand types.",
+        "secondary_concepts": [
+          "poker_hand_types",
+          "collections_counter_for_grouping"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-101-what-first-sample-run",
+      "content": "A sample run:\n\n```python\nwhat_first()\n```\n\n```\n{1: 7, 2: 9, 6: 11, 3: 11, 4: 12, 5: 15, 7: 23, 8: 30}\n```",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-101-what-first-sample-run",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 0.95,
+        "reasoning": "This chunk shows a sample execution and output of a function related to simulating the first occurrence of poker hand types."
+      }
+    },
+    {
+      "chunk_id": "chunk-102-what-firsts-function",
+      "content": "I will define `what_firsts` to run `n` simulations and return a dict keyed by type number, where each value is a Counter of the card numbers where the type first appeared across all the simulations. \n\n\n```python\ndef what_firsts(n) -> dict:\n    \"\"\"Run what_first() n times and record numbers of cards as Counters:\n    returns dict of {type_number: Counter(how_many_cards: how_often})}\"\"\"\n    counters = {type: Counter() for type in types}\n    for trial in range(n):\n        numbers = what_first()\n        for type in numbers:\n            counters[type][numbers[type]] += 1\n    return counters        \n```",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-102-what-firsts-function",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 0.98,
+        "reasoning": "This chunk defines the `what_firsts` function, which explicitly implements the logic for running multiple simulations to determine the first occurrence of poker hand types.",
+        "secondary_concepts": [
+          "simulation_for_probability_estimation",
+          "collections_counter_for_grouping"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-103-what-firsts-example",
+      "content": "```python\nwhat_firsts(10) # Run 10 simulations\n```\n\n```\n{0: Counter(),\n 1: Counter({5: 1, 8: 1, 10: 1, 9: 2, 6: 2, 2: 1, 7: 1, 3: 1}),\n 2: Counter({10: 4, 11: 2, 7: 1, 8: 2, 4: 1}),\n 3: Counter({13: 1, 15: 3, 11: 1, 14: 3, 17: 1, 9: 1}),\n 4: Counter({9: 2, 14: 1, 17: 2, 13: 1, 19: 1, 10: 2, 16: 1}),\n 5: Counter({12: 2, 9: 1, 8: 1, 13: 1, 10: 1, 11: 3, 16: 1}),\n 6: Counter({13: 1, 15: 3, 11: 1, 14: 3, 17: 1, 9: 1}),\n 7: Counter({31: 2, 25: 1, 34: 1, 12: 1, 21: 1, 20: 1, 19: 1, 26: 1, 27: 1}),\n 8: Counter({22: 1, 14: 1, 20: 2, 36: 1, 28: 1, 33: 1, 23: 1, 25: 1, 34: 1}),\n 9: Counter()}\n```",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-103-what-firsts-example",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 0.95,
+        "reasoning": "This chunk provides an example run and output of the `what_firsts` simulation function, demonstrating the data collected.",
+        "secondary_concepts": [
+          "collections_counter_for_grouping"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-104-analysis-of-simulation-results",
+      "content": "We see that type 1 (one pair) has a Counter with mostly low numbers&mdash;a pair tends to show up early. Type 8 (straight flush) has a Counter with mostly high numbers; it takes a lot of cards before you are likely to get a straight flush. \n\nLet's run 100,000 simulations:\n\n```python\n%time counters = what_firsts(10**5)\n```\n\n```\nCPU times: user 36.2 s, sys: 12.8 ms, total: 36.3 s\nWall time: 36.3 s\n```",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-104-analysis-of-simulation-results",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 0.9,
+        "reasoning": "This chunk begins the analysis of the results from the `what_firsts` simulation, discussing early and late occurring hand types.",
+        "secondary_concepts": [
+          "simulation_for_probability_estimation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-105-plotting-the-results",
+      "content": "The raw numbers are messy to look at, so I'll plot them, showing for each type the distribution of how many cards it took, and in the legend showing the mean number of cards for each type:\n\n\n```python\ndef plot_what_firsts(counters, types=range(1, 9),\n                     colors='w b g r c m y k orange'.split()):\n    N = sum(counters[min(types)].values())           # How many trials\n    M = max(L for c in counters.values() for L in c) # Longest trial\n    X = range(1, M + 1)                              # Numbers to plot\n    plt.figure(figsize=(10, 6))\n    plt.xlabel('Number of cards needed')\n    plt.ylabel(f'Percent (out of {N:,d} trials)')\n    plt.grid(True, which='major'); \n    plt.grid(True, which='minor', linestyle=':', alpha=0.5, markevery=1)\n    plt.minorticks_on()\n    for type in reversed(types):\n        Y = [100 * counters[type][x]/ N for x in X]\n        μ = sum(L * n for L, n in counters[type].items()) / N\n        plt.plot(X, Y, 'o:', lw=2, alpha=0.8, color=colors[type],\n                 label=f'{type}: μ={μ:4.1f} {type_names[type]}')\n    plt.legend()\n    plt.show()\n```",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-105-plotting-the-results",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 0.85,
+        "reasoning": "This chunk defines a function to plot the results obtained from the `first_occurrence_simulation`, focusing on visualization.",
+        "secondary_concepts": [
+          "simulation_for_probability_estimation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-106-initial-plot-of-all-types",
+      "content": "```python\nplot_what_firsts(counters)\n```\n\n```\n<Figure size 720x432 with 1 Axes>\n```\n\nOK, that looks kind of like a side view of the rollercoasters at Six Flags amusement park. Let's see if we can make sense of it. There seem to be three distinct patterns. First, there are three hand types with an early sharp peak:",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-106-initial-plot-of-all-types",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 0.88,
+        "reasoning": "This chunk executes the plotting function to display the overall results of the `first_occurrence_simulation` and makes initial observations.",
+        "secondary_concepts": [
+          "simulation_for_probability_estimation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-107-early-peak-hand-types",
+      "content": "```python\nplot_what_firsts(counters, types=(1, 2, 5))\n```\n\n```\n<Figure size 720x432 with 1 Axes>\n```\n\nAs discussed, the flush can go no more than 17 cards. Also by the pigeonhole principle, the pair can go no more than 14 cards (one card in each of the 13 ranks, and then the 14th card must form a pair) and two pair can go no more than 17 cards (one card in each of the 13 ranks, then 3 more cards in one of the ranks (making four of a kind), and then the 17th card must make a second pair).",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-107-early-peak-hand-types",
+        "concept_id": "pigeonhole_principle_application",
+        "confidence": 0.98,
+        "reasoning": "This chunk specifically applies the Pigeonhole Principle to explain the maximum card limits for certain poker hand types (pair, two pair, flush) in the context of the first occurrence simulation results.",
+        "secondary_concepts": [
+          "first_occurrence_simulation",
+          "poker_hand_types"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-108-gaussian-hand-types",
+      "content": "Next are three tightly-grouped Gaussian-looking curves. It makes sense that three of a kind and full house are close together, because usually when you get three of a kind, you have gotten some other pair previously. I'm not sure why straight is so close to them.\n\n\n```python\nplot_what_firsts(counters, types=(3, 4, 6))\n```",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-108-gaussian-hand-types",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 0.85,
+        "reasoning": "This chunk continues the analysis of the `first_occurrence_simulation` results, focusing on a specific group of hand types that show 'Gaussian-looking curves'.",
+        "secondary_concepts": [
+          "poker_hand_types"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-109-gaussian-hand-types-plot",
+      "content": "```\n<Figure size 720x432 with 1 Axes>\n```",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-109-gaussian-hand-types-plot",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 0.7,
+        "reasoning": "This chunk is merely the output of a plot command, showing the visualization of data from the `first_occurrence_simulation`.",
+        "secondary_concepts": [
+          "simulation_for_probability_estimation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-110-straight-flush-and-four-of-a-kind",
+      "content": "Finally, I was quite surprised to see how closely the straight flush and four of a kind curves track each other; I can't explain why:\n\n\n```python\nplot_what_firsts(counters, types=(7, 8))\n```",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-110-straight-flush-and-four-of-a-kind",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 0.85,
+        "reasoning": "This chunk concludes the analysis of distinct patterns in the `first_occurrence_simulation` results, focusing on straight flush and four of a kind.",
+        "secondary_concepts": [
+          "poker_hand_types"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-111-straight-flush-and-four-of-a-kind-plot",
+      "content": "```\n<Figure size 720x432 with 1 Axes>\n```",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-111-straight-flush-and-four-of-a-kind-plot",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 0.7,
+        "reasoning": "This chunk is merely the output of a plot command, showing the visualization of data from the `first_occurrence_simulation`.",
+        "secondary_concepts": [
+          "simulation_for_probability_estimation"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-112-conclusion",
+      "content": "That concludes our exploration of poker ranking; I hope it has inspired you to explore some on your own.",
+      "section": "What Comes First?",
+      "start_line": 986,
+      "end_line": 1201,
+      "concept_mapping": {
+        "chunk_id": "chunk-112-conclusion",
+        "concept_id": "first_occurrence_simulation",
+        "confidence": 0.5,
+        "reasoning": "Inferred from previous chunk (first_occurrence_simulation)"
+      }
+    }
+  ]
+}

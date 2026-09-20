@@ -1,0 +1,22 @@
+{
+  "unique_snippets": [
+    {
+      "primary_segment": 1,
+      "timestamp": 89.96,
+      "code": "if True:    if condition:        print(\"true\")    else:        print(\"false\")",
+      "concepts": [
+        "indentation_for_scope",
+        "nested_indentation"
+      ],
+      "rationale": "The code demonstrates Python's fundamental use of consistent indentation to define code blocks (e.g., within an 'if' statement) and further shows how additional levels of indentation are used for nested code blocks, such as an 'if/else' structure inside another 'if' block.",
+      "teaching_context": "This snippet teaches how Python enforces code block structure and scope using indentation, crucial for understanding control flow logic, especially in nested conditional statements.",
+      "duplicate_segments": []
+    }
+  ],
+  "rejected_segments": [],
+  "statistics": {
+    "total_segments_analyzed": 1,
+    "unique_code_snippets": 1,
+    "rejected_segments": 0
+  }
+}

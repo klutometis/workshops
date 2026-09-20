@@ -1,0 +1,741 @@
+{
+  "metadata": {
+    "title": "Getting Started with Python in Less Than 10 Minutes",
+    "author": "Andrej Karpathy",
+    "source": "https://www.youtube.com/watch?v=fWjsdhR3z3c",
+    "video_id": "fWjsdhR3z3c",
+    "total_duration": 629.9,
+    "total_concepts": 28,
+    "extracted_at": "2025-12-12T11:50:52.014Z",
+    "enriched_at": "2024-07-30T12:00:00Z",
+    "enrichment_version": "1.0"
+  },
+  "nodes": [
+    {
+      "id": "variables_and_assignment",
+      "name": "Variables and Assignment",
+      "description": "Understanding how to create named storage locations (variables) and assign values to them using the = operator in Python. This allows you to store and refer to data throughout your program.",
+      "prerequisites": [],
+      "difficulty": "basic",
+      "code_examples": [
+        "item = \"banana\"",
+        "item_name = \"orange\""
+      ],
+      "learning_objectives": [
+        "Define what a variable is in Python.",
+        "Assign values to variables using the assignment operator.",
+        "Retrieve the value stored in a variable."
+      ],
+      "common_misconceptions": [
+        "Confusing assignment (=) with equality (==)."
+      ]
+    },
+    {
+      "id": "strings",
+      "name": "Strings",
+      "description": "Learning about the string data type, which represents sequences of characters (text), and how to define them using single or double quotation marks.",
+      "prerequisites": [
+        "variables_and_assignment"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "my_string = \"Hello, World!\"",
+        "another_string = 'Python is fun'"
+      ],
+      "learning_objectives": [
+        "Identify and create string literals.",
+        "Understand that strings are sequences of characters."
+      ]
+    },
+    {
+      "id": "case_sensitivity",
+      "name": "Case Sensitivity",
+      "description": "Recognizing that Python distinguishes between uppercase and lowercase letters in identifiers (variable names, function names, keywords, etc.), meaning 'item' and 'Item' are treated as different entities.",
+      "prerequisites": [
+        "variables_and_assignment"
+      ],
+      "difficulty": "basic",
+      "learning_objectives": [
+        "Explain why 'myVar' and 'myvar' are different variables in Python."
+      ],
+      "common_misconceptions": [
+        "Assuming identifiers are case-insensitive, leading to 'NameError'."
+      ]
+    },
+    {
+      "id": "naming_conventions",
+      "name": "Naming Conventions (snake_case)",
+      "description": "Adhering to Python's recommended `snake_case` convention for variable, function, and file names, where words are lowercase and separated by underscores, improving code readability.",
+      "prerequisites": [
+        "variables_and_assignment"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "item_name = \"orange\"",
+        "calculate_total_price()"
+      ],
+      "learning_objectives": [
+        "Apply snake_case to new variable and function names."
+      ]
+    },
+    {
+      "id": "print_function",
+      "name": "print() Function",
+      "description": "Using the built-in `print()` function to display output (text, variable values, etc.) to the console, which is crucial for debugging and communicating information to the user.",
+      "prerequisites": [
+        "variables_and_assignment"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "print(\"Hello\")",
+        "message = \"Python is great\"\nprint(message)"
+      ],
+      "learning_objectives": [
+        "Use print() to display strings and variable values."
+      ]
+    },
+    {
+      "id": "string_concatenation",
+      "name": "String Concatenation",
+      "description": "Combining two or more strings into a single string using the `+` operator. This allows for building dynamic messages from different text segments.",
+      "prerequisites": [
+        "strings",
+        "print_function"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "greeting = \"Hello\" + \" \" + \"World\"",
+        "item_name = \"orange\"\nprint(\"Hello \" + item_name)"
+      ],
+      "learning_objectives": [
+        "Combine multiple strings using the '+' operator.",
+        "Print concatenated strings to the console."
+      ]
+    },
+    {
+      "id": "integers",
+      "name": "Integers",
+      "description": "Understanding the integer data type (`int`) for representing whole numbers (positive, negative, or zero) in Python, used for counting and mathematical operations.",
+      "prerequisites": [
+        "variables_and_assignment"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "age = 28",
+        "number_of_items = 10",
+        "negative_num = -5"
+      ],
+      "learning_objectives": [
+        "Identify and create integer literals.",
+        "Distinguish integers from other numeric types (like floats, though not covered here)."
+      ]
+    },
+    {
+      "id": "booleans",
+      "name": "Booleans",
+      "description": "Learning about the boolean data type (`bool`), which can hold only two values: `True` or `False`. These are fundamental for logical operations and controlling program flow.",
+      "prerequisites": [
+        "variables_and_assignment"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "is_happy = False",
+        "is_active = True"
+      ],
+      "learning_objectives": [
+        "Define and use True and False boolean values."
+      ]
+    },
+    {
+      "id": "lists",
+      "name": "Lists",
+      "description": "Introducing lists as an ordered, mutable (changeable) collection data type in Python, capable of storing a sequence of items of different data types, enclosed in square brackets `[]`.",
+      "prerequisites": [
+        "variables_and_assignment"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "my_list = [2021, \"text\", False, 3.14]",
+        "names = [\"Mario\", \"Luigi\", \"Peach\"]"
+      ],
+      "learning_objectives": [
+        "Create lists with various data types.",
+        "Understand that lists are ordered collections."
+      ]
+    },
+    {
+      "id": "data_type_conversion",
+      "name": "Data Type Conversion (Type Casting)",
+      "description": "Performing explicit conversion of values from one data type to another using built-in functions like `str()` (to string) and `int()` (to integer). This is necessary when operations require compatible data types.",
+      "prerequisites": [
+        "strings",
+        "integers",
+        "print_function"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "num_as_string = str(22)",
+        "string_as_int = int(\"100\")",
+        "print(\"Name: \" + str(22))"
+      ],
+      "learning_objectives": [
+        "Convert integers to strings and strings to integers.",
+        "Explain why type conversion is necessary in certain operations."
+      ],
+      "common_misconceptions": [
+        "Attempting to concatenate strings and numbers directly without conversion.",
+        "Trying to convert non-numeric strings to integers."
+      ]
+    },
+    {
+      "id": "arithmetic_operators",
+      "name": "Arithmetic Operators",
+      "description": "Using standard mathematical operators (`+` for addition, `-` for subtraction, `*` for multiplication, `/` for division, `**` for exponentiation) to perform calculations on numeric data.",
+      "prerequisites": [
+        "integers",
+        "variables_and_assignment"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "result_add = 10 + 5",
+        "result_sub = 10 - 5",
+        "result_mul = 10 * 5",
+        "result_div = 10 / 5",
+        "result_exp = 2 ** 3"
+      ],
+      "learning_objectives": [
+        "Perform basic arithmetic operations in Python.",
+        "Understand the different arithmetic operators and their functions."
+      ]
+    },
+    {
+      "id": "comparison_operators",
+      "name": "Comparison Operators",
+      "description": "Using operators like `>` (greater than), `<` (less than), `==` (equal to), `>=` (greater than or equal to), `<=` (less than or equal to), and `!=` (not equal to) to compare two values and produce a boolean (`True` or `False`) result.",
+      "prerequisites": [
+        "booleans",
+        "integers"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "age > 21",
+        "is_equal = (item_name == \"orange\")"
+      ],
+      "learning_objectives": [
+        "Compare numerical and string values using comparison operators.",
+        "Understand that comparison operations result in boolean values."
+      ],
+      "common_misconceptions": [
+        "Confusing the assignment operator '=' with the equality operator '=='."
+      ]
+    },
+    {
+      "id": "conditional_statements",
+      "name": "Conditional Statements (if/elif/else)",
+      "description": "Controlling the flow of a program by executing different blocks of code based on whether specified conditions (boolean expressions) are `True` or `False`. This allows programs to make decisions.",
+      "prerequisites": [
+        "booleans",
+        "comparison_operators"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "if age > 21:\n    print(\"You are old\")\nelif age == 18:\n    print(\"You are getting old\")\nelse:\n    print(\"You are still young\")",
+        "is_happy = False\nif is_happy:\n    print(\"You are happy\")\nelse:\n    print(\"You are not happy\")"
+      ],
+      "learning_objectives": [
+        "Write if, elif, and else statements to control program flow.",
+        "Construct conditions using comparison operators and booleans."
+      ]
+    },
+    {
+      "id": "range_function",
+      "name": "range() Function",
+      "description": "Using the `range()` built-in function to generate a sequence of numbers. It is primarily used for iterating a specific number of times in loops, often starting from 0 by default.",
+      "prerequisites": [],
+      "difficulty": "basic",
+      "code_examples": [
+        "print(list(range(3))) # Output: [0, 1, 2]"
+      ],
+      "learning_objectives": [
+        "Generate a sequence of numbers using range().",
+        "Understand how range() behaves with a single argument."
+      ]
+    },
+    {
+      "id": "for_loop",
+      "name": "for Loop",
+      "description": "Iterating over sequences (like those generated by `range()` or lists) to repeatedly execute a block of code for each item in the sequence, making it efficient for repetitive tasks over collections.",
+      "prerequisites": [
+        "range_function",
+        "lists",
+        "print_function"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "for i in range(3):\n    print(f\"Hello {i}\")",
+        "name_list = [\"Alice\", \"Bob\"]\nfor name in name_list:\n    print(name)"
+      ],
+      "learning_objectives": [
+        "Use a for loop to iterate over a range of numbers.",
+        "Use a for loop to iterate over elements in a list."
+      ]
+    },
+    {
+      "id": "zero_based_indexing",
+      "name": "Zero-Based Indexing",
+      "description": "Understanding that in Python and many other programming languages, the first element of a sequence (like a list or the output of `range()`) is typically accessed at index 0, not 1.",
+      "prerequisites": [
+        "for_loop",
+        "range_function",
+        "lists"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "my_list = [\"first\", \"second\"]\nprint(my_list[0]) # 'first'"
+      ],
+      "learning_objectives": [
+        "Correctly predict the output of loops or list accesses given zero-based indexing."
+      ],
+      "common_misconceptions": [
+        "Assuming the first item in a sequence is at index 1."
+      ]
+    },
+    {
+      "id": "while_loop",
+      "name": "while Loop",
+      "description": "Creating a loop that repeatedly executes a block of code as long as a specified boolean condition remains `True`. It's suitable for situations where the number of iterations is not known beforehand.",
+      "prerequisites": [
+        "booleans",
+        "comparison_operators",
+        "variables_and_assignment"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "i = 0\nwhile i < 5:\n    print(i)\n    i = i + 1"
+      ],
+      "learning_objectives": [
+        "Implement a while loop to repeat actions based on a condition.",
+        "Ensure a while loop has a condition that will eventually become false."
+      ]
+    },
+    {
+      "id": "loop_increment_decrement",
+      "name": "Loop Increment/Decrement",
+      "description": "Modifying a counter variable within a loop (e.g., `i = i + 1` or the shorthand `i += 1`) to control the number of iterations and ensure the loop's termination condition is eventually met.",
+      "prerequisites": [
+        "variables_and_assignment",
+        "while_loop",
+        "arithmetic_operators"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "i = 0\nwhile i < 5:\n    i = i + 1",
+        "count = 10\nwhile count > 0:\n    count -= 1"
+      ],
+      "learning_objectives": [
+        "Increment and decrement variables inside loops correctly."
+      ]
+    },
+    {
+      "id": "infinite_loops",
+      "name": "Infinite Loops",
+      "description": "Recognizing and understanding `while` loops whose conditions never become `False`, leading to continuous execution unless explicitly stopped. These are often used intentionally with a `break` statement for specific exit conditions.",
+      "prerequisites": [
+        "while_loop"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "while True:\n    print(\"This will loop forever unless stopped\")"
+      ],
+      "learning_objectives": [
+        "Identify potential infinite loop conditions.",
+        "Understand scenarios where an infinite loop with a break might be useful."
+      ]
+    },
+    {
+      "id": "input_function",
+      "name": "input() Function",
+      "description": "Using the `input()` built-in function to prompt the user for text input from the console. The function waits for the user to type something and press Enter, returning the input as a string.",
+      "prerequisites": [
+        "strings",
+        "print_function"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "user_name = input(\"Enter your name: \")",
+        "user_age_str = input(\"Please provide your age: \")"
+      ],
+      "learning_objectives": [
+        "Obtain user input from the console.",
+        "Understand that input() always returns a string."
+      ]
+    },
+    {
+      "id": "break_statement",
+      "name": "break Statement",
+      "description": "Using the `break` keyword to immediately terminate the execution of the innermost `for` or `while` loop. This allows the program to exit a loop prematurely based on a specific condition.",
+      "prerequisites": [
+        "for_loop",
+        "while_loop",
+        "conditional_statements"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "while True:\n    user_input = input(\"Enter 0 to quit: \")\n    if user_input == \"0\":\n        print(\"Exiting loop.\")\n        break"
+      ],
+      "learning_objectives": [
+        "Implement the break statement to exit loops conditionally.",
+        "Describe situations where prematurely exiting a loop is beneficial."
+      ]
+    },
+    {
+      "id": "function_definition",
+      "name": "Function Definition (def keyword)",
+      "description": "Defining reusable blocks of code using the `def` keyword, allowing you to encapsulate a specific task into a named unit. This promotes modularity and makes code easier to manage.",
+      "prerequisites": [
+        "variables_and_assignment",
+        "naming_conventions"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def say_hello(name):\n    print(f\"Hey there {name}\")",
+        "def calculate_sum(a, b):\n    return a + b"
+      ],
+      "learning_objectives": [
+        "Define a simple function using the 'def' keyword.",
+        "Explain the purpose of functions in programming."
+      ]
+    },
+    {
+      "id": "function_parameters",
+      "name": "Function Parameters and Arguments",
+      "description": "Understanding how to define parameters in a function definition to act as placeholders for input values, and how to pass arguments (actual values) to those parameters when calling the function.",
+      "prerequisites": [
+        "function_definition"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def greet(name, age): # name and age are parameters\n    print(f\"Hello {name}, you are {age} years old.\")",
+        "greet(\"Alice\", 30) # \"Alice\" and 30 are arguments"
+      ],
+      "learning_objectives": [
+        "Define functions with parameters.",
+        "Distinguish between parameters and arguments."
+      ]
+    },
+    {
+      "id": "function_calls",
+      "name": "Function Calls",
+      "description": "Executing a previously defined function by typing its name followed by parentheses, optionally including arguments if the function expects them. This triggers the code block within the function to run.",
+      "prerequisites": [
+        "function_definition",
+        "function_parameters"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "say_hello(\"Mario\")",
+        "say_hello(\"Luigi\")"
+      ],
+      "learning_objectives": [
+        "Invoke a defined function with or without arguments.",
+        "Understand that a function call executes the function's code."
+      ]
+    },
+    {
+      "id": "code_reusability",
+      "name": "Code Reusability",
+      "description": "The fundamental principle of writing code once and using it in multiple instances or contexts. Functions are the primary mechanism for achieving code reusability, reducing redundancy, and improving maintainability.",
+      "prerequisites": [
+        "function_definition"
+      ],
+      "difficulty": "basic",
+      "learning_objectives": [
+        "Articulate the benefits of code reusability.",
+        "Identify how functions facilitate code reusability."
+      ]
+    },
+    {
+      "id": "pass_statement",
+      "name": "pass Statement",
+      "description": "Using the `pass` keyword as a null operation to serve as a placeholder where a statement is syntactically required but no action needs to be taken. It's useful for outlining functions or classes before implementing their full logic.",
+      "prerequisites": [
+        "function_definition"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def get_internet_status():\n    pass",
+        "def run_game():\n    pass"
+      ],
+      "learning_objectives": [
+        "Use 'pass' to create empty but syntactically correct code blocks.",
+        "Explain the utility of 'pass' in code development."
+      ]
+    },
+    {
+      "id": "error_handling",
+      "name": "Error Handling (try/except)",
+      "description": "Implementing `try` and `except` blocks to anticipate and gracefully manage runtime errors (exceptions) that might occur during program execution. This prevents crashes and allows for user-friendly error messages.",
+      "prerequisites": [
+        "input_function",
+        "data_type_conversion",
+        "print_function"
+      ],
+      "difficulty": "advanced",
+      "code_examples": [
+        "try:\n    num_str = input(\"Please provide a number: \")\n    value = 10 + int(num_str)\n    print(value)\nexcept ValueError:\n    print(\"That is not a valid number.\")"
+      ],
+      "learning_objectives": [
+        "Structure code using try-except blocks.",
+        "Handle common exceptions (like ValueError) to prevent program crashes."
+      ]
+    },
+    {
+      "id": "exceptions",
+      "name": "Exceptions",
+      "description": "Understanding that exceptions are events, detected during execution, that interrupt the normal flow of a program. They are raised by Python when an error occurs, such as trying to convert invalid data or accessing non-existent resources.",
+      "prerequisites": [
+        "error_handling"
+      ],
+      "difficulty": "advanced",
+      "learning_objectives": [
+        "Define what an exception is in Python.",
+        "Recognize common types of exceptions (e.g., ValueError, TypeError)."
+      ],
+      "common_misconceptions": [
+        "Confusing syntax errors (compile-time) with exceptions (run-time errors)."
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "variables_and_assignment",
+      "to": "strings",
+      "type": "prerequisite"
+    },
+    {
+      "from": "variables_and_assignment",
+      "to": "case_sensitivity",
+      "type": "prerequisite"
+    },
+    {
+      "from": "variables_and_assignment",
+      "to": "naming_conventions",
+      "type": "prerequisite"
+    },
+    {
+      "from": "variables_and_assignment",
+      "to": "print_function",
+      "type": "prerequisite"
+    },
+    {
+      "from": "variables_and_assignment",
+      "to": "integers",
+      "type": "prerequisite"
+    },
+    {
+      "from": "variables_and_assignment",
+      "to": "booleans",
+      "type": "prerequisite"
+    },
+    {
+      "from": "variables_and_assignment",
+      "to": "lists",
+      "type": "prerequisite"
+    },
+    {
+      "from": "strings",
+      "to": "string_concatenation",
+      "type": "prerequisite"
+    },
+    {
+      "from": "print_function",
+      "to": "string_concatenation",
+      "type": "prerequisite"
+    },
+    {
+      "from": "strings",
+      "to": "data_type_conversion",
+      "type": "prerequisite"
+    },
+    {
+      "from": "integers",
+      "to": "data_type_conversion",
+      "type": "prerequisite"
+    },
+    {
+      "from": "print_function",
+      "to": "data_type_conversion",
+      "type": "prerequisite"
+    },
+    {
+      "from": "integers",
+      "to": "arithmetic_operators",
+      "type": "prerequisite"
+    },
+    {
+      "from": "booleans",
+      "to": "comparison_operators",
+      "type": "prerequisite"
+    },
+    {
+      "from": "integers",
+      "to": "comparison_operators",
+      "type": "prerequisite"
+    },
+    {
+      "from": "booleans",
+      "to": "conditional_statements",
+      "type": "prerequisite"
+    },
+    {
+      "from": "comparison_operators",
+      "to": "conditional_statements",
+      "type": "prerequisite"
+    },
+    {
+      "from": "range_function",
+      "to": "for_loop",
+      "type": "prerequisite"
+    },
+    {
+      "from": "lists",
+      "to": "for_loop",
+      "type": "prerequisite"
+    },
+    {
+      "from": "print_function",
+      "to": "for_loop",
+      "type": "prerequisite"
+    },
+    {
+      "from": "for_loop",
+      "to": "zero_based_indexing",
+      "type": "prerequisite"
+    },
+    {
+      "from": "range_function",
+      "to": "zero_based_indexing",
+      "type": "prerequisite"
+    },
+    {
+      "from": "lists",
+      "to": "zero_based_indexing",
+      "type": "prerequisite"
+    },
+    {
+      "from": "booleans",
+      "to": "while_loop",
+      "type": "prerequisite"
+    },
+    {
+      "from": "comparison_operators",
+      "to": "while_loop",
+      "type": "prerequisite"
+    },
+    {
+      "from": "variables_and_assignment",
+      "to": "while_loop",
+      "type": "prerequisite"
+    },
+    {
+      "from": "variables_and_assignment",
+      "to": "loop_increment_decrement",
+      "type": "prerequisite"
+    },
+    {
+      "from": "while_loop",
+      "to": "loop_increment_decrement",
+      "type": "prerequisite"
+    },
+    {
+      "from": "arithmetic_operators",
+      "to": "loop_increment_decrement",
+      "type": "prerequisite"
+    },
+    {
+      "from": "while_loop",
+      "to": "infinite_loops",
+      "type": "prerequisite"
+    },
+    {
+      "from": "strings",
+      "to": "input_function",
+      "type": "prerequisite"
+    },
+    {
+      "from": "print_function",
+      "to": "input_function",
+      "type": "prerequisite"
+    },
+    {
+      "from": "for_loop",
+      "to": "break_statement",
+      "type": "prerequisite"
+    },
+    {
+      "from": "while_loop",
+      "to": "break_statement",
+      "type": "prerequisite"
+    },
+    {
+      "from": "conditional_statements",
+      "to": "break_statement",
+      "type": "prerequisite"
+    },
+    {
+      "from": "variables_and_assignment",
+      "to": "function_definition",
+      "type": "prerequisite"
+    },
+    {
+      "from": "naming_conventions",
+      "to": "function_definition",
+      "type": "prerequisite"
+    },
+    {
+      "from": "function_definition",
+      "to": "function_parameters",
+      "type": "prerequisite"
+    },
+    {
+      "from": "function_definition",
+      "to": "function_calls",
+      "type": "prerequisite"
+    },
+    {
+      "from": "function_parameters",
+      "to": "function_calls",
+      "type": "prerequisite"
+    },
+    {
+      "from": "function_definition",
+      "to": "code_reusability",
+      "type": "prerequisite"
+    },
+    {
+      "from": "function_definition",
+      "to": "pass_statement",
+      "type": "prerequisite"
+    },
+    {
+      "from": "input_function",
+      "to": "error_handling",
+      "type": "prerequisite"
+    },
+    {
+      "from": "data_type_conversion",
+      "to": "error_handling",
+      "type": "prerequisite"
+    },
+    {
+      "from": "print_function",
+      "to": "error_handling",
+      "type": "prerequisite"
+    },
+    {
+      "from": "error_handling",
+      "to": "exceptions",
+      "type": "prerequisite"
+    }
+  ]
+}

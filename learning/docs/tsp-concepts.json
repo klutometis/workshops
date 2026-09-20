@@ -1,0 +1,39 @@
+{
+  "concepts": [
+    {
+      "id": "euclidean-distance",
+      "name": "Euclidean Distance",
+      "description": "Calculating straight-line distance between two points using the distance formula"
+    },
+    {
+      "id": "tour-metrics",
+      "name": "Tour Metrics",
+      "description": "Computing length and properties of TSP tours"
+    },
+    {
+      "id": "tour-validation",
+      "name": "Tour Validation",
+      "description": "Checking if a tour visits all cities exactly once"
+    },
+    {
+      "id": "greedy-algorithms",
+      "name": "Greedy Algorithms",
+      "description": "Making locally optimal choices at each step (nearest neighbor)"
+    },
+    {
+      "id": "exhaustive-search",
+      "name": "Exhaustive Search",
+      "description": "Trying all possible solutions to find the optimal one"
+    },
+    {
+      "id": "permutations",
+      "name": "Permutations",
+      "description": "Generating all possible orderings of elements"
+    },
+    {
+      "id": "helper-functions",
+      "name": "Helper Functions",
+      "description": "Utility functions for common operations"
+    }
+  ]
+}

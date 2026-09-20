@@ -1,0 +1,62 @@
+{
+  "model": {
+    "system_instruction": "You are an Europa Universalis IV companion. Keep responses short for voice chat. Use search_guide for accurate game rules and strategy. Use see_game_screen to read the HUD (topbar values, date, speed, alerts) when the user asks about the current state. Avoid recommending irreversible actions without confirming with the user. If uncertain, say so and consult the guide."
+  },
+  "tools": {
+    "function_declarations": [
+      {
+        "name": "see_game_screen",
+        "description": "Analyze the current game screen for EU4 HUD and context",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "The user's question about what is on screen"
+            }
+          },
+          "required": ["query"]
+        }
+      },
+      {
+        "name": "search_guide",
+        "description": "Search EU4 guide/wiki embeddings for accurate mechanics and strategy info",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "What to search for in the guide"
+            }
+          },
+          "required": ["query"]
+        }
+      },
+      {
+        "name": "search_user_history",
+        "description": "Search the user's recent questions or notes",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Optional text to search; leave empty for recent activity"
+            }
+          },
+          "required": []
+        }
+      }
+    ]
+  },
+  "prompts": {
+    "visual_analysis": "Analyze this Europa Universalis IV screenshot and extract the topbar and key context. Return a single JSON object with fields: {\"date\": string|null, \"paused\": boolean|null, \"speed\": integer|null, \"ducats\": number|null, \"income\": number|null, \"manpower\": integer|null, \"sailors\": integer|null, \"stability\": number|null, \"prestige\": number|null, \"legitimacy_or_tradition\": number|null, \"corruption\": number|null, \"overextension\": number|null, \"war_exhaustion\": number|null, \"monarch_points\": {\"adm\": integer|null, \"dip\": integer|null, \"mil\": integer|null}, \"active_alerts\": [string], \"war_status\": \"at_war\"|\"at_peace\"|null, \"subjects_or_allies_visible\": [string], \"noteworthy\": boolean, \"description\": string}. Be conservative: if a value is uncertain, set it to null. Only return JSON; do not include commentary."
+  },
+  "rag": {
+    "embeddings_file": "game_companion/eu4/embeddings.json",
+    "top_k": 3,
+    "embed_model": "gemini-embedding-001"
+  },
+  "memory": {
+    "enabled": true
+  }
+}

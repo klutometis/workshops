@@ -1,0 +1,2001 @@
+{
+  "metadata": {
+    "title": "Building an MCP Server with Python",
+    "author": "Andrej Karpathy",
+    "source": "YouTube",
+    "video_id": "8rieuXTvBtM",
+    "total_duration": 612,
+    "total_concepts": 21,
+    "extracted_at": "2025-12-12T05:19:02.774Z",
+    "enriched_at": "2025-12-12T05:52:06.642Z",
+    "enrichment_version": "1.0"
+  },
+  "nodes": [
+    {
+      "id": "model_context_protocol",
+      "name": "Model Context Protocol (MCP)",
+      "description": "The Model Context Protocol (MCP) is a communication standard that enables AI tools (like large language models) to interact with and utilize custom functions and data provided by external services. It allows AI to access real-world capabilities beyond its inherent knowledge.",
+      "prerequisites": [],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 0,
+          "end": 20
+        }
+      ],
+      "code_examples": [],
+      "learning_objectives": [
+        "Explain the core purpose and functionality of the Model Context Protocol (MCP) in extending AI capabilities.",
+        "Configure a basic Python-based MCP server and manage its dependencies using UV.",
+        "Differentiate between MCP 'tools,' 'resources,' and 'prompts' and identify their appropriate use cases.",
+        "Implement custom MCP tools and resources in Python, including proper documentation for AI interpretation.",
+        "Integrate a local MCP server with an AI client application like Claude Desktop for real-world interaction."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "mcp_purpose_explanation",
+          "description": "Student can articulate why MCP is needed and what problem it solves for AI models, referencing its role in enabling real-world interactions.",
+          "difficulty": "basic",
+          "test_method": "Ask: 'In your own words, what core problem does the Model Context Protocol aim to solve for large language models, and why is it important for expanding their utility?'"
+        },
+        {
+          "skill": "mcp_server_setup_basic",
+          "description": "Student can successfully initialize an MCP project and install necessary dependencies using UV, as demonstrated in the video.",
+          "difficulty": "basic",
+          "test_method": "Ask: 'Outline the precise sequence of UV commands you would use to set up a new Python project for an MCP server, assuming UV is already installed and you want to install the `mcp_cli` package.'"
+        },
+        {
+          "skill": "differentiate_tools_resources",
+          "description": "Student can clearly distinguish between the functionalities of MCP 'tools' and 'resources' and provide concrete examples for each based on the video's explanation.",
+          "difficulty": "intermediate",
+          "test_method": "Ask: 'You want to enable an AI to add two numbers and also to access a greeting message. Which MCP primitive would you use for each task (tool or resource) and why?'"
+        },
+        {
+          "skill": "implement_basic_mcp_function",
+          "description": "Student can write a simple Python function decorated as an `@mcp_tool` or `@mcp_resource` that performs a basic operation, including the required docstring comments.",
+          "difficulty": "intermediate",
+          "test_method": "Ask: 'Write a Python function using the MCP decorator syntax that acts as a 'resource' to return a hardcoded list of favorite fruits. Ensure it includes appropriate comments for output that an AI could understand.'"
+        },
+        {
+          "skill": "configure_mcp_client_integration",
+          "description": "Student can correctly configure an AI client application (e.g., Claude Desktop) to connect to and recognize a local MCP server, troubleshooting common path issues.",
+          "difficulty": "advanced",
+          "test_method": "Ask: 'You've created an MCP server, but Claude Desktop isn't recognizing your tools. You suspect a problem with the `command` in Claude's configuration JSON. How would you find the absolute path for `uv` and correctly update the Claude Desktop configuration to resolve this?'"
+        },
+        {
+          "skill": "understand_mcp_prompt_primitive",
+          "description": "Student understands the purpose of the `mcp_prompt` primitive and how it differs from tools and resources, identifying when to use it.",
+          "difficulty": "intermediate",
+          "test_method": "Ask: 'The video mentions `mcp_prompt` for summarizing a to-do list. How does a prompt primitive facilitate AI interaction differently from a tool or resource, and what kind of output does it primarily generate?'"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "MCP grants the AI model new inherent knowledge or built-in capabilities.",
+          "reality": "MCP is a communication standard that allows AI to *call external functions* and access *external data* from your local environment or other services. The AI itself doesn't 'learn' new skills or data from MCP; it learns *how to use* the provided tools and resources based on their descriptions.",
+          "correction_strategy": "Ask the student to explain how an AI model would 'add data to a database' if it only relied on its training data. Then, explain that MCP is the bridge that allows it to interact with such external systems, much like a human using a calculator without understanding its internal workings."
+        },
+        {
+          "misconception": "The comments (docstrings) for MCP tools/resources are only for human developers to read.",
+          "reality": "The comments containing 'what this function do,' 'inputs,' and 'outputs' are CRITICAL because the large language model *interprets* this metadata. It uses these descriptions to understand the tool's purpose, expected arguments, and returned values, enabling it to correctly generate calls to your MCP server.",
+          "correction_strategy": "Present a simple MCP tool without these detailed comments and ask the student how they think the AI would infer its usage. Explain that the LLM needs this structured metadata to reason about tool selection and parameter passing."
+        },
+        {
+          "misconception": "Once the MCP server is running, the AI client will automatically detect and list its available tools.",
+          "reality": "The AI client (e.g., Claude Desktop) needs to be explicitly configured with the path and command to run your MCP server script. Furthermore, modifications to this configuration often require a full restart or refresh of the AI client to recognize the new settings.",
+          "correction_strategy": "Guide the student through the steps shown in the video where the Claude Desktop configuration JSON is edited (including finding the absolute path for `uv`), emphasizing the need for explicit setup and potential client restarts to apply changes."
+        }
+      ],
+      "key_insights": [
+        "MCP serves as a standardized bridge, enabling AI models to interact with the real world by executing custom functions and accessing dynamic data beyond their static training corpora.",
+        "The three core MCP primitives — 'tools,' 'resources,' and 'prompts' — offer distinct functionalities for AI: executing actions, retrieving contextual data, and generating structured text responses, respectively.",
+        "Effective communication between local Python functions and the AI model is facilitated by carefully structured comments (docstrings) that the AI interprets as a schema for understanding and utilizing the exposed functionalities.",
+        "Setting up and configuring a local MCP server provides a powerful and secure method for rapidly prototyping and integrating custom, real-world functionalities directly with AI applications running on a user's machine."
+      ],
+      "practical_applications": [
+        "Performing CRUD (Create, Read, Update, Delete) operations on custom databases or local data stores via AI commands.",
+        "Automating interactions with external APIs (e.g., sending emails, fetching real-time weather, managing calendars, integrating with enterprise systems).",
+        "Enabling AI to perform complex data processing, image manipulation (e.g., resizing, editing), or file system operations using local libraries.",
+        "Generating dynamic summaries, reports, or personalized content based on live, user-specific, or external data sources.",
+        "Creating personalized 'agentic' AI experiences that can interact with and modify a user's local environment or specific applications."
+      ],
+      "common_gotchas": [
+        "Using an incorrect relative path instead of the absolute path for `uv` or `python` in the AI client's configuration, leading to server startup failures.",
+        "Forgetting to perform a full restart of the AI client (e.g., Claude Desktop) after making changes to the MCP server code or client configuration, preventing the AI from recognizing updates.",
+        "Mismatched script name (e.g., `main.py` vs. `server.py`) between the `uv run mcp_cli` command in the client configuration and the actual Python file, causing the server not to launch.",
+        "Missing or poorly formatted `inputs` and `outputs` sections within the Python function's comments, leading to the AI misinterpreting or failing to call the tool/resource correctly.",
+        "Encountering file system or network permission issues when the AI client attempts to access local folders or run scripts, requiring manual permission grants."
+      ],
+      "debugging_tips": [
+        "Verify AI Client Configuration: Double-check the `command` and `arguments` in the AI client's configuration JSON for correct absolute paths to executables (like `uv`) and accurate script names.",
+        "Check Server Logs Independently: Attempt to run your MCP server script directly from your terminal (`uv run mcp_cli main.py`) to confirm it starts without errors, isolating issues from the AI client's environment.",
+        "Examine AI Client Error Messages: If the AI client indicates a server failure or tool unavailability, review any error messages provided within the client interface or associated log files for specific clues.",
+        "Validate Tool/Resource Docstrings: Ensure all `mcp_tool`, `mcp_resource`, and `mcp_prompt` functions have clear, well-structured comments detailing 'what this function do,' 'inputs,' and 'outputs,' as this is how the AI understands them.",
+        "Restart AI Client Religiously: Always perform a complete restart of the AI client application after modifying your MCP server code, dependencies, or the client's configuration file to ensure changes are applied."
+      ]
+    },
+    {
+      "id": "mcp_server",
+      "name": "MCP Server",
+      "description": "An MCP server is a software application, typically built with a programming language like Python, that implements the Model Context Protocol. Its purpose is to expose specific functionalities (tools) and data (resources) that AI clients can discover and invoke.",
+      "prerequisites": [
+        "model_context_protocol"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 20,
+          "end": 30
+        }
+      ],
+      "code_examples": [],
+      "learning_objectives": [
+        "Set up a basic MCP server development environment using the uv package manager and the mcp-cli SDK.",
+        "Differentiate between the three core MCP primitives: Tools, Resources, and Prompts, and explain their distinct purposes.",
+        "Implement simple MCP Tools and Resources in Python to expose custom functionalities and data to AI clients.",
+        "Configure an AI client (e.g., Claude Desktop) to discover and interact with a locally running MCP server.",
+        "Extend MCP servers with more complex functionalities, such as database integration or dynamic data retrieval."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "mcp_env_setup",
+          "description": "Student can correctly initialize an MCP server project and install necessary dependencies.",
+          "difficulty": "basic",
+          "test_method": "Imagine you're starting a new MCP server project. What `uv` commands would you use to initialize it and add the MCP CLI dependency?"
+        },
+        {
+          "skill": "primitive_differentiation",
+          "description": "Student can accurately distinguish between MCP Tools, Resources, and Prompts based on their intended use.",
+          "difficulty": "basic",
+          "test_method": "You need to enable an AI model to (1) fetch a list of available products, and (2) add a new product to inventory. Which of these would be best implemented as an MCP Tool, and which as a Resource, and why?"
+        },
+        {
+          "skill": "basic_tool_resource_impl",
+          "description": "Student can write a functional Python snippet defining a basic MCP Tool or Resource with appropriate decorators and comments.",
+          "difficulty": "intermediate",
+          "test_method": "Write a Python function for an MCP server that takes a user's name and returns a personalized greeting. Specify if it should be a Tool or Resource and include the necessary decorator and comments."
+        },
+        {
+          "skill": "client_server_config",
+          "description": "Student can correctly configure an AI client (like Claude Desktop) to connect to and utilize a local MCP server, including troubleshooting common configuration issues.",
+          "difficulty": "intermediate",
+          "test_method": "Your MCP server is running locally, but Claude Desktop isn't showing the tools. What specific steps would you check in Claude's developer settings, and what common configuration mistake might cause this?"
+        },
+        {
+          "skill": "advanced_mcp_extension",
+          "description": "Student can describe how to integrate external systems (e.g., databases, external APIs) into an MCP server using Tools and Resources.",
+          "difficulty": "advanced",
+          "test_method": "If you wanted your MCP server to interact with a SQL database to retrieve user profiles, describe how you would design an MCP Resource for getting a user's schema and an MCP Tool for updating a user's email address."
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "MCP Tools and Resources are interchangeable; they both just expose Python functions to the AI.",
+          "reality": "Tools are for executing actions or modifying state (like POST/PUT/DELETE), while Resources are for providing contextual data or reading state (like GET). They serve distinct purposes in how the AI interacts with the server.",
+          "correction_strategy": "Ask the student to describe a real-world scenario (e.g., managing a shopping cart) and identify which operations should use a 'tool' (e.g., 'add item') and which a 'resource' (e.g., 'view cart contents'), emphasizing the action vs. data aspect."
+        },
+        {
+          "misconception": "The comments within MCP Tool/Resource functions are just for developers and don't impact the AI.",
+          "reality": "The comments (specifically description, inputs, and outputs) are crucial. They serve as the schema and documentation that the AI client uses to understand how to invoke the tool or interpret the resource's output.",
+          "correction_strategy": "Show an example of an MCP function without clear comments and ask how an AI would know how to use it. Then, show the same function with proper comments and explain how the AI parses that information to understand arguments and purpose."
+        },
+        {
+          "misconception": "Once my MCP server is running, the AI client (e.g., Claude Desktop) will automatically discover and use it without any specific setup.",
+          "reality": "AI clients require explicit configuration to connect to a local MCP server. This involves adding server details (command, arguments, absolute paths) to the client's configuration file and often requires restarting the client and granting necessary permissions.",
+          "correction_strategy": "Guide the student through the steps Karpathy showed for configuring Claude Desktop, highlighting why each step (like providing the absolute path for `uv` or restarting the client) is necessary for the client to find and initialize the server connection."
+        }
+      ],
+      "key_insights": [
+        "The Model Context Protocol (MCP) empowers AI clients (like Claude or Cursor) to extend their capabilities by dynamically discovering and invoking custom functions and accessing data exposed by external servers.",
+        "MCP servers act as a bridge, allowing AI models to transcend their internal knowledge and interact with the 'real world' through specific tools (for actions) and resources (for contextual information).",
+        "The success of an MCP server relies on clearly defining its functionalities (tools and resources) using Python functions, decorators (@mcp_tool, @mcp_resource, @mcp_prompt), and precise docstrings/comments that the AI client can parse.",
+        "Setting up an MCP server involves both writing the Python application and correctly configuring the AI client (e.g., providing absolute execution paths and permissions) to ensure seamless communication and tool availability."
+      ],
+      "practical_applications": [
+        "Integrating AI models with custom databases or legacy systems to perform CRUD operations (create, read, update, delete) on structured data.",
+        "Enabling AI to interact with and control local machine functionalities, such as managing files, editing images, or automating tasks.",
+        "Allowing AI agents to access real-time or dynamic information from external APIs or local data sources, beyond their training data.",
+        "Creating personalized AI assistants that can perform complex, multi-step tasks by chaining together custom tools and leveraging contextual data."
+      ],
+      "common_gotchas": [
+        "Using `server.py` instead of `main.py` (or the actual script name) in the Claude Desktop configuration. The provided example initially uses `server.py` in the default config, but the user's script might be named `main.py`, leading to a server not found error.",
+        "Forgetting to provide the absolute path for `uv` (or `python`) in the AI client's configuration. Relative paths often fail when the client tries to execute the server command from a different context.",
+        "Not restarting the AI client (e.g., Claude Desktop) after making changes to the server code or configuration. Changes are often not picked up until the client application is fully reloaded.",
+        "Incorrectly structuring the comments/docstrings for MCP tools/resources. The AI model relies heavily on these for understanding inputs, outputs, and the function's purpose, so syntax errors or omissions can lead to tools not being invoked correctly."
+      ],
+      "debugging_tips": [
+        "Check server console output: Always monitor the terminal where your MCP server is running for any error messages or stack traces.",
+        "Verify AI client logs/developer settings: Look for server status indicators or error messages within the AI client's developer configuration or logs (e.g., 'Demo has failed' message in Claude Desktop settings).",
+        "Confirm absolute paths: Double-check that all paths in the AI client's configuration (especially for `uv` or the main script) are absolute and correct using commands like `which uv`.",
+        "Isolate the problem: If tools aren't showing up, first ensure the server runs successfully by itself. If it does, the issue is likely client configuration. If the server doesn't run, debug the Python code first.",
+        "Restart everything: As a last resort, restart both the MCP server and the AI client application to clear any cached states or re-initialize connections."
+      ]
+    },
+    {
+      "id": "python_sdk_for_mcp",
+      "name": "Python SDK for MCP",
+      "description": "The official Python Software Development Kit (SDK) for MCP provides libraries and utilities that simplify the development of MCP servers in Python. It abstracts away the low-level protocol details, allowing developers to focus on defining their tools and resources.",
+      "prerequisites": [
+        "mcp_server"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 30,
+          "end": 40
+        }
+      ],
+      "code_examples": [],
+      "learning_objectives": [
+        "Explain the core purpose and benefits of using the Python SDK for MCP servers.",
+        "Set up a basic MCP server project using the `uv` package manager and the MCP Python SDK.",
+        "Differentiate between MCP tools, resources, and prompts, and identify appropriate use cases for each.",
+        "Implement a simple MCP tool and resource in Python using the SDK's decorators.",
+        "Configure an AI client (like Claude Desktop) to successfully interact with a local MCP server built with the Python SDK."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "sdk_project_setup",
+          "description": "Successfully initializes a Python project for an MCP server and installs the necessary SDK dependencies.",
+          "difficulty": "basic",
+          "test_method": "Describe the sequence of `uv` commands you would use to create a new project directory and install the `mcp-cli` package to start developing an MCP server."
+        },
+        {
+          "skill": "primitive_identification",
+          "description": "Accurately identifies and explains the distinct roles of MCP tools, resources, and prompts.",
+          "difficulty": "basic",
+          "test_method": "Karpathy emphasizes three primitives: tools, resources, and prompts. Provide an example for each and explain when you would use a 'tool' versus a 'resource' in an MCP server."
+        },
+        {
+          "skill": "implement_basic_api",
+          "description": "Writes Python code using the SDK to define a functional MCP tool and a functional MCP resource.",
+          "difficulty": "intermediate",
+          "test_method": "Write a `main.py` file that uses `FastMCP` to expose a tool called `greet_user` that takes a name and returns 'Hello, [name]!', and a resource called `server_status` that always returns 'Online'."
+        },
+        {
+          "skill": "client_integration_config",
+          "description": "Explains and demonstrates how to configure an AI client to connect to and utilize a local MCP server.",
+          "difficulty": "intermediate",
+          "test_method": "After successfully running your MCP server locally, what are the crucial steps you would take within an AI client's settings (like Claude Desktop) to ensure it can discover and invoke your server's functionalities? What specific information needs to be provided?"
+        },
+        {
+          "skill": "debug_path_issues",
+          "description": "Diagnoses and resolves common server configuration issues, specifically related to incorrect executable paths in AI client settings.",
+          "difficulty": "advanced",
+          "test_method": "You've configured your AI client, but the MCP server shows a 'failed' status, with logs indicating `uv` cannot be found. How would you troubleshoot and resolve this specific issue, referencing Karpathy's solution?"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "MCP tools and resources are just different labels for functions the AI can call, with no fundamental difference.",
+          "reality": "Tools are designed for the AI to *perform actions* (e.g., write to a database, modify an image), while resources are for the AI to *receive contextual data* (e.g., read database schema, get static information).",
+          "correction_strategy": "Ask the student to consider a scenario where an AI needs to update an item in a list versus getting a summary of the list. Guide them to realize that one requires an 'action' and the other requires 'data retrieval', mapping these to tools and resources respectively."
+        },
+        {
+          "misconception": "Once the Python MCP server is running on my machine, any AI client will automatically detect and integrate with it without additional setup.",
+          "reality": "AI clients require explicit configuration (e.g., editing a JSON file for Claude Desktop) to specify the command and arguments needed to launch and connect to the local MCP server.",
+          "correction_strategy": "Remind the student of Karpathy's steps where he manually opened Claude Desktop's settings and edited the `claude-desktop-configuration.json` file. Emphasize that this manual step indicates the necessity for explicit client-side configuration."
+        },
+        {
+          "misconception": "The command used to run the server in the terminal (e.g., `uv run mcp-cli main.py`) can be directly copy-pasted into the AI client's configuration without modification.",
+          "reality": "The execution environment of the AI client might differ from the user's terminal. Often, the absolute path to the executable (`uv` in this case) is required in the client's configuration for robust and reliable execution, as relative paths might not be resolved correctly.",
+          "correction_strategy": "Refer back to Karpathy's debugging segment where he specifically used `which uv` to find the absolute path and updated the configuration. Explain that this is a common necessity when a program is run by another application in a potentially different environment."
+        }
+      ],
+      "key_insights": [
+        "The MCP Python SDK provides a high-level abstraction, allowing developers to define AI-callable functions (tools) and data providers (resources) without delving into low-level protocol details.",
+        "MCP tools enable AI models to take actions by executing Python functions, extending their capabilities beyond pure text generation, while MCP resources provide critical contextual data to inform AI reasoning.",
+        "Successful integration of an MCP server requires not only writing the server-side logic with the SDK but also carefully configuring the AI client to correctly launch and communicate with that local server.",
+        "The `@mcp_tool`, `@mcp_resource`, and `@mcp_prompt` decorators are the fundamental building blocks provided by the SDK for exposing Python functions and data to AI models."
+      ],
+      "practical_applications": [
+        "Creating custom AI agents that can perform CRUD operations on a database (e.g., SQLite, PostgreSQL) using SQL queries defined as tools.",
+        "Developing AI assistants capable of advanced image manipulation (e.g., resizing, filtering) by exposing image processing functions as tools.",
+        "Building interactive to-do list applications where an AI can add, list, update, or delete items by calling specific MCP tools.",
+        "Providing real-time or static contextual data to LLMs, such as the latest news articles or database schemas, through MCP resources.",
+        "Generating custom, structured prompts for LLMs based on dynamic data via MCP prompt primitives."
+      ],
+      "common_gotchas": [
+        "Forgetting to restart the AI client (e.g., Claude Desktop) after making changes to its configuration file, leading to the server not being detected or updated.",
+        "Incorrectly structuring the comments for tool/resource functions (input, output, description), which can affect how the AI client understands and uses the exposed capabilities.",
+        "Network or firewall settings potentially blocking communication between the AI client and the local MCP server, even if configured correctly.",
+        "Using relative paths for the server command in the AI client's configuration, which can fail if the client's execution context differs from the development environment."
+      ],
+      "debugging_tips": [
+        "Always check the AI client's developer settings or logs for specific error messages if the MCP server fails to connect or operate.",
+        "If facing 'command not found' errors, use `which <command>` (e.g., `which uv`) in your terminal to find the absolute path and update the AI client's configuration.",
+        "Run the MCP server command directly in your terminal first to ensure the Python code itself runs without errors, isolating issues between server logic and client configuration.",
+        "Verify the syntax and structure of your AI client's configuration JSON carefully, as a misplaced comma or bracket can prevent it from parsing correctly.",
+        "Ensure that the name of the Python file specified in the AI client's configuration matches the actual name of your server script (e.g., `main.py` vs `server.py`)."
+      ]
+    },
+    {
+      "id": "uv_package_manager",
+      "name": "UV Package Manager",
+      "description": "`uv` is a modern Python package manager and installer used to efficiently manage project dependencies and virtual environments. It streamlines the process of adding, removing, and updating packages for Python projects.",
+      "prerequisites": [],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 40,
+          "end": 60
+        }
+      ],
+      "code_examples": [
+        {
+          "segment_index": 1,
+          "timestamp": 75.695,
+          "code": "uv -Vuv 0.6.14 (a4cec56dc 2025-04-09)uv init mcp-server-democd mcp-server-demoInitialized project `mcp-server-demo` at `/Users/erictech/Desktop/mcp-server-demo`(base) -> mcp-server-demo git:(main) x",
+          "rationale": "This snippet demonstrates checking the `uv` version, initializing a new project using `uv init`, and then navigating into the created project directory with `cd`, showcasing basic project setup with `uv`.",
+          "teaching_context": "This teaches the initial steps of setting up a new Python project using the `uv` package manager, including verifying its installation and creating a dedicated virtual environment for the project."
+        }
+      ],
+      "learning_objectives": [
+        "Explain the purpose and benefits of uv as a modern Python package manager.",
+        "Initialize a new Python project and its virtual environment using uv init.",
+        "Add specific dependencies to a uv-managed project using uv add.",
+        "Execute Python scripts within a uv-managed environment using uv run.",
+        "Troubleshoot uv execution issues by providing the absolute path to the uv executable when integrating with external tools."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "uv_installation_check",
+          "description": "Student can verify uv is installed on their system and identify its version.",
+          "difficulty": "basic",
+          "test_method": "How would you check if uv is installed on your system and what version it is? What command would you use? (Referencing uv -V from [1:15])"
+        },
+        {
+          "skill": "project_initialization_uv",
+          "description": "Student can create a new Python project with its dedicated virtual environment using uv init.",
+          "difficulty": "basic",
+          "test_method": "Imagine you need to start a new project called 'my-mcp-app'. What uv command would you use to set up the project and its environment? (Referencing uv init mcp-server-demo from [1:15])"
+        },
+        {
+          "skill": "dependency_management_uv",
+          "description": "Student can add required Python packages to a uv-managed project's dependencies.",
+          "difficulty": "intermediate",
+          "test_method": "After initializing 'my-mcp-app', you decide you need the 'requests' library for your project. How would you add it using uv? (Referencing uv add mcp-cli from [1:36])"
+        },
+        {
+          "skill": "script_execution_uv",
+          "description": "Student can execute a Python script within the context of a uv-managed project's virtual environment.",
+          "difficulty": "intermediate",
+          "test_method": "If you have a script named 'server.py' in your uv project that relies on its installed dependencies, what uv command would you use to run it? (Referencing uv run mcp-cli run server.py then main.py from [3:00])"
+        },
+        {
+          "skill": "uv_path_troubleshooting",
+          "description": "Student can diagnose and resolve issues where uv commands fail in external applications due to incorrect path configurations.",
+          "difficulty": "advanced",
+          "test_method": "If an external application, like Claude Desktop, is failing to run a uv command, and you suspect a path issue, what steps would you take to find the correct uv executable and configure the application? (Referencing which uv and using the absolute path from [4:04])"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "uv only installs packages, it doesn't manage virtual environments.",
+          "reality": "uv is a comprehensive package manager that automatically creates and manages an isolated virtual environment for each project, ensuring dependencies are isolated.",
+          "correction_strategy": "Ask the student to explain what a virtual environment is and then discuss where uv creates its environment after 'uv init', emphasizing the isolation benefit by inspecting the project structure."
+        },
+        {
+          "misconception": "Installing a package with uv add makes it globally available on the system.",
+          "reality": "uv add installs packages into the project's isolated virtual environment, not globally, to prevent conflicts between different projects.",
+          "correction_strategy": "Discuss the problems that arise from global package installations and how uv's approach (like pipenv or poetry) specifically avoids these by confining packages to the project's environment."
+        },
+        {
+          "misconception": "uv run is just a verbose way to say python <script_name>.py.",
+          "reality": "uv run ensures that the script is executed using the Python interpreter and packages from the project's specific virtual environment, preventing issues with system-wide or incorrect Python installations.",
+          "correction_strategy": "Ask the student to consider a scenario where a project needs a very specific version of a library. How does 'uv run' guarantee that specific version is used, compared to simply calling 'python' which might pick up a different interpreter or global package?"
+        }
+      ],
+      "key_insights": [
+        "uv simplifies Python project setup and dependency management by integrating virtual environment creation and package installation into a single, efficient workflow.",
+        "uv automatically isolates project dependencies within a virtual environment, preventing conflicts and ensuring reproducibility across different development environments.",
+        "Using 'uv run' ensures that scripts are executed within the correct virtual environment, leveraging the project's specific dependencies without manual environment activation.",
+        "When integrating 'uv' with external applications or scripts, providing the absolute path to the 'uv' executable is a robust way to resolve execution issues related to system PATH variables."
+      ],
+      "practical_applications": [
+        "Managing dependencies for any Python development project, from small scripts to large applications, ensuring consistent environments.",
+        "Creating reproducible development environments that simplify collaboration and deployment.",
+        "Streamlining CI/CD pipelines by providing fast and reliable dependency installation.",
+        "Developing and distributing Python tools or libraries where precise dependency control is critical."
+      ],
+      "common_gotchas": [
+        "External applications failing to locate the 'uv' executable if its path is not correctly configured in the application's environment (as shown in the video with Claude Desktop [4:04]).",
+        "Assuming 'uv' is just a 'pip' replacement without recognizing its integrated virtual environment management capabilities."
+      ],
+      "debugging_tips": [
+        "Always start by verifying 'uv' installation and version using 'uv -V' to ensure it's accessible and functioning.",
+        "If 'uv' commands fail in specific contexts (e.g., an IDE, external tool, or custom script), use 'which uv' (on Unix-like) or 'where uv' (on Windows) to find its absolute path and provide it explicitly in the configuration [4:04].",
+        "After 'uv init', confirm the creation of the '.venv' directory (or configured virtual environment location) to ensure the project environment was set up successfully."
+      ]
+    },
+    {
+      "id": "project_initialization_with_uv",
+      "name": "Project Initialization with UV",
+      "description": "Initializing a Python project with `uv` involves creating a new project directory and setting up a dedicated virtual environment. This isolates project dependencies, preventing conflicts with other Python projects on the system.",
+      "prerequisites": [
+        "uv_package_manager"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 60,
+          "end": 80
+        }
+      ],
+      "code_examples": [
+        {
+          "segment_index": 1,
+          "timestamp": 75.695,
+          "code": "uv -Vuv 0.6.14 (a4cec56dc 2025-04-09)uv init mcp-server-democd mcp-server-demoInitialized project `mcp-server-demo` at `/Users/erictech/Desktop/mcp-server-demo`(base) -> mcp-server-demo git:(main) x",
+          "rationale": "This snippet demonstrates checking the `uv` version, initializing a new project using `uv init`, and then navigating into the created project directory with `cd`, showcasing basic project setup with `uv`.",
+          "teaching_context": "This teaches the initial steps of setting up a new Python project using the `uv` package manager, including verifying its installation and creating a dedicated virtual environment for the project."
+        }
+      ],
+      "learning_objectives": [
+        "Explain the purpose of `uv` for Python project management and dependency isolation.",
+        "Demonstrate how to verify the installation of `uv` on a local machine.",
+        "Implement the `uv init` command to create a new Python project with a dedicated virtual environment.",
+        "Articulate the benefits of using virtual environments for managing project dependencies."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "uv_installation_check",
+          "description": "Student can correctly check if `uv` is installed and identify its version.",
+          "difficulty": "basic",
+          "test_method": "How would you confirm that `uv` is properly installed on your system using the command line?"
+        },
+        {
+          "skill": "project_initialization_command",
+          "description": "Student can use the `uv init` command to create a new project directory with a virtual environment.",
+          "difficulty": "basic",
+          "test_method": "Imagine you need to start a new Python project called 'my_app'. What `uv` command would you use to initialize it, and what would be the next logical step in the terminal?"
+        },
+        {
+          "skill": "virtual_environment_understanding",
+          "description": "Student understands the role of a virtual environment created by `uv init` in isolating project dependencies.",
+          "difficulty": "intermediate",
+          "test_method": "After running `uv init my_project`, `uv` sets up a virtual environment. Can you explain *why* this virtual environment is created and what problem it solves for Python development?"
+        },
+        {
+          "skill": "project_navigation",
+          "description": "Student can navigate into the newly created project directory after initialization.",
+          "difficulty": "basic",
+          "test_method": "You've just initialized 'my_project'. What command would you use to enter its directory and start working within its context?"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "`uv init` simply creates an empty folder.",
+          "reality": "`uv init` not only creates a project folder but also sets up a dedicated virtual environment within it, and potentially default project files like `.gitignore` and `main.py` (as shown in the video at [2:05]), preparing it for dependency management.",
+          "correction_strategy": "Ask the student what they expect to find inside a directory created by `uv init`. If they only mention the folder, guide them to recall the virtual environment aspect and other generated files mentioned in the video."
+        },
+        {
+          "misconception": "Virtual environments are optional or only for advanced users.",
+          "reality": "Virtual environments are a fundamental best practice for Python development. They ensure project dependencies don't conflict with other projects or the global Python installation, making projects more stable and portable.",
+          "correction_strategy": "Present a scenario where two different projects require conflicting versions of the same library. Ask the student how they would manage this without virtual environments, then introduce how virtual environments elegantly solve this problem."
+        },
+        {
+          "misconception": "`uv init` automatically activates the virtual environment.",
+          "reality": "While `uv init` creates the virtual environment, the student still needs to explicitly `cd` into the project directory. For `uv` commands, being in the project directory is often sufficient for `uv` to detect and use the project's virtual environment. For other tools or explicit activation, an activation command (though not explicitly shown in `uv`'s basic flow here) might be needed.",
+          "correction_strategy": "After discussing `uv init`, ask the student what the immediate next step is to start working with the project's environment using `uv` and why that step is necessary, referring to the transcript's `cd` command at [1:05]."
+        }
+      ],
+      "key_insights": [
+        "`uv` streamlines Python project setup by integrating dependency management and virtual environment creation into simple, efficient commands.",
+        "Dedicated virtual environments are crucial for isolating project dependencies, preventing conflicts and ensuring consistent project execution across different environments.",
+        "Initializing a project with `uv init` establishes a clean, self-contained workspace that is immediately ready for adding project-specific packages.",
+        "The `cd` command is essential for entering the context of a newly initialized `uv` project, ensuring subsequent `uv` commands operate within that project's virtual environment."
+      ],
+      "practical_applications": [
+        "Setting up any new Python-based application, such as web frameworks (Flask, Django) or standalone scripts.",
+        "Developing data science and machine learning projects that require precise control over library versions.",
+        "Creating command-line tools where a controlled set of dependencies is necessary to avoid system-wide interference.",
+        "Ensuring consistent and reproducible development environments for collaborative software teams."
+      ],
+      "common_gotchas": [
+        "Forgetting to `cd` into the newly created project directory after `uv init`, leading to `uv` commands operating outside the intended project context or failing to find the virtual environment.",
+        "Not having `uv` installed globally or not having its executable in the system's PATH, resulting in 'command not found' errors.",
+        "Confusing `uv` commands with those of traditional package managers like `pip` or `venv`; while serving similar purposes, `uv` has its own distinct syntax and workflow."
+      ],
+      "debugging_tips": [
+        "If `uv` commands are not recognized, first verify that `uv` is installed and accessible in your shell's PATH by running `uv -V`.",
+        "If project-specific `uv` commands (like `uv add`) are not working as expected, confirm you are in the correct project directory using `pwd` to ensure `uv` detects the project's virtual environment.",
+        "Carefully review the output messages from `uv` after executing commands; `uv` is designed to provide clear and informative error messages that often point directly to the problem."
+      ]
+    },
+    {
+      "id": "adding_project_dependencies_with_uv",
+      "name": "Adding Project Dependencies with UV",
+      "description": "Adding project dependencies using `uv` involves using the `uv add` command to install required Python packages (e.g., `mcp-cli`) into the project's virtual environment, making them available for the server application.",
+      "prerequisites": [
+        "project_initialization_with_uv"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 80,
+          "end": 100
+        }
+      ],
+      "code_examples": [],
+      "learning_objectives": [
+        "Explain the purpose of adding dependencies in a Python project.",
+        "Execute the `uv add` command to install a specified package into a `uv`-managed project.",
+        "Identify where installed packages reside within a `uv` managed project and understand the benefit of this isolation."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "dependency_purpose_explanation",
+          "description": "Student can articulate why external libraries are needed for a Python application and the role of a dependency manager.",
+          "difficulty": "basic",
+          "test_method": "Imagine you're building a Python application that needs to make HTTP requests. Why can't you just `import requests` right away? What problem do dependencies solve in this scenario?"
+        },
+        {
+          "skill": "uv_add_command_execution",
+          "description": "Student can correctly use the `uv add` command to install a specific package (e.g., `mcp-cli`) into an existing `uv` project.",
+          "difficulty": "basic",
+          "test_method": "Given a `uv` initialized project directory, demonstrate how you would install the `fastapi` package. What command would you type into the terminal?"
+        },
+        {
+          "skill": "virtual_environment_understanding",
+          "description": "Student understands that `uv` installs packages into a project-specific virtual environment, ensuring dependency isolation.",
+          "difficulty": "intermediate",
+          "test_method": "After running `uv add mcp-cli`, where exactly does `uv` place the `mcp-cli` package files? Is it installed globally on your system, or somewhere specific to your project? Why is this important?"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "Dependencies installed with `uv add` are global and accessible by any Python project on the machine.",
+          "reality": "`uv` (like other modern Python package managers) installs dependencies into a project-specific virtual environment. This isolates project requirements.",
+          "correction_strategy": "Ask the student to consider a scenario where Project A needs `library_X` version 1.0 and Project B needs `library_X` version 2.0. How would a global installation cause issues? Guide them to understand the benefits of isolation."
+        },
+        {
+          "misconception": "`uv add` only downloads the package, and further steps are needed to make it usable in code.",
+          "reality": "`uv add` downloads, installs, and integrates the package into the project's virtual environment, making it immediately available for `import` and use within Python scripts run in that environment.",
+          "correction_strategy": "After running `uv add some-package`, what is the very next thing you can do with `some-package` in your Python code? Do you need any extra commands or setup to start using it?"
+        }
+      ],
+      "key_insights": [
+        "`uv add` is the canonical command for incorporating external Python libraries into a project managed by `uv`, streamlining the dependency installation process.",
+        "Dependencies installed via `uv add` are automatically placed within a dedicated virtual environment for the project, preventing version conflicts and maintaining project integrity.",
+        "Once a package is added with `uv add`, its modules and functions become directly available for `import` and use in the project's Python scripts, enabling immediate functionality."
+      ],
+      "practical_applications": [
+        "Integrating web frameworks (e.g., FastAPI, Django, Flask) into a Python project.",
+        "Adding data science libraries (e.g., NumPy, Pandas, Scikit-learn) for analytical applications.",
+        "Incorporating utility libraries (e.g., `requests` for HTTP, `Pillow` for image processing) to extend application capabilities."
+      ],
+      "common_gotchas": [
+        "Typographical errors in the package name during `uv add` will result in a 'package not found' error.",
+        "Attempting to `import` a newly added package in a Python interpreter or script not running within the `uv` managed environment will lead to an `ModuleNotFoundError`.",
+        "Forgetting to run `uv add` for a required package, causing runtime errors when the application tries to import it."
+      ],
+      "debugging_tips": [
+        "If `uv add` fails, double-check the spelling of the package name. Refer to the official package documentation or PyPI for the exact name.",
+        "Use `uv list` (or `uv pip list`) within your project directory to verify that a package has been successfully installed and is visible in the current virtual environment.",
+        "If a package is installed but Python still reports `ModuleNotFoundError`, ensure you are executing your Python script or starting your interpreter using `uv run python your_script.py` or within the `uv` shell to guarantee the correct virtual environment is active."
+      ]
+    },
+    {
+      "id": "basic_mcp_server_structure",
+      "name": "Basic MCP Server Structure (Python)",
+      "description": "The fundamental Python code structure for an MCP server involves importing the `FastAndMTP` class from the SDK to create an MCP server instance. This instance then serves as the entry point for defining and registering tools and resources.",
+      "prerequisites": [
+        "python_sdk_for_mcp",
+        "adding_project_dependencies_with_uv"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 100,
+          "end": 140
+        }
+      ],
+      "code_examples": [
+        {
+          "segment_index": 2,
+          "timestamp": 121.73500000000001,
+          "code": "# server.py\nfrom mcp.server.fastmcp import FastMCP\n\n# Create an MCP server\nmcp = FastMCP(\"Demo\")\n\n# Add an addition tool\n@mcp.tool()\ndef add(a: int, b: int) -> int:\n    \"\"\"Add two numbers\"\"\"\n    return a + b\n\n# Add a dynamic greeting resource\n@mcp.resource(\"greeting://{name}\")\ndef get_greeting(name: str) -> str:\n    \"\"\"Get a personalized greeting\"\"\"\n    return f\"Hello, {name}!\"",
+          "rationale": "This code demonstrates the fundamental structure of an MCP server by importing `FastMCP` from the Python SDK, creating a server instance, and then registering both a basic arithmetic `tool` and a dynamic `resource` using their respective decorators.",
+          "teaching_context": "This snippet introduces how to set up a minimal MCP server in Python, illustrating the core components: server initialization, defining a callable tool using `@mcp.tool()`, and creating a data-providing resource using `@mcp.resource()`."
+        },
+        {
+          "segment_index": 7,
+          "timestamp": 393.15999999999997,
+          "code": "from mcp.server.fastmcp import FastMCP\n\n# Create an MCP server for managing a simple in-memory to-do list\nmcp = FastMCP(\"AI To-Do List\")\n\n# In-memory storage for to-do items\ntodo_list = []\n\n@mcp.tool()\ndef add_todo(item: str) -> str:...\n@mcp.tool()\ndef list_todos() -> str:...\n@mcp.tool()\ndef update_todo(index: int, new_item: str) -> str:...\n@mcp.tool()\ndef delete_todo(index: int) -> str:...\n@mcp.resource(\"todos://latest\")\ndef get_latest_todo() -> str:...",
+          "rationale": "This snippet reiterates the basic `FastMCP` server setup and introduces `todo_list = []` as an example of `in_memory_storage` for application data. It then defines several stub functions for various `mcp_tools` and an `mcp_resource`.",
+          "teaching_context": "This teaches how to structure an MCP server to manage a simple application (like a to-do list) using in-memory data structures, outlining the various tools needed for data manipulation and retrieval."
+        }
+      ],
+      "learning_objectives": [
+        "Explain the purpose of the FastMCP class and its role in initializing an MCP server.",
+        "Differentiate between mcp.tool and mcp.resource decorators and their respective use cases (actions vs. data exposure).",
+        "Implement a minimal MCP server in Python, registering at least one tool and one resource using the FastMCP instance.",
+        "Describe how function comments within mcp.tool and mcp.resource definitions contribute to the LLM's understanding of the function's purpose, inputs, and outputs."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "server_initialization",
+          "description": "Student can correctly import FastMCP and instantiate an MCP server.",
+          "difficulty": "basic",
+          "test_method": "Write the Python code to initialize an MCP server named 'MyAwesomeServer' using the FastMCP class."
+        },
+        {
+          "skill": "tool_resource_differentiation",
+          "description": "Student can clearly articulate the difference between an MCP tool and an MCP resource, including when to use each.",
+          "difficulty": "basic",
+          "test_method": "Explain the primary difference between an mcp.tool and an mcp.resource in the context of an LLM interacting with your server. Provide an example use case for each."
+        },
+        {
+          "skill": "basic_tool_implementation",
+          "description": "Student can define a simple MCP tool function with correct decorator usage and comments for LLM context.",
+          "difficulty": "intermediate",
+          "test_method": "Design an MCP tool function called 'multiply' that takes two integers, 'x' and 'y', and returns their product. Ensure it has appropriate comments for an LLM to understand its purpose, inputs, and outputs."
+        },
+        {
+          "skill": "basic_resource_implementation",
+          "description": "Student can define a simple MCP resource function with a path parameter and correct decorator usage.",
+          "difficulty": "intermediate",
+          "test_method": "Create an MCP resource function 'get_user_profile' that exposes data at the path 'profile://{user_id}'. This function should take 'user_id' as a string and return a dummy profile string like 'Profile for {user_id}'. Include necessary comments."
+        },
+        {
+          "skill": "llm_comment_importance",
+          "description": "Student understands the critical role of specific comment formats within tool/resource functions for LLM interpretation.",
+          "difficulty": "advanced",
+          "test_method": "Karpathy mentions that comments for mcp.tool and mcp.resource functions 'contains three things: what this function do, then is going to be the inputs, and then we also have the outputs' [8:20]. Why are these specific comments so important, especially for an AI agent like Claude, compared to regular Python docstrings?"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "mcp.tool and mcp.resource can be used interchangeably, as they both expose Python functions.",
+          "reality": "They serve distinct purposes: mcp.tool is for actions/side-effects (e.g., adding data, making calculations), while mcp.resource is for exposing contextual data (e.g., fetching information, like a GET endpoint).",
+          "correction_strategy": "Consider a banking application. If you wanted to *transfer money* and *check an account balance*, which would be a tool and which a resource? Why?"
+        },
+        {
+          "misconception": "The comments and type hints in mcp.tool and mcp.resource functions are just for human developers, like regular Python docstrings.",
+          "reality": "While they help humans, their primary purpose in the MCP context is to provide structured metadata that Large Language Models (LLMs) like Claude use to understand how to call and interpret the function. They act as the contract between the Python function and the AI.",
+          "correction_strategy": "If an LLM needs to use your 'add' tool (from [2:01]), how does it know what arguments it expects and what kind of value it will return? What role do the comments and type hints play in that understanding?"
+        },
+        {
+          "misconception": "The FastMCP instance itself (e.g., 'mcp = FastMCP(\"Demo\")') is just a named container and doesn't do much beyond holding the name.",
+          "reality": "The FastMCP instance is the central object that orchestrates the entire server. It's responsible for registering all the tools and resources defined with its decorators, making them discoverable and callable by MCP clients. Without it, the decorators have no server to attach to.",
+          "correction_strategy": "Imagine you forgot to instantiate FastMCP but still used @mcp.tool on a function. What do you think would happen when you try to run your server, and why?"
+        }
+      ],
+      "key_insights": [
+        "The FastMCP class provides the foundational Python object for creating and managing an MCP server, acting as the central registry for all exposed functionalities.",
+        "MCP distinguishes clearly between 'tools' (for executing actions and affecting state) and 'resources' (for providing contextual data, akin to read-only endpoints), each exposed via its dedicated decorator (@mcp.tool, @mcp.resource).",
+        "The structured comments and type hints within functions decorated as mcp.tool or mcp.resource are critical for LLMs, serving as machine-readable descriptions of the function's purpose, expected inputs, and guaranteed outputs.",
+        "MCP servers enable AI agents to interact with custom backend logic by exposing Python functions as callable tools and data sources, extending their capabilities beyond their inherent knowledge."
+      ],
+      "practical_applications": [
+        "Integrating with databases (e.g., SQLite, for schema retrieval and data creation as shown in the video [10:30]).",
+        "Processing and manipulating media like images (e.g., reshaping, editing thumbnails [9:50]).",
+        "Building custom API endpoints that expose specific application logic to LLMs for advanced task automation.",
+        "Managing application-specific data, such as to-do lists or inventory systems."
+      ],
+      "common_gotchas": [
+        "Forgetting to restart the Claude Desktop application after changing the server configuration or code, leading to stale tool/resource definitions.",
+        "Incorrectly configuring the 'uv' path in config.json for Claude Desktop, especially on different operating systems, requiring the absolute path ('which uv').",
+        "Confusing mcp.tool (actions) with mcp.resource (data), leading to inefficient or incorrect LLM interactions.",
+        "Missing or malformed comments/type hints within decorated functions, causing the LLM to misinterpret or fail to use the tool/resource."
+      ],
+      "debugging_tips": [
+        "Check the server's terminal output for any error messages when running 'uv run mcp-server-demo main.py'.",
+        "Verify the 'Claude Desktop configuration.json' file for correct command and argument paths, especially the absolute path for 'uv'.",
+        "Inspect the 'Developer' settings in Claude Desktop to see if the MCP server configuration is failing and review any error logs provided there.",
+        "Use print statements or a debugger within your tool/resource functions to see if they are being called and what values they receive/return.",
+        "Confirm that Claude Desktop has the necessary file system access if your tools/resources interact with local files."
+      ]
+    },
+    {
+      "id": "mcp_resources",
+      "name": "MCP Resources",
+      "description": "MCP Resources are components of an MCP server designed to expose static or dynamic data to AI tools. They function similarly to `GET` endpoints in web APIs, allowing AI to load contextual information into its working memory without executing code.",
+      "prerequisites": [
+        "basic_mcp_server_structure"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 140,
+          "end": 160
+        }
+      ],
+      "code_examples": [
+        {
+          "segment_index": 2,
+          "timestamp": 121.73500000000001,
+          "code": "# server.py\nfrom mcp.server.fastmcp import FastMCP\n\n# Create an MCP server\nmcp = FastMCP(\"Demo\")\n\n# Add an addition tool\n@mcp.tool()\ndef add(a: int, b: int) -> int:\n    \"\"\"Add two numbers\"\"\"\n    return a + b\n\n# Add a dynamic greeting resource\n@mcp.resource(\"greeting://{name}\")\ndef get_greeting(name: str) -> str:\n    \"\"\"Get a personalized greeting\"\"\"\n    return f\"Hello, {name}!\"",
+          "rationale": "This code demonstrates the fundamental structure of an MCP server by importing `FastMCP` from the Python SDK, creating a server instance, and then registering both a basic arithmetic `tool` and a dynamic `resource` using their respective decorators.",
+          "teaching_context": "This snippet introduces how to set up a minimal MCP server in Python, illustrating the core components: server initialization, defining a callable tool using `@mcp.tool()`, and creating a data-providing resource using `@mcp.resource()`."
+        },
+        {
+          "segment_index": 9,
+          "timestamp": 513.04,
+          "code": "def get_latest_todo() -> str:\"\"\"Get the most recently added to-do item.Returns:str: The latest task or a default message if list is empty.\"\"\"return todo_list[-1] if todo_list else \"No to-dos yet.\"@mcp.prompt()def todo_summary_prompt() -> str:\"\"\"Generate a prompt asking the AI to summarize the current to-do list.Returns:str: AI-ready prompt string, or a default message if list is empty.\"\"\"if not todo_list:return \"There are no to-do items.\"return f\"Summarize the following to-do-items: {', '.join(todo_list)}\"",
+          "rationale": "This snippet implements the `get_latest_todo` as an `mcp_resource` and introduces the definition of an `mcp_prompt` using `@mcp.prompt()`. Both functions include docstrings that serve as examples of `documenting_mcp_functions` for AI consumption.",
+          "teaching_context": "This demonstrates how to implement an MCP resource for fetching data and how to create an MCP prompt to guide the AI in generating specific text, emphasizing the importance of clear documentation for both."
+        }
+      ],
+      "learning_objectives": [
+        "Explain the fundamental purpose of MCP Resources within an MCP server.",
+        "Differentiate between an MCP Resource and an MCP Tool, identifying their distinct roles in AI interaction.",
+        "Implement a basic MCP Resource in Python using the `@mcp.resource()` decorator to expose static or dynamic data.",
+        "Define and use dynamic path parameters within an MCP Resource to allow AI to request specific contextual information."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "resource_purpose_identification",
+          "description": "Can articulate when to use an MCP Resource for data exposure versus an MCP Tool for action execution.",
+          "difficulty": "basic",
+          "test_method": "Describe a scenario where an AI needs to get a list of recent news articles. Would you implement this as an MCP Resource or an MCP Tool, and why?"
+        },
+        {
+          "skill": "basic_resource_implementation",
+          "description": "Successfully implements a Python function as an MCP Resource to provide a fixed piece of data.",
+          "difficulty": "basic",
+          "test_method": "Write a Python function that exposes the string 'The current server time is [CURRENT_TIME]' as an MCP Resource at the path 'server://time'. Assume 'CURRENT_TIME' is a placeholder for actual time."
+        },
+        {
+          "skill": "dynamic_resource_path_definition",
+          "description": "Can define an MCP Resource with path parameters to retrieve variable data based on AI input.",
+          "difficulty": "intermediate",
+          "test_method": "Modify the `get_greeting` resource shown in the tutorial [2:18] to also accept a `city` parameter, returning 'Hello, {name} from {city}!'."
+        },
+        {
+          "skill": "resource_data_retrieval_understanding",
+          "description": "Understands how AI agents consume data provided by MCP Resources and the role of documentation.",
+          "difficulty": "intermediate",
+          "test_method": "If an MCP Resource named 'inventory://stock/{item_id}' returns the quantity of a specific item, how would an AI determine if 5 units of 'widgets' are available, and what role does the resource's docstring play?"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "MCP Resources can perform actions or modify the system state.",
+          "reality": "MCP Resources are strictly for retrieving data, akin to HTTP GET requests. They are designed to be read-only and should not have side effects. Actions that modify state are handled by MCP Tools.",
+          "correction_strategy": "Refer back to the explicit distinction made in the video [2:01] between 'exposing data' (Resources) and 'executing code' (Tools). Ask the student to categorize operations like 'add item to cart' vs. 'view cart contents' and explain why."
+        },
+        {
+          "misconception": "The path string in `@mcp.resource()` is just a descriptive name.",
+          "reality": "The path string acts as a URL-like endpoint that the AI uses to request the resource. It defines the routing and can include dynamic parameters (like `{name}`) that map directly to the function's arguments.",
+          "correction_strategy": "Highlight the example `greeting://{name}` [2:18] and `to_do's/latest` [8:33]. Explain how the `{name}` part allows the AI to specify *which* greeting it wants, rather than just calling a generic function."
+        },
+        {
+          "misconception": "MCP Resources are only for static, predefined data.",
+          "reality": "MCP Resources can provide dynamic data, such as the latest to-do item [8:33], a database schema [10:14], or current real-time information. The 'dynamic' aspect refers to the data being generated or retrieved at the time of the request.",
+          "correction_strategy": "Show the `get_latest_todo` example [8:33] or the SQLite schema resource [10:14] and discuss how the data returned by these functions can change over time or based on external factors, making them dynamic, not static."
+        }
+      ],
+      "key_insights": [
+        "MCP Resources serve as read-only data providers for AI models, allowing them to load contextual information into their working memory without executing code or changing the system state [2:01, 11:13].",
+        "The `@mcp.resource()` decorator is the primary mechanism for defining a Python function as a data-exposing endpoint, distinctly separating it from action-oriented 'tools' [2:18, 8:33].",
+        "Resources can support dynamic path parameters (e.g., `greeting://{name}`) which enable AI to request specific variations of data, similar to how web API endpoints accept URL parameters [2:18, 8:33].",
+        "Clear docstrings and type hints for MCP Resource functions are crucial as they serve as the primary documentation for the AI, guiding its understanding of what data is available and how to retrieve it [8:33]."
+      ],
+      "practical_applications": [
+        "Exposing current sensor readings or device status to an AI for monitoring and diagnostic purposes.",
+        "Providing up-to-date product catalogs, pricing, or inventory levels for an AI to assist with customer queries or sales.",
+        "Allowing AI to retrieve user preferences or configuration settings from a profile management system.",
+        "Serving database schema information to an AI, enabling it to formulate intelligent queries without needing direct database access [10:14]."
+      ],
+      "common_gotchas": [
+        "Accidentally implementing state-changing logic within a resource function, violating its read-only principle.",
+        "Misconfiguring the path string in the `@mcp.resource()` decorator, especially with dynamic parameters, leading to routing errors.",
+        "Forgetting to include appropriate type hints for arguments in resource functions, which can hinder the AI's ability to correctly interact with the resource.",
+        "Returning complex, non-serializable Python objects directly from a resource instead of converting them to AI-digestible formats like JSON strings."
+      ],
+      "debugging_tips": [
+        "Verify the MCP server is correctly installed and running; check the Claude desktop's developer settings for 'failed' statuses [6:00].",
+        "Use `print()` statements inside your resource function to confirm it's being called and receiving the expected parameters when the AI queries it.",
+        "Ensure the path in `@mcp.resource()` exactly matches how the AI client is attempting to access the data; even minor discrepancies can cause failures.",
+        "Examine the AI's internal reasoning (if available) to understand how it's interpreting the resource's output and formulating its requests."
+      ]
+    },
+    {
+      "id": "mcp_tools",
+      "name": "MCP Tools",
+      "description": "MCP Tools are functions exposed by an MCP server that enable AI tools to perform specific actions or execute code. These are akin to `POST` or `PUT` endpoints, allowing AI to interact with external systems, modify data, or trigger operations.",
+      "prerequisites": [
+        "basic_mcp_server_structure"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 160,
+          "end": 180
+        }
+      ],
+      "code_examples": [
+        {
+          "segment_index": 2,
+          "timestamp": 121.73500000000001,
+          "code": "# server.py\nfrom mcp.server.fastmcp import FastMCP\n\n# Create an MCP server\nmcp = FastMCP(\"Demo\")\n\n# Add an addition tool\n@mcp.tool()\ndef add(a: int, b: int) -> int:\n    \"\"\"Add two numbers\"\"\"\n    return a + b\n\n# Add a dynamic greeting resource\n@mcp.resource(\"greeting://{name}\")\ndef get_greeting(name: str) -> str:\n    \"\"\"Get a personalized greeting\"\"\"\n    return f\"Hello, {name}!\"",
+          "rationale": "This code demonstrates the fundamental structure of an MCP server by importing `FastMCP` from the Python SDK, creating a server instance, and then registering both a basic arithmetic `tool` and a dynamic `resource` using their respective decorators.",
+          "teaching_context": "This snippet introduces how to set up a minimal MCP server in Python, illustrating the core components: server initialization, defining a callable tool using `@mcp.tool()`, and creating a data-providing resource using `@mcp.resource()`."
+        },
+        {
+          "segment_index": 7,
+          "timestamp": 393.15999999999997,
+          "code": "from mcp.server.fastmcp import FastMCP\n\n# Create an MCP server for managing a simple in-memory to-do list\nmcp = FastMCP(\"AI To-Do List\")\n\n# In-memory storage for to-do items\ntodo_list = []\n\n@mcp.tool()\ndef add_todo(item: str) -> str:...\n@mcp.tool()\ndef list_todos() -> str:...\n@mcp.tool()\ndef update_todo(index: int, new_item: str) -> str:...\n@mcp.tool()\ndef delete_todo(index: int) -> str:...\n@mcp.resource(\"todos://latest\")\ndef get_latest_todo() -> str:...",
+          "rationale": "This snippet reiterates the basic `FastMCP` server setup and introduces `todo_list = []` as an example of `in_memory_storage` for application data. It then defines several stub functions for various `mcp_tools` and an `mcp_resource`.",
+          "teaching_context": "This teaches how to structure an MCP server to manage a simple application (like a to-do list) using in-memory data structures, outlining the various tools needed for data manipulation and retrieval."
+        },
+        {
+          "segment_index": 8,
+          "timestamp": 453.1,
+          "code": "# In-memory storage for to-do items\ntodo_list = []\n\n@mcp.tool()\ndef add_todo(item: str) -> str:\n    \"\"\"\n    Add a new to-do item to the in-memory list.\n\n    - Args:\n        item (str): The task to be added to the list.\n\n    Returns:\n        str: Confirmation message indicating the task was added.\n    \"\"\"\n    todo_list.append(item)\n    return f\"Added to-do: '{item}'\"\n\n@mcp.tool()\ndef list_todos() -> str:",
+          "rationale": "This code provides the full implementation for the `add_todo` function, which is registered as an `mcp_tool`. It explicitly uses the `todo_list` for `in_memory_storage_for_mcp` and includes a detailed docstring, demonstrating `documenting_mcp_functions`.",
+          "teaching_context": "This teaches the practical implementation of an MCP tool, showing how to interact with in-memory data and how to effectively document the tool for AI understanding and usage."
+        }
+      ],
+      "learning_objectives": [
+        "Explain the purpose and function of an MCP Tool in extending AI capabilities.",
+        "Differentiate between an MCP Tool and an MCP Resource based on their intended use cases.",
+        "Implement a basic MCP Tool using the `@mcp.tool()` decorator with appropriate function definition.",
+        "Document an MCP Tool effectively with docstrings to ensure accurate interpretation and usage by an LLM."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "tool_purpose_identification",
+          "description": "The student can articulate why MCP Tools are necessary for AI to perform actions with external systems.",
+          "difficulty": "basic",
+          "test_method": "Ask: 'In the context of an AI interacting with external systems, why would you use an MCP Tool rather than just giving the AI information?'"
+        },
+        {
+          "skill": "tool_resource_distinction",
+          "description": "The student can correctly distinguish between when to use an MCP Tool versus an MCP Resource.",
+          "difficulty": "basic",
+          "test_method": "Present a scenario: 'If you want an AI to add an item to a database, would you create an MCP Tool or Resource for that? What if you wanted it to retrieve the latest news item?'"
+        },
+        {
+          "skill": "basic_tool_implementation",
+          "description": "The student can correctly define and decorate a Python function to act as an MCP Tool.",
+          "difficulty": "intermediate",
+          "test_method": "Provide a simple task: 'Write a Python function called `subtract` that takes two integers, `x` and `y`, and returns their difference, then decorate it as an MCP Tool.' (References code at [2:01])"
+        },
+        {
+          "skill": "tool_documentation",
+          "description": "The student can create comprehensive docstrings for an MCP Tool, detailing its purpose, arguments, and return values, suitable for LLM interpretation.",
+          "difficulty": "intermediate",
+          "test_method": "Given an implemented tool function (e.g., `add_todo` from [7:33]), ask the student to add or correct its docstring to clearly explain its action, inputs, and output for an AI."
+        },
+        {
+          "skill": "tool_integration_logic",
+          "description": "The student can integrate a basic MCP Tool with simple application logic (e.g., in-memory data manipulation).",
+          "difficulty": "advanced",
+          "test_method": "Provide the `todo_list` variable and an `add_todo` tool stub. Ask the student to complete the `add_todo` function so it appends the item to the list and returns a confirmation. (References code at [7:33])"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "MCP Tools are just regular Python functions that get called by my Python script.",
+          "reality": "While they are Python functions, they are specifically exposed by an MCP server to be invoked by a Large Language Model (LLM) as an action-taking agent, not directly by a local script without the server context.",
+          "correction_strategy": "Highlight the `@mcp.tool()` decorator's role in registering the function with the MCP server, and explain that the server acts as an intermediary, translating AI requests into function calls."
+        },
+        {
+          "misconception": "MCP Tools and Resources serve similar purposes and can be used interchangeably for interacting with external data or services.",
+          "reality": "MCP Tools are designed for executing 'actions' or 'mutations' (e.g., adding, deleting, updating data), analogous to POST/PUT operations. MCP Resources are for 'fetching' or 'exposing' contextual data, analogous to GET operations, for the LLM's understanding.",
+          "correction_strategy": "Present clear examples from the video (e.g., `add` function as a Tool, `get_greeting` as a Resource at [2:01]; to-do list actions as Tools vs. `todos://latest` as a Resource at [6:33]) and ask the student to categorize them based on action vs. data exposure."
+        },
+        {
+          "misconception": "The output of an MCP Tool is directly displayed to the user as a final response.",
+          "reality": "The output of an MCP Tool is returned to the LLM. The LLM then interprets this output and uses it to formulate a natural language response back to the user, potentially integrating it with other context.",
+          "correction_strategy": "Refer to the 'can you add one plus two' example [5:39] where the tool returns '3', but the LLM formulates a complete sentence. Emphasize that the AI decides *how* to present the tool's result."
+        }
+      ],
+      "key_insights": [
+        "MCP Tools empower Large Language Models to perform real-world actions and interact with external systems, moving beyond just generating text.",
+        "The `@mcp.tool()` decorator registers a Python function with the MCP server, making it discoverable and callable by an AI.",
+        "Clear and precise docstrings are vital for MCP Tools, as they serve as the primary documentation for the LLM to understand a tool's purpose, parameters, and expected output.",
+        "MCP Tools abstract complex backend logic, providing a simplified, action-oriented interface for AI agents."
+      ],
+      "practical_applications": [
+        "Integrating AI with databases to create, read, update, or delete records (e.g., SQLite example at [8:58]).",
+        "Enabling AI to perform image manipulation tasks like resizing or generating thumbnails.",
+        "Automating tasks by allowing AI to interact with external APIs (e.g., sending emails, scheduling appointments).",
+        "Building AI-powered applications that manage dynamic state, like to-do lists or inventory systems."
+      ],
+      "common_gotchas": [
+        "Forgetting to apply the `@mcp.tool()` decorator to functions intended to be called by the AI, making them inaccessible.",
+        "Providing vague or incomplete docstrings, which can lead the LLM to misunderstand the tool's purpose or misuse its arguments.",
+        "Mixing up Tools and Resources; trying to use a Resource for an action or a Tool for merely exposing data.",
+        "Handling persistent state correctly; in-memory storage (like the `todo_list`) is simple for demos but requires external databases or APIs for real-world applications."
+      ],
+      "debugging_tips": [
+        "Check the MCP server's console output for errors when a tool is invoked; the server logs often indicate issues with function execution.",
+        "If an LLM isn't calling a tool as expected, review the tool's docstring for clarity and completeness from the perspective of an AI.",
+        "Test the underlying Python function of a tool directly (without the `@mcp.tool()` decorator or server) to isolate logic errors within the function itself.",
+        "Ensure the MCP server is correctly started and configured in the client application (e.g., Claude Desktop settings at [4:40]) to allow tool discovery."
+      ]
+    },
+    {
+      "id": "starting_local_mcp_server",
+      "name": "Starting a Local MCP Server",
+      "description": "Starting an MCP server locally involves executing a Python script containing the server definition using the `uv run mcp-cli run <script_name>.py` command. This makes the server accessible for local AI clients or for testing.",
+      "prerequisites": [
+        "basic_mcp_server_structure"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 180,
+          "end": 200
+        }
+      ],
+      "code_examples": [
+        {
+          "segment_index": 5,
+          "timestamp": 273.18,
+          "code": "{\n  \"mcpServers\": {\n    \"Demo\": {\n      \"command\": \"uv\",\n      \"args\": [\n        \"run\",\n        \"--with\",\n        \"mcp[cli]\",\n        \"mcp\",\n        \"run\",\n        \"/Users/erictech/Desktop/mcp-server-demo/main.py\"\n      ]\n    }\n  }\n}",
+          "rationale": "This JSON configures how Claude Desktop can discover and launch an MCP server. It explicitly shows the `command` and `args` to execute the `uv run` command, which starts the local MCP server defined in `main.py`.",
+          "teaching_context": "This demonstrates how to integrate a locally developed MCP server with Claude Desktop by adding a server definition to Claude's configuration file, enabling Claude to run and connect to it."
+        }
+      ],
+      "learning_objectives": [
+        "Execute the `uv run` command to start a local MCP server from a specified Python script.",
+        "Identify the correct Python script name to be used with the `uv run` command to launch the intended server.",
+        "Explain the role of `uv` in managing dependencies and running the local MCP server.",
+        "Modify the server startup command to use the absolute path for `uv` when relative execution fails."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "execute_mcp_run_command",
+          "description": "Successfully runs the `uv run` command to start a basic MCP server locally.",
+          "difficulty": "basic",
+          "test_method": "Given a `main.py` file containing an MCP server definition, what is the exact command you would type into the terminal to start this server locally?"
+        },
+        {
+          "skill": "identify_script_name",
+          "description": "Correctly identifies the Python file containing the MCP server definition for the `uv run` command, avoiding common naming mistakes.",
+          "difficulty": "basic",
+          "test_method": "If your MCP server code is defined in `my_mcp_app.py` instead of `main.py`, how would you adjust the command `uv run mcp-cli run main.py` to correctly start your server?"
+        },
+        {
+          "skill": "uv_role_explanation",
+          "description": "Explains why `uv` is used for running the MCP server script, highlighting its benefits like dependency management.",
+          "difficulty": "intermediate",
+          "test_method": "Why does the tutorial recommend using `uv run` instead of just `python main.py` to start the MCP server? What advantages does `uv` offer in this context?"
+        },
+        {
+          "skill": "resolve_uv_path_issue",
+          "description": "Diagnoses and resolves issues where `uv` is not found by utilizing its absolute path, especially in external client configurations.",
+          "difficulty": "intermediate",
+          "test_method": "If configuring Claude Desktop to run your MCP server, and it fails with an error indicating 'uv command not found', what steps would you take to fix this, and how would you modify the Claude configuration shown in the video (4:33)?"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "The script name in `uv run mcp-cli run <script_name>.py` is always `server.py` or `main.py`.",
+          "reality": "The script name (`<script_name>.py`) must precisely match the Python file where the `FastMCP` instance and your tools/resources are actually defined, which can be any valid filename.",
+          "correction_strategy": "Ask the student to open their project directory, verify the exact filename where their `FastMCP` server is initialized, and then ensure that name is used in the `uv run` command."
+        },
+        {
+          "misconception": "Once the server is running, changes to the Python script or Claude's configuration are immediately reflected.",
+          "reality": "After modifying the server script or the client's configuration (like Claude Desktop's `config.json`), both the MCP server and the AI client often need to be restarted for the changes to take effect.",
+          "correction_strategy": "Remind the student that many applications cache configurations or load them only on startup. Prompt them to consider if they've restarted all relevant components after making changes, similar to how the video addresses Claude not detecting the server until a restart (5:45)."
+        },
+        {
+          "misconception": "The `uv` command will always be found in the system's PATH regardless of the execution context.",
+          "reality": "While `uv` is typically in the PATH for terminal use, external applications or specific environments (like some IDE integrations or client configs) might require the full absolute path to the `uv` executable to function correctly.",
+          "correction_strategy": "Guide the student through using `which uv` (or `where uv` on Windows) to find the absolute path of their `uv` installation and explain scenarios (like Claude Desktop's `command` field at 6:23) where this explicit path is necessary."
+        }
+      ],
+      "key_insights": [
+        "Starting a local MCP server involves executing a Python script using the `uv run` command, which orchestrates the environment and launches the server process.",
+        "The core purpose of running an MCP server locally is to expose custom AI tools and data resources from your Python code to AI clients (like Claude Desktop) for immediate interaction and testing.",
+        "Correctly configuring the script path and ensuring `uv` is accessible (potentially via its absolute path) are critical steps for successful local server startup and integration with AI clients."
+      ],
+      "practical_applications": [
+        "Rapid development and iteration of custom AI tools (functions, data resources) by testing them locally with AI agents.",
+        "Debugging MCP server logic and tool implementations in real-time within a familiar development environment.",
+        "Creating private, context-specific AI functionalities that leverage local data or internal APIs without requiring deployment."
+      ],
+      "common_gotchas": [
+        "Incorrectly specifying the Python script file name or its path in the `uv run` command.",
+        "Not having `uv` installed or ensuring it's accessible in the system's PATH, especially when integrating with external applications.",
+        "Forgetting to restart the AI client application (e.g., Claude Desktop) after making server configuration or code changes, leading to the client not recognizing the updated server."
+      ],
+      "debugging_tips": [
+        "Always check the terminal output for error messages immediately after running `uv run`; these messages are typically very informative about what went wrong.",
+        "Verify that `uv` is correctly installed and accessible by running `uv --version` or `which uv` in your terminal. If not found, reinstall it or ensure its directory is in your PATH.",
+        "Double-check the Python script path and filename in your `uv run` command; even a small typo can prevent the server from starting.",
+        "If the AI client isn't connecting, ensure the MCP server is indeed running and that the client's configuration (e.g., `mcpServers` in Claude Desktop) correctly points to the server's startup command, potentially using an absolute path for `uv`."
+      ]
+    },
+    {
+      "id": "claude_desktop_integration",
+      "name": "Claude Desktop Integration",
+      "description": "Integrating an MCP server with Claude Desktop means configuring the Claude AI application to discover and utilize the tools and resources exposed by a locally running MCP server, enhancing Claude's capabilities with custom functions.",
+      "prerequisites": [
+        "starting_local_mcp_server"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 200,
+          "end": 220
+        }
+      ],
+      "code_examples": [],
+      "learning_objectives": [
+        "Locate and modify the Claude Desktop configuration file (`Claude Desktop configuration.json`).",
+        "Configure Claude Desktop to launch a local MCP server by defining the `command` and `arguments` in its settings.",
+        "Verify the successful integration of an MCP server by observing available tools in a Claude chat.",
+        "Troubleshoot common issues like \"demo has failed\" by identifying and correcting the `uv` executable path or granting necessary permissions."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "ClaudeConfigLocation",
+          "description": "Student can correctly identify the location and purpose of the `Claude Desktop configuration.json` file.",
+          "difficulty": "basic",
+          "test_method": "Imagine you've just installed Claude Desktop. Where would you navigate within the application to find the option to edit its configuration, and what is the name of the file you'd be looking for?"
+        },
+        {
+          "skill": "MCPConfigDefinition",
+          "description": "Student can accurately define an MCP server entry within Claude's configuration, including specifying the `command` and `arguments` for launching the server.",
+          "difficulty": "intermediate",
+          "test_method": "You have an MCP server in `~/projects/my_mcp/main.py`. Explain how you would add this server to Claude Desktop's configuration file, detailing what goes into the `command` and `arguments` fields."
+        },
+        {
+          "skill": "IntegrationVerification",
+          "description": "Student can describe the visual cues and interaction steps to confirm a locally integrated MCP server is active and its tools are accessible within Claude Desktop.",
+          "difficulty": "intermediate",
+          "test_method": "After setting up your MCP server in Claude, what steps would you take inside a new Claude chat to confirm that your custom 'add' tool is recognized and ready for use?"
+        },
+        {
+          "skill": "UVPathTroubleshooting",
+          "description": "Student can diagnose and resolve the specific issue of `uv` pathing within the Claude Desktop configuration.",
+          "difficulty": "intermediate",
+          "test_method": "If your MCP server configuration shows 'demo has failed' in Claude's settings, and you suspect a pathing issue, what command would you run in your terminal, and how would you use its output to fix the `command` field in Claude's `config.json`?"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "Claude Desktop automatically discovers and integrates any running MCP server on the local machine.",
+          "reality": "Claude Desktop requires explicit configuration within its `Claude Desktop configuration.json` file to know how to start and monitor local MCP servers. It doesn't auto-discover them.",
+          "correction_strategy": "Ask the student to describe the manual steps involved in linking an MCP server to Claude Desktop, emphasizing the need to edit a configuration file."
+        },
+        {
+          "misconception": "Once the `config.json` is updated, the MCP server tools will immediately appear in Claude.",
+          "reality": "Claude Desktop typically requires a restart after configuration changes to properly load and recognize new or modified MCP server definitions. Additionally, it may prompt for necessary file system access permissions.",
+          "correction_strategy": "Present a scenario where tools don't appear after config changes and ask the student for the next troubleshooting steps they would take."
+        },
+        {
+          "misconception": "The `command` field in `config.json` can always use simply \"uv\" as the executable.",
+          "reality": "Depending on the environment, Claude Desktop might need the absolute path to the `uv` executable (e.g., `/Users/username/.cargo/bin/uv`) to successfully launch the MCP server, especially if `uv` is not in the system's default PATH for GUI applications.",
+          "correction_strategy": "Guide the student through identifying the `which uv` command and explaining why its output is crucial for robust configuration."
+        }
+      ],
+      "key_insights": [
+        "Claude Desktop uses a dedicated JSON configuration file to manage external tool integrations, specifically detailing how to launch and interact with local MCP servers.",
+        "The `command` and `arguments` specified in the Claude configuration tell Claude how to execute the MCP server script, rather than just pointing to a running process.",
+        "Successful integration often involves not just correct configuration, but also restarting Claude Desktop and explicitly granting file system permissions when prompted."
+      ],
+      "practical_applications": [
+        "Extending Claude's capabilities with custom tools for database interaction (e.g., adding, pulling, updating data).",
+        "Enabling Claude to perform local file system operations or interact with specialized local software.",
+        "Allowing Claude to process or generate media, such as editing images based on prompts.",
+        "Building personalized productivity tools, like a to-do list manager, directly integrated into Claude."
+      ],
+      "common_gotchas": [
+        "Forgetting to replace `server.py` with your actual MCP server script name (e.g., `main.py`) in the `arguments` section of the Claude config.",
+        "Not providing the absolute path to the `uv` executable in the `command` field of the Claude configuration, leading to the \"demo has failed\" error.",
+        "Neglecting to restart Claude Desktop after modifying the `config.json` file.",
+        "Failing to grant file access permissions to Claude Desktop when prompted, preventing it from interacting with the MCP server's directory."
+      ],
+      "debugging_tips": [
+        "Check Claude Desktop's settings under \"Developer\" to see if your MCP server entry shows \"demo has failed.\"",
+        "If `uv` command issues arise, use `which uv` in your terminal to find its absolute path and update the `command` field in `Claude Desktop configuration.json`.",
+        "Always restart Claude Desktop after making changes to its configuration file.",
+        "Ensure you grant necessary file system access to Claude Desktop when prompted, especially for accessing directories where your MCP server scripts reside.",
+        "Verify the `arguments` array in `config.json` correctly points to your MCP server script (e.g., `main.py`)."
+      ]
+    },
+    {
+      "id": "configuring_claude_desktop_for_mcp",
+      "name": "Configuring Claude Desktop for MCP",
+      "description": "Configuring Claude Desktop for MCP involves manually editing its `configuration.json` file. This includes specifying the command and arguments needed to launch and connect to the local MCP server, ensuring Claude can find and interact with it.",
+      "prerequisites": [
+        "claude_desktop_integration"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 220,
+          "end": 270
+        }
+      ],
+      "code_examples": [
+        {
+          "segment_index": 5,
+          "timestamp": 273.18,
+          "code": "{\n  \"mcpServers\": {\n    \"Demo\": {\n      \"command\": \"uv\",\n      \"args\": [\n        \"run\",\n        \"--with\",\n        \"mcp[cli]\",\n        \"mcp\",\n        \"run\",\n        \"/Users/erictech/Desktop/mcp-server-demo/main.py\"\n      ]\n    }\n  }\n}",
+          "rationale": "This JSON configures how Claude Desktop can discover and launch an MCP server. It explicitly shows the `command` and `args` to execute the `uv run` command, which starts the local MCP server defined in `main.py`.",
+          "teaching_context": "This demonstrates how to integrate a locally developed MCP server with Claude Desktop by adding a server definition to Claude's configuration file, enabling Claude to run and connect to it."
+        }
+      ],
+      "learning_objectives": [
+        "Explain the role of `configuration.json` in connecting Claude Desktop to a local MCP server.",
+        "Identify the `command` and `args` fields within the `mcpServers` section of Claude's `configuration.json` file.",
+        "Configure Claude Desktop by manually editing the `configuration.json` to correctly launch a specified local MCP server.",
+        "Troubleshoot common issues, such as incorrect paths or commands, that prevent Claude Desktop from connecting to an MCP server."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "identify_config_purpose",
+          "description": "Explains why `configuration.json` is necessary for Claude Desktop to interact with local MCP servers.",
+          "difficulty": "basic",
+          "test_method": "What is the primary function of the `configuration.json` file when setting up an MCP server with Claude Desktop?"
+        },
+        {
+          "skill": "locate_edit_config",
+          "description": "Can navigate to and open Claude Desktop's `configuration.json` for editing.",
+          "difficulty": "basic",
+          "test_method": "Describe the steps you would take to find and open Claude Desktop's `configuration.json` file on your operating system, assuming you are using macOS as in the video."
+        },
+        {
+          "skill": "configure_server_entry",
+          "description": "Accurately add or modify an MCP server entry within the `mcpServers` object, including `command` and `args`.",
+          "difficulty": "intermediate",
+          "test_method": "Given your MCP server `main.py` is located at `/Users/student/projects/my-mcp-server/main.py` and runs using `uv run --with mcp[cli] mcp run main.py`, construct the correct JSON entry for the `mcpServers` section in Claude's `configuration.json`."
+        },
+        {
+          "skill": "debug_path_issues",
+          "description": "Understands the necessity of absolute paths for commands like `uv` in Claude's configuration and can retrieve them.",
+          "difficulty": "intermediate",
+          "test_method": "If Claude Desktop fails to start your MCP server and indicates `uv` cannot be found, what specific change would you make to the `command` field in `configuration.json`, and how would you obtain the necessary information for that change?"
+        },
+        {
+          "skill": "verify_server_connection",
+          "description": "Can check Claude Desktop to confirm if the MCP server is recognized and active, and identify basic connection status.",
+          "difficulty": "basic",
+          "test_method": "After editing `configuration.json` and restarting Claude Desktop, what visual cues or menu options would you look for within Claude to confirm that your MCP server has successfully connected and its tools are available?"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "The script name (e.g., `server.py` or `main.py`) in the `args` field is a fixed value or convention that doesn't need to match my actual file.",
+          "reality": "The script name specified in the `args` array (e.g., `main.py` in the video's example) must precisely match the file name of your actual MCP server entry point for the `uv run` command to execute it correctly.",
+          "correction_strategy": "Ask the student to trace the path and file name specified in their `args` against the actual location and name of their MCP server file, emphasizing that these must be identical. Refer back to the video where `server.py` was explicitly changed to `main.py` to match the project's file."
+        },
+        {
+          "misconception": "Relative paths (e.g., `uv`) are always sufficient for the `command` field in `configuration.json`, just like in a terminal.",
+          "reality": "Claude Desktop's internal execution environment for the `command` might not have the same `PATH` environment variable as your user terminal. Therefore, it often requires the absolute path (e.g., `/Users/youruser/.uv/bin/uv`) for executables like `uv` to ensure they are found reliably.",
+          "correction_strategy": "Explain that applications sometimes have different execution contexts than a user's terminal. Guide the student to use commands like `which uv` (or `where uv` on Windows) in their terminal to find the absolute path and then update the `command` field with this full path."
+        },
+        {
+          "misconception": "After saving changes to `configuration.json`, the MCP server should immediately appear or update in Claude Desktop.",
+          "reality": "Claude Desktop typically requires a restart (or at least a full reload of its settings) to detect and apply any changes made to its `configuration.json` file, including new or modified MCP server definitions.",
+          "correction_strategy": "Prompt the student to recall if the video demonstrated restarting Claude Desktop after configuration changes and explain that this is a common practice for applications to refresh their settings from configuration files."
+        }
+      ],
+      "key_insights": [
+        "Claude Desktop uses a dedicated JSON configuration file (`configuration.json`) to discover, launch, and manage local MCP servers, acting as a bridge between the AI and custom user-defined functions.",
+        "The configuration explicitly defines *how* to run the MCP server, requiring a precise `command` (e.g., `uv`) and its specific `args` (e.g., `run`, `main.py`) to execute the server script.",
+        "Using absolute paths for commands within the configuration is often crucial for reliability, as Claude Desktop's execution environment may differ from the user's terminal's PATH.",
+        "Changes made to Claude Desktop's `configuration.json` typically necessitate a restart of the application for the modifications to be loaded and take effect."
+      ],
+      "practical_applications": [
+        "Integrating proprietary internal APIs or custom business logic with Claude Desktop for enhanced AI capabilities.",
+        "Connecting Claude to local databases or specific data sources that are not publicly accessible, allowing AI to query and update private information.",
+        "Enabling Claude to perform automated tasks on the user's local machine, such as file management, image processing, or interacting with other local applications, by defining these operations as MCP tools."
+      ],
+      "common_gotchas": [
+        "Introducing syntax errors or malformed JSON in `configuration.json` can prevent Claude Desktop from loading any MCP servers.",
+        "Forgetting to save the `configuration.json` file after making changes before restarting Claude.",
+        "Specifying incorrect working directories or paths within the `args` array for the MCP server script, leading to file not found errors.",
+        "Insufficient file permissions for the `uv` executable or the MCP server script, which can prevent execution."
+      ],
+      "debugging_tips": [
+        "Check Claude Desktop's developer settings (accessed via Claude > Settings > Developer) for status messages or errors related to MCP server startup. The video shows 'demo has failed' here.",
+        "Use your terminal's `which <command_name>` (e.g., `which uv`) command to find the absolute path of executables that fail to run, then update `configuration.json`.",
+        "Temporarily run the exact `command` and `args` specified in `configuration.json` directly in your terminal to verify that the server starts correctly outside of Claude Desktop.",
+        "Review Claude Desktop's internal logs (if accessible via developer tools or system logs) for more detailed error messages during MCP server initialization."
+      ]
+    },
+    {
+      "id": "invoking_mcp_tools_from_claude",
+      "name": "Invoking MCP Tools from Claude Desktop",
+      "description": "Invoking MCP tools from Claude Desktop demonstrates how a user's natural language query to Claude can trigger the execution of a registered MCP tool. Claude acts as an intermediary, interpreting the user's intent and calling the appropriate server-side function.",
+      "prerequisites": [
+        "configuring_claude_desktop_for_mcp",
+        "mcp_tools"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 270,
+          "end": 300
+        }
+      ],
+      "code_examples": [],
+      "learning_objectives": [
+        "Run a local MCP server instance using the provided Python SDK.",
+        "Configure Claude Desktop to recognize and connect to a running local MCP server.",
+        "Invoke a registered MCP tool through natural language queries within Claude Desktop.",
+        "Troubleshoot common connectivity issues between Claude Desktop and a local MCP server."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "mcp_server_initiation",
+          "description": "Successfully starts a local MCP server that hosts defined tools and resources.",
+          "difficulty": "basic",
+          "test_method": "Given a `main.py` file with an MCP server definition, demonstrate the exact terminal command to start the server and explain what the 'successfully installed demo' output signifies."
+        },
+        {
+          "skill": "claude_desktop_configuration",
+          "description": "Correctly adds or verifies an MCP server configuration within Claude Desktop's developer settings by editing its JSON configuration.",
+          "difficulty": "intermediate",
+          "test_method": "Walk through the steps within Claude Desktop's settings to access and understand how an MCP server's command and arguments are defined in `claudedesktop-configuration.json`."
+        },
+        {
+          "skill": "natural_language_tool_invocation",
+          "description": "Formulates natural language queries that successfully prompt Claude to execute a registered MCP tool and interprets the AI's response.",
+          "difficulty": "intermediate",
+          "test_method": "Given an MCP tool named 'calculator' with an 'add' function, provide a natural language prompt you would give Claude to calculate 10 + 5 using this tool, and explain how Claude identifies and uses the tool."
+        },
+        {
+          "skill": "troubleshooting_mcp_connection",
+          "description": "Identifies and resolves common issues, such as incorrect executable paths, that prevent Claude Desktop from connecting to or recognizing an MCP server.",
+          "difficulty": "intermediate",
+          "test_method": "If Claude Desktop reports 'Demo has failed' for a registered MCP server, what specific diagnostic steps would you take, referring to the video's example of using absolute paths for executables?"
+        },
+        {
+          "skill": "tool_permission_management",
+          "description": "Understands and manages the runtime permissions requested by Claude Desktop when an MCP tool is invoked, such as granting file access.",
+          "difficulty": "basic",
+          "test_method": "When Claude first attempts to use a newly registered MCP tool that might interact with local files, what kind of user interaction or prompt does it typically present, and why is it necessary?"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "Claude executes the Python code for MCP tools directly within its own environment.",
+          "reality": "Claude acts as an intelligent intermediary, interpreting natural language to generate calls to functions exposed by a separate, server-side process (the MCP server), which then executes the Python code.",
+          "correction_strategy": "Ask the student to draw a diagram illustrating the distinct components (user, Claude Desktop, MCP server, Python code) and the flow of information and control between them, emphasizing the separate execution environments."
+        },
+        {
+          "misconception": "Any natural language query will automatically trigger the correct MCP tool if it's generally related.",
+          "reality": "Claude's ability to select and use a tool depends on the tool's detailed description (docstrings), the clarity of the user's prompt, and the relevance of the tool to Claude's current conversational context. Explicit phrasing helps Claude understand the intent to use a tool.",
+          "correction_strategy": "Provide an ambiguous query (e.g., 'What's 5 plus 3?') when a 'calculator' tool is available, and ask if Claude would definitely use the tool. Then, guide the student to rephrase it to explicitly mention the 'MCP tool' or 'calculator tool' as shown in the video."
+        },
+        {
+          "misconception": "Once configured, Claude Desktop will immediately recognize and display the MCP tool.",
+          "reality": "Changes to MCP server configurations often require restarting Claude Desktop to ensure the application reloads the settings and attempts to establish connection with the new or updated server.",
+          "correction_strategy": "Refer back to the video segment where the 'hammer' icon (indicating a tool) didn't appear immediately, and Karpathy explicitly stated the need to 'restart our Claude desktop.' Explain why a restart is a common practice for configuration changes."
+        }
+      ],
+      "key_insights": [
+        "Claude Desktop extends its capabilities by integrating with user-defined, server-side functions through the Model Context Protocol (MCP).",
+        "Natural language queries serve as the interface for triggering complex programmatic actions by instructing Claude to invoke specific MCP tools.",
+        "The MCP server runs as a distinct process, allowing users to host custom logic and functionality that Claude Desktop can access and utilize.",
+        "Users must explicitly configure Claude Desktop's developer settings to register MCP servers, providing the command and arguments needed to run the server."
+      ],
+      "practical_applications": [
+        "Integrating AI applications with custom backend systems or databases for data retrieval, storage, or modification.",
+        "Automating complex, multi-step workflows by allowing AI to orchestrate custom scripts (e.g., image processing, data transformation) based on user instructions.",
+        "Building personalized AI assistants that can interact with a user's local file system or specific proprietary business logic through custom tools.",
+        "Creating dynamic, context-aware AI agents that can perform actions beyond their core reasoning capabilities by invoking external utilities."
+      ],
+      "common_gotchas": [
+        "Forgetting to restart Claude Desktop after making changes to the `claudedesktop-configuration.json` file or updating the MCP server code.",
+        "Using relative paths or simply `uv` instead of the absolute path to executables (like `which uv`) in the `command` field of the MCP server configuration, leading to 'Demo has failed' errors.",
+        "Not granting Claude Desktop the necessary file system permissions when prompted, which can prevent MCP tools from accessing required directories or resources.",
+        "Errors in the `main.py` script (e.g., syntax errors, port conflicts) that prevent the MCP server from starting successfully in the first place, causing Claude to fail its connection attempt."
+      ],
+      "debugging_tips": [
+        "Always check the status of your registered MCP servers within Claude Desktop's developer settings to see if they are 'running' or 'failed'.",
+        "Run the MCP server manually in a separate terminal to observe any startup errors or output, ensuring the server itself is operational before connecting Claude.",
+        "If Claude Desktop fails to connect, verify the `command` and `arguments` in `claudedesktop-configuration.json`, ensuring executables use absolute paths (e.g., `which uv`).",
+        "Review Claude's chat history for any error messages or indications that a tool was not used, or if a permission prompt was missed or denied."
+      ]
+    },
+    {
+      "id": "in_memory_storage_for_mcp",
+      "name": "In-Memory Storage for MCP Tools",
+      "description": "In-memory storage refers to using simple Python data structures (like lists or dictionaries) within the MCP server to temporarily hold data. This is suitable for demonstrations or simple applications, but typically replaced by persistent databases for production.",
+      "prerequisites": [
+        "mcp_tools"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 300,
+          "end": 320
+        }
+      ],
+      "code_examples": [
+        {
+          "segment_index": 7,
+          "timestamp": 393.15999999999997,
+          "code": "from mcp.server.fastmcp import FastMCP\n\n# Create an MCP server for managing a simple in-memory to-do list\nmcp = FastMCP(\"AI To-Do List\")\n\n# In-memory storage for to-do items\ntodo_list = []\n\n@mcp.tool()\ndef add_todo(item: str) -> str:...\n@mcp.tool()\ndef list_todos() -> str:...\n@mcp.tool()\ndef update_todo(index: int, new_item: str) -> str:...\n@mcp.tool()\ndef delete_todo(index: int) -> str:...\n@mcp.resource(\"todos://latest\")\ndef get_latest_todo() -> str:...",
+          "rationale": "This snippet reiterates the basic `FastMCP` server setup and introduces `todo_list = []` as an example of `in_memory_storage` for application data. It then defines several stub functions for various `mcp_tools` and an `mcp_resource`.",
+          "teaching_context": "This teaches how to structure an MCP server to manage a simple application (like a to-do list) using in-memory data structures, outlining the various tools needed for data manipulation and retrieval."
+        },
+        {
+          "segment_index": 8,
+          "timestamp": 453.1,
+          "code": "# In-memory storage for to-do items\ntodo_list = []\n\n@mcp.tool()\ndef add_todo(item: str) -> str:\n    \"\"\"\n    Add a new to-do item to the in-memory list.\n\n    - Args:\n        item (str): The task to be added to the list.\n\n    Returns:\n        str: Confirmation message indicating the task was added.\n    \"\"\"\n    todo_list.append(item)\n    return f\"Added to-do: '{item}'\"\n\n@mcp.tool()\ndef list_todos() -> str:",
+          "rationale": "This code provides the full implementation for the `add_todo` function, which is registered as an `mcp_tool`. It explicitly uses the `todo_list` for `in_memory_storage_for_mcp` and includes a detailed docstring, demonstrating `documenting_mcp_functions`.",
+          "teaching_context": "This teaches the practical implementation of an MCP tool, showing how to interact with in-memory data and how to effectively document the tool for AI understanding and usage."
+        }
+      ],
+      "learning_objectives": [
+        "Define in-memory storage in the context of MCP tools and differentiate it from persistent storage.",
+        "Implement simple in-memory data structures (lists, dictionaries) within an MCP server to manage application state.",
+        "Evaluate the suitability of in-memory storage for different application scenarios, identifying its strengths and limitations.",
+        "Modify MCP tool functions to interact with in-memory data structures for operations like adding, listing, updating, and deleting items."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "define_in_memory_storage",
+          "description": "Clearly explains what in-memory storage is, using simple Python data structures in the context of an MCP server.",
+          "difficulty": "basic",
+          "test_method": "Explain, in your own words, what 'in-memory storage' means when building an MCP server, using the `todo_list` example from the video's code [6:33]."
+        },
+        {
+          "skill": "implement_in_memory_crud",
+          "description": "Implements basic Create, Read, Update, Delete (CRUD) operations on an in-memory data structure for an MCP tool.",
+          "difficulty": "intermediate",
+          "test_method": "Given the `todo_list = []` in-memory storage, write the Python code for the `update_todo(index: int, new_item: str)` MCP tool that modifies an item at a specific index, similar to how `add_todo` is implemented [7:33]."
+        },
+        {
+          "skill": "identify_in_memory_limitations",
+          "description": "Recognizes the key limitations of in-memory storage, especially its transient nature and unsuitability for production.",
+          "difficulty": "intermediate",
+          "test_method": "You've implemented the to-do list using in-memory storage. What happens to the `todo_list` if the MCP server restarts, and why would this be an issue for a real-world application?"
+        },
+        {
+          "skill": "choose_appropriate_storage",
+          "description": "Determines when in-memory storage is appropriate and when a persistent database (like SQLite mentioned by Karpathy) is necessary.",
+          "difficulty": "advanced",
+          "test_method": "Imagine you're building an MCP tool for a blogging platform where users can create posts. Would you use in-memory storage for the posts themselves? If not, what kind of storage would you recommend and why?"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "In-memory storage automatically saves data to disk.",
+          "reality": "In-memory storage uses RAM, meaning data is lost when the program ends or the server restarts. It does not automatically persist to disk.",
+          "correction_strategy": "If the video showed the `todo_list` being stored 'in-memory', what does 'in-memory' suggest about where the data lives? What would happen if you added an item and then restarted the MCP server before checking the list again?"
+        },
+        {
+          "misconception": "In-memory storage is suitable for all production applications.",
+          "reality": "While good for demos and simple temporary states, production applications typically require persistent storage (e.g., databases) to ensure data durability, scalability, and integrity.",
+          "correction_strategy": "Karpathy mentions that in-memory storage is 'suitable for demonstrations or simple applications, but typically replaced by persistent databases for production.' Can you elaborate on *why* it would be replaced for production, citing specific drawbacks?"
+        },
+        {
+          "misconception": "All data for an MCP tool needs to be stored in the same way (either all in-memory or all persistent).",
+          "reality": "Different parts of an application might use different storage mechanisms. For example, a temporary session token might be in-memory, while user profiles are in a database.",
+          "correction_strategy": "Could an MCP server simultaneously use in-memory storage for something temporary, like a user's current session preferences, *and* a database for permanent data, like their saved documents? Explain why or why not."
+        }
+      ],
+      "key_insights": [
+        "In-memory storage within an MCP server typically refers to using standard Python data structures (like lists or dictionaries) to hold application data temporarily.",
+        "This approach is simple and effective for quick demonstrations, prototypes, or managing transient states within an MCP tool, as shown with the `todo_list` example [6:33].",
+        "A critical limitation of in-memory storage is its transient nature: any data stored this way is lost when the MCP server process terminates or restarts.",
+        "For real-world, production-ready MCP tools that require data durability, scalability, or concurrent access, persistent storage solutions like databases (e.g., SQLite, mentioned in the transcript at 10:25) are necessary."
+      ],
+      "practical_applications": [
+        "Quick prototyping and development of MCP tools without the overhead of setting up a full database.",
+        "Managing temporary session data or user-specific caches within an MCP server, where persistence is not required.",
+        "Small-scale demonstrations or tutorials for MCP tools where data durability across server restarts is not a primary concern.",
+        "Implementing simple, stateless 'calculator' type tools where inputs are processed and results returned immediately, with no need to remember past states."
+      ],
+      "common_gotchas": [
+        "Forgetting that all in-memory data is wiped upon server restart, leading to unexpected data loss during development or demonstrations.",
+        "Attempting to use in-memory storage for large datasets, which can lead to excessive memory consumption and degraded performance, especially as the application scales.",
+        "Not considering concurrency issues if multiple AI agents or users might interact with and modify the in-memory data simultaneously, potentially leading to race conditions without proper locking mechanisms."
+      ],
+      "debugging_tips": [
+        "To verify the current state of in-memory data, add `print()` statements or log messages within your MCP tool functions to output the contents of the data structure (e.g., `print(todo_list)` before and after modifications).",
+        "Test data persistence explicitly by adding items, then manually restarting the MCP server (e.g., `Ctrl+C` and re-running `uv run mcp_cli run main.py`) and checking if the data is still present.",
+        "If in-memory data isn't updating as expected, use a debugger or add extensive `print()` statements to trace how values are being added, modified, or deleted within your data structure across different function calls."
+      ]
+    },
+    {
+      "id": "mcp_decorators",
+      "name": "MCP Decorators",
+      "description": "MCP decorators (e.g., `@mcp_tool`, `@mcp_resource`, `@mcp_prompt`) are special Python functions that modify the behavior of other functions. In MCP, they are used to automatically register Python functions as specific types of MCP components that the AI can discover and use.",
+      "prerequisites": [
+        "basic_mcp_server_structure",
+        "mcp_tools",
+        "mcp_resources"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 320,
+          "end": 340
+        }
+      ],
+      "code_examples": [],
+      "learning_objectives": [
+        "Explain the fundamental purpose and role of MCP decorators (@mcp_tool, @mcp_resource, @mcp_prompt) in building AI-powered applications.",
+        "Identify the appropriate MCP decorator for a given Python function based on its intended interaction pattern with an AI (e.g., executing an action, providing contextual data, generating a prompt).",
+        "Implement a basic Python function and correctly apply an MCP decorator to register it as a discoverable component for an AI client."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "decorator_purpose_identification",
+          "description": "Student can articulate why MCP decorators are essential for exposing Python functions to AI models.",
+          "difficulty": "basic",
+          "test_method": "What specific problem do decorators like @mcp_tool solve in the Model Context Protocol, and what happens if you forget to use them on your functions?"
+        },
+        {
+          "skill": "decorator_type_selection",
+          "description": "Student can choose the correct MCP decorator based on a function's intended behavior (action, data, prompt).",
+          "difficulty": "intermediate",
+          "test_method": "Imagine you have a function that updates a user's profile in a database, and another function that fetches a list of trending news articles. Which MCP decorator would you apply to each, and why?"
+        },
+        {
+          "skill": "decorator_implementation",
+          "description": "Student can correctly apply an MCP decorator to a Python function, ensuring it's recognized by the MCP server.",
+          "difficulty": "intermediate",
+          "test_method": "Write a Python function called `get_time` that returns the current time. Decorate it as an MCP resource so an AI could query for the current time. Do not forget the documentation for the AI to understand it."
+        },
+        {
+          "skill": "distinguish_tool_resource_prompt",
+          "description": "Student can clearly differentiate between MCP tools, resources, and prompts, including their primary use cases and implications for AI interaction.",
+          "difficulty": "advanced",
+          "test_method": "Describe a real-world scenario where you would use an `@mcp_tool`, an `@mcp_resource`, and an `@mcp_prompt` in the same AI application. Explain the distinct role each plays."
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "MCP decorators are just syntactic sugar or comments that don't impact function execution.",
+          "reality": "Decorators are Python functions that modify or wrap other functions, fundamentally changing how the decorated function is treated. In MCP, they perform crucial registration logic, making the function discoverable by the AI.",
+          "correction_strategy": "Ask the student what would happen if they removed a decorator from an MCP function. Guide them to realize the function would no longer appear as an available tool/resource, highlighting the decorator's active role in registration."
+        },
+        {
+          "misconception": "Any function that returns data should be an @mcp_resource.",
+          "reality": "@mcp_resource is specifically for exposing contextual data (like a GET request) with no side effects. If a function performs an action (e.g., creates, updates, deletes data) even if it also returns information, it should be an @mcp_tool.",
+          "correction_strategy": "Present a function like `log_user_activity(user_id, action)` that returns a confirmation message. Ask which decorator is appropriate, emphasizing that while it returns data, its primary purpose is to perform an action (logging)."
+        },
+        {
+          "misconception": "The AI directly reads and executes the decorated Python code.",
+          "reality": "The decorators register the Python functions with the MCP server, which then exposes them to the AI client via a specific protocol. The AI client *invokes* the MCP component, and the server translates this back to a call to the Python function.",
+          "correction_strategy": "Draw an analogy to an API endpoint. Ask if a client directly runs the server-side code or interacts via a defined interface. Explain that the decorator is part of defining that server-side interface for the AI."
+        }
+      ],
+      "key_insights": [
+        "MCP decorators serve as the primary mechanism for transforming regular Python functions into AI-discoverable and usable components (tools for actions, resources for data, prompts for generation).",
+        "The choice of decorator (@mcp_tool, @mcp_resource, @mcp_prompt) explicitly communicates the intended role and interaction pattern of a function to the AI.",
+        "Decorators abstract away the complexity of registering functions with the MCP server, allowing developers to focus on core Python logic while enabling seamless AI integration."
+      ],
+      "practical_applications": [
+        "Enabling AI agents (like Claude Desktop) to interact with local services, databases (e.g., SQLite examples in video), or custom APIs through defined functions.",
+        "Building dynamic to-do list applications where AI can add, list, update, or delete items by calling decorated functions.",
+        "Allowing AI to generate context-specific summaries or prompts by invoking decorated prompt generation functions.",
+        "Integrating AI with image processing, enabling tasks like generating thumbnails or editing images via Python functions exposed as MCP tools."
+      ],
+      "common_gotchas": [
+        "Forgetting to include clear and concise docstrings (comments for description, inputs, and outputs) for decorated functions, as these are crucial for the AI to understand how to use them.",
+        "Misinterpreting the difference between a 'tool' (action) and a 'resource' (data retrieval), leading to incorrect decorator application and unexpected AI behavior.",
+        "Issues with the MCP server not recognizing decorated functions due to incorrect setup, import errors, or the server not being restarted after code changes."
+      ],
+      "debugging_tips": [
+        "Check the MCP server's console output or logs; it usually provides feedback on which tools, resources, and prompts have been successfully registered upon startup.",
+        "Carefully review the docstrings of your decorated functions. If the AI is misinterpreting how to use a function, the description, input types, or output description might be unclear or incorrect.",
+        "If a decorated function isn't appearing for the AI, ensure the Python file containing the function is correctly specified when starting the MCP server (e.g., `uv run mcp run main.py`)."
+      ]
+    },
+    {
+      "id": "documenting_mcp_functions",
+      "name": "Documenting MCP Functions",
+      "description": "Documenting MCP functions involves adding specific comment blocks within the Python code for tools, resources, and prompts. These comments clearly describe the function's purpose, expected inputs, and anticipated outputs, which is crucial for AI models to understand how to use them correctly.",
+      "prerequisites": [
+        "mcp_decorators"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 340,
+          "end": 360
+        }
+      ],
+      "code_examples": [
+        {
+          "segment_index": 8,
+          "timestamp": 453.1,
+          "code": "# In-memory storage for to-do items\ntodo_list = []\n\n@mcp.tool()\ndef add_todo(item: str) -> str:\n    \"\"\"\n    Add a new to-do item to the in-memory list.\n\n    - Args:\n        item (str): The task to be added to the list.\n\n    Returns:\n        str: Confirmation message indicating the task was added.\n    \"\"\"\n    todo_list.append(item)\n    return f\"Added to-do: '{item}'\"\n\n@mcp.tool()\ndef list_todos() -> str:",
+          "rationale": "This code provides the full implementation for the `add_todo` function, which is registered as an `mcp_tool`. It explicitly uses the `todo_list` for `in_memory_storage_for_mcp` and includes a detailed docstring, demonstrating `documenting_mcp_functions`.",
+          "teaching_context": "This teaches the practical implementation of an MCP tool, showing how to interact with in-memory data and how to effectively document the tool for AI understanding and usage."
+        },
+        {
+          "segment_index": 9,
+          "timestamp": 513.04,
+          "code": "def get_latest_todo() -> str:\"\"\"Get the most recently added to-do item.Returns:str: The latest task or a default message if list is empty.\"\"\"return todo_list[-1] if todo_list else \"No to-dos yet.\"@mcp.prompt()def todo_summary_prompt() -> str:\"\"\"Generate a prompt asking the AI to summarize the current to-do list.Returns:str: AI-ready prompt string, or a default message if list is empty.\"\"\"if not todo_list:return \"There are no to-do items.\"return f\"Summarize the following to-do-items: {', '.join(todo_list)}\"",
+          "rationale": "This snippet implements the `get_latest_todo` as an `mcp_resource` and introduces the definition of an `mcp_prompt` using `@mcp.prompt()`. Both functions include docstrings that serve as examples of `documenting_mcp_functions` for AI consumption.",
+          "teaching_context": "This demonstrates how to implement an MCP resource for fetching data and how to create an MCP prompt to guide the AI in generating specific text, emphasizing the importance of clear documentation for both."
+        }
+      ],
+      "learning_objectives": [
+        "Explain the critical role of documentation comments in MCP functions for AI model understanding and utilization.",
+        "Identify the essential components (purpose, inputs, outputs) required within documentation comments for MCP tools, resources, and prompts.",
+        "Write well-structured documentation comments for new MCP functions that clearly define their functionality, arguments, and return values for AI consumption."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "doc_structure_identification",
+          "description": "Student can correctly identify and explain the distinct components of an MCP function's documentation comment.",
+          "difficulty": "basic",
+          "test_method": "Given the `add_todo` function's documentation (7:33), ask the student to point out the sections for purpose, arguments, and returns, explaining what each communicates to an AI model."
+        },
+        {
+          "skill": "doc_writing_for_tool",
+          "description": "Student can compose accurate and properly formatted documentation for a simple MCP tool.",
+          "difficulty": "intermediate",
+          "test_method": "Provide a new Python function, e.g., `delete_todo(item_id: int) -> str`, and instruct the student to write the complete MCP documentation comment for it, assuming it's registered as an `@mcp.tool()`."
+        },
+        {
+          "skill": "doc_purpose_differentiation",
+          "description": "Student can explain how the documentation's content might differ based on whether a function is an MCP tool, resource, or prompt.",
+          "difficulty": "advanced",
+          "test_method": "Ask the student to describe how the 'what this function does' part of the documentation might vary for an `@mcp.tool()`, an `@mcp.resource()`, and an `@mcp.prompt()`, based on Karpathy's distinctions at the end of the video."
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "Documentation comments in MCP functions are primarily for human developers to understand the code, similar to standard Python docstrings.",
+          "reality": "These specific comment blocks are not just for humans; they are actively parsed by the MCP system and directly interpreted by AI models (like Claude) to infer the function's purpose, required inputs, and expected outputs, enabling autonomous tool use.",
+          "correction_strategy": "Refer to Karpathy's demonstration (6:00, 7:33) where Claude uses the documented 'add' function. Emphasize that the AI's ability to 'calculate 1+2 using the mcp tool' directly stems from these structured comments, proving their machine-readability."
+        },
+        {
+          "misconception": "Any comment style or informal description is sufficient for an MCP function's documentation.",
+          "reality": "MCP documentation requires specific structured elements (e.g., explicit sections for `- Args:` and `Returns:`) that are consistently formatted. This structure is crucial for reliable AI parsing and understanding, ensuring the model knows exactly what inputs to provide and what outputs to expect.",
+          "correction_strategy": "Compare the detailed docstring of `add_todo` (7:33) with a hypothetical informal comment. Highlight how the explicit `Args` and `Returns` sections provide unambiguous contracts for the AI, unlike free-form text."
+        }
+      ],
+      "key_insights": [
+        "MCP documentation serves as the 'API specification' for AI models, allowing them to autonomously discover, understand, and interact with custom backend functions.",
+        "Clear, structured comment blocks within MCP functions (tools, resources, prompts) are essential for AI to correctly infer their purpose, required inputs, and expected outputs, which is critical for reliable AI function calling.",
+        "The explicit definition of inputs and outputs within documentation comments provides a robust contract, guiding the AI on how to correctly invoke functions and process their results."
+      ],
+      "practical_applications": [
+        "Enabling AI agents (like Claude) to perform complex operations by interacting with custom backend APIs or local services defined as MCP tools.",
+        "Building advanced automation workflows where AI can dynamically select and execute appropriate functions based on user requests, leveraging their documentation.",
+        "Creating 'self-describing' computational environments where AI can explore and utilize available functionalities without explicit pre-programming for each new tool."
+      ],
+      "common_gotchas": [
+        "Forgetting to include the `Args` or `Returns` sections in documentation when the function expects inputs or produces outputs, leading to AI models failing to use the tool correctly.",
+        "Using ambiguous or vague language in the function's description or argument explanations, which can confuse the AI about the function's true purpose or how to properly format inputs.",
+        "Mismatching the documented data types or descriptions for arguments/returns with the actual Python function signature, causing runtime errors or unexpected AI behavior."
+      ],
+      "debugging_tips": [
+        "Check the AI client's (e.g., Claude Desktop) logs for any errors related to MCP server or tool parsing, which often indicate issues with documentation format or content.",
+        "Simplify the documentation of a problematic function to its bare minimum (just a clear purpose statement) to isolate if the issue is with specific `Args` or `Returns` formatting.",
+        "Directly ask the AI model (e.g., 'What does the 'add_todo' tool do? What arguments does it take?') to verify its interpretation of your documentation and identify misunderstandings."
+      ]
+    },
+    {
+      "id": "mcp_resource_paths_arguments",
+      "name": "MCP Resource Paths and Arguments",
+      "description": "Defining MCP resource paths allows specifying unique URL-like identifiers (e.g., `/todos/latest`) for accessing different data points. Resources can also accept arguments, such as query parameters (`?id=...`), to dynamically filter or retrieve specific data.",
+      "prerequisites": [
+        "mcp_resources",
+        "documenting_mcp_functions"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 360,
+          "end": 390
+        }
+      ],
+      "code_examples": [],
+      "learning_objectives": [
+        "Identify valid MCP resource paths within a server definition.",
+        "Explain the purpose of arguments in MCP resource paths for dynamic data retrieval.",
+        "Construct an MCP resource definition that correctly utilizes both a path and a query parameter argument.",
+        "Differentiate between using resource paths for specific data points and arguments for dynamic filtering."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "identify_resource_path_component",
+          "description": "The student can correctly pinpoint the path component within an MCP resource decorator.",
+          "difficulty": "basic",
+          "test_method": "Given the code `@ai_todolist.resource('/todos/latest')`, ask the student to identify the resource path."
+        },
+        {
+          "skill": "explain_path_specificity",
+          "description": "The student can articulate why using specific paths (e.g., /todos/latest) is beneficial for accessing particular data states.",
+          "difficulty": "basic",
+          "test_method": "Why would `/todos/latest` be preferred over just `/todos` if you wanted to fetch the single most recent to-do item?"
+        },
+        {
+          "skill": "define_query_parameter_argument",
+          "description": "The student can describe how to define an argument as a query parameter for an MCP resource, including type specification.",
+          "difficulty": "intermediate",
+          "test_method": "If an MCP resource at `/todos` needed to retrieve a specific to-do item using an `id` (string) passed as a query parameter, how would you define that argument in the resource function's signature?"
+        },
+        {
+          "skill": "construct_resource_with_path_and_arg",
+          "description": "The student can write a basic MCP resource definition that includes both a specific path and a query parameter argument.",
+          "difficulty": "intermediate",
+          "test_method": "Write the Python decorator and function signature for an MCP resource that accesses `/products/details` and accepts a `product_code` (string) as a query parameter to fetch specific product details."
+        },
+        {
+          "skill": "distinguish_path_vs_query_param_role",
+          "description": "The student understands the distinct roles of resource paths and query parameters in structuring API access for AI tools.",
+          "difficulty": "advanced",
+          "test_method": "Explain the fundamental difference in how resource paths (e.g., `/users/123`) and query parameters (e.g., `/users?status=active`) are typically used to access or filter data in MCP resources. Provide an example where each would be most appropriate."
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "MCP resource paths are always general categories (e.g., /items) and cannot specify unique data points directly.",
+          "reality": "Resource paths can be highly specific (e.g., `/todos/latest` as shown in the video) to point to particular data items, states, or filtered views, similar to how RESTful APIs use paths.",
+          "correction_strategy": "Present the student with the `/todos/latest` example from the transcript and ask them to consider what 'latest' signifies in the path, guiding them to understand its specificity beyond a general category."
+        },
+        {
+          "misconception": "All variable data needed by a resource should be embedded directly in the path, like `/todos/item_id`.",
+          "reality": "While path segments can be used for unique identifiers, Karpathy explicitly demonstrates using query parameters (`?id=...`) for passing arguments, which is often more suitable for filtering, sorting, or optional parameters, offering greater flexibility.",
+          "correction_strategy": "Discuss scenarios where a path segment is ideal (e.g., accessing a specific, required item by ID) versus when query parameters are more flexible (e.g., optional filters). Refer to the transcript's example of `ID` as a query parameter."
+        },
+        {
+          "misconception": "Arguments for MCP resources are automatically understood and processed by the server without explicit declaration.",
+          "reality": "Arguments must be explicitly defined in the MCP resource function's signature, including their names and types (e.g., `id: str`), so the underlying framework knows how to parse them from the incoming request (e.g., from a query string).",
+          "correction_strategy": "Ask the student to write the function signature for a resource expecting a query parameter and then point out where the argument is declared and how its type hint guides the server's parsing. Emphasize the importance of `string ID` as mentioned by Karpathy."
+        }
+      ],
+      "key_insights": [
+        "MCP resource paths act as unique, URL-like identifiers, allowing AI tools to precisely locate and request specific data points or collections.",
+        "Arguments, typically passed as query parameters, enable dynamic filtering and customization of the data retrieved by a resource, making it highly adaptable to diverse AI tool needs.",
+        "The combination of descriptive paths and flexible arguments provides a powerful and granular mechanism for AI models to interact with and extract specific contextual data from your server."
+      ],
+      "practical_applications": [
+        "Building a news feed resource where the path might be `/news/headlines` and arguments could filter by `category` or `date`.",
+        "Creating an inventory system resource at `/inventory/products` where arguments like `warehouse_id` or `min_stock` dynamically narrow down results.",
+        "Enabling AI agents to fetch specific user preferences or settings by providing a `user_id` as an argument to a `/settings` resource path."
+      ],
+      "common_gotchas": [
+        "Confusing the declaration of path variables (often indicated by curly braces in frameworks) with query parameters, especially when integrating with existing web API patterns. Karpathy focused on query parameters.",
+        "Incorrectly specifying the data type of an argument in the function signature (e.g., expecting an integer when the query parameter value is a string), leading to parsing errors.",
+        "Forgetting that the argument name in the function signature must match the expected query parameter name from the client request for proper binding."
+      ],
+      "debugging_tips": [
+        "Inspect the MCP server's console output for messages indicating malformed requests or argument parsing failures.",
+        "Use a tool or print statements to verify the exact path and query parameters being sent by the client application to ensure they match the resource's definition.",
+        "Temporarily simplify the resource function by removing arguments to isolate if the issue is with path matching or argument parsing."
+      ]
+    },
+    {
+      "id": "mcp_prompts",
+      "name": "MCP Prompts",
+      "description": "MCP Prompts are server-defined templates that generate specific text prompts for large language models. They allow the MCP server to inject structured context or instructions directly into the AI's input, guiding its behavior for tasks like summarization.",
+      "prerequisites": [
+        "mcp_decorators",
+        "documenting_mcp_functions"
+      ],
+      "difficulty": "advanced",
+      "time_ranges": [
+        {
+          "start": 390,
+          "end": 420
+        }
+      ],
+      "code_examples": [
+        {
+          "segment_index": 9,
+          "timestamp": 513.04,
+          "code": "def get_latest_todo() -> str:\"\"\"Get the most recently added to-do item.Returns:str: The latest task or a default message if list is empty.\"\"\"return todo_list[-1] if todo_list else \"No to-dos yet.\"@mcp.prompt()def todo_summary_prompt() -> str:\"\"\"Generate a prompt asking the AI to summarize the current to-do list.Returns:str: AI-ready prompt string, or a default message if list is empty.\"\"\"if not todo_list:return \"There are no to-do items.\"return f\"Summarize the following to-do-items: {', '.join(todo_list)}\"",
+          "rationale": "This snippet implements the `get_latest_todo` as an `mcp_resource` and introduces the definition of an `mcp_prompt` using `@mcp.prompt()`. Both functions include docstrings that serve as examples of `documenting_mcp_functions` for AI consumption.",
+          "teaching_context": "This demonstrates how to implement an MCP resource for fetching data and how to create an MCP prompt to guide the AI in generating specific text, emphasizing the importance of clear documentation for both."
+        }
+      ],
+      "learning_objectives": [
+        "Define the purpose and role of MCP Prompts within the Model Context Protocol.",
+        "Implement a basic MCP Prompt function using the `@mcp.prompt()` decorator and explain its structure, including documentation.",
+        "Differentiate between MCP Prompts, Resources, and Tools based on their functionality and how they interact with large language models."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "prompt_identification",
+          "description": "Recognizes and defines an MCP Prompt function and articulates its primary purpose.",
+          "difficulty": "basic",
+          "test_method": "Given a Python code snippet containing `@mcp.prompt()`, ask the student to identify the prompt function, explain its overall goal, and describe how its output is intended to be used by an LLM."
+        },
+        {
+          "skill": "prompt_implementation",
+          "description": "Can correctly write an MCP Prompt function that generates a structured string designed to guide an LLM for a specific task.",
+          "difficulty": "intermediate",
+          "test_method": "Instruct the student to write an MCP prompt function that generates a string for an LLM to summarize a list of items passed as an argument, similar to the 'todo_summary_prompt' example [8:33]. Ask them to include appropriate documentation."
+        },
+        {
+          "skill": "prompt_distinction",
+          "description": "Clearly distinguishes MCP Prompts from MCP Resources and Tools, explaining their unique use cases and interaction patterns with client applications and LLMs.",
+          "difficulty": "advanced",
+          "test_method": "Present a scenario requiring an LLM interaction (e.g., 'summarize a document', 'retrieve current stock price', 'add an event to a calendar'). Ask the student which MCP primitive (Prompt, Resource, or Tool) would be most suitable for each aspect of the scenario and justify their choices."
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "MCP Prompts directly execute actions on the server.",
+          "reality": "MCP Prompts are server-defined *templates* that generate specific text inputs for the LLM. The LLM processes this text to generate a response, but the prompt itself doesn't perform server-side actions like database updates or API calls (which are handled by Tools).",
+          "correction_strategy": "If an MCP Prompt's output is just a string, how does that string get from the server to the LLM? What part of the overall system decides what to *do* with that string? How does this differ from an MCP Tool, which performs an action *on the server*?"
+        },
+        {
+          "misconception": "Any string returned by a Python function is an MCP Prompt if an LLM eventually sees it.",
+          "reality": "While the output of an MCP Prompt is a string, the `@mcp.prompt()` decorator and the MCP server provide a structured way to *expose* these string templates to the client application. This allows the client to dynamically retrieve and inject context for the LLM in a standardized manner, rather than just passing an arbitrary string.",
+          "correction_strategy": "Consider the `@mcp.prompt()` decorator. What value does it add to a function that simply returns a string, compared to just calling a regular Python function? How does the MCP server leverage this decorator to make the prompt 'discoverable' and 'usable' by the client?"
+        }
+      ],
+      "key_insights": [
+        "MCP Prompts provide a crucial mechanism for the server to inject structured, dynamically generated context or instructions directly into the AI's input, thereby guiding its behavior for specific tasks.",
+        "They function as 'template prompts' generated by the MCP server, explicitly distinguished from `Resources` (which provide contextual data) and `Tools` (which allow the LLM to execute server-side actions).",
+        "Effective MCP prompts rely on clear, concise documentation within the Python function's docstring, which informs both the client application and the LLM about the prompt's purpose and any expected inputs or format requirements."
+      ],
+      "practical_applications": [
+        "Generating dynamic instructions for complex LLM tasks like summarization, entity extraction, or content moderation based on current application state or user preferences.",
+        "Crafting persona-based prompts where the AI needs to adopt a specific tone, role, or knowledge base, which can be dynamically selected by the MCP server.",
+        "Creating structured prompts for code generation, debugging assistance, or data transformation, where specific instructions or contextual data need to be programmatically injected into the LLM's input."
+      ],
+      "common_gotchas": [
+        "Assuming the LLM will perfectly adhere to the prompt's instructions; prompt engineering often requires iteration and refinement to achieve desired LLM behavior.",
+        "Forgetting to include all necessary dynamic variables or context within the generated prompt string, leading to incomplete or ineffective LLM instructions.",
+        "Confusing the role of the prompt (providing instructions) with the LLM's actual response, which might still need post-processing or validation on the client side."
+      ],
+      "debugging_tips": [
+        "Always inspect the exact string output by the MCP prompt function before it's sent to the LLM to ensure it's formatted precisely as intended.",
+        "Test the generated prompt string directly with an LLM (outside the full MCP client context) to isolate and evaluate its effectiveness in guiding behavior.",
+        "Verify that the client application is correctly requesting the MCP prompt's output and then properly integrating that output into the overall input sent to the LLM."
+      ]
+    },
+    {
+      "id": "image_manipulation_with_mcp",
+      "name": "Image Manipulation with MCP Tools",
+      "description": "Image manipulation with MCP tools demonstrates extending server capabilities to process visual data. An MCP tool can accept an image path as input, perform operations like resizing or editing using image processing libraries, and then return the modified image or its path.",
+      "prerequisites": [
+        "mcp_tools",
+        "documenting_mcp_functions"
+      ],
+      "difficulty": "advanced",
+      "time_ranges": [
+        {
+          "start": 420,
+          "end": 450
+        }
+      ],
+      "code_examples": [],
+      "learning_objectives": [
+        "Explain how an MCP tool can be designed to accept and process visual data like images.",
+        "Identify the necessary components (input, processing, output) for an image manipulation MCP tool.",
+        "Describe potential real-world applications where an MCP tool for image manipulation would be beneficial.",
+        "Distinguish between the role of the MCP server in image processing and the client application in displaying results."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "image_tool_input_design",
+          "description": "Student can articulate how an image path or content would be passed as input to an MCP tool, consistent with MCP function documentation principles.",
+          "difficulty": "basic",
+          "test_method": "Imagine you're designing an MCP tool to resize an image. What input parameters would your tool's function definition need, and how would you describe them in the tool's docstring for the LLM?"
+        },
+        {
+          "skill": "image_tool_processing_concept",
+          "description": "Student can describe the high-level internal steps an MCP tool would take to perform a specified image manipulation (e.g., resizing, applying a filter).",
+          "difficulty": "intermediate",
+          "test_method": "Once your image manipulation MCP tool receives an image path, what are the logical steps it would follow internally to, say, convert it to grayscale and save it to a new location? What libraries would you use?"
+        },
+        {
+          "skill": "image_tool_output_design",
+          "description": "Student can explain how the result of an image manipulation, such as a new image path or metadata, would be structured and returned by an MCP tool.",
+          "difficulty": "intermediate",
+          "test_method": "After an MCP tool successfully processes an image, how would it communicate the result (e.g., the modified image's new path, success status, or error messages) back to the LLM?"
+        },
+        {
+          "skill": "integrating_image_libraries",
+          "description": "Student understands that external libraries are required for image processing and can identify where they fit into the MCP tool's logic.",
+          "difficulty": "advanced",
+          "test_method": "What external Python libraries would be essential for an MCP tool to perform actual image resizing or editing, and where in your tool's code (conceptualizing from the to-do list example) would you incorporate their functions?"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "The MCP server directly handles image rendering or display to the end-user.",
+          "reality": "The MCP server provides tools to *process* images; the AI client application (e.g., Claude desktop) is responsible for displaying images or interacting with the user.",
+          "correction_strategy": "If your MCP tool resizes an image, does the MCP server itself display the new image, or does something else handle that? Think about the division of labor between the server and the client in the Claude example."
+        },
+        {
+          "misconception": "Image manipulation MCP tools are fundamentally different in their structure or implementation from other MCP tools.",
+          "reality": "While the data type being processed is visual, the core structure of an MCP tool (defining inputs, executing logic via a function, and providing structured outputs) remains consistent with calculator or to-do list tools.",
+          "correction_strategy": "How does the structure of an image manipulation tool (input, logic, output) compare to the `add` calculator tool or the to-do list tools discussed in the video? Are there fundamental differences in how the *MCP* part works, or just the internal logic?"
+        },
+        {
+          "misconception": "Image processing logic is built directly into the MCP framework.",
+          "reality": "The MCP framework provides the mechanism for LLMs to call external functions; the actual image processing capabilities come from external Python libraries (e.g., Pillow, OpenCV) that are integrated into the MCP tool's function.",
+          "correction_strategy": "When Karpathy mentions 'reshape the image change, the image or maybe edit the image,' is he implying that MCP itself has built-in image editing functions, or something else is performing these tasks?"
+        }
+      ],
+      "key_insights": [
+        "MCP tools extend LLM capabilities to interact with and process diverse data types, including complex visual data like images.",
+        "Implementing image manipulation within MCP follows the standard tool pattern: define inputs (e.g., image path), execute specialized logic (using external libraries), and provide structured outputs.",
+        "The power of MCP lies in enabling LLMs to *delegate* domain-specific tasks, such as image processing, to specialized backend services, without the LLM needing to 'understand' the image itself."
+      ],
+      "practical_applications": [
+        "Automatically generating social media thumbnails from uploaded high-resolution images based on AI prompts.",
+        "Creating dynamic variations of product images for e-commerce sites (e.g., different color filters, watermarks) as requested by an AI assistant.",
+        "Implementing AI-driven image moderation tools (e.g., blurring sensitive content, detecting inappropriate imagery) where an LLM can trigger the processing.",
+        "Integrating visual search or image feature extraction where an MCP tool can process an image and return relevant metadata to the LLM."
+      ],
+      "common_gotchas": [
+        "Handling large image file sizes and potential memory consumption issues on the MCP server, requiring efficient processing or asynchronous handling.",
+        "Ensuring secure handling of image paths and file operations to prevent vulnerabilities like path traversal or unauthorized access.",
+        "Managing dependencies on external image processing libraries (e.g., Pillow, OpenCV) and ensuring they are correctly installed and accessible within the MCP server's environment.",
+        "Communicating rich image data back to the LLM effectively, often requiring converting images to base64 strings or providing URLs to hosted images rather than raw pixel data."
+      ],
+      "debugging_tips": [
+        "Verify the input parameters (e.g., image path, processing settings) received by the MCP tool from the LLM are correct and valid.",
+        "Log intermediate steps of the image processing pipeline within the MCP tool to pinpoint exactly where an operation might be failing or producing unexpected results.",
+        "Test the core image processing logic (using external libraries like Pillow) independently outside the MCP server context to isolate bugs from the MCP integration itself.",
+        "Monitor resource consumption (CPU, memory) of the MCP server when processing images, especially large ones, to detect performance bottlenecks or out-of-memory errors."
+      ]
+    },
+    {
+      "id": "database_integration_with_mcp",
+      "name": "Database Integration with MCP",
+      "description": "Integrating a database (like SQLite) with an MCP server allows tools and resources to interact with persistent data storage. MCP tools can execute SQL queries to create, read, update, or delete data, while resources can retrieve database schemas or query results.",
+      "prerequisites": [
+        "mcp_tools",
+        "mcp_resources",
+        "documenting_mcp_functions"
+      ],
+      "difficulty": "advanced",
+      "time_ranges": [
+        {
+          "start": 450,
+          "end": 490
+        }
+      ],
+      "code_examples": [],
+      "learning_objectives": [
+        "Explain the purpose and benefits of integrating a database with an MCP server for persistent data storage.",
+        "Identify how MCP resources are used to expose database schema or retrieve query results for AI models.",
+        "Implement an MCP tool to execute SQL queries for data manipulation (CRUD operations) against a connected database.",
+        "Differentiate between the appropriate use cases for MCP tools versus resources when interacting with a database."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "database_integration_rationale",
+          "description": "Understands why persistent storage through a database is beneficial for MCP servers.",
+          "difficulty": "basic",
+          "test_method": "Imagine your to-do list application needs to remember tasks even after the MCP server restarts. How would integrating a database help achieve this? Explain the core problem a database solves here."
+        },
+        {
+          "skill": "schema_resource_definition",
+          "description": "Can define an MCP resource to expose a database schema.",
+          "difficulty": "intermediate",
+          "test_method": "If you have a SQLite database named 'mydatabase.db' with a table 'users', how would you structure an MCP resource to allow an AI to retrieve the schema of the 'users' table? Describe the key components of this resource (decorator, function purpose, return type), similar to the example shown at 06:17."
+        },
+        {
+          "skill": "sql_query_tool_implementation",
+          "description": "Implements an MCP tool that accepts and executes a SQL query for data modification.",
+          "difficulty": "advanced",
+          "test_method": "Write the Python code for an MCP tool that takes a SQL query string as input, connects to a SQLite database, executes the query (e.g., an INSERT or UPDATE statement), and returns a success message or results. Consider error handling for invalid queries, referencing the example at 06:17."
+        },
+        {
+          "skill": "tool_vs_resource_for_db",
+          "description": "Clearly differentiates when to use an MCP tool versus a resource for specific database interactions.",
+          "difficulty": "intermediate",
+          "test_method": "Would you use an MCP tool or a resource for the following database operations: 1) Retrieving a list of all items from a table? 2) Deleting a specific record from a table? Explain your reasoning for each, relating it to Karpathy's distinction between executing code and exposing data (02:40)."
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "MCP tools are the only way to interact with a database.",
+          "reality": "MCP tools are used for actions that modify data (create, update, delete) or execute commands. MCP resources are crucial for exposing data from the database, such as schemas or query results, to the LLM context without modification.",
+          "correction_strategy": "Remind the student of Karpathy's distinction at 02:40 (tools for executing code, resources for exposing data). Then, ask them to categorize database operations like 'getting a schema' versus 'inserting a row' into these two MCP primitives, explaining why each fits where it does."
+        },
+        {
+          "misconception": "The MCP server automatically handles database connections for all tools/resources.",
+          "reality": "Each MCP tool or resource function that interacts with a database needs to explicitly manage its own connection (e.g., opening and closing it, or using a connection pool) to ensure proper resource management and prevent issues like concurrent access or leaks.",
+          "correction_strategy": "Pose a scenario where multiple AI queries concurrently try to update a database using a single, globally shared connection object within the MCP server. Ask what potential problems could arise and how explicit connection management within each tool/resource function helps mitigate these issues."
+        }
+      ],
+      "key_insights": [
+        "MCP provides a powerful abstraction for AI models to interact with persistent data stores, extending their capabilities beyond in-memory states to robust, data-driven applications.",
+        "The core distinction between MCP 'tools' (for executing SQL queries that modify data) and 'resources' (for exposing database schema or read-only query results) directly maps to common database interaction patterns, similar to HTTP verbs (e.g., POST/PUT vs. GET).",
+        "Integrating a database transforms an MCP server from a transient, stateless process into a stateful application, enabling the development of more complex and useful AI-driven workflows that retain information over time."
+      ],
+      "practical_applications": [
+        "Building AI-powered data analytics platforms where users can query complex datasets using natural language via MCP tools and resources.",
+        "Developing intelligent content management systems (CMS) where AI agents can update, retrieve, or manage articles stored in a database.",
+        "Creating personalized AI assistants that store and retrieve user preferences, settings, or historical interactions in a database to provide tailored experiences.",
+        "Implementing AI-driven automation for business processes that require interaction with existing corporate databases for data entry, reporting, or validation."
+      ],
+      "common_gotchas": [
+        "SQL injection vulnerabilities when directly passing user-supplied (or LLM-generated) input into SQL queries without proper sanitization or parameterized queries.",
+        "Managing database connection lifecycles (opening and closing connections) within potentially short-lived MCP tool/resource calls to avoid resource exhaustion or 'database is locked' errors (especially with SQLite).",
+        "Handling and formatting large query results efficiently when returning them to the LLM context, as LLMs have token limits and expect structured, concise information.",
+        "Database schema evolution: Changes to the underlying database schema can break existing MCP tools and resources if not carefully managed and kept in sync."
+      ],
+      "debugging_tips": [
+        "Log all incoming SQL queries and their execution results within your MCP tool/resource functions to trace database interactions and identify errors.",
+        "Use a standalone database client (e.g., `sqlite3` CLI for SQLite) to verify SQL queries and schema independently of your MCP server, ensuring the database itself is correctly structured and accessible.",
+        "Implement `try-except` blocks around database operations to catch and log specific database-related exceptions (e.g., `sqlite3.OperationalError`, `sqlite3.IntegrityError`), providing more specific error messages.",
+        "Verify the database file path is correct and accessible from the MCP server's execution environment, especially when deploying or running in different contexts."
+      ]
+    },
+    {
+      "id": "mcp_server_primitives_summary",
+      "name": "Three Primitives of MCP Server Creation",
+      "description": "The three fundamental primitives for building an MCP server are Prompts (for generating AI instructions), Resources (for providing contextual data), and Tools (for enabling AI to perform actions and execute code). Understanding these distinct roles is key to effective MCP server design.",
+      "prerequisites": [
+        "mcp_prompts",
+        "mcp_resources",
+        "mcp_tools"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 490,
+          "end": 612
+        }
+      ],
+      "code_examples": [],
+      "learning_objectives": [
+        "Identify the three core primitives: Prompts, Resources, and Tools, for building an MCP server.",
+        "Differentiate between the purpose and typical use cases of Prompts, Resources, and Tools in the context of an MCP server.",
+        "Describe how each primitive contributes to an AI's ability to generate instructions, access contextual data, and perform actions."
+      ],
+      "mastery_indicators": [
+        {
+          "skill": "identify_primitives",
+          "description": "Correctly lists and generally defines the three core primitives of MCP server creation: Prompts, Resources, and Tools.",
+          "difficulty": "basic",
+          "test_method": "Can you name the three fundamental primitives for building an MCP server and briefly state what each is for?"
+        },
+        {
+          "skill": "distinguish_resource_tool",
+          "description": "Explains the fundamental difference in purpose and action between an MCP Resource and an MCP Tool.",
+          "difficulty": "intermediate",
+          "test_method": "A student wants to expose a list of recent blog posts and also allow the AI to publish a new post. Which primitive would they use for each task, and why is it important to use different primitives here?"
+        },
+        {
+          "skill": "explain_prompt_function",
+          "description": "Articulates how an MCP Prompt is used to generate AI instructions or content, often by templating dynamic information.",
+          "difficulty": "basic",
+          "test_method": "The video mentions 'template prompts that we generate from the mCP server'. How does this 'Prompt' primitive enable the AI to perform tasks like summarizing a to-do list effectively?"
+        },
+        {
+          "skill": "classify_use_case_primitive",
+          "description": "Given a desired AI capability, correctly identifies which MCP primitive (Prompt, Resource, or Tool) is the most suitable implementation.",
+          "difficulty": "advanced",
+          "test_method": "You want your AI to: 1) fetch a user's profile information, 2) update the user's password, and 3) generate a personalized welcome message based on their activity. For each, which MCP primitive would you employ, and what specific characteristics of that primitive make it the best choice?"
+        }
+      ],
+      "misconceptions": [
+        {
+          "misconception": "Resources are just another type of tool, both are for data manipulation.",
+          "reality": "Resources are specifically for exposing *contextual data* to the LLM (like a GET endpoint, passive), while Tools are for *executing actions or code* (like POST, PUT, DELETE, or any function call, active).",
+          "correction_strategy": "Ask the student to consider the difference between fetching information versus making a change or performing an operation. Provide concrete examples for each (e.g., 'getting a weather forecast' vs. 'sending an email') and ask which primitive fits."
+        },
+        {
+          "misconception": "Prompts are static strings defined once and don't change.",
+          "reality": "Prompts are dynamic templates that can incorporate current context (e.g., a list of to-do items, user preferences, API responses) to generate highly specific and context-aware instructions for the AI.",
+          "correction_strategy": "Point to the video's example where the prompt summarizes a *current* to-do list. Ask why a simple static string wouldn't work there and how a dynamic prompt solves the need for real-time context."
+        },
+        {
+          "misconception": "Any Python function can become an MCP Tool without special formatting.",
+          "reality": "While functions form the basis, MCP Tools specifically require structured comments (docstrings) defining their purpose, expected inputs, and anticipated outputs for the AI to correctly understand how and when to use them.",
+          "correction_strategy": "Refer back to the code structure shown in the video for defining tools (e.g., 'add_item', 'list_todo') and emphasize the importance of the detailed docstrings for the AI's understanding, beyond just the Python code itself."
+        }
+      ],
+      "key_insights": [
+        "The three primitives (Prompts, Resources, Tools) provide a clear, structured framework for defining how an AI interacts with its environment: instruction generation, data access, and action execution, respectively.",
+        "By separating these concerns, MCP empowers LLMs to not only generate text but also to be aware of external, dynamic data (Resources) and to take specific, real-world actions (Tools), making them more intelligent and capable agents.",
+        "The MCP server effectively acts as an API layer, allowing client applications (like Claude desktop) to expose custom functionalities (tools and resources) and contextual prompts to an AI model, extending its capabilities beyond its core training data."
+      ],
+      "practical_applications": [
+        "Enabling AI to query and manage databases (e.g., fetching schema via Resources, performing CRUD operations via Tools).",
+        "Allowing AI to interact with web services and external APIs, such as making bookings, sending messages, or updating online content.",
+        "Generating dynamic content or summaries by feeding live data (via Resources) into templated prompts for the AI to process.",
+        "Creating AI-powered image manipulation tools, where the AI can be instructed to edit, reshape, or generate images based on user commands and contextual data."
+      ],
+      "debugging_tips": [
+        "Review the detailed docstrings/comments of your Tool and Resource functions. If the AI isn't using them as expected, it often indicates the AI doesn't fully understand their purpose, inputs, or outputs.",
+        "Monitor the MCP server's console output for any errors during startup or when a client tries to invoke a primitive. This can reveal configuration or runtime issues.",
+        "Test the underlying Python functions for your tools and resources directly, outside of the MCP server context, to ensure they work as intended before expecting the AI to utilize them."
+      ]
+    }
+  ]
+}

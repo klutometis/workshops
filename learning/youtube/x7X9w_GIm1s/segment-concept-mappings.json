@@ -1,0 +1,115 @@
+{
+  "video_id": "x7X9w_GIm1s",
+  "total_segments": 3,
+  "mapped_at": "2025-12-16T09:50:39.159Z",
+  "segments": [
+    {
+      "segment_index": 0,
+      "timestamp": 29.995,
+      "audio_text": "Python a high-level interpreted programming language famous for its zen-like code. It's arguably the most popular language in the world because it's easy to learn yet practical for serious projects. In fact, you're watching this YouTube video in a python web application right now. It was created by Guido van Rossum and released in 1991 who named it after Monty Python's, Flying Circus, which is why you'll sometimes find spam and eggs and Bar in code samples. It's commonly used to build server-side applications, like web apps with the Django framework. And is the language of choice, for Big Data analysis, and machine learning, many students choose python to start learning to code because of its emphasis on readability, as outlined by the Zen of python, beautiful is better than ugly while. Explicit is better than implicit python is very simple, but of the temptation to sprinkle in Magic that causes ambiguity. Its code is often organized into notebooks where individual cells can be executed. Then documented in the same place where currently at version 3 of the language and you can get started by creating a",
+      "audio_start": 0,
+      "audio_end": 59.99,
+      "frame_path": "youtube/x7X9w_GIm1s/frames/frame_0000.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a dark background with a conceptual diagram illustrating connections between different programming elements. On the left, a purple rectangular box contains the text 'WEB APPS'. To its right, a purple circular outline encloses the word 'django'. Further to the right, a large white circle contains the blue and yellow Python logo. Dashed white lines connect these elements, with small purple and blue circles indicating points along the paths. The overall aesthetic is clean and modern, representing a relationship between web applications, Django, and Python.",
+        "code_content": "",
+        "slide_content": "WEB APPS\ndjango",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "WEB APPS",
+          "Django",
+          "Python"
+        ],
+        "is_code_readable": false
+      },
+      "concept_mapping": {
+        "concept_id": "python_introduction",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "python_characteristics",
+          "zen_of_python",
+          "python_use_cases",
+          "python_versions"
+        ],
+        "reasoning": "The segment provides a comprehensive overview of Python, touching upon its nature as a high-level interpreted language, its popularity, use cases (web dev, big data, machine learning), the Zen of Python's principles, and its current version."
+      }
+    },
+    {
+      "segment_index": 1,
+      "timestamp": 89.96000000000001,
+      "audio_text": "File that ends in dot py or Dot ipy. And B to create an interactive notebook. Create a variable by setting a name equal to a value. It strongly typed which means values won't change in unexpected ways. But Dynamic, so type annotations are not required. The syntax is highly efficient, allowing you to declare multiple variables on a single line and Define tuples lists and dictionaries with a literal syntax semicolons are not required and if you use them and experience, pythonista will say that your code is not pythonic instead of semicolons python uses indentation to terminate or determine the scope of a line of code and Define a function with the depth keyword. Then indent the next line, usually by 4 spaces to define the function body. We might then add a fully to it and indent that by another Force spaces. This eliminates the need for curly braces and semicolons found in many other languages python is a multi Paradigm language. We can apply functional programming patterns with things like Anonymous functions using Lambda it also uses objects as an abstraction for data. Allowing you to implement object-oriented patterns with things like",
+      "audio_start": 59.99,
+      "audio_end": 119.93,
+      "frame_path": "youtube/x7X9w_GIm1s/frames/frame_0001.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a code snippet written in Python with a dark background and syntax highlighting. The code shows a nested if-else conditional structure. The outer condition is 'if True:', and nested within it is 'if condition:' with 'print(\"true\")' and an 'else:' block with 'print(\"false\")'. The indentation clearly defines the scope of each block.",
+        "code_content": "if True:\n    if condition:\n        print(\"true\")\n    else:\n        print(\"false\")",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "if statement",
+          "else statement",
+          "conditional logic",
+          "indentation",
+          "code scope"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "indentation_for_scope",
+        "confidence": 0.9,
+        "secondary_concepts": [
+          "python_file_types",
+          "variables",
+          "dynamic_typing",
+          "strong_typing",
+          "multiple_variable_declaration",
+          "lists",
+          "tuples",
+          "dictionaries",
+          "pythonic_code",
+          "function_definition",
+          "function_body",
+          "nested_indentation",
+          "multi_paradigm_language",
+          "functional_programming",
+          "lambda_functions",
+          "object_abstraction"
+        ],
+        "reasoning": "This segment explicitly explains Python's use of indentation to determine code scope, define function bodies, and shows nested indentation in the provided code, making it a central focus. It also transitions through various fundamental syntax and language features."
+      }
+    },
+    {
+      "segment_index": 2,
+      "timestamp": 131.575,
+      "audio_text": " Classes and inheritance. It also has a huge ecosystem of third-party libraries such as deep learning Frameworks like tensorflow and wrappers. For many high performance low level packages like open computer vision which are most often installed with the pipe package manager. This is been the Python programming language. In 100 seconds, hit the like button if you want to see more short videos like this, thanks for watching and I will see you in the next one.",
+      "audio_start": 119.93,
+      "audio_end": 143.22,
+      "frame_path": "youtube/x7X9w_GIm1s/frames/frame_0002.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a graphic on a dark background. On the left, there is the 'python Package Index' logo, featuring a stylized Python logo being handled by a crane-like claw. On the right, a white-bordered rectangular box contains the command 'pip install numpy'.",
+        "code_content": "pip install numpy",
+        "slide_content": "python Package Indexpip install numpy",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "Python Package Index (PyPI)",
+          "pip (package manager)",
+          "numpy",
+          "package installation"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "package_manager_pip",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "classes",
+          "inheritance",
+          "python_ecosystem",
+          "third_party_libraries"
+        ],
+        "reasoning": "The segment explicitly mentions 'pip package manager' and shows a 'pip install numpy' code snippet, directly demonstrating its use for managing third-party libraries within the Python ecosystem."
+      }
+    }
+  ]
+}

@@ -1,0 +1,270 @@
+{
+  "metadata": {
+    "title": "Python in 100 Seconds",
+    "author": "Fireship",
+    "source": "https://www.youtube.com/watch?v=x7X9w_GIm1s",
+    "video_id": "x7X9w_GIm1s",
+    "total_duration": 143.22,
+    "total_concepts": 28,
+    "extracted_at": "2025-12-16T09:42:56.000Z"
+  },
+  "nodes": [
+    {
+      "id": "python_introduction",
+      "name": "Python (Introduction)",
+      "description": "An overview of Python as a high-level, interpreted, general-purpose programming language, highlighting its popularity, readability, and versatility for various projects.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_characteristics",
+      "name": "Python Characteristics",
+      "description": "Key attributes of Python, such as being interpreted (code executed line by line), high-level (abstracts low-level details), and general-purpose (applicable across many domains).",
+      "prerequisites": [
+        "python_introduction"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "zen_of_python",
+      "name": "Zen of Python",
+      "description": "The guiding philosophical principles behind Python's design, emphasizing aspects like readability ('beautiful is better than ugly') and clarity ('explicit is better than implicit').",
+      "prerequisites": [
+        "python_introduction"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_use_cases",
+      "name": "Python Use Cases",
+      "description": "Common applications for which Python is widely used, including server-side web development (e.g., with Django), big data analysis, and machine learning.",
+      "prerequisites": [
+        "python_introduction"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_versions",
+      "name": "Python Versioning",
+      "description": "Information about the current major version of Python (version 3) and the ongoing development of the language.",
+      "prerequisites": [
+        "python_introduction"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_file_types",
+      "name": "Python File Types (.py, .ipynb)",
+      "description": "The different file extensions used for Python code: `.py` for standard scripts and `.ipynb` for interactive Jupyter notebooks, which allow cell-based execution and documentation.",
+      "prerequisites": [
+        "python_introduction"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "variables",
+      "name": "Variables",
+      "description": "The fundamental concept of variables in Python, explaining how to create them by assigning a 'name' to a 'value' using the `=` operator to store data.",
+      "prerequisites": [
+        "python_introduction"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "dynamic_typing",
+      "name": "Dynamic Typing",
+      "description": "Python's dynamic typing system, where variable types are inferred at runtime based on the assigned value, meaning explicit type annotations are not strictly required.",
+      "prerequisites": [
+        "variables"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "strong_typing",
+      "name": "Strong Typing",
+      "description": "Python's strong typing characteristic, ensuring that values generally do not implicitly change their type in unexpected ways, leading to more predictable program behavior.",
+      "prerequisites": [
+        "dynamic_typing"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "multiple_variable_declaration",
+      "name": "Multiple Variable Declaration",
+      "description": "An efficient syntactic feature allowing the declaration and assignment of values to multiple variables on a single line of code.",
+      "prerequisites": [
+        "variables"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "lists",
+      "name": "Lists",
+      "description": "Introduction to Python lists as ordered, mutable collections of items, created using square brackets `[]` with a literal syntax.",
+      "prerequisites": [
+        "variables"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "tuples",
+      "name": "Tuples",
+      "description": "Introduction to Python tuples as ordered, immutable collections of items, created using parentheses `()` with a literal syntax.",
+      "prerequisites": [
+        "variables"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "dictionaries",
+      "name": "Dictionaries",
+      "description": "Introduction to Python dictionaries as unordered collections of key-value pairs, created using curly braces `{}` with a literal syntax.",
+      "prerequisites": [
+        "variables"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "pythonic_code",
+      "name": "Pythonic Code",
+      "description": "The concept of 'pythonic' code, which refers to code that follows Python's idiomatic style, conventions, and best practices, often emphasizing readability and conciseness.",
+      "prerequisites": [
+        "zen_of_python"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "indentation_for_scope",
+      "name": "Indentation for Code Scope",
+      "description": "Python's unique use of consistent indentation (typically 4 spaces) to define code blocks and determine the scope of statements, replacing explicit delimiters like semicolons or curly braces.",
+      "prerequisites": [
+        "python_introduction",
+        "pythonic_code"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "function_definition",
+      "name": "Function Definition",
+      "description": "How to define reusable blocks of code using the `def` keyword, specifying a function name, parameters (if any), and using indentation to enclose the function's body.",
+      "prerequisites": [
+        "indentation_for_scope"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "function_body",
+      "name": "Function Body",
+      "description": "The set of indented statements that constitute the instructions a function will execute when called, defining its behavior.",
+      "prerequisites": [
+        "function_definition",
+        "indentation_for_scope"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "nested_indentation",
+      "name": "Nested Indentation",
+      "description": "Illustrates how additional levels of indentation are used to define nested code blocks, such as control flow statements (e.g., loops or conditionals) within a function or another block.",
+      "prerequisites": [
+        "indentation_for_scope",
+        "function_body"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "multi_paradigm_language",
+      "name": "Multi-Paradigm Language",
+      "description": "Explanation that Python supports multiple programming paradigms, allowing developers to apply various styles like functional, object-oriented, or procedural programming.",
+      "prerequisites": [
+        "python_introduction"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "functional_programming",
+      "name": "Functional Programming",
+      "description": "Introduction to functional programming patterns available in Python, focusing on the use of functions as first-class citizens and minimizing mutable state.",
+      "prerequisites": [
+        "multi_paradigm_language",
+        "function_definition"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "lambda_functions",
+      "name": "Lambda Functions (Anonymous Functions)",
+      "description": "Teaching the creation of small, unnamed (anonymous) functions using the `lambda` keyword, typically used for concise operations that don't require a full `def` statement.",
+      "prerequisites": [
+        "functional_programming"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "object_abstraction",
+      "name": "Object Abstraction",
+      "description": "Explaining how Python uses objects as an abstraction mechanism to represent data and associated behaviors, forming a core concept for object-oriented programming.",
+      "prerequisites": [
+        "multi_paradigm_language",
+        "variables"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "object_oriented_programming",
+      "name": "Object-Oriented Programming (OOP)",
+      "description": "Introduction to the OOP paradigm in Python, where code is structured around objects that encapsulate data (attributes) and methods (functions) that operate on that data.",
+      "prerequisites": [
+        "object_abstraction"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "classes",
+      "name": "Classes",
+      "description": "Teaching the concept of classes as blueprints or templates for creating objects, defining their common attributes and behaviors in Python's OOP model.",
+      "prerequisites": [
+        "object_oriented_programming"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "inheritance",
+      "name": "Inheritance",
+      "description": "Explaining inheritance in OOP, which allows new classes (child classes) to derive properties and methods from existing classes (parent classes), promoting code reuse and hierarchical relationships.",
+      "prerequisites": [
+        "classes"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "python_ecosystem",
+      "name": "Python Ecosystem",
+      "description": "A description of the vast and active community surrounding Python, including its extensive collection of third-party libraries, frameworks, and tools.",
+      "prerequisites": [
+        "python_introduction",
+        "python_use_cases"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "third_party_libraries",
+      "name": "Third-Party Libraries",
+      "description": "Introduction to external code modules (e.g., TensorFlow, OpenCV) that can be easily integrated into Python projects to extend functionality for specialized tasks.",
+      "prerequisites": [
+        "python_ecosystem"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "package_manager_pip",
+      "name": "Python Package Manager (pip)",
+      "description": "Teaching about `pip`, Python's standard package installer, used for downloading, installing, and managing third-party libraries from the Python Package Index (PyPI).",
+      "prerequisites": [
+        "third_party_libraries"
+      ],
+      "difficulty": "basic"
+    }
+  ],
+  "edges": []
+}

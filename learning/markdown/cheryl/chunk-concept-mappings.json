@@ -1,0 +1,593 @@
+{
+  "source_file": "/home/danenberg/prg/workshops/learning/markdown/cheryl/cheryl.md",
+  "total_chunks": 43,
+  "mapped_at": "2025-12-12T16:24:17.380Z",
+  "chunks": [
+    {
+      "chunk_id": "chunk-1-peter-norvig-april-2015",
+      "content": "<div align=\"right\" style=\"text-align: right\"><i>Peter Norvig<br>April 2015</i></div>\n---\n",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-1-peter-norvig-april-2015",
+        "concept_id": "cheryls_birthday_puzzle",
+        "confidence": 0.5,
+        "reasoning": "Inferred from next chunk (cheryls_birthday_puzzle)"
+      }
+    },
+    {
+      "chunk_id": "chunk-2-cheryls-birthday-puzzle-introduction",
+      "content": "Cheryl's Birthday is a logic puzzle that went viral when it was used in the Singapore and Asian Schools Math Olympiad (SASMO) in April 2015. Here is the puzzle:\n\n> Albert and Bernard just became friends with Cheryl, and they want to know when her birthday is. Cheryl gives them a list of 10 possible dates:\n>\n>```\n>May 15, May 16, May 19\n>June 17, June 18\n>July 14, July 16\n>August 14, August 15, August 17\n>```\n>\n> Cheryl then tells Albert the month, and tells Bernard the day. Albert says \"I don't know when Cheryl's birthday is, but I know that Bernard doesn't know too.\" Bernard replies \"At first I didn't know when Cheryl's birthday is, but I know now.\" Albert replies \"Then I also know when Cheryl's birthday is.\"\n> So when is Cheryl's birthday?",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-2-cheryls-birthday-puzzle-introduction",
+        "concept_id": "cheryls_birthday_puzzle",
+        "confidence": 1,
+        "reasoning": "This chunk provides the full text and context of Cheryl's Birthday puzzle."
+      }
+    },
+    {
+      "chunk_id": "chunk-3-solving-cheryls-birthday-puzzle-overview",
+      "content": "This notebook will show how to solve the puzzle with logic, and then how to implement the logic in Python. We will see how to represent the state of Albert and Bernard's knowledge, and how to update that state as they make statements. We will see how to represent the statements themselves as Python functions, and how to combine the functions to solve the puzzle.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-3-solving-cheryls-birthday-puzzle-overview",
+        "concept_id": "deductive_reasoning_strategy",
+        "confidence": 0.9,
+        "reasoning": "This chunk outlines the systematic approach to solving the puzzle using logic and Python, which is a deductive reasoning strategy.",
+        "secondary_concepts": [
+          "belief_state",
+          "statement_as_boolean_function"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-4-representing-belief-states",
+      "content": "The key idea is to represent the state of Albert and Bernard's knowledge as a *belief state*: the set of possible birthdays that they consider possible. We will start with a belief state that contains all 10 possible birthdays, and then we will eliminate birthdays from the belief state as Albert and Bernard make statements. Eventually, the belief state will contain only one birthday, and that will be the answer.\n\nWe will represent a date as a string, and a belief state as a `set` of strings. Sets are a good choice because they are unordered (so the order of the dates doesn't matter) and they only contain unique elements (so we don't have to worry about duplicate dates).",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-4-representing-belief-states",
+        "concept_id": "belief_state",
+        "confidence": 1,
+        "reasoning": "This chunk introduces and explains the concept of a 'belief state' for representing knowledge and details its implementation using Python sets.",
+        "secondary_concepts": [
+          "python_set_data_structure"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-5-initial-belief-state-definition",
+      "content": "Here is the initial belief state, before Albert and Bernard have made any statements:",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-5-initial-belief-state-definition",
+        "concept_id": "belief_state",
+        "confidence": 1,
+        "reasoning": "This chunk sets the stage for defining the initial belief state before any statements are made."
+      }
+    },
+    {
+      "chunk_id": "chunk-6-initial-belief-state-example",
+      "content": "```python\ndates = {\n    'May 15', 'May 16', 'May 19',\n    'June 17', 'June 18',\n    'July 14', 'July 16',\n    'August 14', 'August 15', 'August 17'\n}\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-6-initial-belief-state-example",
+        "concept_id": "python_set_data_structure",
+        "confidence": 1,
+        "reasoning": "This chunk provides the Python code for initializing the 'dates' set, demonstrating the practical application of the Python set data structure for the belief state.",
+        "secondary_concepts": [
+          "belief_state"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-7-date-component-accessors-definition",
+      "content": "We will need functions to access the month and day of a date. We can define these functions using string splitting:",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-7-date-component-accessors-definition",
+        "concept_id": "date_component_accessors",
+        "confidence": 1,
+        "reasoning": "This chunk describes the need for functions to extract month and day from date strings, leading to date component accessors.",
+        "secondary_concepts": [
+          "string_splitting"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-8-date-component-accessors-example",
+      "content": "```python\ndef month(date):\n    \"\"\"The month of a date.\"\"\"\n    return date.split()[0]\n\ndef day(date):\n    \"\"\"The day of a date.\"\"\"\n    return date.split()[1]\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-8-date-component-accessors-example",
+        "concept_id": "date_component_accessors",
+        "confidence": 1,
+        "reasoning": "This chunk provides the Python code for the 'month' and 'day' accessor functions.",
+        "secondary_concepts": [
+          "function_definition_python",
+          "string_splitting"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-9-filtering-belief-states-satisfy-function-definition",
+      "content": "We will need a function to filter the belief state, keeping only the dates that satisfy a given condition. We'll call this function `satisfy`:",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-9-filtering-belief-states-satisfy-function-definition",
+        "concept_id": "filtering_belief_states_satisfy_function",
+        "confidence": 1,
+        "reasoning": "This chunk introduces the 'satisfy' function, specifically designed to filter belief states based on conditions."
+      }
+    },
+    {
+      "chunk_id": "chunk-10-filtering-belief-states-satisfy-function-example",
+      "content": "```python\ndef satisfy(condition, belief_state):\n    \"\"\"The subset of the belief_state that satisfy the condition.\"\"\"\n    return {d for d in belief_state if condition(d)}\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-10-filtering-belief-states-satisfy-function-example",
+        "concept_id": "filtering_belief_states_satisfy_function",
+        "confidence": 1,
+        "reasoning": "This chunk provides the Python code implementation for the 'satisfy' function using a set comprehension.",
+        "secondary_concepts": [
+          "function_definition_python",
+          "set_comprehensions",
+          "iterating_over_collections",
+          "conditional_logic_python"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-11-filtering-belief-states-satisfy-function-explanation",
+      "content": "The `satisfy` function takes a `condition` (which is a Python function that takes a date as input and returns `True` or `False`) and a `belief_state` (which is a set of dates). It returns a new set containing only the dates from the `belief_state` that satisfy the `condition`.  This is a crucial step in narrowing down the possibilities based on the statements made by Albert and Bernard.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-11-filtering-belief-states-satisfy-function-explanation",
+        "concept_id": "filtering_belief_states_satisfy_function",
+        "confidence": 1,
+        "reasoning": "This chunk explains the purpose and mechanism of the 'satisfy' function, emphasizing its role in narrowing down possibilities.",
+        "secondary_concepts": [
+          "belief_state",
+          "statement_as_boolean_function"
+        ]
+      }
+    },
+    {
+      "chunk_id": "chunk-12-information-disclosure-simulation-definition",
+      "content": "We will need a way to simulate Cheryl telling Albert the month and Bernard the day. We'll call this function `told`:",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-12-information-disclosure-simulation-definition",
+        "concept_id": "filtering_belief_states_satisfy_function",
+        "confidence": 0.5,
+        "reasoning": "Inferred from previous chunk (filtering_belief_states_satisfy_function)"
+      }
+    },
+    {
+      "chunk_id": "chunk-13-information-disclosure-simulation-example",
+      "content": "```python\ndef told(agent, value, belief_state):\n    \"\"\"The result of agent being told the value.\"\"\"\n    if agent == 'Albert':\n        return satisfy(lambda d: month(d) == value, belief_state)\n    elif agent == 'Bernard':\n        return satisfy(lambda d: day(d) == value, belief_state)\n    else:\n        raise ValueError(f'unknown agent: {agent}')\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-13-information-disclosure-simulation-example",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-14-information-disclosure-simulation-explanation",
+      "content": "The `told` function takes an `agent` (either `'Albert'` or `'Bernard'`), a `value` (the month or day that Cheryl told the agent), and a `belief_state`. It returns a new belief state containing only the dates that are consistent with the agent being told the value. For example, `told('Albert', 'May', dates)` returns the set of dates in May.  This function simulates the private information each person receives.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-14-information-disclosure-simulation-explanation",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-15-alberts-first-statement-logic-definition",
+      "content": "Now we can define the logic of Albert's first statement: \"I don't know when Cheryl's birthday is, but I know that Bernard doesn't know too.\" We'll call this function `albert1`:",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-15-alberts-first-statement-logic-definition",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-16-alberts-first-statement-logic-example",
+      "content": "```python\ndef albert1(belief_state):\n    \"\"\"Albert: I don't know when Cheryl's birthday is, but I know that Bernard doesn't know too.\"\"\"\n    # Albert doesn't know when Cheryl's birthday is:\n    # For each date d in the belief_state, Albert considers month(d).\n    # Albert must have > 1 date with the same month.\n    new_belief_state = {d for d in belief_state\n                        if len(satisfy(lambda x: month(x) == month(d), belief_state)) > 1}\n    # Albert knows that Bernard doesn't know too:\n    # For each date d in the belief_state, Albert considers month(d).\n    # For every date d2 with month(d) (that is, satisfy(lambda x: month(x) == month(d), dates)),\n    # Bernard must have > 1 date with the same day.\n    new_belief_state = {d for d in new_belief_state\n                        if all(len(satisfy(lambda x: day(x) == day(d2), dates)) > 1\n                               for d2 in satisfy(lambda x: month(x) == month(d), belief_state))}\n    return new_belief_state\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-16-alberts-first-statement-logic-example",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-17-alberts-first-statement-logic-explanation",
+      "content": "The `albert1` function takes a `belief_state` and returns a new belief state containing only the dates that are consistent with Albert's first statement. The statement has two parts:\n\n1.  \"I don't know when Cheryl's birthday is\": This means that Albert must consider at least two dates possible, given the month he was told. If Albert only saw one possible date for the month, he would know the birthday. Therefore, we eliminate any dates where the month only appears once in the `belief_state`.\n2.  \"I know that Bernard doesn't know too\": This means that Albert knows that for every possible date *that has the same month as Cheryl's birthday*, Bernard must consider at least two dates possible, given the day he was told. If there was a date with a unique day within that month, then Bernard would know the birthday, and Albert wouldn't be able to make this statement.  Therefore, we eliminate any dates where *any* date in the same month has a unique day in the original `dates` set.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-17-alberts-first-statement-logic-explanation",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-18-bernards-first-statement-logic-definition",
+      "content": "Next, we define the logic of Bernard's first statement: \"At first I didn't know when Cheryl's birthday is, but I know now.\" We'll call this function `bernard1`:",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-18-bernards-first-statement-logic-definition",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-19-bernards-first-statement-logic-example",
+      "content": "```python\ndef bernard1(belief_state):\n    \"\"\"Bernard: At first I didn't know when Cheryl's birthday is, but I know now.\"\"\"\n    # Bernard didn't know at first:\n    # (This is already implied by Albert's statement, so we don't need to check it.)\n    # Bernard knows now:\n    # There is only one date d in the belief_state with the same day.\n    new_belief_state = {d for d in belief_state\n                        if len(satisfy(lambda x: day(x) == day(d), belief_state)) == 1}\n    return new_belief_state\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-19-bernards-first-statement-logic-example",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-20-bernards-first-statement-logic-explanation",
+      "content": "The `bernard1` function takes a `belief_state` and returns a new belief state containing only the dates that are consistent with Bernard's first statement. The statement has two parts:\n\n1.  \"At first I didn't know when Cheryl's birthday is\": This is already implied by Albert's statement, so we don't need to check it.\n2.  \"but I know now\": This means that Bernard now knows the birthday. This implies that, given the day he was told, there is only one possible date in the `belief_state` with that day. Therefore, we eliminate any dates where the day appears more than once in the `belief_state`.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-20-bernards-first-statement-logic-explanation",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-21-alberts-second-statement-logic-definition",
+      "content": "Finally, we define the logic of Albert's second statement: \"Then I also know when Cheryl's birthday is.\" We'll call this function `albert2`:",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-21-alberts-second-statement-logic-definition",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-22-alberts-second-statement-logic-example",
+      "content": "```python\ndef albert2(belief_state):\n    \"\"\"Albert: Then I also know when Cheryl's birthday is.\"\"\"\n    # Albert knows now:\n    # There is only one date d in the belief_state with the same month.\n    new_belief_state = {d for d in belief_state\n                        if len(satisfy(lambda x: month(x) == month(d), belief_state)) == 1}\n    return new_belief_state\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-22-alberts-second-statement-logic-example",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-23-alberts-second-statement-logic-explanation",
+      "content": "The `albert2` function takes a `belief_state` and returns a new belief state containing only the dates that are consistent with Albert's second statement. The statement means that Albert now knows the birthday. This implies that, given the month he was told, there is only one possible date in the `belief_state` with that month. Therefore, we eliminate any dates where the month appears more than once in the `belief_state`.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-23-alberts-second-statement-logic-explanation",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-24-cheryls-birthday-main-function-definition",
+      "content": "Now we can define the main function that solves the puzzle. We'll call this function `solve`:",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-24-cheryls-birthday-main-function-definition",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-25-cheryls-birthday-main-function-example",
+      "content": "```python\ndef solve(dates):\n    \"\"\"Solve Cheryl's birthday puzzle.\"\"\"\n    # Albert is told the month:\n    albert_belief_state = told('Albert', month(list(dates)[0]), dates)\n    # Bernard is told the day:\n    bernard_belief_state = told('Bernard', day(list(dates)[0]), dates)\n    # Albert: I don't know when Cheryl's birthday is, but I know that Bernard doesn't know too.\n    albert_belief_state = albert1(albert_belief_state)\n    # Bernard: At first I didn't know when Cheryl's birthday is, but I know now.\n    bernard_belief_state = bernard1(albert_belief_state)\n    # Albert: Then I also know when Cheryl's birthday is.\n    albert_belief_state = albert2(bernard_belief_state)\n    # The answer is the only date left in the belief state.\n    return albert_belief_state\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-25-cheryls-birthday-main-function-example",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-26-cheryls-birthday-main-function-explanation",
+      "content": "The `solve` function takes the initial set of possible `dates` as input. It then simulates the conversation between Albert and Bernard, updating their belief states after each statement. The function returns the final belief state, which should contain only one date: Cheryl's birthday.\n\nNote that the `told` function is initially called with an arbitrary date from the `dates` set. This is because the `told` function is only used to narrow down the belief state based on the *form* of the statements, not the specific month or day that Cheryl told Albert and Bernard. The specific month and day are irrelevant; what matters is the *effect* of the statements on the belief states.",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-26-cheryls-birthday-main-function-explanation",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-27-running-the-solution-and-assertion-testing",
+      "content": "Now we can run the `solve` function and see the answer. We can also add an assertion to test that the answer is correct:",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-27-running-the-solution-and-assertion-testing",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-28-running-the-solution-and-assertion-testing-example",
+      "content": "```python\nanswer = solve(dates)\nassert answer == {'July 16'}\nanswer\n```",
+      "section": "Introduction",
+      "start_line": 0,
+      "end_line": 1,
+      "concept_mapping": {
+        "chunk_id": "chunk-28-running-the-solution-and-assertion-testing-example",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-29-cheryls-birthday-puzzle-introduction",
+      "content": "# When is Cheryl's Birthday?\n\n**[This logic puzzle](https://en.wikipedia.org/wiki/Cheryl%27s_Birthday)** has been making the rounds:\n\n1. Albert and Bernard became friends with Cheryl, and want to know when her birthday is. Cheryl gives them a list of 10 possible dates:\n   - May 15,     May 16,     May 19\n   - June 17,    June 18\n   - July 14,    July 16\n   - August 14,  August 15,  August 17\n3. **Cheryl** then privately tells Albert the month and Bernard the day of her birthday.\n4. **Albert**: \"I don't know when Cheryl's birthday is, and I know that Bernard does not know.\"\n5. **Bernard**: \"At first I didn't know when Cheryl's birthday is, but I know now.\"\n6. **Albert**: \"Then I also know when Cheryl's birthday is.\"\n7. So when is Cheryl's birthday?\n\nThis puzzle is designed for a paper-and-pencil solution, but I'm going to solve it with code; code is more flexible and can be used to solve other similar puzzles. Let's work through the puzzle line by line.",
+      "section": "When is Cheryl's Birthday?",
+      "start_line": 2,
+      "end_line": 80,
+      "concept_mapping": {
+        "chunk_id": "chunk-29-cheryls-birthday-puzzle-introduction",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-30-initial-belief-state-definition",
+      "content": "## 1. Cheryl gives Albert and Bernard a list of 10 possible dates:\n\nThe result of this is that Albert and Bernard each know the birthday is one of ten dates, but they don't know which date. We'll call a set of possible dates a **belief state**. As additional statements are made, each character's belief state will change. When someone has a belief state with just one possibility, we say they **know** the true value.",
+      "section": "When is Cheryl's Birthday?",
+      "start_line": 2,
+      "end_line": 80,
+      "concept_mapping": {
+        "chunk_id": "chunk-30-initial-belief-state-definition",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-31-belief-state-implementation-and-know-function",
+      "content": "```python\nBeliefState = set # A set of possible values\n\nDATES = BeliefState({'May 15', 'May 16', 'May 19', 'June 17', 'June 18', \n                     'July 14', 'July 16', 'August 14', 'August 15', 'August 17'})\n\ndef know(beliefs: BeliefState) -> bool:\n    \"\"\"A person `knows` the correct value if their belief state has only one possibility.\"\"\"\n    return len(beliefs) == 1\n```",
+      "section": "When is Cheryl's Birthday?",
+      "start_line": 2,
+      "end_line": 80,
+      "concept_mapping": {
+        "chunk_id": "chunk-31-belief-state-implementation-and-know-function",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-32-date-component-accessor-functions",
+      "content": "We'll define accessor functions for the month and day of a date:\n\n\n```python\ndef month(date: str) -> str: return date.split()[0]\ndef day(date: str)   -> str: return date.split()[1]\n\nassert month('May 15') == 'May'\nassert   day('May 15') == '15'\n```",
+      "section": "When is Cheryl's Birthday?",
+      "start_line": 2,
+      "end_line": 80,
+      "concept_mapping": {
+        "chunk_id": "chunk-32-date-component-accessor-functions",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-33-information-disclosure-simulation-told-function",
+      "content": "## 2. Cheryl then privately tells Albert the month and Bernard the day of her birthday.\n\nWe can define the idea of Cheryl having **told** someone a component of her birthdate, thus updating their belief state:\n\n\n```python\ndef told(part: str) -> BeliefState:\n    \"\"\"Cheryl told a part of her birthdate to someone; return a belief state of possible dates.\"\"\"\n    return {date for date in DATES if part in date}\n```\n\n(*Note*: I dislike it that the function `told` uses the global constant `DATES`. But I can live with it.)",
+      "section": "When is Cheryl's Birthday?",
+      "start_line": 2,
+      "end_line": 80,
+      "concept_mapping": {
+        "chunk_id": "chunk-33-information-disclosure-simulation-told-function",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-34-belief-state-examples-after-information-disclosure",
+      "content": "Let's consider `'May 15'` as a possible birthdate. Cheryl tells Albert `'May'` and Bernard `'15'`, so they would have  these belief states, and they would not *know* the birthday:\n\n\n```python\nassert told('May') == {'May 15', 'May 16', 'May 19'} # Albert's belief state\nassert told('15')  == {'August 15', 'May 15'}        # Bernard's belief state\nassert not know(told('May'))                         # Albert does not know\nassert not know(told('15'))                          # Bernard does not know\n```\n\nNow consider  `'June 18'`; in this case, Bernard would *know*.\n\n\n```python\nassert told('June') == {'June 17', 'June 18'}  # Albert's belief state\nassert told('18') == {'June 18'}               # Bernard's belief state\nassert not know(told('June'))                  # Albert does not know\nassert know(told('18'))                        # Bernard DOES know\n```",
+      "section": "When is Cheryl's Birthday?",
+      "start_line": 2,
+      "end_line": 80,
+      "concept_mapping": {
+        "chunk_id": "chunk-34-belief-state-examples-after-information-disclosure",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-35-overall-strategy",
+      "content": "# Overall Strategy\n\nThe puzzle is tricky because we're dealing with two types of uncertainty:\n\n1. Albert and Bernard are initially uncertain about the birthdate. *(Cheryl knows something they don't know.)*\n2. We (the puzzle solvers) don't know what Albert and Bernard were told by Cheryl. *(They know something we don't know.)*\n\nIf Cheryl tells Albert that the month is \"May\",  his belief state becomes {May 15, May 16, May 19}.  But we the puzzle solvers don't know what month he was told. To deal with this we will consider each of the ten dates one at a time and reason as follows: \n- For each date, we know what Albert and Bernard were told; we have eliminated the second type of uncertainty. \n- We can thus figure out if Albert and Bernard's statements are true (given this date). \n- There should be only one date out of the ten that makes all the statements true; that's Cheryl's birthday.",
+      "section": "Overall Strategy",
+      "start_line": 81,
+      "end_line": 207,
+      "concept_mapping": {
+        "chunk_id": "chunk-35-overall-strategy",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-36-cheryls-birthday-main-function-definition",
+      "content": "Here is the main function, `cheryls_birthday`, which computes the subset of possible dates that satisfy Albert and Bernard's statements.  We will implement a **statement** as a boolean function that takes a single date as input and returns true if the statement would be true under the condition that the given date is Cheryl's actual birthday. \n\n\n```python\ndef cheryls_birthday() -> BeliefState:\n    \"\"\"Return a subset of the global `DATES` for which all three statements are true.\"\"\"\n    return satisfy(DATES, albert1, bernard1, albert2)\n\n## TODO: Implement statements albert1, bernard1, albert2\n```",
+      "section": "Overall Strategy",
+      "start_line": 81,
+      "end_line": 207,
+      "concept_mapping": {
+        "chunk_id": "chunk-36-cheryls-birthday-main-function-definition",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-37-satisfy-function-definition",
+      "content": "The function `satisfy` takes a belief state and some statements and returns the subset that satisfies all the statements:\n\n\n```python\ndef satisfy(beliefs: BeliefState, *statements) -> BeliefState:\n    \"\"\"Return the subset of values in `beliefs` that satisfy all the statements.\"\"\"\n    return {value for value in beliefs if all(statement(value) for statement in statements)}\n```",
+      "section": "Overall Strategy",
+      "start_line": 81,
+      "end_line": 207,
+      "concept_mapping": {
+        "chunk_id": "chunk-37-satisfy-function-definition",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-38-alberts-first-statement-logic-albert1",
+      "content": "## 3. Albert: I don't know when Cheryl's birthday is, and I know that Bernard does not know.\n\n\nLet's first rephrase this statement to use the concepts we have defined:\n\n**Albert**: *After Cheryl **told** me the **month** of her birthdate, my **belief state** is a set of dates such that I didn't **know** her birthday.  And I know that Bernard does not know. How do I know that? I can see that there are no possible dates that Bernard would **know** Cheryl's birthday if he was **told** the **day** of that date.*\n\nThat I can translate directly into code:\n\n\n```python\ndef albert1(date: str) -> bool:\n    \"\"\"Albert: I don't know when Cheryl's birthday is, and I know that Bernard does not know.\"\"\"\n    dates = told(month(date))\n    return not know(dates) and not satisfy(dates, lambda date: know(told(day(date))))\n```",
+      "section": "Overall Strategy",
+      "start_line": 81,
+      "end_line": 207,
+      "concept_mapping": {
+        "chunk_id": "chunk-38-alberts-first-statement-logic-albert1",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-39-alberts-first-statement-example",
+      "content": "We haven't solved the puzzle yet, but let's take a peek and see which dates satisfy Albert's first statement:\n\n\n```python\nsatisfy(DATES, albert1)\n```\n\n```\n{'August 14', 'August 15', 'August 17', 'July 14', 'July 16'}\n```",
+      "section": "Overall Strategy",
+      "start_line": 81,
+      "end_line": 207,
+      "concept_mapping": {
+        "chunk_id": "chunk-39-alberts-first-statement-example",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-40-bernards-first-statement-logic-bernard1",
+      "content": "## 4. Bernard: At first I didn't know when Cheryl's birthday is, but I know now.\n\nAgain, a paraphrase:\n\n**Bernard:** *At first Cheryl **told** me the **day**, and I didn't **know**.  After I heard Albert's **statement**, I updated my **belief state**, and now I **know**.*\n\n\n```python\ndef bernard1(date: str) -> bool:\n    \"Bernard: At first I don't know when Cheryl's birthday is, but I know now.\"\n    at_first = told(day(date))\n    now      = satisfy(at_first, albert1)\n    return not know(at_first) and know(now)\n```",
+      "section": "Overall Strategy",
+      "start_line": 81,
+      "end_line": 207,
+      "concept_mapping": {
+        "chunk_id": "chunk-40-bernards-first-statement-logic-bernard1",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-41-bernards-first-statement-example",
+      "content": "Let's see which dates satisfy the two statements:\n\n\n```python\nsatisfy(DATES, albert1, bernard1)\n```\n\n```\n{'August 15', 'August 17', 'July 16'}\n```\n\nWait a minute–I thought that Bernard **knew**?! Why are there **three** possible dates? \n\nAccording to the puzzle, Bernard does indeed know; it is just that we, the puzzle solvers, don't know yet.  That's because Bernard was told something we don't know: the day. If Bernard was told `'15'` then he would know `'August 15'`; if he was told `'17'` he would know `'August 17'`, and if he was told `'16'` he would know `'July 16'`. We'll need more information (coming in statement `albert2`) before *we* know.",
+      "section": "Overall Strategy",
+      "start_line": 81,
+      "end_line": 207,
+      "concept_mapping": {
+        "chunk_id": "chunk-41-bernards-first-statement-example",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-42-alberts-second-statement-logic-albert2",
+      "content": "## 5. Albert: Then I also know when Cheryl's birthday is.\n\nA paraphrase:\n\n**Albert**: *After being **told** the **month** and hearing Bernard's **statement**, I now **know** Cheryl's birthday.*\n\n\n```python\ndef albert2(date: str) -> bool:\n    \"Albert: Then I also know when Cheryl's birthday is.\" \n    now = satisfy(told(month(date)), bernard1)\n    return know(now)\n```",
+      "section": "Overall Strategy",
+      "start_line": 81,
+      "end_line": 207,
+      "concept_mapping": {
+        "chunk_id": "chunk-42-alberts-second-statement-logic-albert2",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    },
+    {
+      "chunk_id": "chunk-43-solution-and-assertion",
+      "content": "## 6. So when is Cheryl's birthday?\n\n\n```python\ncheryls_birthday()\n```\n\n```\n{'July 16'}\n```\n\n**Success!** We have deduced that Cheryl's birthday is **July 16**. We know Cheryl's birthday:\n\n\n```python\nassert know(cheryls_birthday())\n```",
+      "section": "Overall Strategy",
+      "start_line": 81,
+      "end_line": 207,
+      "concept_mapping": {
+        "chunk_id": "chunk-43-solution-and-assertion",
+        "concept_id": "unmapped",
+        "confidence": 0,
+        "reasoning": "Failed to map in batch"
+      }
+    }
+  ]
+}

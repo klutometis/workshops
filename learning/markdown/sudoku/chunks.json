@@ -1,0 +1,927 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "chunk-1-introduction-to-sudoku-solver",
+      "topic": "Introduction to Sudoku Solver",
+      "text": "<div style=\"text-align:right\"><i>Peter Norvig<br>2006, 2021</i></div>\n---\n",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-2-sudoku-puzzle-rules-definition",
+      "topic": "Sudoku Puzzle Rules",
+      "text": "A *Sudoku puzzle* is a puzzle in which some digits are already filled in, and the solver must fill in the missing digits, subject to the constraint that no digit appears twice in a row, column, or 3x3 box.",
+      "concepts": [
+        "sudoku_puzzle_rules"
+      ],
+      "chunk_type": "definition",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-3-sudoku-grid-components-definition",
+      "topic": "Sudoku Grid Components",
+      "text": "We will need terminology to describe the parts of a Sudoku puzzle. Here is what I will use:\n\n- A *grid* is the whole 9x9 array of squares.\n- A *unit* is a row, a column, or a box; each unit has 9 squares.\n- A *square* is one of the 81 positions in the grid.\n- A *peer* of a square is another square in the same row, column, or box.",
+      "concepts": [
+        "sudoku_grid_components"
+      ],
+      "chunk_type": "definition",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-4-digit-and-digit-set-representation",
+      "topic": "Digit and Digit Set Representation",
+      "text": "I will represent a digit as a simple character such as `'1'`, and a set of digits as a string of characters such as `'123'` to mean that the the square can hold a `'1'`, a `'2'`, or a `'3'`.  I considered other representations, but this one seemed simplest.",
+      "concepts": [
+        "digit_and_digit_set_representation",
+        "data_structure_design_tradeoffs"
+      ],
+      "chunk_type": "definition",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-5-grid-data-structure-definition",
+      "topic": "Grid Data Structure",
+      "text": "I will represent a `Grid` as a `dict` of `{square: contents}`.  That is, there will be 81 entries in the dict, each mapping a square to the digit, if known, or to the possible digits for that square.  So a solved puzzle will have entries like `{'A1': '7', 'A2': '3', ...}` while an unsolved puzzle will have entries like `{'A1': '123', 'A2': '3', ...}`.",
+      "concepts": [
+        "grid_data_structure",
+        "data_structure_design_tradeoffs"
+      ],
+      "chunk_type": "definition",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-6-utility-cross-product-function",
+      "topic": "Utility: Cross Product Function",
+      "text": "I will need the function `cross(A, B)` which is defined as the list of the concatenation of each element of A with each element of B.  I call this the *cross product* of A and B, but note that it is different from the vector cross product. We can define it like this:",
+      "concepts": [
+        "utility_cross_product"
+      ],
+      "chunk_type": "definition",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-7-utility-cross-product-example",
+      "topic": "Utility: Cross Product Example",
+      "text": "```python\ndef cross(A, B):\n    \"\"\"Cross product of elements in A and elements in B.\"\"\"\n    return [a+b for a in A for b in B]\n\n\nassert cross('ABC', '12') == ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']\n```",
+      "concepts": [
+        "utility_cross_product"
+      ],
+      "chunk_type": "example",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-8-defining-rows-columns-and-squares",
+      "topic": "Defining Rows, Columns, and Squares",
+      "text": "Now I can define the rows, columns, and squares that make up a Sudoku grid:",
+      "concepts": [
+        "sudoku_grid_components"
+      ],
+      "chunk_type": "explanation",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-9-defining-rows-columns-and-squares-example",
+      "topic": "Defining Rows, Columns, and Squares Example",
+      "text": "```python\ndigits   = '123456789'\nrows    = 'ABCDEFGHI'\ncols    = digits\nsquares  = cross(rows, cols)\nunitlist = ([cross(rows, c) for c in cols] +\n            [cross(r, cols) for r in rows] +\n            [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')])\nunits = dict((s, [u for u in unitlist if s in u]) \n             for s in squares)\npeers = dict((s, set(sum(units[s],[]))-set([s]))\n             for s in squares)\n```",
+      "concepts": [
+        "sudoku_grid_components",
+        "utility_cross_product"
+      ],
+      "chunk_type": "example",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-10-rows-columns-and-squares-explanation",
+      "topic": "Rows, Columns, and Squares Explanation",
+      "text": "That may seem like a lot to take in at once, so let's go through it slowly:\n\n- `digits` is just the string of digits; I could have called it `'123456789'` directly, but it is nice to give a name to things.\n- `rows` is the same, but for the row labels.\n- `cols` is the same as `digits`.\n- `squares` is a list of all the squares, as strings.  It is computed by taking the cross product of `rows` and `cols`.\n- `unitlist` is a list of lists of squares, where each list of squares is a unit. So `unitlist` contains 9 lists of 9 squares each for the rows, then 9 more for the columns, and then 9 more for the boxes.\n- `units` is a dict that maps each square to the list of units that contain the square. So `units['C2']` is the list of three units that contain the square C2: the top row, the second column, and the top-left box.\n- `peers` is a dict that maps each square *s* to the set of squares that are peers of *s*. That is, the squares that share a row, column, or box with *s*. This set contains 20 squares (21 if you count *s* itself).",
+      "concepts": [
+        "sudoku_grid_components",
+        "utility_cross_product"
+      ],
+      "chunk_type": "explanation",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-11-sudoku-puzzle-introduction",
+      "topic": "Introduction to Solving Sudoku Puzzles",
+      "text": "# Solving Any Sudoku Puzzle\n\nThe rules of <a href=\"http://en.wikipedia.org/wiki/Sudoku\">Sudoku</a> are simple and finite: fill in the empty squares in the puzzle so that each column, row, and 3×3 box contains all the digits from 1 to 9 with no repeats. For example:\n\n|Puzzle|-|Solution|\n|---|--|---|\n|![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sudoku_Puzzle_by_L2G-20050714_standardized_layout.svg/361px-Sudoku_Puzzle_by_L2G-20050714_standardized_layout.svg.png)|&nbsp;&nbsp;|![](https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Sudoku_Puzzle_by_L2G-20050714_solution_standardized_layout.svg/361px-Sudoku_Puzzle_by_L2G-20050714_solution_standardized_layout.svg.png)|\n\nThis notebook develops a program to solve any Sudoku puzzle, in about 80 lines of Python. You can also see:\n  - The [original 2006 version of this program](http://norvig.com/sudoku.html); it has some obsolete Python idioms.\n  - [A Java program for Sudoku](SudokuJava.ipynb) that is less clear but faster, solving over 100,000 puzzles per second.\n  - [A Python program for Star Battle](StarBattle.ipynb), a related fill-in-the-grid puzzle.\n  - [A Python program for KenKen](KenKen.ipynb), a related fill-in-the-grid puzzle.",
+      "concepts": [
+        "sudoku_puzzle_rules"
+      ],
+      "chunk_type": "overview",
+      "section": "Solving Any Sudoku Puzzle",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Solving Any Sudoku Puzzle"
+      ],
+      "markdown_anchor": "solving-any-sudoku-puzzle",
+      "start_line": 2,
+      "end_line": 16
+    },
+    {
+      "chunk_id": "chunk-12-sudoku-basic-concepts-overview",
+      "topic": "Overview of Sudoku concepts and Python implementation choices",
+      "text": "# Sudoku: Implementing Basic Concepts \n\nHere are the key concepts and the Python implementation choices I made. Types are in Uppercase and constants in lowercase:\n\n- **Digit**: the digits are the characters `'1'` to `'9'`.\n- **Digit set**: when several digits could fill a square, use `'123'` to mean  1, 2, or 3 are possible.\n- **rows**: by convention the 9 rows have labels `'A'` to `'I'` (top to bottom).\n- **columns**: by convention the 9 columns have labels `'1'` to `'9'` (left to right).\n- **Square**: a square is named by the concatenation of its row and column labels, e.g. `'A9'` is the upper-rightmost square.\n  - `squares` is a tuple of all 81 squares.\n- **Grid**: a grid of 81 squares is represented as a dict of `{Square: DigitSet}` such as `{'A9': '123', ...}`.\n- **Boxes**: the 9 boxes are 3×3 squares within the grid (outlined with heavy black lines in the diagram).\n  - `all_boxes` is a list of all 9 boxes\n- **Unit**: a unit is a row, column, or box; each unit is a tuple of 9 squares.\n  - `all_units` is a list of all 27 units.\n  - `units` is a dict such that `units[s]` is a tuple of the 3 units that square `s` is a part of.\n- **Peers**: the squares that share a unit are called peers.\n  - `peers` is a dict such that `peers[s]` is a set of 20 squares that are in some unit with `s`.\n- **None**: If a puzzle has no solution, we represent that with `None`.\n- **Picture**: for input and output, a string is used to describe the grid (details described below).\n- **Solution**: A grid is a valid solution to a puzzle if every unit is filled with all nine digits, one to a square, with no repeats, and each square that was filled with a digit in the puzzle has the same digit in the solution.",
+      "concepts": [
+        "digit_and_digit_set_representation",
+        "sudoku_grid_components",
+        "grid_data_structure",
+        "picture_string_format",
+        "sudoku_solution_validation"
+      ],
+      "chunk_type": "overview",
+      "section": "Sudoku: Implementing Basic Concepts",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Sudoku: Implementing Basic Concepts"
+      ],
+      "markdown_anchor": "sudoku-implementing-basic-concepts",
+      "start_line": 17,
+      "end_line": 127
+    },
+    {
+      "chunk_id": "chunk-13-data-structures-and-utility-function",
+      "topic": "Python implementation of core data structures and the cross product utility function",
+      "text": "```python\nimport re\nfrom typing import Dict, Optional\n\ndef cross(A, B) -> tuple:\n    \"\"\"Cross product of strings in A and strings in B.\"\"\"\n    return tuple(a + b for a in A for b in B)\n\nDigit     = str  # e.g. '1'\ndigits    = '123456789'\nDigitSet  = str  # e.g. '123'\nrows      = 'ABCDEFGHI'\ncols      = digits\nSquare    = str  # e.g. 'A9'\nsquares   = cross(rows, cols)\nGrid      = Dict[Square, DigitSet] # E.g. {'A9': '123', ...}\nall_boxes = [cross(rs, cs)  for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]\nall_units = [cross(rows, c) for c in cols] + [cross(r, cols) for r in rows] + all_boxes\nunits     = {s: tuple(u for u in all_units if s in u) for s in squares}\npeers     = {s: set().union(*units[s]) - {s} for s in squares}\nPicture   = str \n\ndef is_solution(solution: Grid, puzzle: Grid) -> bool:\n    \"\"\"Is this proposed solution to the puzzle actually valid?\"\"\"\n    return (solution is not None and\n            all(solution[s] in puzzle[s] for s in squares) and\n            all({solution[s] for s in unit} == set(digits) for unit in all_units))\n```",
+      "concepts": [
+        "utility_cross_product",
+        "digit_and_digit_set_representation",
+        "sudoku_grid_components",
+        "grid_data_structure",
+        "sudoku_solution_validation"
+      ],
+      "chunk_type": "example",
+      "section": "Sudoku: Implementing Basic Concepts",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Sudoku: Implementing Basic Concepts"
+      ],
+      "markdown_anchor": "sudoku-implementing-basic-concepts",
+      "start_line": 17,
+      "end_line": 127
+    },
+    {
+      "chunk_id": "chunk-14-units-and-peers-example",
+      "topic": "Example illustrating units and peers for square C2",
+      "text": "For example,\nhere are the three units (and the 20 peers) for the square <b><tt  style=\"color:red\">C2</tt></b>:\n\n<pre>\n.  A2 . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .         A1 A2 A3|.  .  . |.  .  .  \n.  B2 . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .         B1 B2 B3|.  .  . |.  .  .  \n.  <b style=\"color:red\">C2</b> . |.  .  . |.  .  .         C1 <b style=\"color:red\">C2</b> C3|C4 C5 C6|C7 C8 C9        C1 <b style=\"color:red\">C2</b> C3|.  .  . |.  .  .  \n--------+--------+--------        --------+--------+--------        --------+--------+-------- \n.  D2 . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .  \n.  E2 . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .  \n.  F2 . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .  \n--------+--------+--------        --------+--------+--------        --------+--------+-------- \n.  G2 . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .  \n.  H2 . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .  \n.  I2 . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  .         .  .  . |.  .  . |.  .  . \n</pre>",
+      "concepts": [
+        "sudoku_grid_components"
+      ],
+      "chunk_type": "example",
+      "section": "Sudoku: Implementing Basic Concepts",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Sudoku: Implementing Basic Concepts"
+      ],
+      "markdown_anchor": "sudoku-implementing-basic-concepts",
+      "start_line": 17,
+      "end_line": 127
+    },
+    {
+      "chunk_id": "chunk-15-units-and-peers-code-example",
+      "topic": "Code examples showing the values of units['C2'] and peers['C2']",
+      "text": "```python\nunits['C2']\n```\n\n```\n(('A2', 'B2', 'C2', 'D2', 'E2', 'F2', 'G2', 'H2', 'I2'),\n ('C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9'),\n ('A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'))\n```\n\n```python\npeers['C2']\n```\n\n```\n{'A1',\n 'A2',\n 'A3',\n 'B1',\n 'B2',\n 'B3',\n 'C1',\n 'C3',\n 'C4',\n 'C5',\n 'C6',\n 'C7',\n 'C8',\n 'C9',\n 'D2',\n 'E2',\n 'F2',\n 'G2',\n 'H2',\n 'I2'}\n```",
+      "concepts": [
+        "sudoku_grid_components"
+      ],
+      "chunk_type": "example",
+      "section": "Sudoku: Implementing Basic Concepts",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Sudoku: Implementing Basic Concepts"
+      ],
+      "markdown_anchor": "sudoku-implementing-basic-concepts",
+      "start_line": 17,
+      "end_line": 127
+    },
+    {
+      "chunk_id": "chunk-16-constraint-propagation-introduction",
+      "topic": "Introduction to Constraint Propagation",
+      "text": "# Constraint Propagation\n\nSudoku players know these two key strategies:\n\n1. If a square has only one possible digit, then **eliminate** that digit as a possibility for each of the square's peers.\n2. If a unit has only one possible square that can hold a digit, then **fill** the square with the digit.</i>\n\nThis suggests  two  functions:\n1. `eliminate(grid, s, d)` to eliminate digit `d` as a possibility for square `s`\n2. `fill(grid, s, d)` to fill square `s` with the digit `d`.",
+      "concepts": [
+        "constraint_propagation_concept",
+        "elimination_strategy",
+        "filling_strategy"
+      ],
+      "chunk_type": "overview",
+      "section": "Constraint Propagation",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Constraint Propagation"
+      ],
+      "markdown_anchor": "constraint-propagation",
+      "start_line": 128,
+      "end_line": 183
+    },
+    {
+      "chunk_id": "chunk-17-eliminate-and-fill-functions-explanation",
+      "topic": "Explanation of eliminate and fill functions",
+      "text": "You might think that `fill` is the most fundamental operation, and that it could be implemented with `grid[s] = d`. But it turns out the code is simpler if we think of `eliminate` as the fundamental operation, and implement `fill` as  \"eliminate all the digits except for `d` from `s`.\" Both functions mutate the grid they are passed, and return the mutated grid if they can perform the operation, or return `None` if there is a contradiction.\n\nWe say that these two strategies constitute [constraint propagation](http://en.wikipedia.org/wiki/Constraint_satisfaction): \"constraint\" because they constrain what values can go in what squares, and \"propagation\" because a `fill` of one square can lead to an `eliminate` in other squares, which can in turn cause a `fill` of yet another square, and so on. \n\nThe function `constrain` starts the whole process off. We initialize a new grid, `result`, (so that the original puzzle is not mutated), where `result` is filled with the known digits from the original grid.",
+      "concepts": [
+        "constraint_propagation_concept",
+        "elimination_strategy",
+        "filling_strategy",
+        "contradiction_handling"
+      ],
+      "chunk_type": "explanation",
+      "section": "Constraint Propagation",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Constraint Propagation"
+      ],
+      "markdown_anchor": "constraint-propagation",
+      "start_line": 128,
+      "end_line": 183
+    },
+    {
+      "chunk_id": "chunk-18-constraint-propagation-code",
+      "topic": "Constraint Propagation Code Implementation",
+      "text": "Here is the code:\n\n\n```python\ndef constrain(grid) -> Grid:\n    \"\"\"Propagate constraints on a copy of grid to yield a new constrained Grid.\"\"\"\n    result: Grid = {s: digits for s in squares}\n    for s in grid:\n        if len(grid[s]) == 1:\n            fill(result, s,  grid[s])\n    return result\n\ndef fill(grid: Grid, s: Square, d: Digit) -> Optional[Grid]:\n    \"\"\"Eliminate all the digits except d from grid[s].\"\"\"\n    if grid[s] == d or all(eliminate(grid, s, d2) for d2 in grid[s] if d2 != d):\n        return grid\n    else:\n        return None\n\ndef eliminate(grid: Grid, s: Square, d: Digit) -> Optional[Grid]:\n    \"\"\"Eliminate d from grid[s]; implement the two constraint propagation strategies.\"\"\"\n    if d not in grid[s]:\n        return grid        ## Already eliminated\n    grid[s] = grid[s].replace(d, '')\n    if not grid[s]:\n        return None        ## None: no legal digit left\n    elif len(grid[s]) == 1:\n        # 1. If a square has only one possible digit, then eliminate that digit as a possibility for each of the square's peers.\n        d2 = grid[s]\n        if not all(eliminate(grid, s2, d2) for s2 in peers[s]):\n            return None    ## None: can't eliminate d2 from some square\n    for u in units[s]:\n        dplaces = [s for s in u if d in grid[s]]\n        # 2. If a unit has only one possible square that can hold a digit, then fill the square with the digit.\n        if not dplaces or (len(dplaces) == 1 and not fill(grid, dplaces[0], d)):\n            return None    ## None: no place in u for d\n    return grid\n```",
+      "concepts": [
+        "constraint_propagation_concept",
+        "elimination_strategy",
+        "filling_strategy",
+        "eliminate_function_implementation",
+        "fill_function_implementation",
+        "constrain_function",
+        "grid_data_structure",
+        "digit_and_digit_set_representation"
+      ],
+      "chunk_type": "example",
+      "section": "Constraint Propagation",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Constraint Propagation"
+      ],
+      "markdown_anchor": "constraint-propagation",
+      "start_line": 128,
+      "end_line": 183
+    },
+    {
+      "chunk_id": "chunk-19-input-output-pictures-and-grids-overview",
+      "topic": "Input and Output: Pictures and Grids Overview",
+      "text": "To show how constraint propagation works, we will need to read in a string representing a puzzle (what we call a `Picture`), convert that picture to a `Grid`, apply constraint propagation, convert the solution back to a picture, and display the picture.  Conventions for `Picture`:\n- A filled square is represented by a single digit, e.g.: `5`.\n- A blank square is represented by a period: `.`.\n- Spaces, newlines, and dashes/bars to separate boxes are included on output, but are optional (and ignored) on input.\n- An uncertain square is represented by a DigitSet in braces, e.g.: `{123}`.",
+      "concepts": [
+        "picture_string_format",
+        "grid_data_structure",
+        "digit_and_digit_set_representation"
+      ],
+      "chunk_type": "overview",
+      "section": "Input and Output: Pictures and Grids",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Input and Output: Pictures and Grids"
+      ],
+      "markdown_anchor": "input-and-output-pictures-and-grids",
+      "start_line": 184,
+      "end_line": 350
+    },
+    {
+      "chunk_id": "chunk-20-parse-and-picture-functions",
+      "topic": "Parse and Picture Functions",
+      "text": "```python\ndef parse(picture) -> Grid:\n    \"\"\"Convert a Picture to a Grid.\"\"\"\n    vals = re.findall(r\"[.1-9]|[{][1-9]+[}]\", picture)\n    assert len(vals) == 81\n    return {s: digits if v == '.' else re.sub(r\"[{}]\", '', v) \n            for s, v in zip(squares, vals)}\n\ndef picture(grid) -> Picture:\n    \"\"\"Convert a Grid to a Picture string, one line at a time.\"\"\"\n    if grid is None: \n        return \"None\"\n    def val(d: DigitSet) -> str: return '.' if d == digits else d if len(d) == 1 else '{' + d + '}'\n    maxwidth = max(len(val(grid[s])) for s in grid)\n    dash1 = '-' * (maxwidth * 3 + 2)\n    dash3 = '\\n' + '+'.join(3 * [dash1])\n    def cell(r, c): return val(grid[r + c]).center(maxwidth) + ('|'  if c in '36' else ' ')\n    def line(r): return ''.join(cell(r, c) for c in cols)    + (dash3 if r in 'CF' else '')\n    return '\\n'.join(map(line, rows))\n```",
+      "concepts": [
+        "parse_function",
+        "output_picture_function",
+        "grid_data_structure",
+        "digit_and_digit_set_representation"
+      ],
+      "chunk_type": "example",
+      "section": "Input and Output: Pictures and Grids",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Input and Output: Pictures and Grids"
+      ],
+      "markdown_anchor": "input-and-output-pictures-and-grids",
+      "start_line": 184,
+      "end_line": 350
+    },
+    {
+      "chunk_id": "chunk-21-parse-and-picture-example",
+      "topic": "Parse and Picture Example",
+      "text": "Here we parse a picture string into a grid, and then print the grid's picture:\n\n\n```python\npic1 = \"53..7.... 6..195... .98....6. 8...6...3 4..8.3..1 7...2...6 .6....28. ...419..5 ....8..79\"\ngrid1 = parse(pic1)\nprint(picture(grid1))\n```\n\n```\n5 3 .|. 7 .|. . . \n6 . .|1 9 5|. . . \n. 9 8|. . .|. 6 . \n-----+-----+-----\n8 . .|. 6 .|. . 3 \n4 . .|8 . 3|. . 1 \n7 . .|. 2 .|. . 6 \n-----+-----+-----\n. 6 .|. . .|2 8 . \n. . .|4 1 9|. . 5 \n. . .|. 8 .|. 7 9 \n\n```",
+      "concepts": [
+        "parse_function",
+        "output_picture_function",
+        "picture_string_format"
+      ],
+      "chunk_type": "example",
+      "section": "Input and Output: Pictures and Grids",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Input and Output: Pictures and Grids"
+      ],
+      "markdown_anchor": "input-and-output-pictures-and-grids",
+      "start_line": 184,
+      "end_line": 350
+    },
+    {
+      "chunk_id": "chunk-22-grid-square-access-example",
+      "topic": "Grid Square Access Example",
+      "text": "In a grid, filled squares (like `A1`, the upper left corner of `grid1`) have one possible digit, and unfilled squares (like `A9`, the upper right corner of `grid1`) have all 9 possible digits:\n\n\n```python\ngrid1['A1']\n```\n\n```\n'5'\n```\n\n```python\ngrid1['A9']\n```\n\n```\n'123456789'\n```",
+      "concepts": [
+        "grid_data_structure",
+        "digit_and_digit_set_representation",
+        "sudoku_grid_components"
+      ],
+      "chunk_type": "example",
+      "section": "Input and Output: Pictures and Grids",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Input and Output: Pictures and Grids"
+      ],
+      "markdown_anchor": "input-and-output-pictures-and-grids",
+      "start_line": 184,
+      "end_line": 350
+    },
+    {
+      "chunk_id": "chunk-23-constraint-propagation-example-setup",
+      "topic": "Constraint Propagation Example Setup",
+      "text": "To see how this all works, let's look again at `grid1`:\n\n\n```python\nprint(picture(grid1))\n```\n\n```\n5 3 .|. 7 .|. . . \n6 . .|1 9 5|. . . \n. 9 8|. . .|. 6 . \n-----+-----+-----\n8 . .|. 6 .|. . 3 \n4 . .|8 . 3|. . 1 \n7 . .|. 2 .|. . 6 \n-----+-----+-----\n. 6 .|. . .|2 8 . \n. . .|4 1 9|. . 5 \n. . .|. 8 .|. 7 9 \n\n```\n\nConstraint propagation will at some point consider the square `E5`, in the center of the center box.  It is in a row with the digits 4, 8, 3, 1, and in a column with the digits 7, 9, 6, 2, 1, 8. If according to strategy 1 we call `eliminate(grid1, 'E5', d)` for each of these digits, then we're left with only one possible digit, `5`, for `E5`. Thus, we would next call `eliminate(grid1, s2, '5')` for each peer `s2` of 'E5'. This would lead to the square three columns to the left, `E2`, only having one remaining possible digit, `2`. Constraint propagation continues in this fashion.",
+      "concepts": [
+        "constraint_propagation_concept",
+        "elimination_strategy",
+        "grid_data_structure",
+        "output_picture_function",
+        "eliminate_function_implementation",
+        "sudoku_grid_components"
+      ],
+      "chunk_type": "explanation",
+      "section": "Input and Output: Pictures and Grids",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Input and Output: Pictures and Grids"
+      ],
+      "markdown_anchor": "input-and-output-pictures-and-grids",
+      "start_line": 184,
+      "end_line": 350
+    },
+    {
+      "chunk_id": "chunk-24-constrain-function-example-1",
+      "topic": "Constrain Function Example 1",
+      "text": "Many puzzles can be completely solved by `constrain` alone, for example:\n\n\n```python\nprint(picture(constrain(grid1)))\n```\n\n```\n5 3 4|6 7 8|9 1 2 \n6 7 2|1 9 5|3 4 8 \n1 9 8|3 4 2|5 6 7 \n-----+-----+-----\n8 5 9|7 6 1|4 2 3 \n4 2 6|8 5 3|7 9 1 \n7 1 3|9 2 4|8 5 6 \n-----+-----+-----\n9 6 1|5 3 7|2 8 4 \n2 8 7|4 1 9|6 3 5 \n3 4 5|2 8 6|1 7 9 \n\n```",
+      "concepts": [
+        "constrain_function",
+        "output_picture_function",
+        "constraint_propagation_concept"
+      ],
+      "chunk_type": "example",
+      "section": "Input and Output: Pictures and Grids",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Input and Output: Pictures and Grids"
+      ],
+      "markdown_anchor": "input-and-output-pictures-and-grids",
+      "start_line": 184,
+      "end_line": 350
+    },
+    {
+      "chunk_id": "chunk-25-constrain-function-example-2-and-limitations",
+      "topic": "Constrain Function Example 2 and Limitations",
+      "text": "But for other puzzles, `constrain` is not enough:\n\n\n```python\ngrid2 = parse(\"4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......\")\nprint(picture(grid2))\n```\n\n```\n4 . .|. . .|8 . 5 \n. 3 .|. . .|. . . \n. . .|7 . .|. . . \n-----+-----+-----\n. 2 .|. . .|. 6 . \n. . .|. 8 .|4 . . \n. . .|. 1 .|. . . \n-----+-----+-----\n. . .|6 . 3|. 7 . \n5 . .|2 . .|. . . \n1 . 4|. . .|. . . \n\n```\n\n```python\nprint(picture(constrain(grid2)))\n```\n\n```\n    4       {1679}   {12679} |  {139}     {2369}    {269}  |    8       {1239}      5     \n {26789}      3     {1256789}| {14589}   {24569}   {245689}| {12679}    {1249}   {124679} \n  {2689}   {15689}   {125689}|    7      {234569}  {245689}| {12369}   {12349}   {123469} \n-----------------------------+-----------------------------+-----------------------------\n  {3789}      2      {15789} |  {3459}   {34579}    {4579} | {13579}      6      {13789}  \n  {3679}   {15679}   {15679} |  {359}       8      {25679} |    4      {12359}   {12379}  \n {36789}      4      {56789} |  {359}       1      {25679} | {23579}   {23589}   {23789}  \n-----------------------------+-----------------------------+-----------------------------\n  {289}      {89}     {289}  |    6       {459}       3    |  {1259}      7      {12489}  \n    5       {6789}      3    |    2       {479}       1    |   {69}     {489}     {4689}  \n    1       {6789}      4    |  {589}     {579}     {5789} | {23569}   {23589}   {23689}  \n\n```\n\nWe see that some progress has been made: the `grid2` puzzle has 17 squares filled in, and after constraint propagation, 20 are filled in. But that leaves 61 squares to go.   We could try to add [additional constraint propagation strategies](https://bestofsudoku.com/sudoku-strategy), but there are many strategies, each one complicates the code, and even if we implemented them all, we wouldn't be *guaranteed* they could solve *any* puzzle.",
+      "concepts": [
+        "constrain_function",
+        "output_picture_function",
+        "constraint_propagation_concept",
+        "search_strategy_concept"
+      ],
+      "chunk_type": "explanation",
+      "section": "Input and Output: Pictures and Grids",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Input and Output: Pictures and Grids"
+      ],
+      "markdown_anchor": "input-and-output-pictures-and-grids",
+      "start_line": 184,
+      "end_line": 350
+    },
+    {
+      "chunk_id": "chunk-26-search-strategy-introduction",
+      "topic": "Introduction to Search Strategy",
+      "text": "# Search Strategy\n\nWe need a strategy that will **search** through all possibile solutions, systematically and efficiently, until the solution is found.  (A  well-formed Sudoku puzzle has  exactly  one solution).",
+      "concepts": [
+        "search_strategy_concept"
+      ],
+      "chunk_type": "overview",
+      "section": "Search Strategy",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Search Strategy"
+      ],
+      "markdown_anchor": "search-strategy",
+      "start_line": 351,
+      "end_line": 498
+    },
+    {
+      "chunk_id": "chunk-27-brute-force-search-limitations",
+      "topic": "Limitations of Brute Force Search",
+      "text": "A naive search can be slow. Consider a brute force search that tries every possible combination of digits. In the constrained `grid2` above, `A2` has 4 possibilities, `{1679}`, `A3` has 5, `{12679}`, and if we keep going and multiply all the choices together, [we get over 10<sup>38</sup>](http://www.google.com/search?hl=en&q=4*5*3*4*3*4*5*7*5*5*6*5*4*6*4*5*6*6*6*5*5*6*4*5*4*5*4*5*5*4*5*5*3*5*5*5*5*5*3*5*5*5*5*3*2*3*3*4*5*4*3*2*3*4*4*3*3*4*5*5*5) possibilities for the whole\npuzzle.  Suppose we have a\nvery efficient implementation that takes only ten CPU instructions to evaluate a\nposition, and that we have access to next-generation computers\nwith 1024–core CPUs running at 100 GHz, and let's say\nwe could afford a million of them, and while we're shopping, let's also pick up a time machine and go back 13 billion years to the origin of the universe and start our program running.  We can then [estimate](http://www.google.com/search?&q=100+GHz/10+*+1024+*+1+million+*+13+billion+years+%2F+4.6e38+in+percent)\nthat we'd be almost 1% done with this one puzzle by now! Brute force is not the search you're looking for.",
+      "concepts": [
+        "brute_force_search_limitations"
+      ],
+      "chunk_type": "explanation",
+      "section": "Search Strategy",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Search Strategy"
+      ],
+      "markdown_anchor": "search-strategy",
+      "start_line": 351,
+      "end_line": 498
+    },
+    {
+      "chunk_id": "chunk-28-interleaving-constraint-propagation-and-search",
+      "topic": "Interleaving Constraint Propagation and Search",
+      "text": "It is too slow to do constraint propagation first and then search. A smarter strategy is to **interleave** constraint propagation and search as follows:\n  - If a previous step of the search on this branch returned `None`, then pass the `None` along.\n  - If there are no squares with multiple possibilities in the puzzle, then return the completed grid.\n  - Otherwise choose one of the not-yet-determined squares, *s*. \n  - For each digit *d* that could possibly fill square *s*:\n    - Initiate constraint propagation by calling `fill` on *s* and *d* and a copy of the grid.\n    - Recursively search for a solution to the puzzle from there.\n        - If the guess was right, we will get a solution.\n        - If the guess was wrong, continue on to the next digit *d*.\n\nBecause we give up as soon as we get a contradiction, we examine far fewer possibilities than brute force search. Here is the implementation:",
+      "concepts": [
+        "interleaving_propagation_and_search",
+        "constraint_propagation_concept"
+      ],
+      "chunk_type": "explanation",
+      "section": "Search Strategy",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Search Strategy"
+      ],
+      "markdown_anchor": "search-strategy",
+      "start_line": 351,
+      "end_line": 498
+    },
+    {
+      "chunk_id": "chunk-29-depth-first-search-implementation",
+      "topic": "Implementation of Depth-First Search",
+      "text": "```python\ndef search(grid) -> Grid:\n    \"\"\"Depth-first search with constraint propagation to find a solution.\"\"\"\n    if grid is None: \n        return None\n    s = min((s for s in squares if len(grid[s]) > 1), \n            default=None, key=lambda s: len(grid[s]))\n    if s is None: # No squares with multiple possibilities; the search has succeeded\n        return grid\n    for d in grid[s]:\n        solution = search(fill(grid.copy(), s, d))\n        if solution:\n            return solution\n    return None\n```",
+      "concepts": [
+        "depth_first_search_implementation",
+        "fill_function_implementation",
+        "grid_copying_for_search_branches"
+      ],
+      "chunk_type": "example",
+      "section": "Search Strategy",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Search Strategy"
+      ],
+      "markdown_anchor": "search-strategy",
+      "start_line": 351,
+      "end_line": 498
+    },
+    {
+      "chunk_id": "chunk-30-variable-ordering-heuristic",
+      "topic": "Variable and Value Ordering Heuristics",
+      "text": "There are two choices we have to make in implementing the search:\n**variable ordering** (which square do we try first?) and **value\nordering** (which digit do we try first for the square?).  For\nvariable ordering, I used a common heuristic called **minimum\nremaining values**, which means that we choose a \nsquare with the minimum number of possible values. Why?  Consider \n`grid2` above. Suppose we chose `B3` first.  It has 7\npossibilities, `{1256789}`, so we'd expect to guess wrong with\nprobability 6/7.  If instead we chose `G2`, which only has 2\npossibilities, `{89}`, we'd expect to be wrong with probability\nonly 1/2.  Thus we choose the square with the fewest possibilities and\nthe best chance of guessing right.  For value ordering we won't do\nanything special; we'll consider the digits in numeric order.",
+      "concepts": [
+        "variable_ordering_heuristic"
+      ],
+      "chunk_type": "explanation",
+      "section": "Search Strategy",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Search Strategy"
+      ],
+      "markdown_anchor": "search-strategy",
+      "start_line": 351,
+      "end_line": 498
+    },
+    {
+      "chunk_id": "chunk-31-grid-copying-for-search-branches",
+      "topic": "Grid Copying for Search Branches",
+      "text": "Note we create a new **copy** of `grid` for each recursive call to `search`. This way\neach branch of the search tree is independent, and mutations to `grid` done by constraint propagation in one branch do not  confuse other branches. When it is time to back up and try a different digit, we have the original unaltered `grid` ready to go.",
+      "concepts": [
+        "grid_copying_for_search_branches"
+      ],
+      "chunk_type": "explanation",
+      "section": "Search Strategy",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Search Strategy"
+      ],
+      "markdown_anchor": "search-strategy",
+      "start_line": 351,
+      "end_line": 498
+    },
+    {
+      "chunk_id": "chunk-32-solve-puzzles-function",
+      "topic": "Solve Puzzles Function",
+      "text": "We could call `search` directly, but I'll define the helper function `solve_puzzles(puzzles)` to call `constrain` and then `search` on each puzzle, and then verify that the solution is correct with `is_solution`, and finally print the puzzle and the solution side by side:\n\n\n```python\ndef solve_puzzles(puzzles, verbose=True) -> int:\n    \"\"\"Solve and verify each puzzle, and if `verbose`, print puzzle and solution.\"\"\"\n    for puzzle in puzzles:\n        solution = search(constrain(puzzle))\n        assert is_solution(solution, puzzle)\n        if verbose:\n            print_side_by_side('\\nPuzzle:\\n' + picture(puzzle), \n                               '\\nSolution:\\n' + picture(solution))\n    return len(puzzles)\n\ndef print_side_by_side(left, right, width=20):\n    \"\"\"Print two strings side-by-side, line-by-line, each side `width` wide.\"\"\"\n    for L, R in zip(left.splitlines(), right.splitlines()):\n        print(L.ljust(width), R.ljust(width))\n```",
+      "concepts": [
+        "search_strategy_concept",
+        "constrain_function",
+        "sudoku_solution_validation",
+        "output_picture_function"
+      ],
+      "chunk_type": "example",
+      "section": "Search Strategy",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Search Strategy"
+      ],
+      "markdown_anchor": "search-strategy",
+      "start_line": 351,
+      "end_line": 498
+    },
+    {
+      "chunk_id": "chunk-33-solve-puzzles-example",
+      "topic": "Example Usage of solve_puzzles",
+      "text": "```python\nsolve_puzzles([grid1, grid2])\n```\n\n```\n                                         \nPuzzle:              Solution:           \n5 3 .|. 7 .|. . .    5 3 4|6 7 8|9 1 2   \n6 . .|1 9 5|. . .    6 7 2|1 9 5|3 4 8   \n. 9 8|. . .|. 6 .    1 9 8|3 4 2|5 6 7   \n-----+-----+-----    -----+-----+-----   \n8 . .|. 6 .|. . 3    8 5 9|7 6 1|4 2 3   \n4 . .|8 . 3|. . 1    4 2 6|8 5 3|7 9 1   \n7 . .|. 2 .|. . 6    7 1 3|9 2 4|8 5 6   \n-----+-----+-----    -----+-----+-----   \n. 6 .|. . .|2 8 .    9 6 1|5 3 7|2 8 4   \n. . .|4 1 9|. . 5    2 8 7|4 1 9|6 3 5   \n. . .|. 8 .|. 7 9    3 4 5|2 8 6|1 7 9   \n                                         \nPuzzle:              Solution:           \n4 . .|. . .|8 . 5    4 1 7|3 6 9|8 2 5   \n. 3 .|. . .|. . .    6 3 2|1 5 8|9 4 7   \n. . .|7 . .|. . .    9 5 8|7 2 4|3 1 6   \n-----+-----+-----    -----+-----+-----   \n. 2 .|. . .|. 6 .    8 2 5|4 3 7|1 6 9   \n. . .|. 8 .|4 . .    7 9 1|5 8 6|4 3 2   \n. . .|. 1 .|. . .    3 4 6|9 1 2|7 5 8   \n-----+-----+-----    -----+-----+-----   \n. . .|6 . 3|. 7 .    2 8 9|6 4 3|5 7 1   \n5 . .|2 . .|. . .    5 7 3|2 9 1|6 8 4   \n1 . 4|. . .|. . .    1 6 4|8 7 5|2 9 3   \n\n```",
+      "concepts": [
+        "search_strategy_concept",
+        "constrain_function",
+        "sudoku_solution_validation",
+        "output_picture_function",
+        "parse_function"
+      ],
+      "chunk_type": "example",
+      "section": "Search Strategy",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Search Strategy"
+      ],
+      "markdown_anchor": "search-strategy",
+      "start_line": 351,
+      "end_line": 498
+    },
+    {
+      "chunk_id": "chunk-34-solve-puzzles-example-output",
+      "topic": "Output of solve_puzzles example",
+      "text": "```\n2\n```\n\nWe see that `search` is effective at solving the previously-unsolved `grid2`.",
+      "concepts": [
+        "search_strategy_concept"
+      ],
+      "chunk_type": "example",
+      "section": "Search Strategy",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Search Strategy"
+      ],
+      "markdown_anchor": "search-strategy",
+      "start_line": 351,
+      "end_line": 498
+    },
+    {
+      "chunk_id": "chunk-35-depth-first-search-and-nishio-strategy",
+      "topic": "Depth-First Search and Nishio Strategy",
+      "text": "Computer scientists call this a [depth-first search](http://en.wikipedia.org/wiki/Depth-first_search) because it (recursively) considers all possible continuations from the grid with *d* in square *s* before it backs up and considers a different digit in *s*. Sudoku players call this the  [Nishio strategy](https://www.sudokuonline.io/tips/advanced-sudoku-strategies), after professional puzzle player Tetsuya Nishio, although Nishio only applied it when there were just two remaining possibilities for a square. We can apply it with any number of possibilities; we can even find a solution for the completely empty puzzle where every square has 9 possibilities:",
+      "concepts": [
+        "depth_first_search_implementation",
+        "search_strategy_concept"
+      ],
+      "chunk_type": "explanation",
+      "section": "Search Strategy",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Search Strategy"
+      ],
+      "markdown_anchor": "search-strategy",
+      "start_line": 351,
+      "end_line": 498
+    },
+    {
+      "chunk_id": "chunk-36-solve-empty-puzzle",
+      "topic": "Solving an Empty Sudoku Puzzle",
+      "text": "```python\nempty = parse('.' * 81)\n              \nsolve_puzzles([empty])\n```\n\n```\n                                         \nPuzzle:              Solution:           \n. . .|. . .|. . .    1 2 3|4 5 6|7 8 9   \n. . .|. . .|. . .    4 5 6|7 8 9|1 2 3   \n. . .|. . .|. . .    7 8 9|1 2 3|4 5 6   \n-----+-----+-----    -----+-----+-----   \n. . .|. . .|. . .    2 3 1|6 7 4|8 9 5   \n. . .|. . .|. . .    8 7 5|9 1 2|3 6 4   \n. . .|. . .|. . .    6 9 4|5 3 8|2 1 7   \n-----+-----+-----    -----+-----+-----   \n. . .|. . .|. . .    3 1 7|2 6 5|9 4 8   \n. . .|. . .|. . .    5 4 2|8 9 7|6 3 1   \n. . .|. . .|. . .    9 6 8|3 4 1|5 7 2   \n\n```",
+      "concepts": [
+        "search_strategy_concept",
+        "parse_function",
+        "output_picture_function",
+        "sudoku_solution_validation",
+        "constrain_function"
+      ],
+      "chunk_type": "example",
+      "section": "Search Strategy",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Search Strategy"
+      ],
+      "markdown_anchor": "search-strategy",
+      "start_line": 351,
+      "end_line": 498
+    },
+    {
+      "chunk_id": "chunk-37-solve-empty-puzzle-output",
+      "topic": "Output of solving empty puzzle",
+      "text": "```\n1\n```",
+      "concepts": [
+        "search_strategy_concept"
+      ],
+      "chunk_type": "example",
+      "section": "Search Strategy",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Search Strategy"
+      ],
+      "markdown_anchor": "search-strategy",
+      "start_line": 351,
+      "end_line": 498
+    },
+    {
+      "chunk_id": "chunk-38-verifying-the-program",
+      "topic": "Verifying Sudoku Solver Correctness and Performance",
+      "text": "# Verifying the Program\n\nWe had success in solving `grid1`, `grid2`, and `empty`, but we are left with some questions:\n- Can the program solve *any* puzzle? \n  - We'll test it on some more `puzzles`, taken from some files. The more we test, the more confidence we have.\n  - Theoretically, the program should be able to solve any puzzle, but we haven't determined a bound on how long it would take.\n- Are the components of the program correct? \n  - We'll run some `unit_tests` to give us some confidence/ There should be more tests.\n- How long does it take to solve a puzzle?\n  - We can measure that with the `%time` magic command.\n  - For a more complete investigation of run times, see the [Java version](SudokuJava.ipynb).",
+      "concepts": [
+        "program_verification_unit_testing",
+        "performance_measurement_python"
+      ],
+      "chunk_type": "overview",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-39-unit-tests-function",
+      "topic": "Unit Tests Implementation",
+      "text": "```python\ndef unit_tests():\n    \"\"\"A suite of unit tests.\"\"\"\n    assert len(squares) == 81\n    assert len(all_units) == 27\n    assert cross('AB', '12') == ('A1', 'A2', 'B1', 'B2')\n    for s in squares:\n        assert len(units[s]) == 3\n        assert len(peers[s]) == 20\n    assert units['C2'] == (('A2', 'B2', 'C2', 'D2', 'E2', 'F2', 'G2', 'H2', 'I2'),\n                           ('C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9'),\n                           ('A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'))\n    assert peers['C2'] == {'A2', 'B2',       'D2', 'E2', 'F2', 'G2', 'H2', 'I2',\n                           'C1',       'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9',\n                           'A1', 'A3', 'B1', 'B3'}\n    return 'pass'\n\ndef parse_grids(pictures):\n    \"\"\"Parse an iterable of picture lines into a list of grids.\"\"\"\n    return [parse(p) for p in pictures if p]\n\nhardest  = parse_grids(open('hardest.txt'))\ngrids10k = parse_grids(open('sudoku10k.txt'))\n\nunit_tests()\n```",
+      "concepts": [
+        "program_verification_unit_testing",
+        "utility_cross_product",
+        "sudoku_grid_components"
+      ],
+      "chunk_type": "example",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-40-unit-tests-output",
+      "topic": "Unit Tests Output",
+      "text": "```\n'pass'\n```",
+      "concepts": [
+        "program_verification_unit_testing"
+      ],
+      "chunk_type": "example",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-41-solving-10000-puzzles",
+      "topic": "Solving 10,000 Sudoku Puzzles and Measuring Performance",
+      "text": "We can solve 10,000 puzzles, verifying that each solution is correct (but not printing them):\n\n```python\n%time solve_puzzles(grids10k, verbose=False)\n```",
+      "concepts": [
+        "performance_measurement_python"
+      ],
+      "chunk_type": "example",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-42-solving-10000-puzzles-output",
+      "topic": "Performance Results for Solving 10,000 Puzzles",
+      "text": "```\nCPU times: user 27.2 s, sys: 17.1 ms, total: 27.2 s\nWall time: 27.4 s\n\n```",
+      "concepts": [
+        "performance_measurement_python"
+      ],
+      "chunk_type": "example",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-43-solving-10000-puzzles-summary",
+      "topic": "Performance Analysis of Sudoku Solver",
+      "text": "```\n10000\n```\n\nThat took less than 3 milliseconds per puzzle, or over 350 puzzles per second. (The [Java version](SudokuJava.ipynb) does over 100,000 puzzles per second. It benefits from being able to run 20 threads in parallel, from using more efficient data structures, and from the Java JVM being more efficient than Python's bytecode interpreter.)",
+      "concepts": [
+        "performance_measurement_python",
+        "data_structure_design_tradeoffs"
+      ],
+      "chunk_type": "explanation",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-44-solving-hardest-puzzles",
+      "topic": "Solving the Hardest Puzzles and Measuring Performance",
+      "text": "The ten allegedly hardest puzzles also take about 3 milliseconds per puzzle on average:\n\n```python\n%time solve_puzzles(hardest, verbose=False)\n```",
+      "concepts": [
+        "performance_measurement_python"
+      ],
+      "chunk_type": "example",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-45-solving-hardest-puzzles-output",
+      "topic": "Performance Results for Solving Hardest Puzzles",
+      "text": "```\nCPU times: user 33.8 ms, sys: 1.08 ms, total: 34.9 ms\nWall time: 34.3 ms\n\n```",
+      "concepts": [
+        "performance_measurement_python"
+      ],
+      "chunk_type": "example",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-46-solving-hardest-puzzles-summary",
+      "topic": "Confirmation of Solving Hardest Puzzles",
+      "text": "```\n10\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-47-displaying-hardest-puzzles-solutions",
+      "topic": "Displaying Puzzles and Solutions",
+      "text": "We can see the puzzles and their solutions:\n\n```python\nsolve_puzzles(hardest)\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-48-displaying-hardest-puzzles-solutions-output",
+      "topic": "Output of Hardest Puzzles and Solutions",
+      "text": "```\n                                         \nPuzzle:              Solution:           \n8 5 .|. . 2|4 . .    8 5 9|6 1 2|4 3 7   \n7 2 .|. . .|. . 9    7 2 3|8 5 4|1 6 9   \n. . 4|. . .|. . .    1 6 4|3 7 9|5 2 8   \n-----+-----+-----    -----+-----+-----   \n. . .|1 . 7|. . 2    9 8 6|1 4 7|3 5 2   \n3 . 5|. . .|9 . .    3 7 5|2 6 8|9 1 4   \n. 4 .|. . .|. . .    2 4 1|5 9 3|7 8 6   \n-----+-----+-----    -----+-----+-----   \n. . .|. 8 .|. 7 .    4 3 2|9 8 1|6 7 5   \n. 1 7|. . .|. . .    6 1 7|4 2 5|8 9 3   \n. . .|. 3 6|. 4 .    5 9 8|7 3 6|2 4 1   \n                                         \nPuzzle:              Solution:           \n. . 5|3 . .|. . .    1 4 5|3 2 7|6 9 8   \n8 . .|. . .|. 2 .    8 3 9|6 5 4|1 2 7   \n. 7 .|. 1 .|5 . .    6 7 2|9 1 8|5 4 3   \n-----+-----+-----    -----+-----+-----   \n4 . .|. . 5|3 . .    4 9 6|1 8 5|3 7 2   \n. 1 .|. 7 .|. . 6    2 1 8|4 7 3|9 5 6   \n. . 3|2 . .|. 8 .    7 5 3|2 9 6|4 8 1   \n-----+-----+-----    -----+-----+-----   \n. 6 .|5 . .|. . 9    3 6 7|5 4 2|8 1 9   \n. . 4|. . .|. 3 .    9 8 4|7 6 1|2 3 5   \n. . .|. . 9|7 . .    5 2 1|8 3 9|7 6 4   \n                                         \nPuzzle:              Solution:           \n1 2 .|. 4 .|. . .    1 2 8|5 4 7|6 3 9   \n. . 5|. 6 9|. 1 .    3 4 5|8 6 9|2 1 7   \n. . 9|. . .|5 . .    6 7 9|2 1 3|5 4 8   \n-----+-----+-----    -----+-----+-----   \n. . .|. . .|. 7 .    9 1 2|4 8 6|3 7 5   \n7 . .|. 5 2|. 9 .    7 8 4|3 5 2|1 9 6   \n. 3 .|. . .|. . 2    5 3 6|7 9 1|4 8 2   \n-----+-----+-----    -----+-----+-----   \n. 9 .|6 . .|. 5 .    8 9 1|6 2 4|7 5 3   \n4 . .|9 . .|8 . 1    4 6 7|9 3 5|8 2 1   \n. . 3|. . .|9 . 4    2 5 3|1 7 8|9 6 4   \n                                         \nPuzzle:              Solution:           \n. . .|5 7 .|. 3 .    6 2 4|5 7 8|1 3 9   \n1 . .|. . .|. 2 .    1 3 5|4 9 6|8 2 7   \n7 . .|. 2 3|4 . .    7 8 9|1 2 3|4 5 6   \n-----+-----+-----    -----+-----+-----   \n. . .|. 8 .|. . 4    2 1 6|3 8 5|7 9 4   \n. . 7|. . 4|. . .    8 5 7|9 6 4|2 1 3   \n4 9 .|. . .|6 . 5    4 9 3|2 1 7|6 8 5   \n-----+-----+-----    -----+-----+-----   \n. 4 2|. . .|3 . .    9 4 2|6 5 1|3 7 8   \n. . .|7 . .|9 . .    5 6 8|7 3 2|9 4 1   \n. . 1|8 . .|. . .    3 7 1|8 4 9|5 6 2   \n                                         \nPuzzle:              Solution:           \n1 . .|. . 7|. 9 .    1 6 2|8 5 7|4 9 3   \n. 3 .|. 2 .|. . 8    5 3 4|1 2 9|6 7 8   \n. . 9|6 . .|5 . .    7 8 9|6 4 3|5 2 1   \n-----+-----+-----    -----+-----+-----   \n. . 5|3 . .|9 . .    4 7 5|3 1 2|9 8 6   \n. 1 .|. 8 .|. . 2    9 1 3|5 8 6|7 4 2   \n6 . .|. . 4|. . .    6 2 8|7 9 4|1 3 5   \n-----+-----+-----    -----+-----+-----   \n3 . .|. . .|. 1 .    3 5 6|4 7 8|2 1 9   \n. 4 .|. . .|. . 7    2 4 1|9 3 5|8 6 7   \n. . 7|. . .|3 . .    8 9 7|2 6 1|3 5 4   \n                                         \nPuzzle:              Solution:           \n1 . .|. 3 4|. 8 .    1 5 2|9 3 4|6 8 7   \n. . .|8 . .|5 . .    7 6 3|8 2 1|5 4 9   \n. . 4|. 6 .|. 2 1    9 8 4|5 6 7|3 2 1   \n-----+-----+-----    -----+-----+-----   \n. 1 8|. . .|. . .    6 1 8|4 9 3|2 7 5   \n3 . .|1 . 2|. . 6    3 7 5|1 8 2|4 9 6   \n. . .|. . .|8 1 .    2 4 9|7 5 6|8 1 3   \n-----+-----+-----    -----+-----+-----   \n5 2 .|. 7 .|9 . .    5 2 1|3 7 8|9 6 4   \n. . 6|. . 9|. . .    4 3 6|2 1 9|7 5 8   \n. 9 .|6 4 .|. . 2    8 9 7|6 4 5|1 3 2   \n                                         \nPuzzle:              Solution:           \n. . .|9 2 .|. . .    3 8 7|9 2 6|4 1 5   \n. . 6|8 . 3|. . .    5 4 6|8 1 3|9 7 2   \n1 9 .|. 7 .|. . 6    1 9 2|4 7 5|8 3 6   \n-----+-----+-----    -----+-----+-----   \n2 3 .|. 4 .|1 . .    2 3 5|7 4 9|1 6 8   \n. . 1|. . .|7 . .    9 6 1|2 5 8|7 4 3   \n. . 8|. 3 .|. 2 9    4 7 8|6 3 1|5 2 9   \n-----+-----+-----    -----+-----+-----   \n7 . .|. 8 .|. 9 1    7 5 4|3 8 2|6 9 1   \n. . .|5 . 7|2 . .    6 1 3|5 9 7|2 8 4   \n. . .|. 6 4|. . .    8 2 9|1 6 4|3 5 7   \n                                         \nPuzzle:              Solution:           \n. 6 .|5 . 4|. 3 .    8 6 9|5 7 4|1 3 2   \n1 . .|. 9 .|. . 8    1 2 4|3 9 6|7 5 8   \n. . .|. . .|. . .    3 7 5|1 2 8|6 9 4   \n-----+-----+-----    -----+-----+-----   \n9 . .|. 5 .|. . 6    9 3 2|8 5 7|4 1 6   \n. 4 .|6 . 2|. 7 .    5 4 1|6 3 2|8 7 9   \n7 . .|. 4 .|. . 5    7 8 6|9 4 1|3 2 5   \n-----+-----+-----    -----+-----+-----   \n. . .|. . .|. . .    2 1 7|4 6 9|5 8 3   \n4 . .|. 8 .|. . 1    4 9 3|7 8 5|2 6 1   \n. 5 .|2 . 3|. 4 .    6 5 8|2 1 3|9 4 7   \n                                         \nPuzzle:              Solution:           \n7 . .|. . .|4 . .    7 9 8|6 3 5|4 2 1   \n. 2 .|. 7 .|. 8 .    1 2 6|9 7 4|5 8 3   \n. . 3|. . 8|. 7 9    4 5 3|2 1 8|6 7 9   \n-----+-----+-----    -----+-----+-----   \n9 . .|5 . .|3 . .    9 7 2|5 8 6|3 1 4   \n. 6 .|. 2 .|. 9 .    5 6 4|1 2 3|8 9 7   \n. . 1|. 9 7|. . 6    3 8 1|4 9 7|2 5 6   \n-----+-----+-----    -----+-----+-----   \n. . .|3 . .|9 . .    6 1 7|3 5 2|9 4 8   \n. 3 .|. 4 .|. 6 .    8 3 5|7 4 9|1 6 2   \n. . 9|. . 1|. 3 5    2 4 9|8 6 1|7 3 5   \n                                         \nPuzzle:              Solution:           \n. . .|. 7 .|. 2 .    5 9 4|8 7 6|1 2 3   \n8 . .|. . .|. . 6    8 2 3|9 1 4|7 5 6   \n. 1 .|2 . 5|. . .    6 1 7|2 3 5|8 9 4   \n-----+-----+-----    -----+-----+-----   \n9 . 5|4 . .|. . 8    9 6 5|4 2 1|3 7 8   \n. . .|. . .|. . .    7 8 1|6 5 3|9 4 2   \n3 . .|. . 8|5 . 1    3 4 2|7 9 8|5 6 1   \n-----+-----+-----    -----+-----+-----   \n. . .|3 . 2|. 8 .    1 5 9|3 4 2|6 8 7   \n4 . .|. . .|. . 9    4 3 6|5 8 7|2 1 9   \n. 7 .|. 6 .|. . .    2 7 8|1 6 9|4 3 5   \n```",
+      "concepts": [
+        "sudoku_solution_validation"
+      ],
+      "chunk_type": "example",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-49-displaying-hardest-puzzles-solutions-summary",
+      "topic": "Completion of Displaying Hardest Puzzles and Solutions",
+      "text": "```\n10\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-50-roads-not-taken",
+      "topic": "Alternative Implementation Choices and Trade-offs",
+      "text": "## Roads not taken\n\nI made my implementation choices for clarity and ease of debugging. There are alternative choices I could have made:\n- **Digit**: could have been an `int`, but:\n  - There is no need to do arithmetic on digits (all that matters is that they are unique).\n  - I wanted the compact DigitSet representation.\n- **Digit set**: I considered two other options:\n  - `set` of digits: a good choice, but:\n    - I would then need to do a `deepcopy` of each grid, not just a copy.\n    - The printed representation `'123'` is shorter and easier to read than `{'1', '2', '3'}` when debugging.\n  - `int` bitset: each digit is represented by a bit; a DigitSet is a 9-bit binary int.\n    - Efficient, but obfuscating. Used in the [Java version](SudokuJava.ipynb) for efficiency.\n- **Grid**: I considered three other options: \n  - `defaultdict`: the default is the DigitSet `'123456789'`.\n    - I thought that the top levels in the search tree would have only a few entries, so this would save space. \n    - But the first round of constraint propagation touches almost all the squares anyway.\n  - `list` of 9 rows, each a `list` of 9 squares (or a numpy 2D array):\n    - Then a `Square` is a pair of coordinates, like `(1, 2)` rather than the simpler string `C2`.\n    - Copying a grid would again require a `deepcopy`. \n  - `list` of 81 squares: \n    - Then a `Square` is an integer from 0 to 81.\n    - Efficient, but for debugging it is clear that `C2` is in the third row and second column; it is not obvious that `19` is.",
+      "concepts": [
+        "data_structure_design_tradeoffs",
+        "digit_and_digit_set_representation",
+        "grid_data_structure",
+        "grid_copying_for_search_branches"
+      ],
+      "chunk_type": "explanation",
+      "section": "Verifying the Program",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Verifying the Program",
+        "Roads not taken"
+      ],
+      "markdown_anchor": "verifying-the-program",
+      "start_line": 499,
+      "end_line": 748
+    },
+    {
+      "chunk_id": "chunk-51-sudoku-solver-motivation",
+      "topic": "Motivation for creating a Sudoku solver",
+      "text": "# Why?\n\nWhy did I do this? As computer security expert [Ben Laurie](http://en.wikipedia.org/wiki/Ben_Laurie) has\nstated, Sudoku is \"a denial of service attack on human intellect.\" \nSeveral people I know (including my\nwife) were victims of the attack, and I thought maybe this would\ndemonstrate that they didn't need to spend any more time on Sudoku.  It\ndidn't work for my friends (although my wife has since independently\nkicked the habit without my help), but at least one stranger wrote\nand said this page worked for them, so I've made the world more\nproductive. And perhaps along the way I've taught something about\nPython, constraint propagation, search, problem solving, and Sudoku.",
+      "concepts": [
+        "constraint_propagation_concept",
+        "search_strategy_concept"
+      ],
+      "chunk_type": "overview",
+      "section": "Why?",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+      "heading_path": [
+        "Why?"
+      ],
+      "markdown_anchor": "why",
+      "start_line": 749,
+      "end_line": 762
+    }
+  ],
+  "metadata": {
+    "total_chunks": 51,
+    "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md",
+    "chunked_at": "2025-12-12T15:55:15.500Z"
+  }
+}

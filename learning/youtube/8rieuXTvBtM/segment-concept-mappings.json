@@ -1,0 +1,383 @@
+{
+  "video_id": "8rieuXTvBtM",
+  "total_segments": 12,
+  "mapped_at": "2025-12-12T05:52:38.089Z",
+  "segments": [
+    {
+      "segment_index": 0,
+      "timestamp": 29.97,
+      "audio_text": "In this video, I'm gonna walk you through how to build your own mCP server using python that can power real-world tools. Like adding data to database pulling data or even editing your images. MCP stands for model context protocol and it's what lets AI tools like cloud or cursor. Use your own custom functions and if you never use MTP before, I have created a beginner friendly video for you to check it out. Now, if you're ready to build your own MTP server, let's get started with this video and we're going to take a look at how to set up our first mCP server with the official MCPE python package SDK. So first we're going to navigate to the MCPE python SDK to get started by adding mCP to our python projects. So I'm just going to click on this and here you can see this is going to be the first step which is recommended to install UV to manage our python projects. So if you haven't done, so just to check out the UV website to install UV on your local machine based on your operating system. So once you have UV installed, were then going to set up our MCPE server using the UV package manager. So we're going to copy this command here and be able to come back to terminal.",
+      "audio_start": 0,
+      "audio_end": 59.94,
+      "frame_path": "youtube/8rieuXTvBtM/frames/frame_0000.jpg",
+      "analysis": {
+        "visual_description": "A slide displaying information about a GitHub repository. The main title is \"github/github-mcp-server\", with a subtitle \"GitHub's official MCP Server\". Below this, statistics are shown: 9 Contributors, 11 Issues, 595 Stars, and 23 Forks. On the right side, there is a prominent Python logo and a smaller GitHub Octocat logo.",
+        "code_content": "",
+        "slide_content": "github/github-mcp-server GitHub's official MCP Server 9 Contributors 11 Issues 595 Stars 23 Forks",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "GitHub",
+          "MCP Server",
+          "Python",
+          "Repository"
+        ],
+        "is_code_readable": false
+      },
+      "concept_mapping": {
+        "concept_id": "uv_package_manager",
+        "confidence": 0.95,
+        "reasoning": "The segment introduces `uv` as a package manager to set up the MCP server, directing the viewer to install it and use it for project management."
+      }
+    },
+    {
+      "segment_index": 1,
+      "timestamp": 75.695,
+      "audio_text": "And run UV initialize rmcp server demo project. And once we initialize it, we're going to CD into the mCP server demo. So here you can see, we have initialized our mCP server demo projects inside of our directory or instead of our desktop and once we are initialized, we are CD into the mCP server demo, okay? So next up is basically, adding mCP to our project dependencies. So we're just going to use UV, add and CPC CLI. So, we're just gonna copy this command and navigate back to the terminal and run this command.",
+      "audio_start": 59.94,
+      "audio_end": 91.45,
+      "frame_path": "youtube/8rieuXTvBtM/frames/frame_0001.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a terminal window with a dark background and light text. Several commands and their outputs are visible, showing the initialization and navigation into a new project directory. The current prompt indicates being inside the 'mcp-server-demo' directory within a Git repository on the 'main' branch.",
+        "code_content": "uv -Vuv 0.6.14 (a4cec56dc 2025-04-09)uv init mcp-server-democd mcp-server-demoInitialized project `mcp-server-demo` at `/Users/erictech/Desktop/mcp-server-demo`(base) -> mcp-server-demo git:(main) x",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "uv",
+          "uv init",
+          "cd",
+          "project initialization",
+          "command line interface",
+          "directory navigation",
+          "git"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "project_initialization_with_uv",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "adding_project_dependencies_with_uv"
+        ],
+        "reasoning": "The segment explicitly demonstrates and describes using `uv init mcp-server-demo` to initialize a new Python project, followed by changing into the new directory. It then mentions adding dependencies, which is a secondary step."
+      }
+    },
+    {
+      "segment_index": 2,
+      "timestamp": 121.73500000000001,
+      "audio_text": "All right, so now it's done. The installation. Let's go back to the codebase and see what's inside of our project. Alright? So inside of our codebase, you can see for MCPE server demo. We have a couple of things inside of our directories. So we have our virtual environment here, as well as our gate ignore. And here we have the main.py and inside of the main apply. You can see we have a simple function which basically prints the text into the console. So what we can do is we're just gonna follow the documentation for the quick start and you can see that we have a simple mCP server, that will basically expose a calculator tool and some data, right? So here you can see for this code, it basically Imports the mCP server, which is called Fast and mCP, which a MTP server, and we can use this instance of The Fast and TTP. And by the way, this is just a name for the MCPE server. And then what we can be able to use the mCP server here to basically create a tool and also create a resource Now quickly, I'll just want to talk about the difference between resource and tools. Now, resource here, we basically try to expose data, kind of like a get endpoints",
+      "audio_start": 91.45,
+      "audio_end": 152.02,
+      "frame_path": "youtube/8rieuXTvBtM/frames/frame_0002.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a web page or documentation titled \"Quickstart\", demonstrating how to set up a simple MCP server. The text explains that the server exposes a calculator tool and some data. A Python code block shows the implementation: importing FastMCP, initializing an MCP server named 'Demo', defining an 'add' function as a tool using `@mcp.tool()`, and defining a 'get_greeting' function as a resource using `@mcp.resource()`. The code includes type hints and docstrings. A yellow highlighter cursor is visible over the phrase \"simple MCP server\" in the introductory text.",
+        "code_content": "# server.py\nfrom mcp.server.fastmcp import FastMCP\n\n# Create an MCP server\nmcp = FastMCP(\"Demo\")\n\n# Add an addition tool\n@mcp.tool()\ndef add(a: int, b: int) -> int:\n    \"\"\"Add two numbers\"\"\"\n    return a + b\n\n# Add a dynamic greeting resource\n@mcp.resource(\"greeting://{name}\")\ndef get_greeting(name: str) -> str:\n    \"\"\"Get a personalized greeting\"\"\"\n    return f\"Hello, {name}!\"",
+        "slide_content": "Quickstart\nLet's create a simple MCP server that exposes a calculator tool and some data:\nYou can install this server in Claude Desktop and interact with it right away by running:",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "MCP server",
+          "FastMCP",
+          "Python decorators",
+          "API tools",
+          "API resources",
+          "Server-side programming",
+          "Function definition",
+          "Type hinting",
+          "f-strings"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "basic_mcp_server_structure",
+        "confidence": 0.95,
+        "reasoning": "The segment explains the basic Python code structure for an MCP server, specifically showing the import of `FastMCP` and its instantiation as `mcp = FastMCP('Demo')`."
+      }
+    },
+    {
+      "segment_index": 3,
+      "timestamp": 167.53,
+      "audio_text": "We're trying to load the information into the large language models context. Where tools on the other hand we basically trying to execute the code, right? Maybe we're trying to delete in data creating the data or also try to update the data, right? So back to the code here, we're basically try to use tool here to make a calculation, right? We're trying to add a two numbers together and return back to the results. And then we also have the resource which we'll talk about in a second, but you can see that it takes a name or a greeting and generates a text",
+      "audio_start": 152.02,
+      "audio_end": 183.04,
+      "frame_path": "youtube/8rieuXTvBtM/frames/frame_0003.jpg",
+      "analysis": {
+        "visual_description": "A screenshot of a web page displaying a Python programming tutorial or documentation. The page shows a \"Quickstart\" section with code examples for creating a simple MCP server. The code includes importing FastMCP, initializing an MCP server, defining an 'add' function using the @mcp.tool() decorator, and defining a 'get_greeting' function using the @mcp.resource() decorator. A mouse cursor is visible, hovering over the 'return a + b' line of the 'add' function.",
+        "code_content": "# server.py\nfrom mcp.server.fastmcp import FastMCP\n\n# Create an MCP server\nmcp = FastMCP(\"Demo\")\n\n# Add an addition tool\n@mcp.tool()\ndef add(a: int, b: int) -> int:\n    \"\"\"Add two numbers\"\"\"\n    return a + b\n\n# Add a dynamic greeting resource\n@mcp.resource(\"greeting://{name}\")\ndef get_greeting(name: str) -> str:\n    \"\"\"Get a personalized greeting\"\"\"\n    return f\"Hello, {name}!\"",
+        "slide_content": "Quickstart\nLet's create a simple MCP server that exposes a calculator tool and some data:\nYou can install this server in Claude Desktop and interact with it right away by running:",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "MCP server",
+          "FastMCP",
+          "Python decorators",
+          "Function definition",
+          "Type hinting",
+          "Tool definition",
+          "Resource definition",
+          "f-strings"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "mcp_tools",
+        "confidence": 0.95,
+        "reasoning": "The audio clearly differentiates between resources (loading data) and tools (executing code), then focuses on an example of an MCP tool for calculation using `@mcp.tool()`."
+      }
+    },
+    {
+      "segment_index": 4,
+      "timestamp": 213.125,
+      "audio_text": "So we're just going to copy this code and come back to the visual studio code replace the current existing main.py with the new code. So, once we have the new code here, we're just going to start our mCP server and play around with it in our Cloud desktop. So that's exactly what we're gonna do first. So first, we want to make sure that we have clawed desktop installed on your local machine. So, currently I'm using the Mac version. So I'm just gonna install this and Mac OS version, okay? So once we have claw desktop installed, and then we're going to run the command here to basically start our mCP server. So, we're just gonna copy this command, paste it here to the terminal curly, I mean, the MCPE server demo, and I'm going to run UV, run MCPE, install server.py. And because here inside of our code, we have main.py which in this case, we go to replace the command here to be main.py instead of these server.py. So, back to the terminal, we're just gonna replace these server.py main.py here and we're just gonna run this, okay?",
+      "audio_start": 183.04,
+      "audio_end": 243.21,
+      "frame_path": "youtube/8rieuXTvBtM/frames/frame_0004.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a webpage, likely a README or documentation, showing Python code snippets, command-line instructions, and descriptive text. The code includes two Python functions, `add` and `get_greeting`, both decorated with `@mcp.tool()` and `@mcp.resource()` respectively. Below the code, there are instructions for installing the server using `mcp install server.py` and testing it with `mcp dev server.py`. A mouse cursor hovers over a hyperlink labeled 'Claude Desktop'. At the bottom, a heading 'What is MCP?' is visible with partial introductory text.",
+        "code_content": "# Add an addition tool\n@mcp.tool()\ndef add(a: int, b: int) -> int:\n    \"\"\"Add two numbers\"\"\"\n    return a + b\n\n# Add a dynamic greeting resource\n@mcp.resource(\"greeting://{name}\")\ndef get_greeting(name: str) -> str:\n    \"\"\"Get a personalized greeting\"\"\"\n    return f\"Hello, {name}!\"",
+        "slide_content": "You can install this server in Claude Desktop and interact with it right away by running:\nmcp install server.py\nAlternatively, you can test it with the MCP Inspector:\nmcp dev server.py\nWhat is MCP?\nThe Model Context Protocol (MCP) lets you build servers that expose data and",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "Python functions",
+          "Decorators",
+          "Type hints",
+          "f-strings",
+          "MCP (Model Context Protocol)",
+          "Command-line interface",
+          "Server installation",
+          "Server development",
+          "Claude Desktop"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "starting_local_mcp_server",
+        "confidence": 0.95,
+        "reasoning": "The segment explicitly states the intention to 'start our mCP server' and demonstrates the command `uv run --with mcp[cli] mcp run main.py` to execute the server script."
+      }
+    },
+    {
+      "segment_index": 5,
+      "timestamp": 273.18,
+      "audio_text": "So here you can see, we have successfully installed the demo, mCP server into the cloud application. So here, back to the cloud, we can be able to verify that the configuration has added. So first, we're going to click on Claude and click on settings for mac. And then inside of the settings here, we're going to click on developer. All right, so once we're in the developer, we're going to click on edit config. And once it has a folder pops up, we're just gonna see a claw desktop configuration dot Json. So, we're just gonna open this and vs code. Here, you can see inside of the settings, we can be able to see that, we have the mCP servers and inside of it, we have our demo, which, in this case, we have two sections. One is the command and the other one is the arguments. So, this is the command right here. We're using UV to run with the mCP CLI and after that is going to MCPE, run this script right here, which is the same script that we have right here. Okay. So it's basically just going to run this mCP server that we have just initialized. So now if we were to go about a clawed open a new chat, you can see the at the bottoms here. Usually, it shows a",
+      "audio_start": 243.21,
+      "audio_end": 303.15,
+      "frame_path": "youtube/8rieuXTvBtM/frames/frame_0005.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a Visual Studio Code editor. On the left, the file explorer shows the 'MCP-SERVER-DEMO' project with 'main.py' highlighted. The main editor window is displaying 'claude_desktop_config.json', which contains JSON code defining an 'mcpServers' configuration. This configuration includes a 'Demo' entry with a 'command' set to 'uv' and 'args' specifying a command sequence: 'run', '--with', 'mcp[cli]', 'mcp', 'run', and a file path to '/Users/erictech/Desktop/mcp-server-demo/main.py'. The UI elements of VS Code, including tabs and status bar, are visible.",
+        "code_content": "{\n  \"mcpServers\": {\n    \"Demo\": {\n      \"command\": \"uv\",\n      \"args\": [\n        \"run\",\n        \"--with\",\n        \"mcp[cli]\",\n        \"mcp\",\n        \"run\",\n        \"/Users/erictech/Desktop/mcp-server-demo/main.py\"\n      ]\n    }\n  }\n}",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "JSON configuration",
+          "VS Code",
+          "mcpServers",
+          "command line arguments",
+          "uv command",
+          "mcp[cli]",
+          "file path",
+          "script execution"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "configuring_claude_desktop_for_mcp",
+        "confidence": 0.95,
+        "reasoning": "This segment details the steps to navigate Claude Desktop's settings, access the developer options, and inspect the `configuration.json` file to verify the MCP server setup, including its command and arguments."
+      }
+    },
+    {
+      "segment_index": 6,
+      "timestamp": 333.16999999999996,
+      "audio_text": "MCPE server Tools. In this case, it doesn't. So here it just the style. So what we can do is we can either restart our clod desktop, or we can be also able to make some changes to the settings. So, right now, you can see that inside of settings, you can see the demo has failed. And here we can do is click on the edit configurations, and I'm just gonna open this again with vs code. So, back to vs code, we're just gonna replace the command UV with UVS absolute path. So, to get the absolute path, we're just going to open a terminal, and we're just going to say which UV, which will give us the absolute path for UV. We're just gonna copy this. Replace the with the command here here, back to call, we're just gonna restore Clawd and after we start is basically a prompt to Grant access for the desktop folder. So we're just gonna click on all to Grant access for a desktop folder here. And then after a cloud has started, you can see that we have a hammer here which is the one MCB tool. If it were to click on this you can see that is the add function that we just mentioned. So here we can be able to ask a question.",
+      "audio_start": 303.15,
+      "audio_end": 363.19,
+      "frame_path": "youtube/8rieuXTvBtM/frames/frame_0006.jpg",
+      "analysis": {
+        "visual_description": "The screen displays the VS Code integrated development environment. On the left sidebar, the file explorer shows the 'MCP-SERVER-DEMO' project with several files and folders, including '__pycache__', '.venv', '.gitignore', '.python-version', 'main.py' (highlighted), 'pyproject.toml', 'README.md', and 'uv.lock'. In the main panel, a terminal tab is active, displaying a prompt that includes '(base) -> mcp-server-demo git:(main) x' followed by the partially typed command 'which'. The editor tabs above the terminal show 'main.py' and 'claude_desktop_config.json', with the latter being the active tab. The status bar at the bottom indicates 'main*', 'Ln 4, Col 22 (4 selected)', 'Spaces: 2', 'UTF-8', 'LF', and 'JSON'.",
+        "code_content": "",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "VS Code",
+          "Terminal commands",
+          "File paths",
+          "Configuration files",
+          "Project structure",
+          "Virtual environments",
+          "which command"
+        ],
+        "is_code_readable": false
+      },
+      "concept_mapping": {
+        "concept_id": "configuring_claude_desktop_for_mcp",
+        "confidence": 0.95,
+        "reasoning": "The segment involves troubleshooting the Claude Desktop configuration by modifying the `configuration.json` to use the absolute path for `uv`, which is part of the configuration process."
+      }
+    },
+    {
+      "segment_index": 7,
+      "timestamp": 393.15999999999997,
+      "audio_text": "And I'm just going to say can you add one plus two from the mCP tool and you can see that it's basically calculating 1 plus 2. Using the mCP tool that we specify and here you can see it basically gave us a prompt to allow tool from demo and to do the calculation. So, basically what we can do is we're just going to say allele for this chat and then you can see that, it gives us the answer which in this case, one plus two is three, all right? So that's basically how you can be able to create your mCP server in your local machine and be able to use it include desktop, but I can also be able to add more things onto the main.py and here you can see inside of the main.py here. I have changed the name for the MTV server, call the AI to do list and the goal for this mCP is to basically have the to-do list functionality. And here, I basically have a in-memory storage for the to-do list, but you can always change this to be like your database or maybe your external apis, right? And here we have a couple MCB tools, right? So, these are the tools that we create and here you can see Fort MCB tools. We have",
+      "audio_start": 363.19,
+      "audio_end": 423.13,
+      "frame_path": "youtube/8rieuXTvBtM/frames/frame_0007.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a Visual Studio Code-like IDE, open to the 'main.py' file within an 'MCP-SERVER-DEMO' project. The file explorer on the left shows project files. The main editor pane highlights Python code defining an MCP server for an 'AI To-Do List'. The code initializes an empty 'todo_list' for in-memory storage and defines several functions decorated with '@mcp.tool()', including 'add_todo', 'list_todos', 'update_todo', 'delete_todo', and one with '@mcp.resource()' named 'get_latest_todo'. A mouse cursor hovers over line 7, 'todo_list = []'.",
+        "code_content": "from mcp.server.fastmcp import FastMCP\n\n# Create an MCP server for managing a simple in-memory to-do list\nmcp = FastMCP(\"AI To-Do List\")\n\n# In-memory storage for to-do items\ntodo_list = []\n\n@mcp.tool()\ndef add_todo(item: str) -> str:...\n@mcp.tool()\ndef list_todos() -> str:...\n@mcp.tool()\ndef update_todo(index: int, new_item: str) -> str:...\n@mcp.tool()\ndef delete_todo(index: int) -> str:...\n@mcp.resource(\"todos://latest\")\ndef get_latest_todo() -> str:...",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "MCP Server",
+          "FastMCP",
+          "AI To-Do List",
+          "In-memory storage",
+          "To-do list functionality",
+          "mcp.tool decorator",
+          "mcp.resource decorator",
+          "add_todo function",
+          "list_todos function",
+          "update_todo function",
+          "delete_todo function",
+          "get_latest_todo function"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "in_memory_storage_for_mcp",
+        "confidence": 0.9,
+        "secondary_concepts": [
+          "invoking_mcp_tools_from_claude"
+        ],
+        "reasoning": "After demonstrating tool invocation, the segment transitions to introducing a new to-do list server and explicitly shows and explains using a Python list (`todo_list = []`) for in-memory storage."
+      }
+    },
+    {
+      "segment_index": 8,
+      "timestamp": 453.1,
+      "audio_text": "God list, updates and deletes. And we also have resource here to list out the latest new item and then we also have the prompt which will basically generate the prompt to get the summary for the deduce. So here you can see for each functions. We will basically start with a decorator, which is in this case, is a MCV tool, or it's gonna be an mCP resource or a prompt. So, then inside of a function, you can see that first, we have our comments, and the comments contains three things one is what this function do then is going to be the inputs, right? What kind of inputs is going to be expecting? And then we also have the outputs for what kind of outputs this function is going to output, and then here's our code. Basically, we're trying to add the item onto the to-do list, and we're just gonna return a outputs that the item has been added and same thing for the list to do. Since we don't have any input. For this function, we're just gonna talk about what this function does and we also going to add a comments for the output of this function. And then there we all have updates and delete. And in terms of resource here, you can see that this is our path, basically. This is to do's and the path here is the latest, right? And we can also be able to",
+      "audio_start": 423.13,
+      "audio_end": 483.07,
+      "frame_path": "youtube/8rieuXTvBtM/frames/frame_0008.jpg",
+      "analysis": {
+        "visual_description": "The screen displays a VS Code-like integrated development environment (IDE) with a file explorer on the left and the `main.py` file open in the main editor. The file explorer shows `MCP-SERVER-DEMO` project files, with `main.py` highlighted. The code in `main.py` defines a `todo_list` and two Python functions: `add_todo` and `list_todos`. The `add_todo` function includes a detailed docstring explaining its purpose, arguments (item: str), and returns (str confirmation message). It also uses the `@mcp.tool()` decorator. The `list_todos` function is partially visible, also decorated with `@mcp.tool()`. The status bar at the bottom shows details like line 15, column 54, Python, and Prettier.",
+        "code_content": "# In-memory storage for to-do items\ntodo_list = []\n\n@mcp.tool()\ndef add_todo(item: str) -> str:\n    \"\"\"\n    Add a new to-do item to the in-memory list.\n\n    - Args:\n        item (str): The task to be added to the list.\n\n    Returns:\n        str: Confirmation message indicating the task was added.\n    \"\"\"\n    todo_list.append(item)\n    return f\"Added to-do: '{item}'\"\n\n@mcp.tool()\ndef list_todos() -> str:",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "Python functions",
+          "Docstrings",
+          "Decorators",
+          "Type hints",
+          "In-memory list",
+          "Function arguments",
+          "Function return values",
+          "f-strings"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "documenting_mcp_functions",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "mcp_decorators"
+        ],
+        "reasoning": "The segment provides a detailed explanation of how to add comments (docstrings) to MCP functions, specifying the function's purpose, expected inputs, and anticipated outputs for AI models to understand their usage."
+      }
+    },
+    {
+      "segment_index": 9,
+      "timestamp": 513.04,
+      "audio_text": "Specify Arguments. For example, I can also say like I want to have the ID and we can also pass the ID for the query parameter here. And we can specify, this is the string ID from the query parameter and then we also have prompt which basically returns a string and you can see that we have our comments for the function. And here you can see, we basically returns a prompt and this prompt basically summarizes the following to do list to do items. And basically, we passed the to-do list into the string. And then this problem will basically pass to the large language model here, which will basically summarize the to-do list. Now, of course, there's also other things that we can do, for example, we can go to add an image for example. Same thing for the MCB tool but we can also be able to return it an image for what the users looking for. For example, they want to create a thumbnail, they can be able to pass the image path and then we can be able to, for example, reshape the image change, the image or maybe edit the image for example, right? I like I mentioned you can also use mCP server for database integration. So, for example, here you can see the example uses sqlite and here, you can see",
+      "audio_start": 483.07,
+      "audio_end": 543.01,
+      "frame_path": "youtube/8rieuXTvBtM/frames/frame_0009.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a Visual Studio Code interface showing the `main.py` file within an 'MCP-SERVER-DEMO' project. The file explorer is visible on the left, highlighting `main.py`. The main editor window shows two Python functions: `get_latest_todo()` and `todo_summary_prompt()`. The `todo_summary_prompt` function's implementation, including its docstring and an f-string used for generating a summary prompt, is clearly visible. The cursor is positioned at the end of line 89 within the `todo_summary_prompt` function.",
+        "code_content": "def get_latest_todo() -> str:\"\"\"Get the most recently added to-do item.Returns:str: The latest task or a default message if list is empty.\"\"\"return todo_list[-1] if todo_list else \"No to-dos yet.\"@mcp.prompt()def todo_summary_prompt() -> str:\"\"\"Generate a prompt asking the AI to summarize the current to-do list.Returns:str: AI-ready prompt string, or a default message if list is empty.\"\"\"if not todo_list:return \"There are no to-do items.\"return f\"Summarize the following to-do-items: {', '.join(todo_list)}\"",
+        "slide_content": "",
+        "visual_audio_alignment": "somewhat_relevant",
+        "key_concepts": [
+          "Python functions",
+          "Docstrings",
+          "String formatting (f-strings)",
+          "Conditional expressions",
+          "List manipulation",
+          "AI prompt generation",
+          "Decorators"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "mcp_resource_paths_arguments",
+        "confidence": 0.85,
+        "secondary_concepts": [
+          "mcp_prompts",
+          "image_manipulation_with_mcp",
+          "database_integration_with_mcp"
+        ],
+        "reasoning": "The segment first discusses specifying arguments and query parameters for MCP resources, then briefly touches upon prompts, image manipulation, and database integration as other possibilities. The most detailed explanation is on resource arguments."
+      }
+    },
+    {
+      "segment_index": 10,
+      "timestamp": 572.98,
+      "audio_text": "See, we have the mCP which will in this case is it going to be a resource? And we're trying to get the schema for the database first. We're going to set the connection. We're going to now we're gonna get a schema and then once we get the schema is going to return the schema as an output and then we also have the mCP tool here which will basically create the data. So this is gonna be a SQL query, I believe. And basically, once we connect it, we're just gonna execute this, SQL query. And once we have the result, for the query is going to return the data back to the user. All right? So that's basically how you can be able to clear your mCP server and how you can use it and include that stop applications now to conclude everything. When you create your MCPE server, there are three Primitives that we need to watch out for when we creating our MCPE server. So the first one is props. These are props basically, a template prompts that we generate from the mCP server. And then we also have resources, which is equivalent to our get endpoints and these are basically gonna be follow contents, API responses, and such. And these are basically gonna be contextual data, which will be managed by the client application and they will sell tools which will",
+      "audio_start": 543.01,
+      "audio_end": 602.95,
+      "frame_path": "youtube/8rieuXTvBtM/frames/frame_0010.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a documentation page, possibly a README, titled 'MCP Primitives'. Below the title, text states, 'The MCP protocol defines three core primitives that servers can implement:'. A table with columns 'Primitive', 'Control', 'Description', and 'Example Use' lists three primitives: 'Prompts' (User-controlled, Interactive templates invoked by user choice, Slash commands, menu options), 'Resources' (Application-controlled, Contextual data managed by the client application, File contents, API responses), and 'Tools' (Model-controlled, Functions exposed to the LLM to take actions, API calls, data updates). A code snippet `asyncio.run(run())` is visible above the title. A mouse cursor is pointing near the table, and a drawing toolbar is visible on the right side.",
+        "code_content": "asyncio.run(run())",
+        "slide_content": "MCP Primitives\nThe MCP protocol defines three core primitives that servers can implement:\nPrimitive | Control | Description | Example Use\nPrompts | User-controlled | Interactive templates invoked by user choice | Slash commands, menu options\nResources | Application-controlled | Contextual data managed by the client application | File contents, API responses\nTools | Model-controlled | Functions exposed to the LLM to take actions | API calls, data updates",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "MCP Primitives",
+          "Prompts",
+          "Resources",
+          "Tools",
+          "User-controlled",
+          "Application-controlled",
+          "Model-controlled",
+          "API calls",
+          "API responses",
+          "LLM"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "mcp_server_primitives_summary",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "database_integration_with_mcp"
+        ],
+        "reasoning": "After briefly discussing database integration, the segment explicitly transitions to 'conclude everything' by summarizing the 'three Primitives' of MCP server creation: Prompts, Resources, and Tools."
+      }
+    },
+    {
+      "segment_index": 11,
+      "timestamp": 607.485,
+      "audio_text": " basically equivalent to function calls that are going to be used by large language models to take actions things like API calls or data updates and such",
+      "audio_start": 602.95,
+      "audio_end": 612.02,
+      "frame_path": "youtube/8rieuXTvBtM/frames/frame_0011.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a technical document or webpage with the title \"MCP Primitives\" and a table below it. The table outlines three primitives: Prompts, Resources, and Tools, detailing their control mechanism, description, and example use. The 'Tools' row, which is currently highlighted by a mouse cursor, describes 'Functions exposed to the LLM to take actions' with examples 'API calls, data updates'. Above the main content, a code snippet `asyncio.run(run())` is visible. A vertical toolbar is present on the right side of the screen.",
+        "code_content": "asyncio.run(run())",
+        "slide_content": "Title: MCP PrimitivesDescription: The MCP protocol defines three core primitives that servers can implement:Table:Primitive | Control | Description | Example UsePrompts | User-controlled | Interactive templates invoked by user choice | Slash commands, menu optionsResources | Application-controlled | Contextual data managed by the client application | File contents, API responsesTools | Model-controlled | Functions exposed to the LLM to take actions | API calls, data updates",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "MCP Primitives",
+          "Tools",
+          "Large Language Models (LLM)",
+          "API calls",
+          "Data updates",
+          "Function calls"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "mcp_server_primitives_summary",
+        "confidence": 0.95,
+        "reasoning": "This segment continues directly from the previous one, completing the definition of 'tools' as one of the three fundamental primitives of an MCP server, thereby concluding the summary."
+      }
+    }
+  ]
+}

@@ -1,0 +1,355 @@
+{
+  "metadata": {
+    "title": "SUDOKU",
+    "author": "Peter Norvig",
+    "source": "Markdown document",
+    "video_id": "",
+    "total_duration": 0,
+    "total_concepts": 25,
+    "extracted_at": "2025-12-12T15:52:57.790Z",
+    "source_file": "/home/danenberg/prg/workshops/learning/markdown/sudoku/sudoku.md"
+  },
+  "nodes": [
+    {
+      "id": "sudoku_puzzle_rules",
+      "name": "Sudoku Puzzle Rules",
+      "description": "Explains the fundamental rules of Sudoku: filling a 9x9 grid so that each column, row, and 3x3 box contains all digits from 1 to 9 exactly once, with no repeats.",
+      "prerequisites": [],
+      "difficulty": "basic",
+      "learning_objectives": [
+        "Understand the basic rules of Sudoku."
+      ]
+    },
+    {
+      "id": "sudoku_grid_components",
+      "name": "Sudoku Grid Components",
+      "description": "Defines the structural elements of a Sudoku grid including rows ('A'-'I'), columns ('1'-'9'), individual squares (e.g., 'A1'), 3x3 boxes, units (any row, column, or box), and peers (squares that share any unit). Explains how these components are named and represented.",
+      "prerequisites": [
+        "sudoku_puzzle_rules"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "digit_and_digit_set_representation",
+      "name": "Digit and Digit Set Representation",
+      "description": "Explains how individual digits ('1'-'9') are represented as single-character strings and how multiple possible digits for a square are represented as a string of characters (e.g., '123' for 1, 2, or 3).",
+      "prerequisites": [
+        "python_strings",
+        "sudoku_puzzle_rules"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "grid_data_structure",
+      "name": "Grid Data Structure",
+      "description": "Details the primary data structure for representing a Sudoku grid: a Python dictionary where keys are Square identifiers (e.g., 'A1') and values are DigitSet strings, indicating the possible digits for that square. An empty square starts with all 9 digits, and a filled square has a single digit.",
+      "prerequisites": [
+        "python_dictionaries",
+        "sudoku_grid_components",
+        "digit_and_digit_set_representation"
+      ],
+      "difficulty": "basic",
+      "learning_objectives": [
+        "Understand how to represent a Sudoku grid in Python using a dictionary."
+      ],
+      "common_misconceptions": [
+        "Thinking of digits as integers for arithmetic, when only uniqueness matters.",
+        "Not using a copy for modifications, leading to unexpected side effects."
+      ]
+    },
+    {
+      "id": "utility_cross_product",
+      "name": "Utility: Cross Product Function",
+      "description": "Teaches the cross(A, B) utility function, which computes the Cartesian product of characters in string A and string B, generating combined strings. This is used to programmatically create all Square identifiers and define all_boxes and all_units lists.",
+      "prerequisites": [
+        "python_functions",
+        "python_list_comprehensions",
+        "python_strings"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "def cross(A, B) -> tuple: return tuple(a + b for a in A for b in B)"
+      ]
+    },
+    {
+      "id": "sudoku_solution_validation",
+      "name": "Sudoku Solution Validation",
+      "description": "Explains the criteria and provides the is_solution Python function to verify if a proposed Grid state is a valid and complete solution to a given Sudoku puzzle. It checks if all units contain unique digits 1-9 and if initial puzzle constraints are maintained.",
+      "prerequisites": [
+        "sudoku_puzzle_rules",
+        "grid_data_structure",
+        "sudoku_grid_components"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def is_solution(solution: Grid, puzzle: Grid) -> bool: # ... function body ..."
+      ],
+      "learning_objectives": [
+        "Verify the correctness of a Sudoku solution programmatically."
+      ]
+    },
+    {
+      "id": "constraint_propagation_concept",
+      "name": "Constraint Propagation",
+      "description": "Introduces the general algorithmic strategy of constraint propagation, where deductions from known constraints are repeatedly applied to reduce the set of possible values for variables, thereby narrowing down the search space.",
+      "prerequisites": [
+        "sudoku_puzzle_rules",
+        "grid_data_structure"
+      ],
+      "difficulty": "intermediate",
+      "learning_objectives": [
+        "Explain the concept of constraint propagation and its role in problem-solving."
+      ]
+    },
+    {
+      "id": "elimination_strategy",
+      "name": "Elimination Strategy (Rule 1)",
+      "description": "One of the two core constraint propagation strategies: If a square is definitively filled with a single digit, then that digit must be removed as a possibility from all of that square's peer squares.",
+      "prerequisites": [
+        "constraint_propagation_concept",
+        "sudoku_grid_components"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "filling_strategy",
+      "name": "Filling Strategy (Rule 2)",
+      "description": "The second core constraint propagation strategy: If a particular digit can only be placed in one specific square within an entire unit (row, column, or box), then that square must be filled with that digit.",
+      "prerequisites": [
+        "constraint_propagation_concept",
+        "sudoku_grid_components"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "contradiction_handling",
+      "name": "Contradiction Handling",
+      "description": "The mechanism by which the algorithm detects and signals an impossible Sudoku state (e.g., a square having no possible digits, or a unit having no valid place for a required digit) by returning None. This is crucial for pruning incorrect search paths.",
+      "prerequisites": [
+        "python_none",
+        "constraint_propagation_concept"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "eliminate_function_implementation",
+      "name": "Implement eliminate function",
+      "description": "Details the Python implementation of the eliminate(grid, s, d) function. This function removes a digit d from the DigitSet of square s, and then recursively triggers further constraint propagation (both elimination and filling strategies) based on the consequences of this removal. It returns None if a contradiction is found.",
+      "prerequisites": [
+        "python_functions",
+        "grid_data_structure",
+        "elimination_strategy",
+        "filling_strategy",
+        "contradiction_handling"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def eliminate(grid: Grid, s: Square, d: Digit) -> Optional[Grid]: # ... function body ..."
+      ],
+      "learning_objectives": [
+        "Implement the elimination strategy in code, handling recursive propagation."
+      ]
+    },
+    {
+      "id": "fill_function_implementation",
+      "name": "Implement fill function",
+      "description": "Explains the Python implementation of the fill(grid, s, d) function. This function effectively 'fills' a square s with digit d by eliminating all other digits from s's DigitSet. It uses the eliminate function as its core operation and also returns None on contradiction.",
+      "prerequisites": [
+        "python_functions",
+        "grid_data_structure",
+        "eliminate_function_implementation",
+        "contradiction_handling"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def fill(grid: Grid, s: Square, d: Digit) -> Optional[Grid]: # ... function body ..."
+      ],
+      "learning_objectives": [
+        "Implement the filling strategy by leveraging the elimination function."
+      ]
+    },
+    {
+      "id": "constrain_function",
+      "name": "Implement constrain function",
+      "description": "Describes the constrain(grid) function, which orchestrates the initial round of constraint propagation. It takes an initial puzzle grid, creates a working copy, and iteratively applies the fill function for all pre-filled squares to propagate their constraints throughout the grid.",
+      "prerequisites": [
+        "python_functions",
+        "grid_data_structure",
+        "fill_function_implementation"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def constrain(grid) -> Grid: # ... function body ..."
+      ]
+    },
+    {
+      "id": "picture_string_format",
+      "name": "Picture String Format",
+      "description": "Defines the text-based string format used for inputting Sudoku puzzles and displaying solutions. It specifies conventions for filled squares (single digit), blank squares (period), and uncertain squares (DigitSet in braces), along with optional formatting characters.",
+      "prerequisites": [
+        "grid_data_structure"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "parse_function",
+      "name": "Implement parse function",
+      "description": "Teaches the parse(picture) function, which converts a human-readable Picture string representation of a Sudoku puzzle into the internal Grid dictionary data structure. It uses regular expressions to extract square values.",
+      "prerequisites": [
+        "python_functions",
+        "python_regular_expressions",
+        "picture_string_format",
+        "grid_data_structure"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def parse(picture) -> Grid: # ... function body ..."
+      ]
+    },
+    {
+      "id": "output_picture_function",
+      "name": "Implement picture function",
+      "description": "Describes the picture(grid) function, which converts the internal Grid dictionary representation of a Sudoku puzzle or solution back into a formatted, human-readable Picture string, including visual separators for 3x3 boxes.",
+      "prerequisites": [
+        "python_functions",
+        "picture_string_format",
+        "grid_data_structure"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def picture(grid) -> Picture: # ... function body ..."
+      ]
+    },
+    {
+      "id": "search_strategy_concept",
+      "name": "Search Strategy",
+      "description": "Introduces the necessity of a systematic search algorithm for solving Sudoku puzzles that cannot be fully resolved by constraint propagation alone. It highlights the general idea of exploring possibilities.",
+      "prerequisites": [
+        "constraint_propagation_concept",
+        "constrain_function"
+      ],
+      "difficulty": "intermediate",
+      "learning_objectives": [
+        "Understand why a search strategy is needed in addition to constraint propagation."
+      ]
+    },
+    {
+      "id": "brute_force_search_limitations",
+      "name": "Brute Force Search Limitations",
+      "description": "Illustrates the extreme inefficiency and computational impracticality of a naive brute-force search for Sudoku puzzles, emphasizing why such a straightforward approach is not viable due to the immense search space.",
+      "prerequisites": [
+        "search_strategy_concept"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "interleaving_propagation_and_search",
+      "name": "Interleaving Constraint Propagation and Search",
+      "description": "Presents a crucial optimization strategy: combining constraint propagation with a search algorithm. After each 'guess' made by the search, constraint propagation is immediately applied to prune the search tree significantly by identifying and discarding impossible states early.",
+      "prerequisites": [
+        "constraint_propagation_concept",
+        "search_strategy_concept",
+        "eliminate_function_implementation",
+        "fill_function_implementation"
+      ],
+      "difficulty": "advanced",
+      "learning_objectives": [
+        "Explain the benefits of interleaving constraint propagation and search."
+      ]
+    },
+    {
+      "id": "depth_first_search_implementation",
+      "name": "Implement Depth-First Search (DFS)",
+      "description": "Teaches the Python implementation of a depth-first search algorithm in the search(grid) function. It recursively explores possible digit assignments for unsolved squares, using fill to apply constraint propagation after each assignment, and backtracks if a contradiction is encountered.",
+      "prerequisites": [
+        "python_recursion",
+        "interleaving_propagation_and_search",
+        "fill_function_implementation",
+        "contradiction_handling",
+        "grid_copying_for_search_branches"
+      ],
+      "difficulty": "advanced",
+      "code_examples": [
+        "def search(grid) -> Grid: # ... function body ..."
+      ],
+      "learning_objectives": [
+        "Implement a depth-first search algorithm for solving Sudoku puzzles."
+      ],
+      "common_misconceptions": [
+        "Forgetting to make a copy of the grid, leading to unintended modifications across search branches."
+      ]
+    },
+    {
+      "id": "variable_ordering_heuristic",
+      "name": "Variable Ordering Heuristic (Minimum Remaining Values)",
+      "description": "Explains the 'minimum remaining values' heuristic for variable ordering in search algorithms. This strategy involves choosing the next square to guess a digit for from those with the fewest possible remaining values, which increases the likelihood of an early contradiction and faster pruning of the search tree.",
+      "prerequisites": [
+        "depth_first_search_implementation",
+        "search_strategy_concept"
+      ],
+      "difficulty": "advanced",
+      "learning_objectives": [
+        "Apply the Minimum Remaining Values heuristic to optimize search performance."
+      ]
+    },
+    {
+      "id": "grid_copying_for_search_branches",
+      "name": "Grid Copying for Search Branches",
+      "description": "Emphasizes the critical importance of creating a distinct copy of the Grid object (grid.copy()) at each branching point within the recursive search function. This ensures that modifications made by constraint propagation in one search path do not affect other independent branches, enabling correct backtracking.",
+      "prerequisites": [
+        "python_object_copying",
+        "depth_first_search_implementation"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "program_verification_unit_testing",
+      "name": "Program Verification: Unit Testing",
+      "description": "Demonstrates the practice and importance of unit testing for verifying the correctness of individual functions or components of the Sudoku solver. The unit_tests function provides examples of assertions for core data structures and calculations.",
+      "prerequisites": [
+        "python_assertions",
+        "python_functions"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "def unit_tests(): # ... function body ..."
+      ],
+      "learning_objectives": [
+        "Understand how to write basic unit tests for program components."
+      ]
+    },
+    {
+      "id": "performance_measurement_python",
+      "name": "Performance Measurement with %time",
+      "description": "Introduces how to measure the execution time of Python code using IPython's %time magic command. This is used to evaluate the efficiency of the Sudoku solver and its components, providing insight into algorithm performance.",
+      "prerequisites": [
+        "basic_python_execution"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "%time solve_puzzles(grids10k, verbose=False)"
+      ],
+      "learning_objectives": [
+        "Measure the execution time of Python code."
+      ]
+    },
+    {
+      "id": "data_structure_design_tradeoffs",
+      "name": "Data Structure Design Trade-offs",
+      "description": "A pedagogical discussion on the various alternative data structure choices for representing digits, digit sets, and the overall Sudoku grid. It covers the trade-offs between clarity, debugging ease, memory efficiency, and execution speed, explaining the reasoning behind the chosen implementations.",
+      "prerequisites": [
+        "grid_data_structure",
+        "digit_and_digit_set_representation",
+        "python_data_structures"
+      ],
+      "difficulty": "advanced",
+      "learning_objectives": [
+        "Analyze the trade-offs involved in selecting appropriate data structures for a problem."
+      ],
+      "common_misconceptions": [
+        "Always prioritizing performance over readability and ease of debugging.",
+        "Not considering the impact of data structure choice on copying behavior (shallow vs. deep copy)."
+      ]
+    }
+  ]
+}

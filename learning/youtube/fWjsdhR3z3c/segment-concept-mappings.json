@@ -1,0 +1,455 @@
+{
+  "video_id": "fWjsdhR3z3c",
+  "total_segments": 14,
+  "mapped_at": "2025-12-12T12:00:03.457Z",
+  "segments": [
+    {
+      "segment_index": 0,
+      "timestamp": 29.97,
+      "audio_text": "What is Up Guys? In this video, I'm going to be showing you how you can get started with python in less than 10 minutes. And I'm going to be using python 3.8 for this along with pycharm. As my code editor, you can just search these on Google and they will pop up immediately. They are free and open source so definitely do. Check those out. Otherwise, let's get started immediately with the first thing you should know in Python, and that is how to assign values to variables. So to create a variable, all you have to do is decide on a name such as item and then you can just assign it a value. This is a string and a string is just any form of text for the program to read. And you also need to keep in mind that python is a case sensitive language which means item with a small I and item with a big I are going to mean absolutely different things and also a naming convention in Python is to add an underscore every time you have more than one word. So if we say item name, you want to add",
+      "audio_start": 0,
+      "audio_end": 59.94,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0000.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a PyCharm IDE with a Python file named 'main.py' open. The file shows a single line of code partially typed: 'item ='. The overall IDE theme is dark. The project explorer is visible on the left, and a status bar at the bottom indicates 'Expression expected' and file details like 'UTF-8', '4 spaces', and 'Python 3.8'.",
+        "code_content": "item =",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "Variables",
+          "Assignment operator",
+          "Python",
+          "PyCharm"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "variables_and_assignment",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "strings",
+          "case_sensitivity",
+          "naming_conventions"
+        ],
+        "reasoning": "The segment explicitly introduces how to assign values to variables, using 'item ='. It also discusses strings, case sensitivity, and naming conventions in the context of variables."
+      }
+    },
+    {
+      "segment_index": 1,
+      "timestamp": 67.955,
+      "audio_text": " this underscore over here and we can just say orange. So now we have a few strings assigned to three different variables. Let's go ahead and print first. The difference between item and item just to show you that there is a difference. So we'll go ahead and click on run.",
+      "audio_start": 59.94,
+      "audio_end": 75.97,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0001.jpg",
+      "analysis": {
+        "visual_description": "An IDE (likely PyCharm) displaying Python code. The file 'main.py' is open, showing variable assignments on lines 1-3 for 'item', 'Item', and 'item_name' with string values 'Banana', 'Apple', and 'Orange' respectively. Line 5 shows an empty 'print()' function with the cursor blinking inside the parentheses, indicating an upcoming input. The overall interface is dark-themed, showing typical IDE elements like project explorer and run configurations.",
+        "code_content": "item = 'Banana'\nItem = 'Apple'\nitem_name = 'Orange'\nprint()",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "Variable assignment",
+          "String literals",
+          "Case sensitivity",
+          "print() function"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "case_sensitivity",
+        "confidence": 0.9,
+        "secondary_concepts": [
+          "print_function",
+          "variables_and_assignment"
+        ],
+        "reasoning": "The segment explicitly prints 'item' and 'Item' to demonstrate that Python treats them as different entities, directly illustrating case sensitivity. It also uses the print function."
+      }
+    },
+    {
+      "segment_index": 2,
+      "timestamp": 106.15,
+      "audio_text": "And you'll notice it will say banana and apple. Now, let's go ahead and print another string, which this time is going to be hello. And we're going to add a plus and the item name. So, as you can see, we can actually combine text. And when we print that it's going to say hello orange. Next, we have data types. So the first one is the integer, which is just any number, and you're going to notice it being written in blue. Then we have strings, which, as I showed you earlier is just any text inside. Quotation marks, then we have booleans, which is just a simple true or false. So as you can see, we can just type in false here or true here and that's all that it is just says true or false. And the final one, you should know for getting started is list which all you have to do is create a pair of angle, brackets and insert, the values you want inside here and it can be a mixture between numbers boolean's and so on, but for this example we'll just keep it simple and write a few strings. Then if we go ahead and print these",
+      "audio_start": 75.97,
+      "audio_end": 136.33,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0002.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a dark-themed IDE, likely PyCharm, showing a Python file named 'main.py'. Two lines of Python code are visible: 'integer = 2021' on line 1 and 'word = 'text'' on line 2. The code is centered on the screen, and the sidebar and bottom panel of the IDE are also visible.",
+        "code_content": "integer = 2021\nword = 'text'",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "data types",
+          "integer",
+          "string",
+          "variable assignment"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "lists",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "integers",
+          "strings",
+          "booleans"
+        ],
+        "reasoning": "The segment introduces several data types including integers, strings, booleans, but focuses extensively on defining and explaining lists ('angle brackets and insert the values')."
+      }
+    },
+    {
+      "segment_index": 3,
+      "timestamp": 166.31,
+      "audio_text": "You're going to notice that we will get 2021, text false, and the list. But let's move on to an example that we want to print these values combined. So let's say name is Mario. The string number is going to equal 22, so you're going to notice 2021 is a blue number. And this one is green because this is considered text while this is considered an integer. So, what we need to do is actually convert them into the correct types before combining them. So to do that, we can just go ahead and type in print name plus the string value of integer. So it's going to convert the integer to a string, so that we can combine these two texts together, if we remove that, and only write integer, you're going to notice. We are going to get an exception that says we cannot do that. And the same thing goes for the string. Number pretend, we want to add the value of 10 to the string. Number editor will be nice enough to tell you, you shouldn't do that and we should just put some parentheses there and type in in a head of that so we can convert it to an integer and add it easily.",
+      "audio_start": 136.33,
+      "audio_end": 196.29,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0003.jpg",
+      "analysis": {
+        "visual_description": "The screen displays a PyCharm IDE with a Python file 'main.py' open. The code editor shows the line 'integer = 2021' and a partially typed 'print(na)' statement, with an autocomplete suggestion 'name' highlighted for the 'print' function's argument. A detailed tooltip for the 'print' function's parameters is also visible. Below the editor, the console output from a previous run is shown, displaying '2021', 'text', 'False', and the list \"['Luigi', 'Mario', 'Toad']\", followed by 'Process finished with exit code 0'.",
+        "code_content": "integer = 2021\nprint(na)\n# Console Output:\n# 2021\n# text\n# False\n# ['Luigi', 'Mario', 'Toad']",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "Python programming",
+          "PyCharm IDE",
+          "variables",
+          "integers",
+          "strings",
+          "lists",
+          "boolean",
+          "print function",
+          "console output",
+          "type conversion",
+          "string concatenation",
+          "autocomplete"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "data_type_conversion",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "string_concatenation",
+          "exceptions"
+        ],
+        "reasoning": "The core of this segment is about combining a string and an integer, explaining why direct combination fails and demonstrating how to convert an integer to a string using `str()` and a string to an integer using `int()` for operations."
+      }
+    },
+    {
+      "segment_index": 4,
+      "timestamp": 226.625,
+      "audio_text": "Next, let's move on to math. So we will create two variables, one will be 10, and 1 will be 5 and to do math in Python. It's very self-explanatory. As you can see to do addition, you just need to add a plus symbol for the difference. You just add a minus symbol to multiply you. Add an asterisk to divide you add a slash. And if you want the exponential power, just add to Asterix. And you'll notice that if we print all of these, you're going to get a very quick calculator. So of course, 10 plus 5 is 15, a minus B is going to be 5 and so on you'll get the value that correspond to those operators. Okay? Next let's go ahead and create a logic statement so we're going to use these two values so he's happy is False. Age is 28. Let's pretend we want something to happen. If the age is more than 21, we'll say print you are old, and if they are not old, we can also type in l if the H is equal to 18.",
+      "audio_start": 196.29,
+      "audio_end": 256.96,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0004.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a dark-themed integrated development environment (IDE), likely PyCharm, showing a Python file named 'main.py'. The upper section contains a code editor with Python code defining two variables, 'a' and 'b', assigned values 10 and 5 respectively. Below these, five variables ('addition', 'difference', 'multiply', 'divide', 'power') are calculated using basic arithmetic operators on 'a' and 'b'. Following the calculations, there are five print statements to output the values of these result variables. The lower section of the IDE shows the 'Run' console, displaying the output of the executed Python code, which includes the results of the arithmetic operations (15, 5, 50, 2.0, 100000) and a 'Process finished with exit code 0' message.",
+        "code_content": "a = 10\nb = 5\n\naddition = a + b\ndifference = a - b\nmultiply = a * b\ndivide = a/b\npower = a**b\n\nprint(addition)\nprint(difference)\nprint(multiply)\nprint(divide)\nprint(power)",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "variables",
+          "arithmetic operators",
+          "addition",
+          "subtraction",
+          "multiplication",
+          "division",
+          "exponentiation",
+          "print function",
+          "code execution",
+          "output"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "arithmetic_operators",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "variables_and_assignment"
+        ],
+        "reasoning": "The segment begins by defining variables and then systematically goes through addition, subtraction, multiplication, division, and exponentiation using corresponding operators."
+      }
+    },
+    {
+      "segment_index": 5,
+      "timestamp": 287.17499999999995,
+      "audio_text": "Them, you are getting old and if it's neither of those we can go ahead and say you are still young and the same thing goes with the is Happy statement. So if we type in, if the person is happy we can write. You are happy else. They are probably not happy. So we will just write, you are not happy and when we play it it's going to say they are not happy because it's happy is false. And if we set this to true it's going to change to. You are happy. So the if statement just takes into account, whether a statement is true or false and depending on that, it's going to give the outcome of the values. And the if else statement is going to probably be your most used logic. Next, let's move on to the for Loop. So for I in range of three, which means it's going to Loop over three values. We want to print, hello? And we can add a comma here and the value of I. So if we print this, you're going to notice, it's going to say hello zero. Hello.",
+      "audio_start": 256.96,
+      "audio_end": 317.39,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0005.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a PyCharm IDE with a Python script in a dark theme. The script defines two variables, 'age' and 'isHappy', and includes an if-else statement that prints a message based on the boolean value of 'isHappy'. Below the code, the run console output 'You are happy!' is visible, confirming the execution of the code where 'isHappy' is set to 'True'.",
+        "code_content": "age = 10\nisHappy = True\n\nif isHappy:\n    print('You are happy!')\nelse:\n    print('You are not happy!')",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "Variables",
+          "Boolean values",
+          "If-else statement",
+          "Conditional logic",
+          "Print function"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "conditional_statements",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "booleans",
+          "comparison_operators"
+        ],
+        "reasoning": "The segment provides examples of `if`, `elif`, and `else` statements, explaining how they control program flow based on conditions like age and a boolean variable 'isHappy'. It then transitions to for loops."
+      }
+    },
+    {
+      "segment_index": 6,
+      "timestamp": 327.53499999999997,
+      "audio_text": " One. Hello two because in programming the index always starts at 0. So if you actually want that to start at 1 you're going to have to manually, add one to I. So now you get hello one hello two. Hello three. And also just so you know what ranges we can go down here and we can go ahead and type in print range of three",
+      "audio_start": 317.39,
+      "audio_end": 337.68,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0006.jpg",
+      "analysis": {
+        "visual_description": "The screen displays a PyCharm IDE with Python code in the 'main.py' file. The code snippet shows a 'for' loop iterating through a range of 3, printing 'Hello' concatenated with the loop variable 'i' plus one. Below the code, the console output is visible, showing 'Hello 1', 'Hello 2', and 'Hello 3', followed by 'Process finished with exit code 0'. The IDE's project structure, navigation, and status bar are also visible.",
+        "code_content": "for i in range(3):\n    print('Hello', i + 1)\n\nHello 1\nHello 2\nHello 3\nProcess finished with exit code 0",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "for loop",
+          "range() function",
+          "print() function",
+          "iteration index",
+          "console output"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "zero_based_indexing",
+        "confidence": 0.9,
+        "secondary_concepts": [
+          "for_loop",
+          "range_function"
+        ],
+        "reasoning": "The segment explains why a `for` loop using `range(3)` prints 0, 1, 2, and then demonstrates adding 1 to `i` to get output starting from 1, directly addressing zero-based indexing."
+      }
+    },
+    {
+      "segment_index": 7,
+      "timestamp": 367.90999999999997,
+      "audio_text": "So you're going to notice, it's going to create a range object which is going to have the values from 0 to 3. So this can iterate three times over that but you should also know that this works for lists so we can create a name list how we can type in four name in name list we can print the name next we have a while loop so we're just going to type in I equal 0 and while I is less than 5 we're going to increment the value of I by 1 each time, it goes in this Loop and finally we want to print the value of I. So what you should get a 5 values printed out just like this. Because as soon as this statement becomes false, it's going to exit out of this Loop and just terminate the program. But a recent to use this is because you can create an infinite Loop such as wild true and that's never going to be false and inside here, we're going to type in user input and that's going to equal an input that says and something and if the user input is",
+      "audio_start": 337.68,
+      "audio_end": 398.14,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0007.jpg",
+      "analysis": {
+        "visual_description": "The frame shows a PyCharm IDE with a Python file `main.py` open. In the main editor pane, a `while` loop is partially visible. Below the editor, a run console is displayed showing output from a previous execution, which includes a list of names ('Luigi', 'Mario', 'Toad') followed by 'Process finished with exit code 0'. The current code being typed is `i = 0`, `while i < 5:`, and `i = i + 1`.",
+        "code_content": "i = 0\nwhile i < 5:\n    i = i + 1",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "while loop",
+          "iteration",
+          "variable initialization",
+          "incrementing",
+          "lists"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "while_loop",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "loop_increment_decrement",
+          "for_loop",
+          "input_function"
+        ],
+        "reasoning": "The segment explicitly introduces and demonstrates a `while` loop, explaining its condition (`while i < 5`) and the need for incrementing `i`. It then transitions to 'infinite loops' and 'input' using `while True`."
+      }
+    },
+    {
+      "segment_index": 8,
+      "timestamp": 401.595,
+      "audio_text": " Equal to the string of 0, then we're going to print. We are done here and we are going to break",
+      "audio_start": 398.14,
+      "audio_end": 405.05,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0008.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a PyCharm IDE showing a Python script named 'main.py'. The code visible includes a 'while True' loop, an 'input' function assigned to 'user_input', an 'if' statement checking if 'user_input' equals the string '0', and an incomplete 'print' statement: 'print('We are |')'. Below the code editor, a run console shows file paths and the message 'Process finished with exit code 0'. The overall IDE layout with project files, editor, and console is visible.",
+        "code_content": "while True:\n    user_input = input('Enter something >> ')\n    if user_input == '0':\n        print('We are |')",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "while True loop",
+          "input() function",
+          "if statement",
+          "string comparison",
+          "print() function"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "break_statement",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "infinite_loops",
+          "input_function",
+          "conditional_statements"
+        ],
+        "reasoning": "This segment shows an `infinite_loop` using `while True` and then introduces an `if` condition to `break` out of the loop when '0' is entered, focusing on the `break` keyword's function."
+      }
+    },
+    {
+      "segment_index": 9,
+      "timestamp": 435.265,
+      "audio_text": "And what break does is just cancel the loop, which means, if we type in zero, this Loop is no longer going to be valid and it's going to exit out of the program. Otherwise it's going to Loop forever. And if we actually play the program, you're going to notice that. Finally we can add some inputs so we can type in 10. We can do two, we can type in whatever that is but as soon as we type in 0, it's going to exit the loop because it will reach this brake statement and the program will finish moving on to functions to create a function. All you have to do is use the dev keyword and just name the function. However, you like, of course, I'm going to use the underscore naming convention, and this function is only going to be used to say hello to the user. So here we can go ahead and type in print, hey, there. And we're going to insert the name. So you might be wondering what I've functions and what do we use functions for? Well, functions are just used to reuse your code in many different instances because the main point of programming is to reuse your code as much",
+      "audio_start": 405.05,
+      "audio_end": 465.48,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0009.jpg",
+      "analysis": {
+        "visual_description": "The screen displays the PyCharm IDE. The upper pane is an empty `main.py` file editor with a blinking cursor. The lower pane, labeled 'Run', shows the console output of a Python program's execution. It prompts the user with 'Enter something >>' multiple times, receiving inputs like '10', '02', 'jbasdelas', and '0'. After the input '0', the program prints 'We are done here.' and 'Process finished with exit code 0'. The project is named 'learn_python_5'.",
+        "code_content": "",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "Program execution",
+          "User input",
+          "Loop termination",
+          "Break statement",
+          "Console output"
+        ],
+        "is_code_readable": false
+      },
+      "concept_mapping": {
+        "concept_id": "function_definition",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "function_parameters",
+          "code_reusability",
+          "naming_conventions"
+        ],
+        "reasoning": "The segment starts by explaining how to create a function using the 'def' keyword, naming it, and adding parameters. It explicitly states, 'To create a function all you have to do is use the dev keyword'."
+      }
+    },
+    {
+      "segment_index": 10,
+      "timestamp": 495.48,
+      "audio_text": "As possible, you want to maximize how often you can reuse the same line of code without having to rewrite it. So for example, now we created a function that says hello, we can type in Mario and we can also use it again and we can type in Luigi. And when we run the program, it will say, hey there Mario. And hey, there Luigi, instead of writing this statement twice, we were able to just use one function to do it multiple times and one thing we should cover. Also on functions is pretend, you have a lot of functions. You need to create such as get internet and Run game something such as that, and you don't really have the logic for it yet. So you're going to notice that these are empty. If you run the program, you're going to get an era but python has created this keyword. That is called pass. Which is essentially just says, there's nothing in here, we accept that and your program is still going to be able to run regardless of having no content inside the function. Now, when we tap on run, you're going to notice, there are going to be no errors",
+      "audio_start": 465.48,
+      "audio_end": 525.48,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0010.jpg",
+      "analysis": {
+        "visual_description": "The frame displays the PyCharm IDE in a dark theme. The `main.py` file is open and visible. In the main editor window, a Python function definition `def ge` is partially typed on line 2, with an autocompletion suggestion for `__getattr__(name)` appearing below it, labeled as 'predefined'. The console at the bottom shows the output of a previous successful run: 'Process finished with exit code 0'. The status bar at the very bottom indicates multiple syntax errors, including \"expected. Identifier expected. Indent expected.\".",
+        "code_content": "def ge\n__getattr__(name)",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "function definition",
+          "Python syntax",
+          "IDE autocompletion",
+          "runtime errors"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "pass_statement",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "function_definition",
+          "code_reusability"
+        ],
+        "reasoning": "The segment introduces the `pass` keyword specifically for creating function blueprints without logic, explaining that it prevents errors when a function body is empty."
+      }
+    },
+    {
+      "segment_index": 11,
+      "timestamp": 539.7049999999999,
+      "audio_text": " Because the program's going to understand that we provided the keyword pass, which just tells it, that there's nothing there and it accepts it. But this is very good for creating the blueprints later in case you need to write everything your program should do. But don't really know how to do that yet. Just insert the word pass and it will save you a lot of trouble. And finally, we're going to go over how we can use the try and except block. So for here, we're going to create an input, and it's going to say, please provide",
+      "audio_start": 525.48,
+      "audio_end": 553.93,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0011.jpg",
+      "analysis": {
+        "visual_description": "The screen displays a PyCharm IDE with the 'main.py' file open. The code editor shows two Python function definitions: 'def get_internet():' and 'def run_game():', both containing the 'pass' keyword. The cursor is on the 'pass' keyword within the 'run_game()' function. Below the code editor, a run console is visible, displaying 'Process finished with exit code 0'.",
+        "code_content": "def get_internet():\n    pass\n\ndef run_game():\n    pass",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "pass keyword",
+          "function definition",
+          "code structure",
+          "PyCharm IDE"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "pass_statement",
+        "confidence": 0.9,
+        "secondary_concepts": [
+          "error_handling",
+          "input_function"
+        ],
+        "reasoning": "The segment continues to explain the utility of the `pass` statement for placeholders and then transitions to error handling, introducing `try` and `except` blocks for user input."
+      }
+    },
+    {
+      "segment_index": 12,
+      "timestamp": 584.02,
+      "audio_text": "A number. So now we're going to go ahead and type in try and we're going to try to print the Value. Plus, the integer of the number that we get from the user, and if that doesn't work, we're going to print that that is not a valid number. So the way it works, is it tries to execute the code that's inside here. And if anything goes wrong, if an exception occurs, it's going to go to the except block and it's going to execute. Whatever is inside that. Of course, if you write something that throws an exception inside here, you need to try with another try and except block. But if we go ahead and run the program, now we can write something like 10 and it's going to add 10 to the value. But of course, what if we write something such as Mario? Try adding Mario to 10 and the program is not going to be happy because you cannot convert Mario to an integer and then add it to 10. So it's going to say you shouldn't do that but don't worry because we have the exception covered and our program will say that is not a valid number.",
+      "audio_start": 553.93,
+      "audio_end": 614.11,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0012.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a PyCharm IDE showing a Python script named 'main.py'. The code implements a 'try-except' block. The 'try' block attempts to convert user input to an integer and add it to 10, then print the result. The 'except' block prints 'That is not a valid number!' if an error occurs during the conversion. Below the code editor, the 'Run' console is visible, displaying 'Process finished with exit code 0'. A mouse cursor hovers over the 'is' keyword in the 'except' block's print statement.",
+        "code_content": "number = input('Please provide a number >> ')\n\ntry:\n    print(10 + int(number))\nexcept:\n    print('That is not a valid number!')",
+        "slide_content": "",
+        "visual_audio_alignment": "highly_relevant",
+        "key_concepts": [
+          "try-except block",
+          "exception handling",
+          "input() function",
+          "int() function",
+          "type conversion",
+          "print() function"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "error_handling",
+        "confidence": 0.95,
+        "secondary_concepts": [
+          "exceptions",
+          "data_type_conversion",
+          "input_function"
+        ],
+        "reasoning": "The segment demonstrates a `try` and `except` block to gracefully handle `ValueError` when a user enters non-numeric input for an `int()` conversion, preventing the program from crashing."
+      }
+    },
+    {
+      "segment_index": 13,
+      "timestamp": 622.005,
+      "audio_text": " And not throwing exception. But anyway, I really hope that helped you to get started with python. Of course, there's a lot more to cover. This was just meant as a very quick guide for helping you to get started. And with that being said, have a wonderful day and I'll see you guys in the next video.",
+      "audio_start": 614.11,
+      "audio_end": 629.9,
+      "frame_path": "youtube/fWjsdhR3z3c/frames/frame_0013.jpg",
+      "analysis": {
+        "visual_description": "The frame displays a PyCharm IDE with a Python script named 'main.py' open. The script shows a 'try-except' block. The 'try' block attempts to convert user input to an integer and add 10 to it, then print the result. The 'except' block catches potential errors and prints 'That is not a valid number!'. Below the code editor, the console output shows the program prompting 'Please provide a number >>', followed by user input 'Mario', and then the error message 'That is not a valid number!' from the 'except' block, and finally 'Process finished with exit code 0'. The editor and console are clearly visible.",
+        "code_content": "number = input('Please provide a number >> ')\ntry:\n    print(10 + int(number))\nexcept:\n    print('That is not a valid number!')",
+        "slide_content": "",
+        "visual_audio_alignment": "unrelated",
+        "key_concepts": [
+          "try-except block",
+          "exception handling",
+          "input() function",
+          "int() function",
+          "type conversion",
+          "print() function",
+          "runtime error"
+        ],
+        "is_code_readable": true
+      },
+      "concept_mapping": {
+        "concept_id": "error_handling",
+        "confidence": 0.85,
+        "secondary_concepts": [
+          "exceptions"
+        ],
+        "reasoning": "This segment reviews the previous `try/except` example, reiterating that it prevents an exception from being thrown, reinforcing the concept of error handling."
+      }
+    }
+  ]
+}

@@ -1,0 +1,647 @@
+{
+  "metadata": {
+    "title": "A Concrete Introduction to Probability (using Python)",
+    "author": "Peter Norvig",
+    "source": "Markdown document",
+    "video_id": "",
+    "total_duration": 0,
+    "total_concepts": 26,
+    "extracted_at": "2025-12-12T16:09:37.205Z",
+    "enriched_at": "2024-07-30T12:00:00Z",
+    "enrichment_version": "1.0",
+    "source_file": "/home/danenberg/prg/workshops/learning/markdown/probability/probability.md"
+  },
+  "nodes": [
+    {
+      "id": "classical_definition_of_probability",
+      "name": "Classical Definition of Probability",
+      "description": "Laplace's definition stating probability as the ratio of favorable cases to total possible cases, assuming all cases are equally likely.",
+      "prerequisites": [],
+      "difficulty": "basic",
+      "learning_objectives": [
+        "Understand the fundamental principle of probability based on equal likelihood."
+      ]
+    },
+    {
+      "id": "trial",
+      "name": "Trial (Probability)",
+      "description": "A single occurrence or experiment with an uncertain outcome.",
+      "prerequisites": [
+        "classical_definition_of_probability"
+      ],
+      "difficulty": "basic",
+      "learning_objectives": [
+        "Define what constitutes a trial in probability theory."
+      ]
+    },
+    {
+      "id": "outcome",
+      "name": "Outcome (Probability)",
+      "description": "A possible result or specific state of the world from a trial.",
+      "prerequisites": [
+        "trial"
+      ],
+      "difficulty": "basic",
+      "learning_objectives": [
+        "Identify all possible outcomes for a given trial."
+      ]
+    },
+    {
+      "id": "sample_space",
+      "name": "Sample Space",
+      "description": "The complete set of all possible outcomes for a given trial.",
+      "prerequisites": [
+        "outcome"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "D = {1, 2, 3, 4, 5, 6}"
+      ],
+      "learning_objectives": [
+        "Construct the sample space for simple probability experiments."
+      ]
+    },
+    {
+      "id": "event",
+      "name": "Event (Probability)",
+      "description": "A subset of the sample space, representing one or more outcomes that share a specific property of interest.",
+      "prerequisites": [
+        "sample_space"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "even = {2, 4, 6}"
+      ],
+      "learning_objectives": [
+        "Define an event as a subset of the sample space."
+      ]
+    },
+    {
+      "id": "probability_calculation_laplace",
+      "name": "Probability Calculation (Laplace's Rule)",
+      "description": "The method of calculating probability by dividing the number of outcomes in an event (favorable cases) by the total number of outcomes in the sample space, assuming equiprobability.",
+      "prerequisites": [
+        "classical_definition_of_probability",
+        "sample_space",
+        "event"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "def P(event: Event, cases: Space) -> Fraction:",
+        "    return Fraction(number(favorable(event, cases)), number(cases))"
+      ],
+      "learning_objectives": [
+        "Calculate the probability of an event using Laplace's definition."
+      ]
+    },
+    {
+      "id": "python_sets_for_sample_spaces",
+      "name": "Python Sets for Sample Spaces",
+      "description": "Using Python's `set` data structure to represent sample spaces and events due to their properties of uniqueness and efficient membership testing.",
+      "prerequisites": [
+        "sample_space",
+        "event"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "D = {1, 2, 3, 4, 5, 6}"
+      ],
+      "learning_objectives": [
+        "Represent probability sample spaces and events using Python sets."
+      ]
+    },
+    {
+      "id": "counting_cases_len",
+      "name": "Counting Cases (len)",
+      "description": "Using Python's `len()` function to determine the total number of outcomes in a sample space or the number of favorable outcomes in an event when represented as a set.",
+      "prerequisites": [
+        "python_sets_for_sample_spaces",
+        "probability_calculation_laplace"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "number = len"
+      ],
+      "learning_objectives": [
+        "Use `len()` to count elements in Python sets."
+      ]
+    },
+    {
+      "id": "favorable_cases_set_intersection",
+      "name": "Favorable Cases (Set Intersection)",
+      "description": "Identifying favorable cases by performing a set intersection between the event (a subset) and the sample space, ensuring only valid outcomes are considered.",
+      "prerequisites": [
+        "python_sets_for_sample_spaces",
+        "event",
+        "counting_cases_len"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "def favorable(event: Event, cases: Space) -> Event:",
+        "    return event.intersection(cases)"
+      ],
+      "learning_objectives": [
+        "Identify favorable outcomes using set intersection."
+      ]
+    },
+    {
+      "id": "python_fractions_module",
+      "name": "Python `fractions` Module",
+      "description": "Using the `Fraction` type from Python's `fractions` module to represent probabilities as exact fractions, avoiding floating-point inaccuracies.",
+      "prerequisites": [
+        "probability_calculation_laplace"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "from fractions import Fraction"
+      ],
+      "learning_objectives": [
+        "Use the `Fraction` object for precise probability representation."
+      ]
+    },
+    {
+      "id": "set_operations_probability",
+      "name": "Set Operations in Probability",
+      "description": "Applying set union (`|`) for \"OR\" events and set intersection (`&`) for \"AND\" events to combine or filter outcomes, and understanding their probabilistic meaning.",
+      "prerequisites": [
+        "python_sets_for_sample_spaces",
+        "event"
+      ],
+      "difficulty": "basic",
+      "code_examples": [
+        "P((even | prime), D)",
+        "P((odd & prime), D)"
+      ],
+      "learning_objectives": [
+        "Use set union and intersection to define complex events."
+      ]
+    },
+    {
+      "id": "itertools_combinations",
+      "name": "`itertools.combinations`",
+      "description": "Using the `combinations` function from Python's `itertools` module to generate all unique unordered selections of items from a collection, crucial for defining sample spaces in problems like card hands or urn selections.",
+      "prerequisites": [
+        "python_sets_for_sample_spaces"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "Hands = joins(combinations(deck, 5))"
+      ],
+      "learning_objectives": [
+        "Generate combinations of items for complex sample spaces."
+      ]
+    },
+    {
+      "id": "mathematical_combinations",
+      "name": "Mathematical Combinations (nCr)",
+      "description": "The mathematical concept of \"n choose k\" (nCr), which calculates the number of ways to choose k items from a set of n distinct items without regard to order, often denoted as `math.comb` in Python.",
+      "prerequisites": [
+        "counting_cases_len"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "math.comb(9, 6)"
+      ],
+      "learning_objectives": [
+        "Calculate combinations using the nCr formula."
+      ],
+      "common_misconceptions": [
+        "Confusing combinations with permutations (order doesn't matter)."
+      ]
+    },
+    {
+      "id": "non_equiprobable_outcomes",
+      "name": "Non-Equiprobable Outcomes",
+      "description": "Understanding that not all outcomes in a sample space may have the same likelihood, introducing the need for frequencies or weights associated with each outcome.",
+      "prerequisites": [
+        "classical_definition_of_probability",
+        "probability_calculation_laplace"
+      ],
+      "difficulty": "intermediate",
+      "learning_objectives": [
+        "Recognize scenarios where outcomes are not equally likely."
+      ]
+    },
+    {
+      "id": "frequency",
+      "name": "Frequency (Probability)",
+      "description": "A non-negative numerical value describing how often an outcome occurs, either as a count or a ratio, used to quantify the likelihood of non-equiprobable outcomes.",
+      "prerequisites": [
+        "non_equiprobable_outcomes"
+      ],
+      "difficulty": "intermediate",
+      "learning_objectives": [
+        "Understand frequency as a measure of outcome likelihood."
+      ]
+    },
+    {
+      "id": "probability_distribution_concept",
+      "name": "Probability Distribution",
+      "description": "A mapping from each outcome in a sample space to its associated frequency, where all frequencies are between 0 and 1 and sum to 1.",
+      "prerequisites": [
+        "non_equiprobable_outcomes",
+        "frequency",
+        "sample_space"
+      ],
+      "difficulty": "intermediate",
+      "learning_objectives": [
+        "Define a probability distribution for a given set of outcomes."
+      ]
+    },
+    {
+      "id": "python_collections_counter",
+      "name": "`collections.Counter`",
+      "description": "Using the `Counter` class from Python's `collections` module as a base for creating frequency mappings, which is useful for implementing custom distribution types.",
+      "prerequisites": [],
+      "difficulty": "basic",
+      "code_examples": [
+        "from collections import Counter"
+      ],
+      "learning_objectives": [
+        "Utilize `collections.Counter` for frequency counting."
+      ]
+    },
+    {
+      "id": "custom_distribution_class",
+      "name": "Custom Distribution Class (`Dist`)",
+      "description": "Implementing a custom Python class, `Dist`, typically by inheriting from `collections.Counter`, to represent and manipulate probability distributions with associated frequencies.",
+      "prerequisites": [
+        "probability_distribution_concept",
+        "python_collections_counter"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "class Dist(Counter):",
+        "    \"A Distribution of {outcome: frequency} pairs.\" "
+      ],
+      "learning_objectives": [
+        "Implement a custom class for handling probability distributions."
+      ]
+    },
+    {
+      "id": "probability_with_distributions",
+      "name": "Probability with Distributions",
+      "description": "Adapting the probability calculation functions (`P`, `number`, `favorable`) to correctly handle sample spaces represented as `Dist` objects, summing frequencies instead of counting items.",
+      "prerequisites": [
+        "probability_distribution_concept",
+        "custom_distribution_class",
+        "probability_calculation_laplace"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def number(cases: Space) -> float:",
+        "    return len(cases) if isinstance(cases, set) else sum(cases.values())"
+      ],
+      "learning_objectives": [
+        "Calculate probabilities for non-equiprobable outcomes using distributions."
+      ]
+    },
+    {
+      "id": "python_functions_as_events",
+      "name": "Python Functions as Events",
+      "description": "Defining events as Boolean predicate functions that test for membership, allowing for more flexible and generalized event definitions than explicit sets.",
+      "prerequisites": [
+        "event"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def even(n: int) -> bool: return n % 2 == 0"
+      ],
+      "learning_objectives": [
+        "Define events using predicate functions in Python."
+      ]
+    },
+    {
+      "id": "implicit_sets_decorator",
+      "name": "Implicit Sets (Python Decorator)",
+      "description": "Implementing a custom Python decorator (`@ImplicitSet`) to transform a predicate function into an object that behaves like a set for membership and intersection operations, simplifying event definition.",
+      "prerequisites": [
+        "python_functions_as_events",
+        "python_sets_for_sample_spaces"
+      ],
+      "difficulty": "advanced",
+      "code_examples": [
+        "@ImplicitSet",
+        "def even(n: int) -> bool: return n % 2 == 0"
+      ],
+      "learning_objectives": [
+        "Create implicit sets using decorators for event handling."
+      ]
+    },
+    {
+      "id": "simulating_dice_rolls",
+      "name": "Simulating Dice Rolls",
+      "description": "Generating sample spaces for single or multiple dice rolls, including sums, by using `itertools.product` to create combinations of outcomes and then mapping them to a `Dist` for frequency counting.",
+      "prerequisites": [
+        "sample_space",
+        "custom_distribution_class",
+        "itertools_combinations"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def roll(n: int, s: int) -> Space:",
+        "    return Dist(map(sum, product(die(s), repeat=n)))"
+      ],
+      "learning_objectives": [
+        "Simulate complex dice roll scenarios."
+      ]
+    },
+    {
+      "id": "conditional_probability",
+      "name": "Conditional Probability",
+      "description": "The probability of an event occurring given that another event has already occurred, effectively narrowing down the sample space to only those outcomes where the given event is true.",
+      "prerequisites": [
+        "probability_with_distributions",
+        "event",
+        "favorable_cases_set_intersection"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "given = favorable",
+        "P(second_girl, given(first_girl, DK))"
+      ],
+      "learning_objectives": [
+        "Calculate conditional probabilities by redefining the sample space."
+      ],
+      "common_misconceptions": [
+        "Confusing P(A|B) with P(B|A)."
+      ]
+    },
+    {
+      "id": "independence_probability",
+      "name": "Independence (Probability)",
+      "description": "Two events are independent if the occurrence of one does not affect the probability of the other, allowing their joint probability to be calculated as the product of their individual probabilities.",
+      "prerequisites": [
+        "conditional_probability"
+      ],
+      "difficulty": "intermediate",
+      "learning_objectives": [
+        "Identify independent events and calculate their joint probabilities."
+      ]
+    },
+    {
+      "id": "joint_probability_distribution",
+      "name": "Joint Probability Distribution",
+      "description": "A distribution that describes the probability of two or more random variables occurring simultaneously, often created by multiplying the probabilities of independent events.",
+      "prerequisites": [
+        "probability_distribution_concept",
+        "independence_probability"
+      ],
+      "difficulty": "intermediate",
+      "code_examples": [
+        "def joint2(A: Dist, B: Dist, format_fn='{}{}'.format) -> Dist:",
+        "    return Dist({format_fn(a, b): A[a] * B[b] for a in A for b in B})"
+      ],
+      "learning_objectives": [
+        "Construct joint probability distributions for multiple events."
+      ]
+    },
+    {
+      "id": "bayes_theorem",
+      "name": "Bayes' Theorem",
+      "description": "A formula that describes how to update the probability for a hypothesis as more evidence becomes available, relating conditional probabilities. It links P(A|B) to P(B|A).",
+      "prerequisites": [
+        "conditional_probability",
+        "joint_probability_distribution",
+        "independence_probability"
+      ],
+      "difficulty": "advanced",
+      "code_examples": [
+        "P(A | E) = P(E | A) * P(A) / P(E)"
+      ],
+      "learning_objectives": [
+        "Apply Bayes' Theorem to calculate inverse conditional probabilities."
+      ],
+      "common_misconceptions": [
+        "Believing it's only for specific statistical problems when it's a general rule."
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "classical_definition_of_probability",
+      "to": "trial",
+      "type": "prerequisite"
+    },
+    {
+      "from": "trial",
+      "to": "outcome",
+      "type": "prerequisite"
+    },
+    {
+      "from": "outcome",
+      "to": "sample_space",
+      "type": "prerequisite"
+    },
+    {
+      "from": "sample_space",
+      "to": "event",
+      "type": "prerequisite"
+    },
+    {
+      "from": "classical_definition_of_probability",
+      "to": "probability_calculation_laplace",
+      "type": "prerequisite"
+    },
+    {
+      "from": "sample_space",
+      "to": "probability_calculation_laplace",
+      "type": "prerequisite"
+    },
+    {
+      "from": "event",
+      "to": "probability_calculation_laplace",
+      "type": "prerequisite"
+    },
+    {
+      "from": "sample_space",
+      "to": "python_sets_for_sample_spaces",
+      "type": "prerequisite"
+    },
+    {
+      "from": "event",
+      "to": "python_sets_for_sample_spaces",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_sets_for_sample_spaces",
+      "to": "counting_cases_len",
+      "type": "prerequisite"
+    },
+    {
+      "from": "probability_calculation_laplace",
+      "to": "counting_cases_len",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_sets_for_sample_spaces",
+      "to": "favorable_cases_set_intersection",
+      "type": "prerequisite"
+    },
+    {
+      "from": "event",
+      "to": "favorable_cases_set_intersection",
+      "type": "prerequisite"
+    },
+    {
+      "from": "counting_cases_len",
+      "to": "favorable_cases_set_intersection",
+      "type": "prerequisite"
+    },
+    {
+      "from": "probability_calculation_laplace",
+      "to": "python_fractions_module",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_sets_for_sample_spaces",
+      "to": "set_operations_probability",
+      "type": "prerequisite"
+    },
+    {
+      "from": "event",
+      "to": "set_operations_probability",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_sets_for_sample_spaces",
+      "to": "itertools_combinations",
+      "type": "prerequisite"
+    },
+    {
+      "from": "counting_cases_len",
+      "to": "mathematical_combinations",
+      "type": "prerequisite"
+    },
+    {
+      "from": "classical_definition_of_probability",
+      "to": "non_equiprobable_outcomes",
+      "type": "prerequisite"
+    },
+    {
+      "from": "probability_calculation_laplace",
+      "to": "non_equiprobable_outcomes",
+      "type": "prerequisite"
+    },
+    {
+      "from": "non_equiprobable_outcomes",
+      "to": "frequency",
+      "type": "prerequisite"
+    },
+    {
+      "from": "non_equiprobable_outcomes",
+      "to": "probability_distribution_concept",
+      "type": "prerequisite"
+    },
+    {
+      "from": "frequency",
+      "to": "probability_distribution_concept",
+      "type": "prerequisite"
+    },
+    {
+      "from": "sample_space",
+      "to": "probability_distribution_concept",
+      "type": "prerequisite"
+    },
+    {
+      "from": "probability_distribution_concept",
+      "to": "custom_distribution_class",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_collections_counter",
+      "to": "custom_distribution_class",
+      "type": "prerequisite"
+    },
+    {
+      "from": "probability_distribution_concept",
+      "to": "probability_with_distributions",
+      "type": "prerequisite"
+    },
+    {
+      "from": "custom_distribution_class",
+      "to": "probability_with_distributions",
+      "type": "prerequisite"
+    },
+    {
+      "from": "probability_calculation_laplace",
+      "to": "probability_with_distributions",
+      "type": "prerequisite"
+    },
+    {
+      "from": "event",
+      "to": "python_functions_as_events",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_functions_as_events",
+      "to": "implicit_sets_decorator",
+      "type": "prerequisite"
+    },
+    {
+      "from": "python_sets_for_sample_spaces",
+      "to": "implicit_sets_decorator",
+      "type": "prerequisite"
+    },
+    {
+      "from": "sample_space",
+      "to": "simulating_dice_rolls",
+      "type": "prerequisite"
+    },
+    {
+      "from": "custom_distribution_class",
+      "to": "simulating_dice_rolls",
+      "type": "prerequisite"
+    },
+    {
+      "from": "itertools_combinations",
+      "to": "simulating_dice_rolls",
+      "type": "prerequisite"
+    },
+    {
+      "from": "probability_with_distributions",
+      "to": "conditional_probability",
+      "type": "prerequisite"
+    },
+    {
+      "from": "event",
+      "to": "conditional_probability",
+      "type": "prerequisite"
+    },
+    {
+      "from": "favorable_cases_set_intersection",
+      "to": "conditional_probability",
+      "type": "prerequisite"
+    },
+    {
+      "from": "conditional_probability",
+      "to": "independence_probability",
+      "type": "prerequisite"
+    },
+    {
+      "from": "probability_distribution_concept",
+      "to": "joint_probability_distribution",
+      "type": "prerequisite"
+    },
+    {
+      "from": "independence_probability",
+      "to": "joint_probability_distribution",
+      "type": "prerequisite"
+    },
+    {
+      "from": "conditional_probability",
+      "to": "bayes_theorem",
+      "type": "prerequisite"
+    },
+    {
+      "from": "joint_probability_distribution",
+      "to": "bayes_theorem",
+      "type": "prerequisite"
+    },
+    {
+      "from": "independence_probability",
+      "to": "bayes_theorem",
+      "type": "prerequisite"
+    }
+  ]
+}

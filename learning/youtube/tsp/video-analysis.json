@@ -1,0 +1,48 @@
+{
+  "results": [
+    {
+      "segment_index": 0,
+      "timestamp": 0,
+      "audio_text": "## Traveling Salesperson Problem\n\n> *I have to visit all my customers; what's the shortest route?*\n\nThe **Traveling Salesperson Problem** (TSP) asks the following question: Given a list of cities and the distances between each pair of cities, what is the shortest possible route that visits each city exactly once and returns to the origin city?  It is an NP-hard problem in combinatorial optimization, important in operations research and theoretical computer science.\n\nIn this notebook, we will explore different approaches to solve the TSP, including brute force, dynamic programming, and heuristics. We will also analyze the time complexity and accuracy of each approach.",
+      "audio_start": 0,
+      "audio_end": 0,
+      "analysis": {
+        "visual_description": "Markdown section: ",
+        "code_content": ""
+      }
+    },
+    {
+      "segment_index": 1,
+      "timestamp": 0,
+      "audio_text": "### Brute Force Approach\n\nThe brute force approach involves generating all possible permutations of the cities and calculating the total distance for each permutation. The permutation with the shortest distance is then selected as the optimal solution. This approach guarantees finding the optimal solution but is computationally expensive, especially for a large number of cities.\n\nHere's a breakdown of the brute force approach:\n\n1.  **Generate all permutations:** Create a list of all possible orderings of the cities.\n2.  **Calculate total distance:** For each permutation, calculate the total distance by summing the distances between consecutive cities in the permutation, including the distance from the last city back to the starting city.\n3.  **Find the minimum distance:** Compare the total distances of all permutations and select the permutation with the smallest distance.",
+      "audio_start": 0,
+      "audio_end": 0,
+      "analysis": {
+        "visual_description": "Markdown section: ",
+        "code_content": ""
+      }
+    },
+    {
+      "segment_index": 2,
+      "timestamp": 0,
+      "audio_text": "#### Python Implementation\n\n```python\nimport itertools\n\ndef total_distance(graph, route):\n    \"\"\"Calculates the total distance of a given route.\n\n    Args:\n        graph (dict): A dictionary representing the graph where keys are city names\n                      and values are dictionaries of neighboring cities with distances.\n        route (list): A list of city names representing the route.\n\n    Returns:\n        int: The total distance of the route.\n    \"\"\"\n    total = 0\n    for i in range(len(route) - 1):\n        total += graph[route[i]][route[i + 1]]\n    total += graph[route[-1]][route[0]]  # Return to starting city\n    return total\n\ndef brute_force_tsp(graph, cities):\n    \"\"\"Solves the TSP using a brute force approach.\n\n    Args:\n        graph (dict): A dictionary representing the graph.\n        cities (list): A list of city names.\n\n    Returns:\n        tuple: A tuple containing the shortest route and its total distance.\n    \"\"\"\n    shortest_route = None\n    shortest_distance = float('inf')\n\n    for route in itertools.permutations(cities):\n        route = list(route)\n        distance = total_distance(graph, route)\n\n        if distance < shortest_distance:\n            shortest_distance = distance\n            shortest_route = route\n\n    return shortest_route, shortest_distance\n```",
+      "audio_start": 0,
+      "audio_end": 0,
+      "analysis": {
+        "visual_description": "Markdown section: ",
+        "code_content": "```python\nimport itertools\n\ndef total_distance(graph, route):\n    \"\"\"Calculates the total distance of a given route.\n\n    Args:\n        graph (dict): A dictionary representing the graph where keys are city names\n                      and values are dictionaries of neighboring cities with distances.\n        route (list): A list of city names representing the route.\n\n    Returns:\n        int: The total distance of the route.\n    \"\"\"\n    total = 0\n    for i in range(len(route) - 1):\n        total += graph[route[i]][route[i + 1]]\n    total += graph[route[-1]][route[0]]  # Return to starting city\n    return total\n\ndef brute_force_tsp(graph, cities):\n    \"\"\"Solves the TSP using a brute force approach.\n\n    Args:\n        graph (dict): A dictionary representing the graph.\n        cities (list): A list of city names.\n\n    Returns:\n        tuple: A tuple containing the shortest route and its total distance.\n    \"\"\"\n    shortest_route = None\n    shortest_distance = float('inf')\n\n    for route in itertools.permutations(cities):\n        route = list(route)\n        distance = total_distance(graph, route)\n\n        if distance < shortest_distance:\n            shortest_distance = distance\n            shortest_route = route\n\n    return shortest_route, shortest_distance\n```"
+      }
+    },
+    {
+      "segment_index": 3,
+      "timestamp": 0,
+      "audio_text": "#### Example Usage\n\n```python\n# Example graph\ngraph = {\n    'A': {'B': 10, 'C': 15, 'D': 20},\n    'B': {'A': 10, 'C': 35, 'D': 25},\n    'C': {'A': 15, 'B': 35, 'D': 30},\n    'D': {'A': 20, 'B': 25, 'C': 30}\n}\n\ncities = list(graph.keys())\n\nshortest_route, shortest_distance = brute_force_tsp(graph, cities)\nprint(\"Shortest Route:\", shortest_route)\nprint(\"Shortest Distance:\", shortest_distance)\n```\n\nIn this example, we define a graph representing the distances between four cities (A, B, C, and D). The `brute_force_tsp` function is then called with the graph and the list of cities. The function returns the shortest route and its corresponding distance, which are then printed to the console.",
+      "audio_start": 0,
+      "audio_end": 0,
+      "analysis": {
+        "visual_description": "Markdown section: ",
+        "code_content": "```python\n# Example graph\ngraph = {\n    'A': {'B': 10, 'C': 15, 'D': 20},\n    'B': {'A': 10, 'C': 35, 'D': 25},\n    'C': {'A': 15, 'B': 35, 'D': 30},\n    'D': {'A': 20, 'B': 25, 'C': 30}\n}\n\ncities = list(graph.keys())\n\nshortest_route, shortest_distance = brute_force_tsp(graph, cities)\nprint(\"Shortest Route:\", shortest_route)\nprint(\"Shortest Distance:\", shortest_distance)\n```"
+      }
+    }
+  ]
+}

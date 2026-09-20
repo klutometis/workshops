@@ -1,0 +1,104 @@
+{
+  "audio_file": "youtube/sg_fuEzFw0g/audio.mp3",
+  "total_duration": 154.06,
+  "segments": [
+    {
+      "text": "When you ask artificial intelligence like chat GPT a question like what is the best way to slice bread? It provides an answer. That seems like a human expert.",
+      "start": 0,
+      "end": 11.36,
+      "confidence": 0.9855453372001648
+    },
+    {
+      "text": " The AI appears to know about types of knives. And that bread is heated, when cooked",
+      "start": 11.36,
+      "end": 17.47,
+      "confidence": 0.9883680939674377
+    },
+    {
+      "text": " Does AI really know these things. How can it know about so many topics? Can we trust the answers?",
+      "start": 17.47,
+      "end": 25.19,
+      "confidence": 0.987597644329071
+    },
+    {
+      "text": " To answer those questions. Let's look at the source of the information used by tools like chat GPT large language models.",
+      "start": 25.19,
+      "end": 34.66,
+      "confidence": 0.9681313633918762
+    },
+    {
+      "text": " imagine the task of scanning every word on the internet that every blog website, research paper, book newspaper, computer program, and more",
+      "start": 34.66,
+      "end": 46.61,
+      "confidence": 0.9157081246376038
+    },
+    {
+      "text": " That's the goal of massive computers, that power tools like chat GPT to capture everything, it can on the web.",
+      "start": 46.61,
+      "end": 55.8,
+      "confidence": 0.9520639181137085
+    },
+    {
+      "text": " This snapshot of over a trillion words, creates the foundation for large language models.",
+      "start": 55.8,
+      "end": 63.25,
+      "confidence": 0.9424453377723694
+    },
+    {
+      "text": " By analyzing the words in the model, chat GPT can answer our questions and requests with human like quality.",
+      "start": 63.25,
+      "end": 71.05,
+      "confidence": 0.9163347482681274
+    },
+    {
+      "text": "What sounds like expertise is really a math problem for artificial intelligence.",
+      "start": 71.05,
+      "end": 76.51,
+      "confidence": 0.9945077300071716
+    },
+    {
+      "text": " It works because powerful computers are trained to look for common patterns between words and phrases. Like tomorrow morning cup of coffee and suppose that you",
+      "start": 76.51,
+      "end": 90.19,
+      "confidence": 0.9948298335075378
+    },
+    {
+      "text": " large language models can also detect context. It can tell based on Words that appear together, if you mean bat or bat,",
+      "start": 90.19,
+      "end": 100.95,
+      "confidence": 0.9719484448432922
+    },
+    {
+      "text": " Every word becomes a math problem that uses artificial intelligence to find what word should come next in a sentence.",
+      "start": 100.95,
+      "end": 109,
+      "confidence": 0.9535349607467651
+    },
+    {
+      "text": " So when we ask AI how to slice bread, it doesn't know about bread or knives like you and me. It only knows the words in the large language model.",
+      "start": 109,
+      "end": 120.01,
+      "confidence": 0.9753047823905945
+    },
+    {
+      "text": " because it was trained on a trillion words and their context, it can assemble the words that most often answer that question,",
+      "start": 120.01,
+      "end": 128.93,
+      "confidence": 0.9829695224761963
+    },
+    {
+      "text": " Keep in mind that AI responses are based on what is published on the internet and like the internet. They can be biased misleading and inaccurate.",
+      "start": 128.93,
+      "end": 140.41,
+      "confidence": 0.9288381338119507
+    },
+    {
+      "text": " Evaluate and use them with skepticism and care with experimentation in practice, you can use these tools to easily access the world's knowledge and find the answers. You need quickly.",
+      "start": 140.41,
+      "end": 154.06,
+      "confidence": 0.9742117524147034
+    }
+  ],
+  "full_transcript": "When you ask artificial intelligence like chat GPT a question like what is the best way to slice bread? It provides an answer. That seems like a human expert.  The AI appears to know about types of knives. And that bread is heated, when cooked  Does AI really know these things. How can it know about so many topics? Can we trust the answers?  To answer those questions. Let's look at the source of the information used by tools like chat GPT large language models.  imagine the task of scanning every word on the internet that every blog website, research paper, book newspaper, computer program, and more  That's the goal of massive computers, that power tools like chat GPT to capture everything, it can on the web.  This snapshot of over a trillion words, creates the foundation for large language models.  By analyzing the words in the model, chat GPT can answer our questions and requests with human like quality. What sounds like expertise is really a math problem for artificial intelligence.  It works because powerful computers are trained to look for common patterns between words and phrases. Like tomorrow morning cup of coffee and suppose that you  large language models can also detect context. It can tell based on Words that appear together, if you mean bat or bat,  Every word becomes a math problem that uses artificial intelligence to find what word should come next in a sentence.  So when we ask AI how to slice bread, it doesn't know about bread or knives like you and me. It only knows the words in the large language model.  because it was trained on a trillion words and their context, it can assemble the words that most often answer that question,  Keep in mind that AI responses are based on what is published on the internet and like the internet. They can be biased misleading and inaccurate.  Evaluate and use them with skepticism and care with experimentation in practice, you can use these tools to easily access the world's knowledge and find the answers. You need quickly.",
+  "transcribed_at": "2025-11-18T00:21:24.332Z"
+}

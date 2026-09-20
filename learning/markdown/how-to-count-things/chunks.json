@@ -1,0 +1,2393 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "chunk-1-introduction-to-counting",
+      "topic": "Introduction to counting strategies",
+      "text": "<div align=\"right\" style=\"text-align: right\"><i>Peter Norvig<br>Updated Sep 2018, May 2020</i></div>\n\n![the count](https://vignette.wikia.nocookie.net/muppet/images/9/90/CountCountsLP%282%29.jpg/revision/latest/scale-to-width-down/280?cb=20140628202329)\n---\n",
+      "concepts": [
+        "counting_general_concept"
+      ],
+      "chunk_type": "overview",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 3
+    },
+    {
+      "chunk_id": "chunk-2-introduction-to-counting",
+      "topic": "Introduction to counting and its challenges",
+      "text": "# How to Count Things\n\nSesame Street teaches us to  count up to ten using our fingers. A computer doesn't have fingers, but it too can use brute force, enumerating things one by one, to easily count up to a billion or so. So in that sense, a billion is a small number. It is rare to get more than a billion <i>things</i> together in one place, but it is common to encounter situations where there many billions of <i>combinations</i> of things; indeed many problems have <a href=\"http://norvig.com/atoms.html\">more combinations of things than the number of atoms in the Universe</a>.\n\nThus, for really big numbers we need a portfolio of counting strategies. Here is a partial list:",
+      "concepts": [
+        "counting_general_concept",
+        "brute_force_enumeration",
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "overview",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-3-brute-force-enumeration",
+      "topic": "Brute Force Enumeration",
+      "text": "- **Brute Force enumeration**: Generate all the things, and count them one by one. <br>*Example*: How many odd numbers from 1 to 10? Answer: Generate {1, 3, 5, 7, 9}, count 5.",
+      "concepts": [
+        "brute_force_enumeration"
+      ],
+      "chunk_type": "definition",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-4-enumerate-and-test",
+      "topic": "Enumerate and Test",
+      "text": "- **Enumerate and test**: Generate a larger set of candidate things, and count the ones that satisfy some criteria. <br>*Example*: How many odd prime numbers from 1 to 10? Answer: Generate {1, 3, 5, 7, 9}, test each one for primality, count 3.",
+      "concepts": [
+        "enumerate_and_test"
+      ],
+      "chunk_type": "definition",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-5-incremental-enumeration",
+      "topic": "Incremental Enumeration",
+      "text": "- **Incremental enumeration**: When the things we are counting have parts, don't generate all possible complete things and then check each one to see if it is valid. Instead, generate the first part of a thing, and check if that part is valid so far. If it is, generate all the possibilities for the next part, but if it is not, stop there. That means that many invalid things will never get generated, saving time.<br>*Example*: Given a set of *n* cities, how many acyclic paths through some subset of cities are in alphabetical order by city name? Brute force enumeration would generate all permutations up to length *n* and check if each one was alphabetical; incremental enumeration would start generating paths and only extend them with cities in the correct order.",
+      "concepts": [
+        "incremental_enumeration",
+        "brute_force_enumeration",
+        "permutations"
+      ],
+      "chunk_type": "definition",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-6-abstract-enumeration",
+      "topic": "Abstract Enumeration",
+      "text": "- **Abstract enumeration**: put the things into equivalence classes, and calculate how many there are in each class. Then we don't have to enumerate all the things; we can consider many at the same time.",
+      "concepts": [
+        "abstract_enumeration"
+      ],
+      "chunk_type": "definition",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-7-divide-and-conquer-counting",
+      "topic": "Divide and Conquer Counting Strategy",
+      "text": "- **Divide and conquer**: Split the problem into parts, solve each part, and combine the results.<br>*Example*: How many ways are there of getting a straight flush in poker? We can divide the problem into 4 subproblems, one for each suit. Then for each suit we can say: a straight can have one of 10 different high cards (5 through Ace), so there are 10 possible straights for each suit. The total number of straight flushes is 40, which you can think of either as multiplying 4 and 10, the numbers from the two independent components of the problem, or you can think of as adding 10+10+10+10 for the four disjoint parts of the problem.",
+      "concepts": [
+        "divide_and_conquer_counting_strategy"
+      ],
+      "chunk_type": "definition",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-8-recursive-divide-and-conquer",
+      "topic": "Recursive Divide and Conquer",
+      "text": "- **Recursive divide and conquer**: often we break a problem down into smaller pieces that are recursive instances of the same type of problem. We conquer by solving the smaller pieces and combining results.<br>*Example*: How many permutations are there of *n* things? If *n* > 0, solve by finding the number of permutations of *n* - 1 things, and multiplying by *n*.",
+      "concepts": [
+        "recursive_divide_and_conquer",
+        "recursion",
+        "permutations"
+      ],
+      "chunk_type": "definition",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-9-formula-calculation",
+      "topic": "Formula Calculation",
+      "text": "- **Formula calculation**: Use mathematical thinking to derive a formula for the number of things. <br>*Example*: How many odd numbers from 1 to *n*? The formula is ⌈n/2⌉, meaning \"divide *n* by 2 and round up\".",
+      "concepts": [
+        "formula_calculation"
+      ],
+      "chunk_type": "definition",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-10-memoization-caching",
+      "topic": "Memoization / Caching",
+      "text": "- **Remembering**: Sometimes there are multiple ways to break a problem into subproblems, and when solving the big problem we may come across the same subproblem more than once. We can remember the solution to the subproblem so that we don't recompute it multiple times. We call that *memoizing* or *caching* the results; we can use the decorator `@lru_cache`.",
+      "concepts": [
+        "memoization_caching"
+      ],
+      "chunk_type": "definition",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-11-simulation-counting",
+      "topic": "Simulation Counting Strategy",
+      "text": "- **Simulation**: Sometimes it is difficult to exactly count all the things. But you can do a random simulation in which you record the things that randomly come up, and use those results as an estimate.",
+      "concepts": [
+        "simulation_counting_strategy"
+      ],
+      "chunk_type": "definition",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-12-visualization-problem-solving",
+      "topic": "Visualization in Problem Solving",
+      "text": "- **Visualization**: When you're stuck, making a chart or table or plot of examples can help you see patterns that can lead to solutions.",
+      "concepts": [
+        "visualization_problem_solving"
+      ],
+      "chunk_type": "definition",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-13-checking-validation-problem-solving",
+      "topic": "Checking and Validation in Problem Solving",
+      "text": "- **Checking**: make sure that your calculations work for small test cases that you verify by hand. Create two different programs and check that they agree with each other. A common approach is to have one straightforward but inefficient program that is easy to see is correct, and one program that is optimized for speed but more complex. If the two programs agree on the small inputs, you can have more confidence they are both correct.)",
+      "concepts": [
+        "checking_validation_problem_solving"
+      ],
+      "chunk_type": "explanation",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-14-standing-on-shoulders-research",
+      "topic": "Standing on Shoulders / Research",
+      "text": "- **Standing on shoulders**: it is fun to solve a problem on your own, but sometimes the right approach is to look up how others have solved it before. Sometimes you need to do some work to understand the problem better before you know how to search for a prior solution.<br>*Example*: In how many ways can a convex polygon be cut into triangles by connecting vertices? You could type the question directly as [a search](https://www.google.com/search?q=In+how+many+ways+can+a+convex+polygon+be+cut+into+triangles+by+connecting+vertices) and find some helpful answers. You could also solve the problem for small polygons (with *n* = 3 to 7 sides), note that the sequence of answers is [\"1, 2, 5, 14, 42\"](https://www.google.com/search?q=%221%2C+2%2C+5%2C+14%2C+42%22&oq=%221%2C+2%2C+5%2C+14%2C+42%22) and see that a search reveals that  these are called [Catalan Numbers](https://en.wikipedia.org/wiki/Catalan_number) and that there is a lot written about them.<br>*Example*: A coach wants to create a basketball lineup of three shooters and two rebounders. She has seven shooters and five rebounders to select from. How many different lineups can she make? Entering the text of the whole problem as a search query gives [results about basketball](https://www.google.com/search?q=A+coach+wants+to+create+a+basketball+lineup+of+three+shooters+and+two+rebounders.+She+has+seven+shooters+and+five+rebounders+to+select+from.+How+many+different+lineups+can+she+make%3F&oq=A+coach+wants+to+create+a+basketball+lineup+of+three+shooters+and+two+rebounders.+She+has+seven+shooters+and+five+rebounders+to+select+from.+How+many+different+lineups+can+she+make), not about combinatorics.  You need to understand the problem and standard terminology well enough to realize that a better query is [7 choose 3 * 5 choose 2](https://www.google.com/search?q=7+choose+3+*+5+choose+2).",
+      "concepts": [
+        "standing_on_shoulders_research",
+        "combinatorics_general_concept",
+        "combinations_n_choose_k"
+      ],
+      "chunk_type": "explanation",
+      "section": "How to Count Things",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "How to Count Things"
+      ],
+      "markdown_anchor": "how-to-count-things",
+      "start_line": 4,
+      "end_line": 22
+    },
+    {
+      "chunk_id": "chunk-15-preliminaries-imports-and-utilities",
+      "topic": "Imports and Utility Functions",
+      "text": "# Preliminaries: Imports and Utilities\n\nBefore getting started, here are the necessary imports, and four oft-used utility functions:\n- `quantify` (from [the `itertools` module recipes](https://docs.python.org/3/library/itertools.html)) takes a collection of things and a predicate and counts for how many things the predicate is true. It is designed for the **enumerate and test** strategy, but can be used for the **brute force enumeration** strategy by omitting the optional predicate (as long as none of the things you want to count are false (like `0` or the empty string).\n- `total` totals up all the values in a `dict` or `Counter`. Helpful because `sum(counter)` would sum the keys, not the values.\n- `iterate`: The pattern of repeatedly calling a function *n* times will be common in this notebook; `iterate(f, x, n)`, a function [borrowed](https://hackage.haskell.org/package/base-4.14.0.0/docs/Prelude.html#v:iterate) from  Haskell, encapsulates the pattern.\n- `same`: Tests if two functions return the same output for all the given inputs.",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "Preliminaries: Imports and Utilities",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Preliminaries: Imports and Utilities"
+      ],
+      "markdown_anchor": "preliminaries-imports-and-utilities",
+      "start_line": 23,
+      "end_line": 61
+    },
+    {
+      "chunk_id": "chunk-16-utility-functions-code",
+      "topic": "Utility Functions Code",
+      "text": "```python\n%matplotlib inline\nimport matplotlib.pyplot as plt\nimport random\nfrom collections import Counter, namedtuple\nfrom functools   import lru_cache\nfrom itertools   import product, permutations, combinations, islice\nfrom math        import factorial, log\nfrom statistics  import mean, stdev\nfrom sys         import maxsize\n\ndef quantify(iterable, predicate=bool) -> int: \n    \"\"\"Count the number of items in iterable for which the predicate is true.\"\"\"\n    return sum(1 for item in iterable if predicate(item))\n\ndef total(counter) -> int:\n    \"\"\"The sum of all the values in a Counter (or dict or other mapping).\"\"\"\n    return sum(counter.values())\n\ndef iterate(f, x, n) -> object:\n    \"\"\"Return f^n(x); for example, iterate(f, x, 3) == f(f(f(x))).\"\"\"\n    for _ in range(n):\n        x = f(x)\n    return x\n\ndef same(fn1, fn2, inputs) -> bool:\n    \"\"\"Verify whether fn1(x) == fn2(x) for all x in inputs.\"\"\"\n    return all(fn1(x) == fn2(x) for x in inputs)\n```",
+      "concepts": [
+        "data_structures_counter",
+        "iteration_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Preliminaries: Imports and Utilities",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Preliminaries: Imports and Utilities"
+      ],
+      "markdown_anchor": "preliminaries-imports-and-utilities",
+      "start_line": 23,
+      "end_line": 61
+    },
+    {
+      "chunk_id": "chunk-17-quantify-function-explanation",
+      "topic": "Quantify Function Explanation",
+      "text": "The `quantify` function takes an iterable and a predicate and counts the number of items for which the predicate is true. This aligns with the **enumerate and test** strategy, where you generate a set of candidates and then test each one. It can also be used for **brute force enumeration** by omitting the predicate, effectively counting all items in the iterable (as long as none of the items are falsy).",
+      "concepts": [
+        "enumerate_and_test",
+        "brute_force_enumeration"
+      ],
+      "chunk_type": "explanation",
+      "section": "Preliminaries: Imports and Utilities",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Preliminaries: Imports and Utilities"
+      ],
+      "markdown_anchor": "preliminaries-imports-and-utilities",
+      "start_line": 23,
+      "end_line": 61
+    },
+    {
+      "chunk_id": "chunk-18-total-function-explanation",
+      "topic": "Total Function Explanation",
+      "text": "The `total` function calculates the sum of all values in a `Counter` (or any dictionary-like object). This is useful because the built-in `sum()` function applied to a `Counter` would sum the keys, not the values (counts).",
+      "concepts": [
+        "data_structures_counter"
+      ],
+      "chunk_type": "explanation",
+      "section": "Preliminaries: Imports and Utilities",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Preliminaries: Imports and Utilities"
+      ],
+      "markdown_anchor": "preliminaries-imports-and-utilities",
+      "start_line": 23,
+      "end_line": 61
+    },
+    {
+      "chunk_id": "chunk-19-iterate-function-explanation",
+      "topic": "Iterate Function Explanation",
+      "text": "The `iterate` function repeatedly applies a function `f` to an initial value `x` for `n` times. It's equivalent to `f(f(...f(x)...))`. This pattern is common when exploring state spaces or simulating processes.",
+      "concepts": [
+        "iteration_programming"
+      ],
+      "chunk_type": "explanation",
+      "section": "Preliminaries: Imports and Utilities",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Preliminaries: Imports and Utilities"
+      ],
+      "markdown_anchor": "preliminaries-imports-and-utilities",
+      "start_line": 23,
+      "end_line": 61
+    },
+    {
+      "chunk_id": "chunk-20-same-function-explanation",
+      "topic": "Same Function Explanation",
+      "text": "The `same` function checks if two functions, `fn1` and `fn2`, return the same output for all inputs in a given collection. This is useful for verifying the correctness of a function or comparing different implementations.",
+      "concepts": [
+        "checking_validation_problem_solving"
+      ],
+      "chunk_type": "explanation",
+      "section": "Preliminaries: Imports and Utilities",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Preliminaries: Imports and Utilities"
+      ],
+      "markdown_anchor": "preliminaries-imports-and-utilities",
+      "start_line": 23,
+      "end_line": 61
+    },
+    {
+      "chunk_id": "chunk-21-problem-counting-barcodes-definition",
+      "topic": "Problem Definition: Counting Barcodes",
+      "text": "# Problem: Counting Barcodes\n\n> A typical barcode is pictured below. A valid barcode consists of alternating black and white stripes, where each stripe is either 1, 2, or 3 units wide. For a box that is *n* units wide, how many different valid barcodes are there?\n\n![barcode](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/EAN-13-5901234123457.svg/250px-EAN-13-5901234123457.svg.png)\n\nWe'll represent a unit as a character, `'B'` or `'W'`, and a barcode as a string of *n* units. The barcode above would start with `'BWBWW...'`.  A valid string is one without 4 of the same character/unit in a row; `valid_barcode` tests for this.",
+      "concepts": [
+        "counting_general_concept",
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "definition",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-22-enumerate-and-test-barcode-counting",
+      "topic": "Enumerate and Test Strategy for Counting Barcodes",
+      "text": "We'll start with the  **enumerate and test** strategy: generate `all_strings` of *n* units and count how many are valid with `enumerate_barcodes`:\n\n\n```python\ndef enumerate_barcodes(n) -> int: \n    \"\"\"Enumerate all barcodes of n units and count how many are valid.\"\"\"\n    return quantify(all_strings('BW', n), valid_barcode)\n\ndef all_strings(alphabet, n): \n    \"\"\"All strings of length n over the given alphabet.\"\"\"\n    return {''.join(chars) for chars in product(alphabet, repeat=n)}\n\ndef valid_barcode(code) -> bool: \n    \"\"\"A valid barcode does not have 4 or more of the same unit in a row.\"\"\"\n    return 'BBBB' not in code and 'WWWW' not in code\n```",
+      "concepts": [
+        "enumerate_and_test",
+        "brute_force_enumeration",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-23-all-strings-example",
+      "topic": "Example of all_strings function",
+      "text": "Here are all the strings of length 3:\n\n\n```python\nall_strings('BW', 3)\n```\n\n```\n{'BBB', 'BBW', 'BWB', 'BWW', 'WBB', 'WBW', 'WWB', 'WWW'}\n```",
+      "concepts": [
+        "enumerate_and_test",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-24-valid-barcode-counts-table",
+      "topic": "Table of Valid Barcode Counts for Small n",
+      "text": "Here is a table of counts of valid barcodes for small values of *n*:\n\n\n```python\n{n: enumerate_barcodes(n) for n in range(13)}\n```\n\n```\n{0: 1,\n 1: 2,\n 2: 4,\n 3: 8,\n 4: 14,\n 5: 26,\n 6: 48,\n 7: 88,\n 8: 162,\n 9: 298,\n 10: 548,\n 11: 1008,\n 12: 1854}\n```",
+      "concepts": [
+        "enumerate_and_test",
+        "visualization_problem_solving"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-25-incremental-enumeration-strategy",
+      "topic": "Incremental Enumeration Strategy",
+      "text": "This approach enumerates a lot of strings that can't possibly be valid. For example, there are 1024 strings of length 14 that start with `'BBBB...'` and none of them are valid. We could save a lot of time if we stopped generating such strings after we see the `'BBBB'`.\n\nThe **incremental enumeration** strategy starts with all the valid strings of length 0 (there is only one, the empty string), and then repeats *n* times the process of appending one unit (`'B'` or `'W'`) to each string, if that append would be valid.\n\n\n```python\ndef incremental_count_barcodes(n): \n    \"\"\"Count how many barcodes of length n are valid.\"\"\"\n    barcodes = {''}\n    for _ in range(n):\n        barcodes = extend_barcodes(barcodes)\n    return len(barcodes)\n\ndef extend_barcodes(barcodes) -> set:\n    \"\"\"All valid ways to add one unit to each of a set of barcodes.\"\"\"\n    return {barcode + unit for barcode in barcodes for unit in 'BW'\n            if not barcode.endswith(3 * unit)}\n```",
+      "concepts": [
+        "incremental_enumeration",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-26-incremental-enumeration-with-iterate",
+      "topic": "Incremental Enumeration with Iterate Function",
+      "text": "The four lines of code in the body of `incremental_count_barcodes` are exactly the pattern encapsulated in the `iterate` higher-order function. So we can rewrite `incremental_count_barcodes` with a one-line body:\n\n\n```python\ndef incremental_count_barcodes(n): \n    \"\"\"Count how many barcodes of length n are valid.\"\"\"\n    return len(iterate(extend_barcodes, {''}, n))\n```",
+      "concepts": [
+        "incremental_enumeration",
+        "basic_programming_concepts",
+        "iteration_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-27-incremental-enumeration-example",
+      "topic": "Example Usage of Incremental Enumeration",
+      "text": "Try it:\n\n\n```python\nincremental_count_barcodes(12)\n```\n\n```\n1854\n```\n\nVerify that the results are the same for small *n*:\n\n\n```python\nsame(enumerate_barcodes, incremental_count_barcodes, range(13))\n```\n\n```\nTrue\n```",
+      "concepts": [
+        "incremental_enumeration",
+        "checking_validation_problem_solving",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-28-abstract-incremental-enumeration-strategy",
+      "topic": "Abstract Incremental Enumeration Strategy",
+      "text": "Here's how I think about a more efficient approach:\n* I can use **abstract incremental enumeration**: find a representation that summarizes all the barcodes of length zero, then incremently extend that summary to get a summary of the barcodes of length 1. Do that *n* times.\n* At each step, the key information that needs to be in the summary is how many barcode units of the same color are at the *end* of a barcode: if it is 1 or 2, then we can add another instance of the same color to the end. If it is 3, we cannot. We can always add the opposite color, and then the resulting barcode will end in just one unit of the same color. \n* Thus, the summary will be a list of four counts: `[e0, e1, e2, e3]`, where `ei` gives the number of strings that end in `i` units of the same color. \n* To take this summary and extend it by one unit to make the next summary:\n   - For all the counts except `e3` we could add a unit of the same color; that would show up in the next higher position (e.g. a count of 4 in `e1` would show up as a count of 4 in `e2` in the next summary).\n   - For all the counts, we could add a unit of the opposite color; the sum of them would show up in `e1` of the next summary.\n* The function `abstract_barcodes(n)` does this update `n` times (using `iterate`) and in the end takes the sum of the four counts in the summary.\n* With **brute force enumeration**, incrementing *n* by 1 doubles the amount of work (because you double the number of candidate strings). With **incremental enumeration** there are fewer strings, but still an exponential number of them.\n* With the **abstract incremental** approach, incrementing *n* by 1 does a constant amount of work. Thus the total complexity is *O*(*n*), instead of *O*(2<sup>*n*</sup>) for **brute force enumeration** and (we will see later) approximately *O*(1.8<sup>*n*</sup>) for **incremental enumeration**.",
+      "concepts": [
+        "abstract_enumeration",
+        "incremental_enumeration",
+        "brute_force_enumeration",
+        "algorithm_design_general"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-29-abstract-barcode-implementation",
+      "topic": "Implementation of Abstract Barcode Counting",
+      "text": "We can code that up as follows:\n\n\n```python\nbarcodes0 = [1, 0, 0, 0] # Summary of ending-counts of barcodes of length n=0\n\ndef abstract_barcodes(n) -> int: \n    \"\"\"Count how many barcodes of length n are valid.\"\"\"\n    return sum(iterate(extend_barcodesummary, barcodes0, n))\n\ndef extend_barcodesummary(barcodes) -> list:\n    \"\"\"Given a summary of barcodes of length n, build a summary for length n+1.\"\"\"\n    e0, e1, e2, e3 = barcodes\n    return [0, sum(barcodes) + e0, e1, e2]\n```",
+      "concepts": [
+        "abstract_enumeration",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-30-abstract-barcode-verification",
+      "topic": "Verification of Abstract Barcode Counting",
+      "text": "Verify that we get the same results for small values of *n*:\n\n\n```python\nsame(enumerate_barcodes, abstract_barcodes, range(20))\n```\n\n```\nTrue\n```\n\nWe can examine the first few summaries:\n\n\n```python\n{n: iterate(extend_barcodesummary, barcodes0, n) for n in range(10)}\n```\n\n```\n{0: [1, 0, 0, 0],\n 1: [0, 2, 0, 0],\n 2: [0, 2, 2, 0],\n 3: [0, 4, 2, 2],\n 4: [0, 8, 4, 2],\n 5: [0, 14, 8, 4],\n 6: [0, 26, 14, 8],\n 7: [0, 48, 26, 14],\n 8: [0, 88, 48, 26],\n 9: [0, 162, 88, 48]}\n```",
+      "concepts": [
+        "abstract_enumeration",
+        "checking_validation_problem_solving",
+        "visualization_problem_solving"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-31-abstract-barcode-performance",
+      "topic": "Performance of Abstract Barcode Counting",
+      "text": "`abstract_barcodes` can quickly compute very big numbers that `enumerate_barcodes` could never handle:\n\n\n```python\n%time abstract_barcodes(10000)\n```\n\n```\nCPU times: user 11.3 ms, sys: 643 µs, total: 12 ms\nWall time: 12.6 ms\n```\n\n```\n3861431277625007961956955484353530119634001892816040917233932945064320273497370215771811960744678098449553175356862760450029708838175822242262792740296878964074883622671541479265048463512360941352413049264274485743297728357502930085506419846119753743423275462450713981257123756695327534235952507322555045959925039572403245743061549541274972562526816439217931608999532601457740681763142591939324781110768274782850152125981385364637513839024687081770052346957401052189529936883629883775724870785833452510126377097128195647948735625551805771200981065390268401761158588370204299868440790417559363818139283430755197453196664541025472104658523804014518931760254828135638415413408780736125999685589725526874318196976263624936793335541955083569139572617638693840543637407782446933562063756941909207810703824222697116352937601482868529114899390708691493432262019965964035273813939182009029538539757438413668036430833988535147478776959903569999055599703304516221455076523484352182404159659661240973630499557250950477386781288167303525408434907471599633608826344342446869378392685927230076723348547049789748491137890119623879128231595262082532286126660730784998797003448161418183918024344043613986269574364002761796194720086663633818066518383357158900007727428966795190669943187944515210398817044521469661682433819382541570464313514353180507280999817655346753846288267575488232309682752190042235927387740555053797529717247933281707578234957297940957985028202675009617273305705968728942732545640071819447202821044438874136038990729299397246489481363094787623333269036228204295737689912072742922999093173704662567170601571800655678495878408411165386708197339087266092115780445248022350264528021426918011958029075557108406192634108388793426193565093359228830473466263938925653882623387099940055081548579900911968982480432787324594136156465497071249090902373689488770079828664684036332439902542305885855063306802357476735193730805776865978477463443216064890685565824039494431583860044254937057151591772329166180799218273949130368000609439119706131185925513231524378443124711002954768565310478734594199963723940004083846148186188631535346393565417946059827530465095391420721324513264443555308798011729355327067365885381721113676766083967129134309202588682281325857855165574371421168078423586430302604691681703448297310856061359072019641696782664700526740970642410648738647199882852824774480069658314840218244137906558931392021855430239022442215072063184370394666755160595637651648014842470092745788026900633378764049390511584307920491613532339464196985013369306439276245475602674051266814071448421271626238787893306176669816773478303604652043427279626683524358370\n```\n\nThat's a big number! And it only took about 10 milliseconds! How many digits is the result?",
+      "concepts": [
+        "abstract_enumeration",
+        "algorithm_design_general",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-32-digit-calculation",
+      "topic": "Calculating the Number of Digits",
+      "text": "\n```python\ndef digits(n: int) -> int: return len(str(n))\n\ndigits(abstract_barcodes(10000))\n```\n\n```\n2647\n```\n\nSo the number of valid barcodes of length 10,000 is more than 10<sup>2646</sup>.",
+      "concepts": [
+        "abstract_enumeration",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-33-standing-on-shoulders-oeis",
+      "topic": "Standing on Shoulders: Using OEIS",
+      "text": "We can apply the **shoulders of giants** strategy and search for the first few numbers in the series, [\"1, 2, 4, 8, 14, 26, 48\"](https://www.google.com/search?q=%221%2C+2%2C+4%2C+8%2C+14%2C+26+48%22), and get as the first result the page [oeis.org/A135491](https://oeis.org/A135491), titled *Number of ways to toss a coin n times and not get a run of four*, which sounds right. [OEIS](https://oeis.org/), the On-Line Encyclopedia of Integer Sequences®, is a fantastic resource for all those who count things, and often shows up in searches like this.",
+      "concepts": [
+        "standing_on_shoulders_research",
+        "counting_general_concept"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Barcodes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Barcodes"
+      ],
+      "markdown_anchor": "problem-counting-barcodes",
+      "start_line": 62,
+      "end_line": 265
+    },
+    {
+      "chunk_id": "chunk-34-counting-student-records-problem-definition",
+      "topic": "Problem Definition: Counting Student Records",
+      "text": "# Problem: Counting Student Records (Late/Absent/Present)\n\n> Students at a school must check in with the guidance counselor if they have three total absences, or three consecutive late days. Each student's attendance record consists of a string of 'A' for absent, 'L' for late, or 'P' for present. For example: \"LAPPLAA\" requires a meeting (because there are three absences), and \"LAPPLAL\" is OK (there are three late days, but they are not consecutive). How many attendance records of length *n* days are OK?",
+      "concepts": [
+        "counting_general_concept"
+      ],
+      "chunk_type": "definition",
+      "section": "Problem: Counting Student Records (Late/Absent/Present)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Student Records (Late/Absent/Present)"
+      ],
+      "markdown_anchor": "problem-counting-student-records-lateabsentpresent",
+      "start_line": 266,
+      "end_line": 415
+    },
+    {
+      "chunk_id": "chunk-35-brute-force-enumeration-student-records",
+      "topic": "Brute Force Enumeration for Counting Student Records",
+      "text": "The **brute force enumeration** strategy applies in a similar way to the previous problem. Define what it means for a record to be `ok`, generate all the strings of length *n*, and count how many of them are `ok`.\n\n\n```python\ndef ok(record: str) -> bool: \n    \"\"\"Is this student record OK? (Not 3 absences, nor 3 consecutive lates.)\"\"\"\n    return record.count('A') < 3 and 'LLL' not in record\n\ndef enumerate_count_ok(n) -> int:\n    \"\"\"How many attendance records of length n are ok?\"\"\"\n    return quantify(all_strings('LAP', n), ok)\n```",
+      "concepts": [
+        "brute_force_enumeration",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Student Records (Late/Absent/Present)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Student Records (Late/Absent/Present)"
+      ],
+      "markdown_anchor": "problem-counting-student-records-lateabsentpresent",
+      "start_line": 266,
+      "end_line": 415
+    },
+    {
+      "chunk_id": "chunk-36-brute-force-enumeration-student-records-example",
+      "topic": "Example of Brute Force Enumeration Results",
+      "text": "```python\n{n: enumerate_count_ok(n) for n in range(11)}\n```\n\n```\n{0: 1,\n 1: 3,\n 2: 9,\n 3: 25,\n 4: 67,\n 5: 171,\n 6: 419,\n 7: 994,\n 8: 2296,\n 9: 5188,\n 10: 11510}\n```\n\nThis looks good, but there are 3<sup>*n*</sup> strings of length *n*, so for large values of *n*\nwe will need a more efficient strategy.",
+      "concepts": [
+        "brute_force_enumeration"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Student Records (Late/Absent/Present)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Student Records (Late/Absent/Present)"
+      ],
+      "markdown_anchor": "problem-counting-student-records-lateabsentpresent",
+      "start_line": 266,
+      "end_line": 415
+    },
+    {
+      "chunk_id": "chunk-37-abstract-incremental-enumeration-student-records",
+      "topic": "Abstract Incremental Enumeration for Student Records",
+      "text": "* The **abstract incremental enumeration** strategy is again applicable: find a representation that summarizes all the attendance records of length zero, then incremently extend the length by 1, and do that *n* times. The function `abstract_count_ok` implements this approach, again using `iterate`.\n* What is in the summary? A list of all `ok` records is too much. A simple count of the number of `ok` records is not enough. Instead, we need several different counts, for several different classes of records. Each class is defined by the number of `'A'` characters in the records, and the number of consecutive `'L'` characters at the *end* of the records, because these are the two things that determine whether the string will be `ok` or not `ok` when we add letters to the end).  So the summary can be represented as  a `Counter` of the form `{(A, L): count, ...}`. For example the summary `{(1, 2): 3, ...}` means that there are 3 `ok` records that contain one `'A'` and end in two `'L'`s. They records aren't explicitly named in the summary (that's why the summary can be efficient), but they would be `{'APLL', 'LALL', 'PALL'}`.\n* For *n* = 0, the summary is `{(0, 0): 1}`: one record of length 0, the empty string, which has no `'A'` in it and no `'L'` at the end. \n* The function `extend_one_day` says that we can add an `'A'` to any string that doesn't already have two `'A'`s; we can add an `L` to any string that doesn't already end in 2 `'L'`s; and we can add a `'P'` to any string.",
+      "concepts": [
+        "abstract_enumeration",
+        "incremental_enumeration"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Student Records (Late/Absent/Present)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Student Records (Late/Absent/Present)"
+      ],
+      "markdown_anchor": "problem-counting-student-records-lateabsentpresent",
+      "start_line": 266,
+      "end_line": 415
+    },
+    {
+      "chunk_id": "chunk-38-abstract-incremental-enumeration-code",
+      "topic": "Code for Abstract Incremental Enumeration",
+      "text": "```python\nrecords0 = Counter({(0, 0): 1})\n\ndef abstract_count_ok(n) -> int:\n    \"\"\"How many attendance records of length n are ok?\"\"\"\n    return total(iterate(extend_records, records0, n))\n\ndef extend_records(records: Counter) -> Counter:\n    \"\"\"Given a summary of records of length n in the form {(A, L): count}, \n    build a summary of records of length n + 1.\"\"\"\n    next_records = Counter()\n    for (A, L), count in records.items():\n        if A < 2: next_records[A + 1, 0] += count # add an 'A'\n        if L < 2: next_records[A, L + 1] += count # add an 'L'\n        next_records[A, 0] += count               # add a  'P'\n    return next_records\n```",
+      "concepts": [
+        "abstract_enumeration",
+        "incremental_enumeration",
+        "data_structures_counter",
+        "iteration_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Student Records (Late/Absent/Present)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Student Records (Late/Absent/Present)"
+      ],
+      "markdown_anchor": "problem-counting-student-records-lateabsentpresent",
+      "start_line": 266,
+      "end_line": 415
+    },
+    {
+      "chunk_id": "chunk-39-verification-abstract-vs-brute-force",
+      "topic": "Verification of Abstract Incremental Enumeration",
+      "text": "Verify that `abstract_count_ok` gets the same counts as `enumerate_count_ok`:\n\n```python\nsame(abstract_count_ok, enumerate_count_ok, range(11))\n```\n\n```\nTrue\n```",
+      "concepts": [
+        "abstract_enumeration",
+        "incremental_enumeration",
+        "checking_validation_problem_solving"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Student Records (Late/Absent/Present)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Student Records (Late/Absent/Present)"
+      ],
+      "markdown_anchor": "problem-counting-student-records-lateabsentpresent",
+      "start_line": 266,
+      "end_line": 415
+    },
+    {
+      "chunk_id": "chunk-40-first-few-summaries-of-records",
+      "topic": "First Few Summaries of Records",
+      "text": "Here are the first few summaries of records of length *n*:\n\n```python\n{n: iterate(extend_records, records0, n) for n in range(4)}\n```\n\n```\n{0: Counter({(0, 0): 1}),\n 1: Counter({(1, 0): 1, (0, 1): 1, (0, 0): 1}),\n 2: Counter({(2, 0): 1,\n          (1, 1): 1,\n          (1, 0): 3,\n          (0, 2): 1,\n          (0, 0): 2,\n          (0, 1): 1}),\n 3: Counter({(2, 1): 1,\n          (2, 0): 5,\n          (1, 2): 1,\n          (1, 0): 8,\n          (1, 1): 3,\n          (0, 0): 4,\n          (0, 1): 2,\n          (0, 2): 1})}\n```\n\nFor example, the entry for `1:` says there are 3 total  strings of length one; one of which contains 1 `A` and does not end in `L`; one of which does not contain an `A` and does end in one `L`, and one of which has neither `A` nor `L`.",
+      "concepts": [
+        "abstract_enumeration",
+        "incremental_enumeration",
+        "data_structures_counter"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Student Records (Late/Absent/Present)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Student Records (Late/Absent/Present)"
+      ],
+      "markdown_anchor": "problem-counting-student-records-lateabsentpresent",
+      "start_line": 266,
+      "end_line": 415
+    },
+    {
+      "chunk_id": "chunk-41-abstract-count-ok-beyond-enumeration",
+      "topic": "Abstract Count OK Beyond Enumeration",
+      "text": "Of course `abstract_count_ok` can go *way* beyond what we could do with `enumerate_count_ok`:\n\n```python\nabstract_count_ok(10000)\n```\n\n```\n67915092244946245526761121539961065667354710339484389403398502322665903317227269563431987985548850569926132622865368781540197647175409335204446318662764534903563777210453736211255159314858993923969786046819296950933246810634303897405512752272032426651642064888476180415506912693513909342933046331038474619509081763784765550352067334165901573244296556383159625556197148091705165182887658871588760415124598528254895046939766294908991602550833585558872584109925815975563950518270492886424386418887038225367557977580598940456529146317404617930359322164816128982301399847355494961116547323299531092346924090578848490063810929726294235553624714771568277381300778770044740403839922522259903425992438105556328232190837523076945505837289570218129815218657504553108186081068344280320487112129980538558330653940927620274198611870978884765113302222147574340037452775946171158479481569109577479495284213988633469847097599897091262353972939940610742973967768665639608260138071788253672077302950170544573659098025328249386699113294464533042986243917770015922628745694209690218902434289336799469726583915592005603572447725365675690796428672725349270535435510404530717474913302992334196693282513211071037040630045078690538568866750760269179165191419371245126202447626783645521606741196697550515070422233997330690541032248272343548507506077080632447162616725116827906765346068097284144021799385759481910334161557352438965487177479943712008492652355168983678944082674396835412877102701320156716226396792442810305911973460027845758272368905315276808267770968165158601228698100671353970870820495437717365750878332077859999742716730188128437024395707454371180819695507850153005101353643954347256441396183843055876562258195012627902932249519909390770919657440052840040197024105521065595910086035192717059260479461379754157116341147835641061318945374959021427192475455471423853727585174268760196347849181893783510713204119256033951950166887204536135896283786882669204124059336236100878907356839002912187712588976111620701336082598908391856751671391768146332236193267088262535153912806255587921455005824532343009909950356632076138892829754315844530603374067069772173161102995334001987128851407630096692078344942645715716941016099638170178149988009446531234694691215930910342787376545269610229494026686126796325578380820170813105262828560980051029484551420232365099464095174864505651859406571715076351131405366919080277275366319781500406689243537529390550548233759064314753797975451923281566305080203709436529025198215417739606729647754826931823619915850794244671776741088055751566519186191628709222778000007816869534445057653832155401753050275129786525546204005123078586341515867\n```",
+      "concepts": [
+        "abstract_enumeration",
+        "incremental_enumeration"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Student Records (Late/Absent/Present)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Student Records (Late/Absent/Present)"
+      ],
+      "markdown_anchor": "problem-counting-student-records-lateabsentpresent",
+      "start_line": 266,
+      "end_line": 415
+    },
+    {
+      "chunk_id": "chunk-42-comparison-with-abstract-barcodes",
+      "topic": "Comparison with Abstract Barcodes",
+      "text": "That looks like a roughly similar number of digits as `abstract_barcodes(10000)`; let's compare:\n\n```python\nN = 10000\ndigits(abstract_count_ok(N)), digits(abstract_barcodes(N))\n```\n\n```\n(2654, 2647)\n```\n\nSo `abstract_count_ok(10000)` is only 7 digits more than `abstract_barcodes(10000)`, out of 2654. \n\nI'm curious how close the two series are in general. I'll plot them on a log-plot and compare with $2^n$ and $1.8^n$ (I'll only go up to $n = 366$ days to avoid overflow, but the straight lines look the same at any $n$ values):",
+      "concepts": [
+        "abstract_enumeration",
+        "incremental_enumeration"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Student Records (Late/Absent/Present)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Student Records (Late/Absent/Present)"
+      ],
+      "markdown_anchor": "problem-counting-student-records-lateabsentpresent",
+      "start_line": 266,
+      "end_line": 415
+    },
+    {
+      "chunk_id": "chunk-43-log-plots-comparison",
+      "topic": "Log Plots Comparison",
+      "text": "```python\ndef logplots(X, fns, xlabel='', ylabel=''): \n    \"\"\"Given fns={label: fn,...} plot fn(x) vs x for each fn.\"\"\"\n    plt.yscale('log'); plt.xlabel(xlabel); plt.ylabel(ylabel)\n    for label in fns:\n        plt.plot(X, [fns[label](x) for x in X], '-',  label=label)\n    plt.legend()\n\nlogplots(range(1, 367, 5), {\n    '2^n': (2).__pow__,\n    'abstract_count_ok': abstract_count_ok,\n    'abstract_barcodes': abstract_barcodes,\n    '1.8^n': 1.8.__pow__}, \n    'Number of days', 'Number of Records')\n```\n\n```\n<Figure size 432x288 with 1 Axes>\n```",
+      "concepts": [
+        "visualization_problem_solving",
+        "abstract_enumeration",
+        "incremental_enumeration"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Student Records (Late/Absent/Present)",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Student Records (Late/Absent/Present)"
+      ],
+      "markdown_anchor": "problem-counting-student-records-lateabsentpresent",
+      "start_line": 266,
+      "end_line": 415
+    },
+    {
+      "chunk_id": "chunk-44-counting-rhyme-schemes-problem-definition",
+      "topic": "Problem definition for counting rhyme schemes",
+      "text": "# Problem: Counting Rhyme Schemes\n\nHere's another problem:\n\n> How many rhyme schemes are there for a *k* line poem? 'ABAB' is a valid rhyme scheme, as is 'ABBA', but 'BAAB' is not: in a valid rhyme scheme the first occurrences of each letter forms a prefix of the alphabet.",
+      "concepts": [
+        "counting_general_concept",
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "definition",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-45-rhyme-scheme-validation-explanation",
+      "topic": "Explanation of valid rhyme scheme",
+      "text": "Let's first make sure we understand what counts as a valid rhyme scheme. Given a string, first task pick out the **first occurrences** of letters. For example, for the string `\"ABAB\"`, we read left-to-right, recording each time we see a letter for the first time; that gives us `\"AB\"`; the subsequent occurrences of `'A'` and `'B'` don't matter. Given `\"BAAB\"`, the first occurrences are `\"BA\"`. Now we have to decide if these first occurrences form a **prefix of the alphabet**,  `\"ABCD...\"`. For `\"AB\"` the answer is yes, but for `\"BA\"` the answer is no.\n\nBefore we get to the counting, below are the basic concepts.  Since we will want to go beyond *k* = 26, I will by default make the alphabet be the non-negative integers, so \"letters\" are integers. Use `alphabet` if you want strings of actual letters.",
+      "concepts": [
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-46-rhyme-scheme-validation-code",
+      "topic": "Code for validating rhyme schemes",
+      "text": "```python\nalphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'\n\ndef is_rhyme_scheme(s, alphabet=range(maxsize)) -> bool: \n    \"\"\"Do the first occurrences of letters in `s` form a prefix of the alphabet?\"\"\"\n    return is_prefix(first_occurrences(s), alphabet)\n\ndef is_prefix(short, long) -> bool:\n    \"\"\"Is the first argument a prefix of the second?\"\"\"\n    return all(S == L for S, L in zip(short, long))\n\ndef first_occurrences(s) -> tuple: \n    \"\"\"The first occurrences of each character, in the order they appear.\"\"\"\n    return tuple(Counter(s)) # Counters preserve order of elements\n```",
+      "concepts": [
+        "basic_programming_concepts",
+        "data_structures_counter",
+        "iteration_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-47-rhyme-scheme-validation-examples",
+      "topic": "Examples of rhyme scheme validation",
+      "text": "```python\nis_rhyme_scheme('ABAB', alphabet)\n```\n\n```\nTrue\n```\n\n```python\nis_rhyme_scheme('BAAB', alphabet)\n```\n\n```\nFalse\n```\n\n```python\nis_rhyme_scheme('ABBACABBADABBA', alphabet)\n```\n\n```\nTrue\n```\n\n```python\nis_rhyme_scheme('ABBACABBADABBADO', alphabet)\n```\n\n```\nFalse\n```",
+      "concepts": [
+        "basic_programming_concepts",
+        "checking_validation_problem_solving"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-48-brute-force-enumeration-rhyme-schemes",
+      "topic": "Brute force enumeration of rhyme schemes",
+      "text": "We can count the number of valid strings by **brute force enumeration**: generate all possible strings of length $k$ and check each one with `is_rhyme_scheme`. The complexity of this algorithm is $O(k^{k+1})$, because there are $k^k$ strings, and to validate a string requires looking at $k$ characters:\n\n\n```python\ndef enumerate_rhyme_schemes(k) -> int: \n    \"\"\"Enumerate all possible strings and count the number of valid rhyme schemes.\"\"\"\n    strings = product(range(k), repeat=k)\n    return quantify(strings, is_rhyme_scheme)\n\n{k: enumerate_rhyme_schemes(k) for k in range(8)}\n```\n\n```\n{0: 1, 1: 1, 2: 2, 3: 5, 4: 15, 5: 52, 6: 203, 7: 877}\n```",
+      "concepts": [
+        "brute_force_enumeration",
+        "enumerate_and_test",
+        "algorithm_design_general"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-49-abstract-incremental-enumeration-strategy",
+      "topic": "Abstract incremental enumeration strategy for counting rhyme schemes",
+      "text": "Now let's think about an **abstract incremental enumeration** strategy.\nAs with previous problems, I need a *summary* of the relevant information for strings of length *&nbsp;k*, to help me calculate the relevant information for length *&nbsp;k*+1. I know that if I have a valid string of length *&nbsp;k* with *d* distinct characters in it, then I can extend it by one character in *d* ways by repeating any of those *d* characters, or I can introduce a first occurrence of character number *d+1* (but I can do that in just 1 way). I can't validly introduce any other character. So a good summary would be a Counter of `{d: count, ...}`. We start with strings of length 0, which have a summary of `{0: 1}` (one string, the empty string, with 0 distinct characters) and we get this:",
+      "concepts": [
+        "abstract_enumeration",
+        "incremental_enumeration"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-50-abstract-rhyme-schemes-code",
+      "topic": "Code for abstract rhyme scheme counting",
+      "text": "```python\ndef abstract_rhyme_schemes(k) -> int: \n    \"\"\"Count the number of strings that are valid rhyme schemes.\"\"\"\n    return total(iterate(extend_rhymes, Counter({0: 1}), k))\n\ndef extend_rhymes(counts) -> Counter:\n    \"\"\"Given a summary of the form {d: count}, return summary for one character more.\"\"\"\n    return Counter({d: d * counts[d] + counts[d - 1] \n                    for d in range(len(counts) + 1)})\n```",
+      "concepts": [
+        "abstract_enumeration",
+        "incremental_enumeration",
+        "iteration_programming",
+        "data_structures_counter"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-51-abstract-rhyme-schemes-example",
+      "topic": "Example of abstract rhyme scheme counting",
+      "text": "We can see the summary for strings of length *k* = 3:\n\n```python\niterate(extend_rhymes, Counter({0: 1}), 3)\n```\n\n```\nCounter({0: 0, 1: 1, 2: 3, 3: 1})\n```\n\nThis says that for strings of length 3, there is 1 valid string with 1 distinct letter (which happens to be the string `'AAA'`, but the summary doesn't say that),  3 valid strings with 2 distinct letters (`'AAB', 'ABA', 'ABB'`) and 1 valid string with 3 distinct letters (`'ABC'`).",
+      "concepts": [
+        "abstract_enumeration",
+        "incremental_enumeration",
+        "iteration_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-52-validation-abstract-rhyme-schemes",
+      "topic": "Validation of abstract rhyme scheme counting",
+      "text": "We can show that this approach gives the same results as brute force enumeration (at least up to 7):\n\n```python\nsame(enumerate_rhyme_schemes, abstract_rhyme_schemes, range(8))\n```\n\n```\nTrue\n```\n\nAnd we can see that this approach can handle much bigger values of *k*:\n\n```python\nabstract_rhyme_schemes(1000)\n```\n\n```\n29899013356824084214804223538976464839473928098212305047832737888945413625123259596641165872540391578300639147082986964028021802248993382881013411276574829121155811755170830666039838837273971971676782389800810361809319250755399325279656765435255999301529770267107281619733800281695881540007577899106878679451165492535930459233713316342551545242815802367257284852612201081016386308535990145447341800455472334713864080523978960296365736999295932080550928561633025800627524911700149562106895897725047744775812241800937310491797818107578233924187312824632629095993832334781713007323483688294825326897450386817327410532925074613888321264138083842196202242956001314953449497244271843922741908252107652201346933889741070435350690242062001522697855278356012055718392851567813397125419144780476479197990921602015873703820769182603836788465785093563686025690269802153802436873530877006737154523895273029510238745997356292232631282773748762989386003970214423843947094021177989737557020369751561595003372955621411858485959813344799967960196238368337022346946771703060269288691694028444791203978533454759410587065022546491518871238421560825907135885619221776405898771057270555581449229994215739476758785884545723062263992367750091319644861547658472282284005892044371587560711880627741139497818835632120761570174928529697397267899554407350161283097123211048049269727655279783900702416095132827766428865017653366696304131436690232979453876337599721772897049270230544262611264917393374756384152784943607952408782612639220380791445272655004475989064276373713608901650681165467490310898804916827069427310961109285035545084791339423266482359955663377201515204340817580915468489969181643341007197836481461051798995640789292580146918580703759556634019451731530034209189203377522668309771129566108101617727442045637098112678864654309987785463307376544339506878267267349348171320834971956806668304099159992067385998690820326902473886782781499414773179\n```\n\nThat's a big number.\n\nA search for [\"1, 1, 2, 5, 15\"](https://www.google.com/search?q=%221%2C+1%2C+2%2C+5%2C+15%22) shows that this sequence is called [Bell numbers](https://en.wikipedia.org/wiki/Bell_number), and that they have lots of applications.",
+      "concepts": [
+        "abstract_enumeration",
+        "incremental_enumeration",
+        "checking_validation_problem_solving",
+        "standing_on_shoulders_research"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-53-recursion-version-2",
+      "topic": "Recursive approach to counting rhyme schemes",
+      "text": "## Version 2: Recursion\n\nAnother way to keep track of the number of valid strings of length *&nbsp;k* with *&nbsp;d* distinct characters is with a recursive counting function, which I will call `count_rhymes(k, d)`. There are three cases: \n\n- `count_rhymes(0, 0)` is 1, because the empty string is valid (and contains no distinct characters). \n- `count_rhymes(k, d)` is 0 when `k` is negative (because there is no such thing as a negative length string) or less than `d` (because a string can't contain more distinct characters than its length). \n- Otherwise, there are `d` ways to add an existing letter to each of the strings of length `k - 1`, and there is one way to add a new letter.",
+      "concepts": [
+        "recursion",
+        "counting_general_concept",
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-54-recursive-counting-code",
+      "topic": "Code for recursive counting of rhyme schemes",
+      "text": "```python\n@lru_cache(None)\ndef count_rhymes(k, d) -> int:\n    \"\"\"Count the number of valid strings of length k, that use d distinct characters.\"\"\"\n    return (1 if (k == 0 == d)    else\n            0 if (k < 0 or k < d) else\n            d * count_rhymes(k - 1, d) + count_rhymes(k - 1, d - 1))\n```\n\nNote that I used `lru_cache`, to avoid having to re-compute intermediate results.",
+      "concepts": [
+        "recursion",
+        "memoization_caching"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-55-calculate-rhyme-schemes-function",
+      "topic": "Calculate rhyme schemes function definition",
+      "text": "Now I can define `calculate_rhyme_schemes(k)` as the sum of `count_rhymes(k, d)` over all values of `d`:\n\n```python\ndef calculate_rhyme_schemes(k) -> int: \n    \"\"\"Count the number of strings that are valid rhyme schemes.\"\"\"\n    return sum(count_rhymes(k, d) for d in range(k + 1))\n```",
+      "concepts": [
+        "recursion",
+        "counting_general_concept"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-56-validation-recursive-approach",
+      "topic": "Validation of the recursive approach",
+      "text": "Let's validate this:\n\n```python\nsame(abstract_rhyme_schemes, calculate_rhyme_schemes, range(101))\n```\n\n```\nTrue\n```",
+      "concepts": [
+        "recursion",
+        "checking_validation_problem_solving"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rhyme Schemes",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rhyme Schemes",
+        "Version 2: Recursion"
+      ],
+      "markdown_anchor": "problem-counting-rhyme-schemes",
+      "start_line": 645,
+      "end_line": 813
+    },
+    {
+      "chunk_id": "chunk-57-counting-rectangle-sets-problem-introduction",
+      "topic": "Introduction to the problem of counting rectangle sets.",
+      "text": "# Problem: Counting Rectangle Sets\n\nThis problem is covered in depth in [another notebook](Golomb-puzzle.ipynb), so here I present just the part that has to do with counting things:\n\n> Say you’re given the following challenge: create a set of five rectangles that have sides of length 1, 2, 3, 4, 5, 6, 7, 8, 9 and 10 units. You can combine sides in a variety of ways: for example, you could create a set of rectangles with dimensions 1 x 3, 2 x 4, 5 x 7, 6 x 8 and 9 x 10. How many different sets of five rectangles are possible?",
+      "concepts": [
+        "counting_general_concept",
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "overview",
+      "section": "Problem: Counting Rectangle Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rectangle Sets"
+      ],
+      "markdown_anchor": "problem-counting-rectangle-sets",
+      "start_line": 814,
+      "end_line": 875
+    },
+    {
+      "chunk_id": "chunk-58-combinatorics-problem-statement",
+      "topic": "Defining the rectangle set counting problem as a combinatorics problem.",
+      "text": "This is a basic [combinatorics](http://en.wikipedia.org/wiki/Combinatorics) problem. I will present *three* methods to calculate the number of sets. If all goes well they will give the same answer. The example set of rectangles given in the problem was\n\n     {1 × 3, 2 × 4, 5 × 7, 6 × 8, 9 × 10}\n    \nand in general it would be\n\n     {A × B, C × D, E × F, G × H, I × J}\n\nThe question is: how many distinct ways can we assign the integers 1 through 10 to the variables A through J?",
+      "concepts": [
+        "combinatorics_general_concept",
+        "counting_general_concept"
+      ],
+      "chunk_type": "definition",
+      "section": "Problem: Counting Rectangle Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rectangle Sets"
+      ],
+      "markdown_anchor": "problem-counting-rectangle-sets",
+      "start_line": 814,
+      "end_line": 875
+    },
+    {
+      "chunk_id": "chunk-59-method-1-count-permutations-and-divide",
+      "topic": "Method 1: Counting all permutations and dividing by repetitions.",
+      "text": "**Method 1: Count all permutations and divide by repetitions:** There are 10 variables to be filled, so there are 10! = 3,628,800 permutations.  But if we fill the first two variables with 1 × 3, that is the same rectangle as 3 × 1. So divide 10! by 2<sup>5</sup> to account for the fact that each of 5 rectangles can appear 2 ways.  Similarly, if we fill A and B with 1 × 3, that yields the same set as if we filled C and D with 1 × 3.  So divide again by 5! (the number of permutations of 5 things) to account for this.\nThat gives us:\n\n\n```python\nfactorial(10) / 2 ** 5 / factorial(5)\n```",
+      "concepts": [
+        "permutations",
+        "counting_general_concept",
+        "formula_calculation"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Rectangle Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rectangle Sets"
+      ],
+      "markdown_anchor": "problem-counting-rectangle-sets",
+      "start_line": 814,
+      "end_line": 875
+    },
+    {
+      "chunk_id": "chunk-60-method-1-code-example-and-result",
+      "topic": "Code and result for Method 1.",
+      "text": "```\n945.0\n```\n\n(It is always a relief when this \"count and divide\" method comes out to a whole number.)",
+      "concepts": [
+        "permutations",
+        "counting_general_concept",
+        "formula_calculation"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rectangle Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rectangle Sets"
+      ],
+      "markdown_anchor": "problem-counting-rectangle-sets",
+      "start_line": 814,
+      "end_line": 875
+    },
+    {
+      "chunk_id": "chunk-61-method-2-count-without-repetitions",
+      "topic": "Method 2: Counting without repetitions by imposing an order.",
+      "text": "**Method 2: Count without repetitions**: in each rectangle of the example set the smaller component is listed first, and in each set, the rectangles with smaller first components are listed first. Without loss of generality, let's assume that all rectangle sets must be of this form, and count how many sets there are that respect this ordering.  We'll work from left to right.  How many choices are there for variable A?  *Only one!* A must always be 1, because we agreed that the smallest number comes first. Then, given A, there are 9 remaining choices for B.  For C, given A and B, there is again only one choice: C must be the smallest of the remaining 8 numbers.  That leaves 7 choices for D, 5 for F, 3 for H and 1 for J. So:\n\n\n```python\n9 * 7 * 5 * 3 * 1\n```",
+      "concepts": [
+        "counting_general_concept",
+        "formula_calculation"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Rectangle Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rectangle Sets"
+      ],
+      "markdown_anchor": "problem-counting-rectangle-sets",
+      "start_line": 814,
+      "end_line": 875
+    },
+    {
+      "chunk_id": "chunk-62-method-2-code-example-and-result",
+      "topic": "Code and result for Method 2.",
+      "text": "```\n945\n```\n\n(It is always a relief when two methods give the same answer.)",
+      "concepts": [
+        "counting_general_concept",
+        "formula_calculation"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rectangle Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rectangle Sets"
+      ],
+      "markdown_anchor": "problem-counting-rectangle-sets",
+      "start_line": 814,
+      "end_line": 875
+    },
+    {
+      "chunk_id": "chunk-63-method-3-enumerate-and-test",
+      "topic": "Method 3: Writing a program to enumerate and test.",
+      "text": "**Method 3: Write a program to enumerate and test:** We'll generate all permutations of sides, and then check which ones are valid rectangle sets: they must have the first element of each pair less than the second (i.e. A < B, C < D, ...) and the pairs must be sorted, which is equivalent to saying their first elements are sorted (i.e. A < C < E < G < I).\n\n\n```python\ndef valid_rectangle_set(sides) -> bool:\n    \"\"\"Are the sides ordered according to convention?\"\"\"\n    A,B, C,D, E,F, G,H, I,J = sides\n    return A < B and C < D and E < F and G < H and I < J and A < C < E < G < I\n\nquantify(permutations(range(1, 11)), valid_rectangle_set)\n```",
+      "concepts": [
+        "enumerate_and_test",
+        "permutations",
+        "counting_general_concept",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rectangle Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rectangle Sets"
+      ],
+      "markdown_anchor": "problem-counting-rectangle-sets",
+      "start_line": 814,
+      "end_line": 875
+    },
+    {
+      "chunk_id": "chunk-64-method-3-code-example-and-result",
+      "topic": "Code and result for Method 3.",
+      "text": "```\n945\n```\n\n(It is a relief that once again we get the same answer.)",
+      "concepts": [
+        "enumerate_and_test",
+        "permutations",
+        "counting_general_concept"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Rectangle Sets",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Rectangle Sets"
+      ],
+      "markdown_anchor": "problem-counting-rectangle-sets",
+      "start_line": 814,
+      "end_line": 875
+    },
+    {
+      "chunk_id": "chunk-65-counting-paths-grid-problem-definition",
+      "topic": "Problem Definition: Counting Paths on a Grid",
+      "text": "# Problem: Counting Paths on a Grid\n\n> In a grid, how many paths are there from the upper left to the lower right corner, making only rightward or downward moves?\n     \nHere is an example 11 × 6 grid, with three of the possible paths:\n\n     ----------+     |..........     --+........\n     ..........|     |..........     ..+-+......\n     ..........|     +--+.......     ....+-+....\n     ..........|     ...|.......     ......+-+..\n     ..........|     ...|.......     ........|..\n     ..........|     ...+-------     ........+--",
+      "concepts": [
+        "counting_general_concept",
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "definition",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-66-counting-paths-method-1",
+      "topic": "Counting Paths: Method 1 - Permutations and Repetitions",
+      "text": "We can use the same three methods as the previous problem:\n\n**Method 1: Count all permutations and divide by repetitions:** Any path on this grid must consist of 10 right and 5 down moves, but they can appear in any order. Arranging 15 things in any order gives 15! = 1,307,674,368,000 possible paths. But that counts all the moves as being distinct, when actually the 10 right moves are indistinguishable, as are the 5 down moves, so we need to divide by the number of ways that they can be arranged. That gives us:\n\n\n```python\nfactorial(15) // (factorial(10) * factorial(5))\n```",
+      "concepts": [
+        "counting_general_concept",
+        "permutations",
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-67-counting-paths-method-1-example",
+      "topic": "Counting Paths: Method 1 - Example",
+      "text": "```\n3003\n```",
+      "concepts": [
+        "counting_general_concept",
+        "permutations",
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-68-counting-paths-method-2",
+      "topic": "Counting Paths: Method 2 - Combinations",
+      "text": "**Method 2: Count without repetitions**: Another way to look at it is that there will be 15 total moves, so start with all 15 being \"right\" moves and  then choose 5 of them to become \"down\" moves. So the answer is (15 choose 5), which happens to lead to the same formula we just used:\n\n\n```python\ndef choose(n, k) -> int: return factorial(n) // (factorial(n - k) * factorial(k))\n\nchoose(15, 5)\n```",
+      "concepts": [
+        "counting_general_concept",
+        "combinations_n_choose_k",
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-69-counting-paths-method-2-example",
+      "topic": "Counting Paths: Method 2 - Example",
+      "text": "```\n3003\n```",
+      "concepts": [
+        "counting_general_concept",
+        "combinations_n_choose_k",
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-70-counting-paths-method-3",
+      "topic": "Counting Paths: Method 3 - Recursive Program",
+      "text": "**Method 3: Write a program to count the paths:** The function `count_paths(start, goal)` counts the number of paths from the start location to the goal location, where a location is an `(x, y)` pair of integers.\nIn general, the number of paths to the goal is the number of paths to the location just to the left of the goal, plus the number of paths to the location just above the goal. But there are two special cases: there is only one path (the empty path) when the start is equal to the goal, and there are zero paths when the goal is an invalid destination (one with a negative coordinate).\n\n\n```python\n@lru_cache(None)\ndef count_paths(start=(0, 0), goal=(5, 10)) -> int:\n    \"\"\"Number of paths to goal, using only 'right' and 'down' moves.\"\"\"\n    (x, y) = goal\n    return (1 if goal == start else\n            0 if x < 0 or y < 0 else\n            count_paths(start, (x - 1, y)) + \n            count_paths(start, (x, y - 1)))\n    \ncount_paths()\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-71-counting-paths-method-3-example",
+      "topic": "Counting Paths: Method 3 - Example",
+      "text": "```\n3003\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-72-counting-paths-large-grids",
+      "topic": "Counting Paths: Handling Large Grids",
+      "text": "Even though `count_paths` is slower than the `choose` calculation, it can still handle reasonably large grids:\n\n\n```python\nN = 100\nassert count_paths(goal=(N, N)) == choose(2 * N, N)\ncount_paths(goal=(N, N))\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-73-counting-paths-large-grids-output",
+      "topic": "Counting Paths: Large Grid Output",
+      "text": "```\n90548514656103281165404177077484163874504589675413336841320\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-74-counting-paths-validation-obstacles",
+      "topic": "Counting Paths: Validation and Handling Obstacles",
+      "text": "Why bother with the recursive function `count_paths` when the `choose` formula works so well? Good question. One reason is **checking**: the two different approaches validate each other by giving the same answer. Another reason is that we can modify `count_paths` to handle things that are hard to do with just the formula. For example, what if we have a grid with some obstacles in it?  I'll define a `Grid` constructor, which adopts the convention that the input is a string of rows, where a `'.'` character within a row is a passable square, and all other (non-whitespace) characters are impassible barriers. Then `count_grid_paths` finds the number of paths on a grid from start to goal (by default, from upper left to lower right):\n\n\n```python\ndef Grid(text): return tuple(text.split())\n\npassable = '.'\n\n@lru_cache(None)\ndef count_grid_paths(grid, start=(0, 0), goal=None) -> int:\n    \"\"\"Number of paths from start to goal on grid, using only 'right' and 'down' moves.\"\"\"\n    if goal is None: goal = (len(grid[-1]) - 1, len(grid) - 1) # bottom right\n    (x, y) = goal\n    return (1 if goal == start else\n            0 if x < 0 or y < 0 or grid[y][x] != passable else\n            count_grid_paths(grid, start, (x - 1, y)) + \n            count_grid_paths(grid, start, (x, y - 1)))\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming",
+        "checking_validation_problem_solving"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-75-counting-grid-paths-validation",
+      "topic": "Counting Grid Paths: Validation with Empty Grid",
+      "text": "We can verify that we get the same answer on the 11 by 6 empty grid:\n\n\n```python\ncount_grid_paths(Grid(\"\"\"\n...........\n...........\n...........\n...........\n...........\n...........\n\"\"\"))\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming",
+        "checking_validation_problem_solving"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-76-counting-grid-paths-validation-output",
+      "topic": "Counting Grid Paths: Empty Grid Output",
+      "text": "```\n3003\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming",
+        "checking_validation_problem_solving"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-77-counting-grid-paths-obstacles-example-1",
+      "topic": "Counting Grid Paths: Example with Obstacles (Wall)",
+      "text": "Here's a grid where there are only two paths around the walls:\n\n\n```python\ncount_grid_paths(Grid(\"\"\"\n...........\n.........|.\n.........|.\n.........|.\n.--------+.\n...........\n\"\"\"))\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-78-counting-grid-paths-obstacles-example-1-output",
+      "topic": "Counting Grid Paths: Obstacles (Wall) Output",
+      "text": "```\n2\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-79-counting-grid-paths-obstacles-example-2",
+      "topic": "Counting Grid Paths: Example with Obstacles (Hole in Wall)",
+      "text": "If we put a hole in the wall, there should be many paths (but less than 3003 because most of the wall remains):\n\n\n```python\ncount_grid_paths(Grid(\"\"\"\n...........\n.........|.\n.........|.\n.........|.\n.------.-+.\n...........\n\"\"\"))\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-80-counting-grid-paths-obstacles-example-2-output",
+      "topic": "Counting Grid Paths: Obstacles (Hole in Wall) Output",
+      "text": "```\n122\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-81-counting-grid-paths-larger-examples",
+      "topic": "Counting Grid Paths: Larger Examples",
+      "text": "Here are a couple of bigger examples, courtesy of [ascii-art-generator.org](https://www.ascii-art-generator.org/):\n\n\n```python\ncount_grid_paths(Grid(\"\"\"\n....................................................................................................\n...................................NK0OkdddolcccccccccclloddxkO0XN..................................\n............................X0kdlc:cccccclodxllxxxkkxdloddolccccccccodkKN...........................\n.......................N0xl:cccllcco0.XXXXXX.l,O.NNNNo,kXXXXXXXNklllolccccokKN......................\n..................X.0dc::loool:,XXXdXXXXXXXXN:.X''X''X.dXXXXXXX.KcXX';coooolcclkX...................\n.................Kd.:cooo:'X.....'O.XXXXXXXXX;.........oXXXXXXXXXNo......X,lddoc:ckX................\n...............Oc,c.oc'..........l.XXXXXXXXXOX.........:NXXXXXXXXX0'.........X;oxoc;oK..............\n.............0c,lxl..............,O.XXXXXXXK;..........XlNXXXXXXXXlX............X;dxc,oX............\n...........Nx':xlX................X;dOKXX0d'.............,d0XK0xl'.................,xx;;O...........\n...........dXlk,......................XXXX.................XXX......................Xl0:xO..........\n..........OX:0:.......................................................................d0x;X.........\n..........lXdOX.......................................................................;XlXk.........\n..........lXdOX.......................................................................;XlXk.........\n.........XkX:0:...............XX....................................XX................dK,;K.........\n..........NoXlk,...........XoOKK0xc'.....X'..............XXX....X;okKXKO:X..........Xl0:Xk..........\n...........XoX:xcX.........o.XXXXXXNk:X,kNNO:..........Xl0NKoX'oK.XXXXXXX:.........'xk;,k...........\n...........X.k;'lo;X.......l.XXXXXXXX.XXXXXXNxX.......,O.XXX.XNXXXXXXXXXK,.......'oxc'cK............\n.............XNx;,:lc,.....Xd.XXXXXXXXXXXXXXX.O'.....cXXXXXXXXXXXXXXXXXX:.....Xcoo:,cO..............\n...............XNOl;;:c:;X..XlXXXXXXXXXXXXXXXXX0,...oNXXXXXXXXXXXXXXX.O,..X;c.lc;:dK................\n..................XNkl:;;:.:::oXXXXXXXXXXXXXXXXX0:'.NXXXXXXXXXXXXXXXNkc:cccc:..:d0..................\n......................NKko.;;;:lxOKX.XXXXXXXXXXXXNN.XXXXXXXXXXX..X0Odc::::cdOX......................\n...........................N0kdl:;;:;;:clodxxkkkkOO.Okkxxddolc::::;:cldOK...........................\n..................................XKOkxdolcc:;;::;;.::;::cllodxk0KN.................................\n....................................................................................................\n\"\"\"))\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-82-counting-grid-paths-larger-examples-output-1",
+      "topic": "Counting Grid Paths: Larger Examples Output 1",
+      "text": "```\n627084695807418\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-83-counting-grid-paths-larger-examples-2",
+      "topic": "Counting Grid Paths: Larger Examples 2",
+      "text": "```python\ncount_grid_paths(Grid(r\"\"\"\n.....................................................................................................\n.................WXK0kxdd.oooooooooodxOXW............................................................\n..........W0xdoooooooodxk.00KKKKK00OxdoolokXW........................................................\n..........Wk',xKXNW....................WXkollOW......................................................\n............0:c0W..........WNN.............NkccOW....................................................\n.............Xd:dN.........Nkooodk0XW........Nk:lKW..................................................\n..............W0lckN........WNKOxooooodk0NW....Xo:ckW................................................\n................WOccxX.............WX0xdoooodOKNWkc;dN.WKOK..........................................\n..................WOocoON................WXOxoododd:.ld:..cX.........................................\n.....................XxlloxKN..................NOl:'....;dKW.........................................\n.......................WXkoloooxO0XNNWWWNXK0k.oll;'...;ON............................................\n...........................WN0kdooooooooooooo.kKO;...dN......WN0kdocc.WW.clodk0NW....................\n....................NX0OkkkO0XWW...WWNNNW......Xc...xW...WXko;.....',.Nd.;'.....;lkKW................\n...............WXOo.;;::ccc::::cokKW..........Wx...oN..Nkc...,cdOKXNW....WNXKOdl;...;o0N.............\n.............Nkc,;c.OXW.....WX0xl:;:lkXW......X;.,d0.Xd'..;d0N..................WKkl'..,dKW..........\n..........WKo,,lONW..............WXkl:;cxKW......oNXd'..cON.........................NOl...lKW........\n.........Kl',xX......................W0dc::lkKo..cd;..c0W.............................WXd'..oX.......\n.......Nd''xN...........................WXOoc:'.....'kW..................................Xo..,.W.....\n......K:.lK.................................WNx'...;K.....................................W0;..xW....\n....W0,.xN..................................Nx...o0X........................................X:..xW...\n....0,.kW...................................WOcl.W...........................................X:.'O...\n...K;.xW.........................................................................................cN..\n..Nl.lN.......................................................................................Wl..k..\n..k.,K.........................................................................................k..oW.\n.Nc.oW............................................................................................cN.\n.K,.O..........................................................................................K,.:X.\n.k.;X..........................................................................................K,.:N.\n.x.:N..........................................................................................0'.lW.\n.d.cN..........................................................................................k.....\n.d.cN.........................................................................................Wo..O..\n.x.;X.........................................................................................K,.:X..\n.O.'0........................................................................................Wx..dW..\n.K,.x........................................................................................X;.,K...\n.Wl.cN......................................................................................Wd..dW...\n..O.'O......................................................................................0,.:X....\n..Nc.lN....................................................................................Nl..O.....\n...O'.k...................................................................................Wx..oW.....\n...Wd.;K..................................................................................0,.:X......\n....Xc.cN................................................................................X:.'0.......\n.....K,.oN..............................................................................No..xW.......\n......0,.dN............................................................................Wx..oW........\n.......0,.oN..............................................................................cN.........\n........0;.cX.........................................................................0,.;K..........\n.........Kc.;0W......................................................................X;..0...........\n..........Nd..dN....................................................................Xc...............\n...........W0;.;OW.................................................................Xc..kW............\n.............Nd'.c0W..............................................................K:..kW.............\n...............Xo..:ON..........................................................Nk'.;0W..............\n.................Xd'.,dKW.....................................................NO:..oX................\n...................Xx:..:d0N........................WNXK0000KKXNW.........WXO....c0W.................\n.....................WKx:'.,cdOKNW...........WNKOxol;'........'',;:cclllc.;......KW..................\n........................WXOo:,..';cloodddoolc;'..',;ldk00K000Okxoolc:::::.ldOXW......................\n.............................NKOxolc:;;,,;:ccodk0NWW.................................................\n.....................................WWWWW...........................................................\n.....................................................................................................\n\"\"\"))\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-84-counting-grid-paths-larger-examples-output-2",
+      "topic": "Counting Grid Paths: Larger Examples Output 2",
+      "text": "```\n11468451846417028993973305727890751485\n```",
+      "concepts": [
+        "counting_general_concept",
+        "recursion",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-85-counting-grid-paths-verification-question",
+      "topic": "Counting Grid Paths: Verification Question",
+      "text": "Can you verify that these last three answers are correct?",
+      "concepts": [
+        "counting_general_concept",
+        "checking_validation_problem_solving"
+      ],
+      "chunk_type": "exercise",
+      "section": "Problem: Counting Paths on a Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Paths on a Grid"
+      ],
+      "markdown_anchor": "problem-counting-paths-on-a-grid",
+      "start_line": 876,
+      "end_line": 1126
+    },
+    {
+      "chunk_id": "chunk-86-problem-paths-in-a-2-x-n-grid",
+      "topic": "Problem Definition: Paths in a 2 x n Grid",
+      "text": "# Problem: Paths in a 2 x *n* Grid\n\nNicolas Schank proposes this problem:\n\n> How many ways can you arrange the integers 1 through 2*n* in a 2 x *n* grid such that any two consecutive numbers are placed into squares that share a side?\n\nAnother way of stating the problem is: how many paths are there that visit every square in  2 x *n* grid once,  moving from a square to any of its orthogonal neighbors. (The integers 1 is then the first square in the path, 2 the second, and so on.)",
+      "concepts": [],
+      "chunk_type": "definition",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-87-brute-force-vs-incremental-enumeration",
+      "topic": "Brute Force vs. Incremental Enumeration",
+      "text": "The **brute force enumeration** strategy would be to generate all (2*n*)! permutations of the integers and check if they form a valid path. That should work fine up to  *n* = 6, but not much beyond that.\n\nTherefore I'll go to the  **incremental enumeration strategy**, in which I start with paths of length 1 and extend them one square at a time, checking for validity at each step, until we find all the paths that reach all 2*n* squares. (This is not an **abstract** strategy: these are individual paths, not summaries of them.)",
+      "concepts": [
+        "brute_force_enumeration",
+        "incremental_enumeration",
+        "abstract_enumeration"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-88-path-data-structure-definition",
+      "topic": "Path Data Structure Definition",
+      "text": "I'll describe a `Path` with three components, `Path(end, n, squares)`:\n  - `end`: the `(x, y)` coordinates of the square that the path ends in.\n  - `n`: the width of the grid. (This is the same for every path in a problem instance, but I had to store it somewhere).\n  - `squares`: a dict of `{(x, y): i}` entries giving the order of the squares visited.\n  \nThe approach then is that we start with one-square paths of the form `Path(s, n, {s: 1})` for every square `s` in the grid. Then we `iterate` calling `extend_paths` until we have all the complete paths. A path is extended by  placing the integer `len(squares) + 1` in any square that neighbors `path.end` and does not already appear in `path.squares`.",
+      "concepts": [
+        "iteration_programming",
+        "incremental_enumeration"
+      ],
+      "chunk_type": "definition",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-89-incremental-path-counting-code",
+      "topic": "Incremental Path Counting Implementation",
+      "text": "```python\nPath = namedtuple('Path', 'end, n, squares')\n\ndef incremental_count_paths(n) -> [Path]:\n    \"\"\"Extend every path as far as possible and return the ones of length 2*n\"\"\"\n    grid = product(range(n), (0, 1))\n    paths = [Path(s, n, {s: 1}) for s in grid]\n    return iterate(extend_paths, paths, 2 * n - 1)\n\ndef extend_paths(paths) -> [Path]:\n    \"\"\"Return a list of paths that validly extend these paths by one square.\"\"\"\n    return [Path(end2, n, {end2: len(squares) + 1, **squares})\n            for (end,  n, squares) in paths\n            for end2 in neighbors(n, *end) if end2 not in squares]\n\ndef neighbors(n, x, y):\n    \"\"\"The squares that neighbor `(x, y)` in a nx2 grid.\"\"\"\n    if x < n-1: yield (x + 1, y)\n    if x > 0:   yield (x - 1, y)\n    yield (x, 1 - y)\n```",
+      "concepts": [
+        "incremental_enumeration",
+        "iteration_programming",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-90-example-incremental-count-paths-n-2",
+      "topic": "Example: incremental_count_paths(2)",
+      "text": "```python\nincremental_count_paths(2)\n```",
+      "concepts": [
+        "incremental_enumeration"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-91-output-incremental-count-paths-n-2",
+      "topic": "Output: incremental_count_paths(2)",
+      "text": "```\n[Path(end=(0, 1), n=2, squares={(0, 1): 4, (1, 1): 3, (1, 0): 2, (0, 0): 1}),\n Path(end=(1, 0), n=2, squares={(1, 0): 4, (1, 1): 3, (0, 1): 2, (0, 0): 1}),\n Path(end=(0, 0), n=2, squares={(0, 0): 4, (1, 0): 3, (1, 1): 2, (0, 1): 1}),\n Path(end=(1, 1), n=2, squares={(1, 1): 4, (1, 0): 3, (0, 0): 2, (0, 1): 1}),\n Path(end=(1, 1), n=2, squares={(1, 1): 4, (0, 1): 3, (0, 0): 2, (1, 0): 1}),\n Path(end=(0, 0), n=2, squares={(0, 0): 4, (0, 1): 3, (1, 1): 2, (1, 0): 1}),\n Path(end=(1, 0), n=2, squares={(1, 0): 4, (0, 0): 3, (0, 1): 2, (1, 1): 1}),\n Path(end=(0, 1), n=2, squares={(0, 1): 4, (0, 0): 3, (1, 0): 2, (1, 1): 1})]\n```",
+      "concepts": [
+        "incremental_enumeration"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-92-path-visualization",
+      "topic": "Path Visualization",
+      "text": "Let's try to get a better understanding by visualizing the paths:",
+      "concepts": [
+        "visualization_problem_solving"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-93-show-paths-function",
+      "topic": "show_paths Function Definition",
+      "text": "```python\ndef show_paths(paths, cols=4):\n    \"\"\"Plot all the paths in a matrix of subplots.\"\"\"\n    n = paths[0].n\n    P = len(paths)\n    fig, axs = plt.subplots(P // cols, cols, figsize=(14, 2 * n))\n    for y in range(P // cols):\n        for x in range(cols):\n            if paths:\n                path = paths.pop()\n                _, X, Y = zip(*(sorted((i, x, y) for (x, y), i in path.squares.items())))\n                axs[y, x].axis('off')\n                axs[y, x].plot(X, Y, 's-', clip_on=False)\n                axs[y, x].plot(X[:1], Y[:1], 'rs', clip_on=False)\n    fig.tight_layout(pad=3.0)\n    fig.suptitle(f'{P} Paths for a 2x{n} Grid:')\n    plt.show()\n```",
+      "concepts": [
+        "visualization_problem_solving",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-94-visualizing-paths-for-different-n",
+      "topic": "Visualizing Paths for different n",
+      "text": "```python\nfor n in (2, 3, 4, 5, 6):\n    show_paths(incremental_count_paths(n))\n```",
+      "concepts": [
+        "visualization_problem_solving",
+        "incremental_enumeration",
+        "iteration_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-95-visualization-outputs",
+      "topic": "Visualization Outputs",
+      "text": "```\n<Figure size 1008x288 with 8 Axes>\n```\n\n```\n<Figure size 1008x432 with 16 Axes>\n```\n\n```\n<Figure size 1008x576 with 28 Axes>\n```\n\n```\n<Figure size 1008x720 with 44 Axes>\n```\n\n```\n<Figure size 1008x864 with 64 Axes>\n```",
+      "concepts": [
+        "visualization_problem_solving"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-96-table-of-path-counts",
+      "topic": "Table of Path Counts",
+      "text": "Let's also create a table of number of paths as a function of `n`:",
+      "concepts": [
+        "visualization_problem_solving"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-97-path-count-table-generation",
+      "topic": "Path Count Table Generation",
+      "text": "```python\n{n: len(incremental_count_paths(n)) for n in range(1, 13)}\n```",
+      "concepts": [
+        "incremental_enumeration",
+        "iteration_programming"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-98-path-count-table-output",
+      "topic": "Path Count Table Output",
+      "text": "```\n{1: 2,\n 2: 8,\n 3: 16,\n 4: 28,\n 5: 44,\n 6: 64,\n 7: 88,\n 8: 116,\n 9: 148,\n 10: 184,\n 11: 224,\n 12: 268}\n```",
+      "concepts": [
+        "incremental_enumeration"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-99-standing-on-shoulders-oeis",
+      "topic": "Standing on Shoulders: OEIS Lookup",
+      "text": "The visualization was interesting, and the number of valid paths makes it clear that this is not growing too quickly; probably polynomial rather than exponential. But I have no clue about a general formula for *n*.\n\nI'll try the **standing on shoulders** approach. I'll search for the first few elements of the sequence,\n[\"2, 8, 16, 28, 44, 64\"](https://www.google.com/search?q=%222%2C+8%2C+16%2C+28%2C+44%2C+64%22), and see if anyone has reported on them.  It turns out the [first search result](https://oeis.org/search?q=2%2C+8%2C+16%2C+28%2C+44%2C+64&language=english&go=Search) is from the online encyclopedia of integer sequences (a famous source for this kind of knowledge) for a sequence described as \"Number of (directed) Hamiltonian paths in the n-ladder graph.\" I know that a Hamiltonian path is a path that visits each vertex once, so that sounds right, and I had never heard the phrase \"n-ladder graph,\" but it makes sense that it is a 2 x *n* grid. So it looks like we're in the right place. The page gives this **calculation** formula:",
+      "concepts": [
+        "standing_on_shoulders_research"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-100-formula-calculation",
+      "topic": "Formula Calculation",
+      "text": "```python\ndef calculate_paths(n): return 2 if n == 1 else 2 * (n ** 2 - n + 2)\n```",
+      "concepts": [
+        "formula_calculation"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-101-formula-validation",
+      "topic": "Formula Validation",
+      "text": "```python\nall(calculate_paths(n) == len(incremental_count_paths(n)) for n in range(1, 13))\n```",
+      "concepts": [
+        "formula_calculation",
+        "incremental_enumeration",
+        "checking_validation_problem_solving"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-102-conclusion",
+      "topic": "Conclusion",
+      "text": "```\nTrue\n```\n\nOur work here is done.",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "Problem: Paths in a 2 x *n* Grid",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Paths in a 2 x *n* Grid"
+      ],
+      "markdown_anchor": "problem-paths-in-a-2-x-n-grid",
+      "start_line": 1127,
+      "end_line": 1273
+    },
+    {
+      "chunk_id": "chunk-103-fischerandom-chess-problem-definition",
+      "topic": "Problem definition for counting Fischerandom chess positions",
+      "text": "# Problem: Counting Positions in Fischerandom Chess\n\n> In this [variant](https://en.wikipedia.org/wiki/Chess960) of chess, the pieces are set up in a random but restricted fashion. The pawns are in their regular positions, and the major white pieces are placed randomly on the first rank, with two restrictions: the bishops must be placed on opposite-color squares, and the king must be placed between the rooks. The black pieces are set up to mirror the white pieces. How many starting positions are there?",
+      "concepts": [
+        "counting_general_concept",
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "definition",
+      "section": "Problem: Counting Positions in Fischerandom Chess",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Positions in Fischerandom Chess"
+      ],
+      "markdown_anchor": "problem-counting-positions-in-fischerandom-chess",
+      "start_line": 1274,
+      "end_line": 1312
+    },
+    {
+      "chunk_id": "chunk-104-fischerandom-chess-enumerate-and-test-example",
+      "topic": "Enumerate and test solution for Fischerandom chess",
+      "text": "We can answer by **enumerate and test**: generate all *distinct* permutations of the pieces and count the number that are valid:\n\n\n```python\ndef valid_position(pieces) -> bool:\n    \"\"\"Valid if bishops are on different colors, and king is between rooks.\"\"\"\n    pieces = ''.join(pieces) # make `pieces` be a string (e.g. 'RNKBRQBN')\n    B, R, K = map(pieces.index, 'BRK')\n    b, r    = map(pieces.rindex, 'BR')\n    return (color(B) != color(b)) and (r < K < R or R < K < r)\n\ndef color(square): return 'BW'[square % 2]\n```\n\n```python\nquantify(set(permutations('RNBKQBNR')), valid_position)\n```\n\n```\n960\n```\n\n(*Note:* initially my program failed because I forgot that while tuples, lists and strings all have an `index` method, only strings have `rindex`.  How annoying! I had to fix the problem by adding `pieces = ''.join(pieces)`. In Ruby, both strings and arrays have `index` and `rindex`. In Julia, both stringsss and arrays have `findfirst` and `findlast`. In  Java and Javascript, both strings and lists/arrays have both `indexOf` and `lastIndexOf`. What's wrong with Python? )",
+      "concepts": [
+        "enumerate_and_test",
+        "permutations",
+        "checking_validation_problem_solving",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Positions in Fischerandom Chess",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Positions in Fischerandom Chess"
+      ],
+      "markdown_anchor": "problem-counting-positions-in-fischerandom-chess",
+      "start_line": 1274,
+      "end_line": 1312
+    },
+    {
+      "chunk_id": "chunk-105-fischerandom-chess-formula-calculation-example",
+      "topic": "Formula calculation solution for Fischerandom chess",
+      "text": "We could also do this by **calculation**. Let's handle the bishops first. The first bishop can go on any of the 8 squares, but then the second bishop has to go on an opposite color, so that's 4 choices. But then we divide by 2! = 2 because the two bishops are indistinguishable. Next, place the other pieces in the 6 remaining squares, for 6! possibilities, but divide by 2! because the knights are indistinguishable, and divide by 3! because, out of the 3! ways of ordering R-K-R left-to-right, only 2 of them are valid, but the 2 cancels out because the rooks are indistinguishable.\n\n\n```python\n(8 * 4 / factorial(2))   *   factorial(6) / (factorial(2) * factorial(3))\n```\n\n```\n960.0\n```",
+      "concepts": [
+        "formula_calculation",
+        "permutations",
+        "combinations_n_choose_k",
+        "combinatorics_general_concept"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Counting Positions in Fischerandom Chess",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Counting Positions in Fischerandom Chess"
+      ],
+      "markdown_anchor": "problem-counting-positions-in-fischerandom-chess",
+      "start_line": 1274,
+      "end_line": 1312
+    },
+    {
+      "chunk_id": "chunk-106-variant-mean-purse-size-intro",
+      "topic": "Introduction to the Mean Purse Size Variant",
+      "text": "Here's another criteria for a mint system: I would like to not accumulate too many coins in my purse/pocket. Suppose I do a cash transaction in which I owe a certain amount of cents, `amount`. If I happen to have coins in my purse that add up to `amount`, I will pay with them (and end up with fewer coins). If I don't, I'll pay for the cents with a dollar bill, and I'll receive `100 - amount` in change back (and end up with more coins). (I won't allow the scenario where, say, I owe 24¢ and pay 25¢ and get 1¢ back.) Will some mints lead to accumulation of more coins than others? I'll do a random **simulation** to see:",
+      "concepts": [
+        "simulation_counting_strategy"
+      ],
+      "chunk_type": "overview",
+      "section": "Variant: Mean Purse Size",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Variant: Mean Purse Size"
+      ],
+      "markdown_anchor": "variant-mean-purse-size",
+      "start_line": 1758,
+      "end_line": 1860
+    },
+    {
+      "chunk_id": "chunk-107-purse-stats-simulation-example",
+      "topic": "Purse Size Simulation Code",
+      "text": "```python\n@lru_cache(None)\ndef purse_stats(mint, t=25000, seed=42):\n    \"\"\"The mean and standard deviation of the number of coins in a purse\n    after each of `t` random transactions.\"\"\"\n    random.seed(seed)\n    purse = Purse()\n    bank  = Purse({c: 100 for c in mint})\n    sizes = []\n    for _ in range(t):\n        amount = random.randrange(1, 100)\n        pay    = show_greedy_limited_mincoins(amount, purse)\n        if pay:\n            purse -= pay\n        else:\n            change = show_greedy_limited_mincoins(100 - amount, bank)\n            purse += change\n        sizes.append(total(purse))\n    return mean(sizes), stdev(sizes)\n```\n\nI can compare various mints:",
+      "concepts": [
+        "simulation_counting_strategy",
+        "memoization_caching",
+        "data_structures_counter",
+        "greedy_algorithm"
+      ],
+      "chunk_type": "example",
+      "section": "Variant: Mean Purse Size",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Variant: Mean Purse Size"
+      ],
+      "markdown_anchor": "variant-mean-purse-size",
+      "start_line": 1758,
+      "end_line": 1860
+    },
+    {
+      "chunk_id": "chunk-108-purse-stats-example-1",
+      "topic": "Purse Stats Example 1",
+      "text": "```python\npurse_stats((25, 10, 5, 1))\n```\n\n```\n(5.6928, 4.441767365800834)\n```",
+      "concepts": [
+        "simulation_counting_strategy"
+      ],
+      "chunk_type": "example",
+      "section": "Variant: Mean Purse Size",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Variant: Mean Purse Size"
+      ],
+      "markdown_anchor": "variant-mean-purse-size",
+      "start_line": 1758,
+      "end_line": 1860
+    },
+    {
+      "chunk_id": "chunk-109-purse-stats-example-2",
+      "topic": "Purse Stats Example 2",
+      "text": "```python\npurse_stats((25, 18, 5, 1))\n```\n\n```\n(6.47408, 4.9299959784987575)\n```\n\nThis says that the US system leaves me, on average, with fewer coins in my purse. But the standard deviation is large compared to the mean, so this may not be very reliable in the short run.",
+      "concepts": [
+        "simulation_counting_strategy"
+      ],
+      "chunk_type": "example",
+      "section": "Variant: Mean Purse Size",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Variant: Mean Purse Size"
+      ],
+      "markdown_anchor": "variant-mean-purse-size",
+      "start_line": 1758,
+      "end_line": 1860
+    },
+    {
+      "chunk_id": "chunk-110-worst-amount-function-definition",
+      "topic": "Definition of worst_amount function",
+      "text": "One more thing I'm interested in is what is the *worst* amount for a mint: the amount that requires the most coins? And what are those coins?\n\n\n```python\ndef worst_amount(mint):\n    \"\"\"What amount (and coins) requires the most number of coins for mint?\"\"\"\n    amount = max(range(100), key=lambda a: mincoins(a, mint)) # Worst amount\n    coins = min((list(c.elements()) for c in show_change(amount, mint)), key=len)\n    return amount, coins\n    \n```",
+      "concepts": [
+        "greedy_algorithm",
+        "data_structures_counter"
+      ],
+      "chunk_type": "example",
+      "section": "Variant: Mean Purse Size",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Variant: Mean Purse Size"
+      ],
+      "markdown_anchor": "variant-mean-purse-size",
+      "start_line": 1758,
+      "end_line": 1860
+    },
+    {
+      "chunk_id": "chunk-111-worst-amount-example",
+      "topic": "Example usage of worst_amount function",
+      "text": "```python\nworst_amount(mint)\n```\n\n```\n(94, [1, 1, 1, 1, 5, 10, 25, 50])\n```",
+      "concepts": [
+        "greedy_algorithm"
+      ],
+      "chunk_type": "example",
+      "section": "Variant: Mean Purse Size",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Variant: Mean Purse Size"
+      ],
+      "markdown_anchor": "variant-mean-purse-size",
+      "start_line": 1758,
+      "end_line": 1860
+    },
+    {
+      "chunk_id": "chunk-112-mint-report-function-definition",
+      "topic": "Definition of mint_report function",
+      "text": "Here is a report summarizing all we have learned about the various mints:\n\n\n```python\ndef mint_report(mints):\n    print('Mint of Coins   Mean Greedy Canon  PurseSize  Amount-requiring-most-coins')\n    for mint in mints:\n        m, g = meancoins(mint), meancoins(mint, greedy_mincoins)\n        mu, sd = purse_stats(mint)\n        a, coins = worst_amount(mint)\n        print(f'{mint}  {m:.2f}  {g:.2f}  {m==g!s:5} {mu:4.1f} ± {sd:3.1f}  {a:2}¢ {len(coins)}: {coins[::-1]}')\n```",
+      "concepts": [
+        "greedy_algorithm",
+        "simulation_counting_strategy"
+      ],
+      "chunk_type": "example",
+      "section": "Variant: Mean Purse Size",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Variant: Mean Purse Size"
+      ],
+      "markdown_anchor": "variant-mean-purse-size",
+      "start_line": 1758,
+      "end_line": 1860
+    },
+    {
+      "chunk_id": "chunk-113-mint-report-example",
+      "topic": "Example usage of mint_report function",
+      "text": "```python\nmint_report(topmints)\n```\n\n```\nMint of Coins   Mean Greedy Canon  PurseSize  Amount-requiring-most-coins\n(25, 18, 5, 1)  3.89  4.58  False  6.5 ± 4.9  14¢ 6: [5, 5, 1, 1, 1, 1]\n(29, 18, 5, 1)  3.89  4.45  False  8.4 ± 6.5  14¢ 6: [5, 5, 1, 1, 1, 1]\n(30, 18, 4, 1)  3.90  4.38  False  7.1 ± 5.7  15¢ 6: [4, 4, 4, 1, 1, 1]\n(28, 17, 4, 1)  3.91  4.44  False  6.4 ± 5.0  99¢ 7: [28, 28, 17, 17, 4, 4, 1]\n(29, 19, 4, 1)  3.91  4.41  False  7.7 ± 6.0  15¢ 6: [4, 4, 4, 1, 1, 1]\n(30, 19, 5, 1)  3.91  4.48  False  6.1 ± 4.6  14¢ 6: [5, 5, 1, 1, 1, 1]\n(28, 21, 5, 1)  3.91  4.62  False  7.6 ± 6.1  19¢ 7: [5, 5, 5, 1, 1, 1, 1]\n(32, 19, 4, 1)  3.92  4.41  False  6.5 ± 5.2  15¢ 6: [4, 4, 4, 1, 1, 1]\n(30, 23, 5, 1)  3.92  4.60  False  6.4 ± 4.9  19¢ 7: [5, 5, 5, 1, 1, 1, 1]\n(31, 14, 6, 1)  3.92  4.45  False  6.8 ± 5.1  98¢ 7: [31, 31, 14, 14, 6, 1, 1]\n(25, 10, 5, 1)  4.70  4.70  True   5.7 ± 4.4  94¢ 9: [25, 25, 25, 10, 5, 1, 1, 1, 1]\n```\n\nThe US system (bottom row) has the advantage of being canonical, and of being natural for people with five fingers on a hand. But its mean number of coins needed is high, as is its maximum number of coins, 9 (to make 94¢). The `(25, 18, 5, 1)` mint has the best (tied) `mincoins` mean score, the best (tied) maximum-number-of-coins score, and pretty good greedy and purse-size scores. It might have been a better system overall, but not by enough of a margin to seriously consider a switch.",
+      "concepts": [
+        "canonical_coin_system",
+        "greedy_algorithm",
+        "simulation_counting_strategy"
+      ],
+      "chunk_type": "explanation",
+      "section": "Variant: Mean Purse Size",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Variant: Mean Purse Size"
+      ],
+      "markdown_anchor": "variant-mean-purse-size",
+      "start_line": 1758,
+      "end_line": 1860
+    },
+    {
+      "chunk_id": "chunk-114-drink-gift-cards-problem-statement",
+      "topic": "Problem statement for the drink gift cards problem.",
+      "text": "# Problem: Drink Gift Cards\n\n[538 Riddler](https://fivethirtyeight.com/features/does-your-gift-card-still-have-free-drinks-on-it/) presents this problem:\n    \n> Lucky you! You’ve won two gift cards, each loaded with 50 free drinks from your favorite coffee shop, Riddler Caffei-Nation. The cards look identical, and because you’re not one for record-keeping, you randomly pick one of the cards to pay with each time you get a drink. One day, the clerk tells you that the card you presented doesn’t have any drink credits left on it. How many free drinks can you expect are still available on the other card?",
+      "concepts": [
+        "problem_solving_general"
+      ],
+      "chunk_type": "overview",
+      "section": "Problem: Drink Gift Cards",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Drink Gift Cards"
+      ],
+      "markdown_anchor": "problem-drink-gift-cards",
+      "start_line": 1861,
+      "end_line": 2029
+    },
+    {
+      "chunk_id": "chunk-115-drink-gift-cards-divide-and-conquer-approach",
+      "topic": "Divide and conquer approach to solving the drink gift cards problem.",
+      "text": "Can I **enumerate** all sequences of choosing one card or the other? No: that would be (100 choose 50) ≅ 10<sup>29</sup> sequences. But I can to use recursive **divide and conquer**:  I'll define `other_card(a, b)` to return a probability distribution of the number of drinks remaining on the \"other\" card, when we start with two cards with `a` and `b` drinks remaining, respectively, and we use them until one card is exhausted. At every step, the function considers decrementing both `a` and `b`, with equal probability (1/2 each).",
+      "concepts": [
+        "divide_and_conquer_counting_strategy",
+        "recursion",
+        "recursive_divide_and_conquer",
+        "enumerate_and_test"
+      ],
+      "chunk_type": "explanation",
+      "section": "Problem: Drink Gift Cards",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Drink Gift Cards"
+      ],
+      "markdown_anchor": "problem-drink-gift-cards",
+      "start_line": 1861,
+      "end_line": 2029
+    },
+    {
+      "chunk_id": "chunk-116-probability-distribution-class-definition",
+      "topic": "Defining a probability distribution class as a subclass of Counter.",
+      "text": "I can define a probability distribution, `Dist`, as a subclass of `Counter` to which I add a method for multiplying by a scalar.\n\n\n```python\nclass Dist(Counter):\n    \"\"\"A frequency distribution of {item: frequency}.\"\"\"\n    def __mul__(self, scalar): return Dist({x: scalar * self[x] for x in self})\n    __rmul__ = __mul__\n\n@lru_cache(None)\ndef other_card(a, b):\n    \"\"\"Probability distribution of drinks remaining on other card when one card runs out.\"\"\"\n    a, b = sorted((a, b)) # Ensure a <= b\n    return (Dist({b: 1})  if a == 0 else\n            Dist(1/2 * other_card(a - 1, b) + \n                 1/2 * other_card(a, b - 1)))\n```",
+      "concepts": [
+        "probability_distributions",
+        "data_structures_counter",
+        "recursion",
+        "memoization_caching"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Drink Gift Cards",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Drink Gift Cards"
+      ],
+      "markdown_anchor": "problem-drink-gift-cards",
+      "start_line": 1861,
+      "end_line": 2029
+    },
+    {
+      "chunk_id": "chunk-117-testing-the-other-card-function-with-small-values",
+      "topic": "Testing the other_card function with small values.",
+      "text": "If I have one free drink on each card and I use one, then the other card has one drink with probability  1.0:\n\n\n```python\nother_card(1, 1)\n```\n\n```\nDist({1: 1.0})\n```\n\nIf I start with two free drinks on each card and I use them randomly until one runs out, then it is equally likely that there are 1 or 2 left on the other card:\n\n\n```python\nother_card(2, 2)\n```\n\n```\nDist({2: 0.5, 1: 0.5})\n```",
+      "concepts": [
+        "checking_validation_problem_solving",
+        "probability_distributions"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Drink Gift Cards",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Drink Gift Cards"
+      ],
+      "markdown_anchor": "problem-drink-gift-cards",
+      "start_line": 1861,
+      "end_line": 2029
+    },
+    {
+      "chunk_id": "chunk-118-full-probability-distribution-for-50-drinks",
+      "topic": "Calculating the full probability distribution for the original problem (50 drinks on each card).",
+      "text": "Here's the full probability distribution for the original question:\n\n\n```python\nother_card(50, 50)\n```\n\n```\nDist({50: 1.7763568394002505e-15,\n      49: 4.440892098500626e-14,\n      48: 5.662137425588298e-13,\n      47: 4.907185768843192e-12,\n      46: 3.2510105718586146e-11,\n      45: 1.755545708803652e-10,\n      44: 8.046251165350071e-10,\n      43: 3.2185004661400285e-09,\n      42: 1.1465907910623852e-08,\n      41: 3.6945703267565744e-08,\n      40: 1.0898982463931894e-07,\n      39: 2.9724497628905167e-07,\n      38: 7.554976480680063e-07,\n      37: 1.8015713146237074e-06,\n      36: 4.053535457903342e-06,\n      35: 8.647542310193795e-06,\n      34: 1.7565320317581147e-05,\n      33: 3.409738649883399e-05,\n      32: 6.345902487282993e-05,\n      31: 0.0001135582550355904,\n      30: 0.00019588798993639344,\n      29: 0.00032647998322732244,\n      28: 0.0005268199729349975,\n      27: 0.0008245877837243439,\n      26: 0.0012540605877474397,\n      25: 0.0018560096698662107,\n      24: 0.0026769370238454962,\n      23: 0.0037675409965232907,\n      22: 0.005180368870219524,\n      21: 0.006966702963398672,\n      20: 0.009172825568474917,\n      19: 0.011835903959322474,\n      18: 0.014979815948517508,\n      17: 0.01861128648149145,\n      16: 0.022716717322996918,\n      15: 0.027260060787596296,\n      14: 0.03218201620757896,\n      13: 0.03740072153853771,\n      12: 0.04281398386648397,\n      11: 0.04830295615705883,\n      10: 0.053737038724727945,\n      9: 0.05897967664909165,\n      8: 0.06389464970318263,\n      7: 0.0683524159615442,\n      6: 0.07223607595935921,\n      5: 0.07544656822421962,\n      4: 0.0779067824054442,\n      3: 0.07956437352045362,\n      2: 0.08039316907795838,\n      1: 0.08039316907795838})\n```",
+      "concepts": [
+        "probability_distributions"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Drink Gift Cards",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Drink Gift Cards"
+      ],
+      "markdown_anchor": "problem-drink-gift-cards",
+      "start_line": 1861,
+      "end_line": 2029
+    },
+    {
+      "chunk_id": "chunk-119-expected-value-calculation",
+      "topic": "Calculating the expected value of the probability distribution.",
+      "text": "We can compute the expected value, `EV`, of this distribution:\n\n\n```python\ndef EV(P): \n    \"\"\"Expected value of a probability distribution.\"\"\"\n    return sum(b * P[b] for b in P)\n\nEV(other_card(50, 50))\n```\n\n```\n7.958923738717876\n```\n\nSo on average, we expect about 8 drinks left on the other card.",
+      "concepts": [
+        "expected_value",
+        "probability_distributions"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Drink Gift Cards",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Drink Gift Cards"
+      ],
+      "markdown_anchor": "problem-drink-gift-cards",
+      "start_line": 1861,
+      "end_line": 2029
+    },
+    {
+      "chunk_id": "chunk-120-expected-value-with-different-initial-values",
+      "topic": "Calculating expected value with different initial values on the gift cards.",
+      "text": "What if we were given two different gift cards to begin with? Say a 25- and a 50-drink card?\n\n\n```python\nEV(other_card(25, 50))\n```\n\n```\n25.008494650139617\n```\n\nThat's interesting. The expectation is almost exactly 25 drinks remaining on the other card (which in almost all cases will be the card that originally had 50 drinks). That doesn't mean there will always be 25 left, or even a number close to that. We see below that the remaining drinks on the other card is in the range 20-30 about half the time:\n\n\n```python\nP = other_card(25, 50)\nsum(P[d] for d in range(20, 30))\n```\n\n```\n0.5148807410710244\n```",
+      "concepts": [
+        "expected_value",
+        "probability_distributions"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Drink Gift Cards",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Drink Gift Cards"
+      ],
+      "markdown_anchor": "problem-drink-gift-cards",
+      "start_line": 1861,
+      "end_line": 2029
+    },
+    {
+      "chunk_id": "chunk-121-plotting-the-probability-distribution",
+      "topic": "Plotting the probability distribution for various values of n.",
+      "text": "We can plot the probability distribution of `other_card(n, n)` for various values of  `n`:\n\n\n```python\ndef show_other_cards(ns):\n    X = list(range(1, max(ns) // 2 + 1))\n    for n in ns:\n        P = other_card(n, n)\n        Y = [P[b] for b in X]\n        plt.plot(X, Y, '.-', label=f'n = {n}; EV = {float(EV(P)):.2f}')\n        plt.grid(True)\n        plt.xlabel('Drinks Remaining'); plt.ylabel('Probability')\n        plt.legend()\n        \nshow_other_cards((20, 25, 30, 40, 50, 60, 75, 99))\n```\n\n```\n<Figure size 432x288 with 1 Axes>\n```",
+      "concepts": [
+        "visualization_problem_solving",
+        "probability_distributions",
+        "expected_value"
+      ],
+      "chunk_type": "example",
+      "section": "Problem: Drink Gift Cards",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Problem: Drink Gift Cards"
+      ],
+      "markdown_anchor": "problem-drink-gift-cards",
+      "start_line": 1861,
+      "end_line": 2029
+    },
+    {
+      "chunk_id": "chunk-122-counting-multiplications-in-matrix-multiplication-overview",
+      "topic": "Introduction to minimizing multiplications in matrix multiplication",
+      "text": "# Counting Multiplications in Matrix Multiplication\n\n> Given a sequence of matrices to be multiplied together,  what is the minimum number of multiplications of the constituent numbers, out of all the possible bracketings of the sequence?",
+      "concepts": [
+        "matrix_multiplication_cost_calculation",
+        "optimal_matrix_chain_multiplication"
+      ],
+      "chunk_type": "overview",
+      "section": "Counting Multiplications in Matrix Multiplication",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Counting Multiplications in Matrix Multiplication"
+      ],
+      "markdown_anchor": "counting-multiplications-in-matrix-multiplication",
+      "start_line": 2030,
+      "end_line": 2173
+    },
+    {
+      "chunk_id": "chunk-123-matrix-multiplication-explanation",
+      "topic": "Explanation of matrix multiplication and cost calculation",
+      "text": "See [Wikipedia's matrix multiplication](https://en.wikipedia.org/wiki/Matrix_multiplication) page for a refresher if needed, but we will explain everything here. A matrix is a two-dimensional grid of numbers. When we multiply two matrices, we do a lot of multiplications of the constituent numbers.  In the diagram below we see that multiplying a matrix of dimensions $l × m$ by a $m × n$ matrix results in a $l × n$ matrix, $C$, where each element $C_{ij}$ is the dot product of two $m$ element vectors, for a total of $l × m × n$ multiplications of constituent numbers. (Forget about [Strassen](https://en.wikipedia.org/wiki/Strassen_algorithm) for now.)\n\n![](https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Matrix_multiplication_qtl1.svg/440px-Matrix_multiplication_qtl1.svg.png)\n\n$$\\sum_{k=1}^{m} A_{ik} × B_{kj} = C_{i,j}$$\n\nTo multiply *three* matrices together, we could do either **(AB)C** or **A(BC)**; both give the same answer, but one might do fewer constituent multiplications. For a sequence of four matrices, there are five possible bracketings: **((AB)C)D,     (A(BC))D,     (AB)(CD),     A((BC)D)**, or     **A(B(CD))**. We want to find the bracketing with the fewest constituent multiplications.",
+      "concepts": [
+        "matrix_multiplication_cost_calculation",
+        "optimal_matrix_chain_multiplication"
+      ],
+      "chunk_type": "explanation",
+      "section": "Counting Multiplications in Matrix Multiplication",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Counting Multiplications in Matrix Multiplication"
+      ],
+      "markdown_anchor": "counting-multiplications-in-matrix-multiplication",
+      "start_line": 2030,
+      "end_line": 2173
+    },
+    {
+      "chunk_id": "chunk-124-matrix-class-definition-and-multiplication",
+      "topic": "Defining a Matrix class to track dimensions and multiplication count",
+      "text": "Here's how I start to think about it:\n\n- We don't need to represent the contents of the matrices, just the dimensions.\n- `Matrix(c, m, n)` will represent a matrix of dimensions $m × n$ that requires $c$ constituent multiplications. I'll implement `Matrix` as a `namedtuple` to which I add a method for multiplication. (To be clear: it doesn't do matrix multiplication; it just computed the count of constituent multiplications and the dimensions of the product.)\n- `M(m, n)` is a handy abbreviation for `Matrix(0, m, n)`\n\nHere is the  code:\n\n\n```python\nclass Matrix(namedtuple('_', 'count, d1, d2')):\n    \"\"\"Contains the dimensions (d1, d2) and a count of the number of multiplies.\"\"\"  \n    def __mul__(A, B):\n        assert A.d2 == B.d1\n        count = A.count + B.count + A.d1 * A.d2 * B.d2\n        return Matrix(count, A.d1, B.d2)\n\ndef M(m, n): return Matrix(0, m, n)\n```",
+      "concepts": [
+        "matrix_multiplication_cost_calculation",
+        "basic_programming_concepts",
+        "data_structures_counter"
+      ],
+      "chunk_type": "example",
+      "section": "Counting Multiplications in Matrix Multiplication",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Counting Multiplications in Matrix Multiplication"
+      ],
+      "markdown_anchor": "counting-multiplications-in-matrix-multiplication",
+      "start_line": 2030,
+      "end_line": 2173
+    },
+    {
+      "chunk_id": "chunk-125-matrix-class-examples",
+      "topic": "Examples of using the Matrix class",
+      "text": "Some examples of use:\n\n\n```python\nA, B, C = M(10, 100), M(100, 5), M(5, 20)\n\nA * B\n```\n\n```\nMatrix(count=5000, d1=10, d2=5)\n```\n\n```python\nB * C\n```\n\n```\nMatrix(count=10000, d1=100, d2=20)\n```\n\n```python\n(A * B) * C\n```\n\n```\nMatrix(count=6000, d1=10, d2=20)\n```\n\n```python\nA * (B * C)\n```\n\n```\nMatrix(count=30000, d1=10, d2=20)\n```\n\nThe bracketing **(AB)C** results in 6000 multiplications; five times less than **A(BC)**. Here's how to find the best product of a sequence of matrices:",
+      "concepts": [
+        "matrix_multiplication_cost_calculation",
+        "basic_programming_concepts"
+      ],
+      "chunk_type": "example",
+      "section": "Counting Multiplications in Matrix Multiplication",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Counting Multiplications in Matrix Multiplication"
+      ],
+      "markdown_anchor": "counting-multiplications-in-matrix-multiplication",
+      "start_line": 2030,
+      "end_line": 2173
+    },
+    {
+      "chunk_id": "chunk-126-multbest-function-explanation",
+      "topic": "Explanation of the multbest function and optimization strategies",
+      "text": "- `multbest(matrices)` will return a `Matrix` that is the product of `matrices` and has the minimum number of constituent multiplications.\n- The **brute force enumeration** approach  would be to try every possible bracketing. How many bracketings are there? It turns out the answer is again the [Catalan numbers](https://en.wikipedia.org/wiki/Catalan_number), so for 10 matrices there are only 4,862 possibilities; no problem. But for 25 matrices, there are 1,289,904,147,324 possibilities.\n- We don't need to evaluate every bracketing. Consider splitting the sequence of matrices into two parts, *left* and *right*. We don't need to find every way of bracketing *left* and combine each of those with every way of bracketing *right*; we only need to find the one best way of bracketing *left* and combine it with the one best way of bracketing *right*. We do have to consider every way of splitting *left* and *right*, but there are only *O(n)* of those.\n- So the algorithm for `multbest` will be a form of the **incremental enumeration** with **remembering** approach:\n   - For every way of splitting the sequence of matrices, recursively find the best matrix products for the *left* and *right* parts of the split, and multiply them to get a candidate.\n   - Out of those candidates, return the one with the minimum number of multiplications. (Since `Matrix` was defined as a namedtuple with the count as the first field, the `min` matrix is the one with the minimum count.)\n   - We use `@lru_cache` to stop the algorithm from repeating itself.",
+      "concepts": [
+        "optimal_matrix_chain_multiplication",
+        "brute_force_enumeration",
+        "incremental_enumeration",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "chunk_type": "explanation",
+      "section": "Counting Multiplications in Matrix Multiplication",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Counting Multiplications in Matrix Multiplication"
+      ],
+      "markdown_anchor": "counting-multiplications-in-matrix-multiplication",
+      "start_line": 2030,
+      "end_line": 2173
+    },
+    {
+      "chunk_id": "chunk-127-multbest-function-implementation-and-examples",
+      "topic": "Implementation of multbest function with memoization and examples",
+      "text": "\n```python\n@lru_cache(None)\ndef multbest(matrices):\n    \"\"\"Find the product of matrices that uses the least number of multiplications.\"\"\"\n    return (matrices[0] if len(matrices) == 1 else\n            min(multbest(left) * multbest(right) \n                for left, right in splits(matrices)))\n    \ndef splits(seq): return [(seq[:i], seq[i:]) for i in range(1, len(seq))]\n```\n\n```python\nsplits(\"ABCDEF\")\n```\n\n```\n[('A', 'BCDEF'),\n ('AB', 'CDEF'),\n ('ABC', 'DEF'),\n ('ABCD', 'EF'),\n ('ABCDE', 'F')]\n```\n\n```python\nmultbest((A, B, C))\n```\n\n```\nMatrix(count=6000, d1=10, d2=20)\n```\n\n```python\nexample = (A, B, C, M(20, 99), M(99, 10), M(10, 100), M(100, 80), M(80, 10), A, B, C)\n\nmultbest(example)\n```\n\n```\nMatrix(count=75350, d1=10, d2=20)\n```\n\nWe see it takes 75,350 constituent multiplications to work out the matrix product of the sequence of eleven `example` matrices. Is that a lot or a little? We can compare this optimal result to the pessimal result:",
+      "concepts": [
+        "optimal_matrix_chain_multiplication",
+        "memoization_caching",
+        "dynamic_programming",
+        "recursion",
+        "divide_and_conquer_counting_strategy"
+      ],
+      "chunk_type": "example",
+      "section": "Counting Multiplications in Matrix Multiplication",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Counting Multiplications in Matrix Multiplication"
+      ],
+      "markdown_anchor": "counting-multiplications-in-matrix-multiplication",
+      "start_line": 2030,
+      "end_line": 2173
+    },
+    {
+      "chunk_id": "chunk-128-multworst-function-and-comparison",
+      "topic": "Comparison of optimal and pessimal matrix multiplication",
+      "text": "\n```python\ndef multworst(matrices):\n    \"\"\"Find the product of matrices that uses the MOST number of multiplications.\"\"\"\n    return (matrices[0] if len(matrices) == 1 else\n            max(multworst(left) * multworst(right) \n                for left, right in splits(matrices)))\n```\n\n```python\nmultworst(example)\n```\n\n```\nMatrix(count=3407000, d1=10, d2=20)\n```\n\nThat's 45 times more work! It seems worthwhile to take the optimal approach.",
+      "concepts": [
+        "optimal_matrix_chain_multiplication",
+        "algorithm_design_general"
+      ],
+      "chunk_type": "example",
+      "section": "Counting Multiplications in Matrix Multiplication",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Counting Multiplications in Matrix Multiplication"
+      ],
+      "markdown_anchor": "counting-multiplications-in-matrix-multiplication",
+      "start_line": 2030,
+      "end_line": 2173
+    },
+    {
+      "chunk_id": "chunk-129-conclusion-counting-methods",
+      "topic": "Conclusion of Counting Methods Notebook",
+      "text": "# Conclusion\n\nThanks for making it all the way to the end of the notebook. I hope you've learned something about methods for counting things, and that you can apply them to your own problems.",
+      "concepts": [
+        "counting_general_concept",
+        "combinatorics_general_concept",
+        "problem_solving_general"
+      ],
+      "chunk_type": "overview",
+      "section": "Conclusion",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+      "heading_path": [
+        "Conclusion"
+      ],
+      "markdown_anchor": "conclusion",
+      "start_line": 2174,
+      "end_line": 2178
+    }
+  ],
+  "metadata": {
+    "total_chunks": 129,
+    "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md",
+    "chunked_at": "2025-12-12T16:19:41.993Z"
+  }
+}

@@ -1,0 +1,909 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "chunk-1-spelling-bee-intro",
+      "topic": "Introduction to the Spelling Bee puzzle",
+      "text": "<div style=\"text-align: right\" align=\"right\"><i>Peter Norvig, 3 Jan 2020</i></div>\n---",
+      "concepts": [
+        "spelling_bee_puzzle_game_mechanics"
+      ],
+      "chunk_type": "overview",
+      "section": "Introduction",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [],
+      "markdown_anchor": "introduction",
+      "start_line": 0,
+      "end_line": 1
+    },
+    {
+      "chunk_id": "chunk-2-spelling-bee-puzzle-introduction",
+      "topic": "Introduction to the Spelling Bee Puzzle",
+      "text": "## Spelling Bee Puzzle\n\nThe [3 Jan. 2020 edition of the **538 Riddler**](https://fivethirtyeight.com/features/can-you-solve-the-vexing-vexillology/) concerns the popular NYTimes  [**Spelling Bee**](https://www.nytimes.com/puzzles/spelling-bee) puzzle:\n\n> In this game, seven letters are arranged in a **honeycomb** lattice, with one letter in the center. Here’s the lattice from Dec. 24, 2019:\n>\n> <img src=\"https://fivethirtyeight.com/wp-content/uploads/2020/01/Screen-Shot-2019-12-24-at-5.46.55-PM.png\" width=\"150\">\n>\n> The goal is to identify as many words as possible that meet the following criteria:\n> 1. The word must be at least four letters long.\n> 2. The word must include the central letter.\n> 3. The word cannot include any letter beyond the seven given letters.\n>\n>Note that letters can be repeated. For example,  GAME and AMALGAM are both acceptable words. Four-letter words are worth 1 point each, while five-letter words are worth 5 points, six-letter words are worth 6 points, etc. Words that use all seven letters in the honeycomb are known as **pangrams** and earn 7 bonus points (in addition to the points for the length of the word). So in the above example, MEGAPLEX is worth 8 + 7 = 15 points.\n>\n> ***Which seven-letter honeycomb results in the highest possible score?*** To be a valid choice of seven letters, no letter can be repeated, it must not contain the letter S (that would be too easy) and there must be at least one pangram.\n>\n> For consistency, please use [this word list](https://norvig.com/ngrams/enable1.txt) to check your score.",
+      "concepts": [
+        "spelling_bee_puzzle_game_mechanics",
+        "honeycomb_structure",
+        "valid_word_criteria",
+        "pangram_spelling_bee",
+        "word_scoring_spelling_bee"
+      ],
+      "chunk_type": "overview",
+      "section": "Spelling Bee Puzzle",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Spelling Bee Puzzle"
+      ],
+      "markdown_anchor": "spelling-bee-puzzle",
+      "start_line": 2,
+      "end_line": 33
+    },
+    {
+      "chunk_id": "chunk-3-solving-the-spelling-bee-puzzle",
+      "topic": "Solving the Spelling Bee Puzzle Programmatically",
+      "text": "Since the referenced word list came from [***my*** web site](https://norvig.com/ngrams), I felt  compelled to solve this puzzle.  (Note the word list is a standard public domain Scrabble® dictionary that I happen to host a copy of; I didn't curate it, Mendel Cooper and Alan Beale did.) \n\nI'll show you how I address the problem. First some imports:\n\n\n```python\nfrom collections import defaultdict\nfrom dataclasses import dataclass\nfrom itertools   import combinations\nfrom typing      import List, Set, Dict, Tuple, Iterable \n```",
+      "concepts": [
+        "algorithmic_thinking",
+        "python_basic_syntax",
+        "collections_defaultdict",
+        "python_dataclasses",
+        "itertools_combinations"
+      ],
+      "chunk_type": "overview",
+      "section": "Spelling Bee Puzzle",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Spelling Bee Puzzle"
+      ],
+      "markdown_anchor": "spelling-bee-puzzle",
+      "start_line": 2,
+      "end_line": 33
+    },
+    {
+      "chunk_id": "chunk-4-letters-words-lettersets-and-pangrams-definition",
+      "topic": "Definitions of basic terms: letter, word, letterset, pangram",
+      "text": "# Letters, Words, Lettersets, and Pangrams\n\nLet's start by defining the most basic terms:\n\n- **Valid letter**: the valid letters are uppercase 'A' to 'Z', but not 'S'.\n- **Word**: A string of letters.\n- **Word list**: a list of valid words.\n- **Valid word**: a word of at least 4 valid letters and not more than 7 distinct letters.\n- **Letterset**: the set of distinct letters in a word; e.g. letterset('BOOBOO') = 'BO'.\n- **Pangram**: a valid word with exactly 7 distinct letters.\n- **Pangram letterset**: the letterset for a pangram.",
+      "concepts": [
+        "valid_word_criteria",
+        "pangram_spelling_bee",
+        "representing_lettersets"
+      ],
+      "chunk_type": "definition",
+      "section": "Letters, Words, Lettersets, and Pangrams",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Letters, Words, Lettersets, and Pangrams"
+      ],
+      "markdown_anchor": "letters-words-lettersets-and-pangrams",
+      "start_line": 34,
+      "end_line": 102
+    },
+    {
+      "chunk_id": "chunk-5-letters-words-lettersets-and-pangrams-code",
+      "topic": "Python code for defining letters, words, lettersets, and pangrams",
+      "text": "```python\nvalid_letters = set('ABCDEFGHIJKLMNOPQR' + 'TUVWXYZ')\nLetter    = str # A string of one letter\nWord      = str # A string of multiple letters\nLetterset = str # A sorted string of distinct letters\n\ndef word_list(text: str) -> List[Word]: \n    \"\"\"All the valid words in a text.\"\"\"\n    return [w for w in text.upper().split() if is_valid(w)]\n\ndef is_valid(word) -> bool: \n    return len(word) >= 4 and valid_letters.issuperset(word) and len(set(word)) <= 7\n\ndef letterset(word) -> Letterset:\n    \"\"\"The set of distinct letters in a word, represented as a sorted str.\"\"\"\n    return ''.join(sorted(set(word)))\n\ndef is_pangram(word) -> bool: return len(set(word)) == 7\n\ndef pangram_lettersets(wordlist) -> Set[Letterset]:\n    \"\"\"All lettersets from the pangram words in wordlist.\"\"\"\n    return {letterset(w) for w in wordlist if is_pangram(w)}\n```",
+      "concepts": [
+        "python_basic_syntax",
+        "python_string_operations",
+        "python_set_operations",
+        "programmatic_word_filtering",
+        "representing_lettersets"
+      ],
+      "chunk_type": "example",
+      "section": "Letters, Words, Lettersets, and Pangrams",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Letters, Words, Lettersets, and Pangrams"
+      ],
+      "markdown_anchor": "letters-words-lettersets-and-pangrams",
+      "start_line": 34,
+      "end_line": 102
+    },
+    {
+      "chunk_id": "chunk-6-letterset-as-sorted-string-explanation",
+      "topic": "Explanation of representing Letterset as a sorted string",
+      "text": "Why did I  represent a `Letterset` as a sorted string of distinct letters, and not a `set`? Because:\n- A `set` can't be the key of a dict.\n- A `frozenset` could be a key, and would be a reasonable choice for `Letterset`, but it:\n  - Takes up more memory than a `str`.\n  - Is harder to read when debugging: `frozenset({'A', 'G', 'L', 'M'})` versus `'AGLM'.",
+      "concepts": [
+        "representing_lettersets",
+        "python_dictionaries",
+        "readability_vs_efficiency_tradeoffs"
+      ],
+      "chunk_type": "explanation",
+      "section": "Letters, Words, Lettersets, and Pangrams",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Letters, Words, Lettersets, and Pangrams"
+      ],
+      "markdown_anchor": "letters-words-lettersets-and-pangrams",
+      "start_line": 34,
+      "end_line": 102
+    },
+    {
+      "chunk_id": "chunk-7-mini-word-list-introduction",
+      "topic": "Introduction of a mini word list for experimentation",
+      "text": "Here's a mini word list to experiment with:\n\n\n```python\nmini = word_list('amalgam amalgamation cacciatore erotica em game gem gems glam megaplex')\nmini\n```",
+      "concepts": [
+        "programmatic_word_filtering"
+      ],
+      "chunk_type": "example",
+      "section": "Letters, Words, Lettersets, and Pangrams",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Letters, Words, Lettersets, and Pangrams"
+      ],
+      "markdown_anchor": "letters-words-lettersets-and-pangrams",
+      "start_line": 34,
+      "end_line": 102
+    },
+    {
+      "chunk_id": "chunk-8-mini-word-list-output",
+      "topic": "Output of the mini word list",
+      "text": "```\n['AMALGAM', 'CACCIATORE', 'EROTICA', 'GAME', 'GLAM', 'MEGAPLEX']\n```",
+      "concepts": [
+        "programmatic_word_filtering"
+      ],
+      "chunk_type": "example",
+      "section": "Letters, Words, Lettersets, and Pangrams",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Letters, Words, Lettersets, and Pangrams"
+      ],
+      "markdown_anchor": "letters-words-lettersets-and-pangrams",
+      "start_line": 34,
+      "end_line": 102
+    },
+    {
+      "chunk_id": "chunk-9-mini-word-list-analysis",
+      "topic": "Analysis of the mini word list, pangrams and lettersets",
+      "text": "Note that `em` and `gem` are too short, `gems` has an `s`, and `amalgamation` has 8 distinct letters. We're left with six valid words out of the ten candidate words. The pangrams and their lettersets are as follows; there are three pangrams but only two pangram lettersets because CACCIATORE and EROTICA have the same letterset:\n\n\n```python\nassert len(pangram_lettersets(mini)) == 2\n\n{w: letterset(w) for w in mini if is_pangram(w)}\n```",
+      "concepts": [
+        "valid_word_criteria",
+        "pangram_spelling_bee",
+        "programmatic_word_filtering"
+      ],
+      "chunk_type": "example",
+      "section": "Letters, Words, Lettersets, and Pangrams",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Letters, Words, Lettersets, and Pangrams"
+      ],
+      "markdown_anchor": "letters-words-lettersets-and-pangrams",
+      "start_line": 34,
+      "end_line": 102
+    },
+    {
+      "chunk_id": "chunk-10-pangram-lettersets-output",
+      "topic": "Output of pangram lettersets",
+      "text": "```\n{'CACCIATORE': 'ACEIORT', 'EROTICA': 'ACEIORT', 'MEGAPLEX': 'AEGLMPX'}\n```",
+      "concepts": [
+        "pangram_spelling_bee",
+        "programmatic_word_filtering"
+      ],
+      "chunk_type": "example",
+      "section": "Letters, Words, Lettersets, and Pangrams",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Letters, Words, Lettersets, and Pangrams"
+      ],
+      "markdown_anchor": "letters-words-lettersets-and-pangrams",
+      "start_line": 34,
+      "end_line": 102
+    },
+    {
+      "chunk_id": "chunk-11-honeycombs-and-scoring-overview",
+      "topic": "Introduction to Honeycombs and Scoring in Spelling Bee",
+      "text": "# Honeycombs and Scoring\n\n- A **honeycomb** lattice consists of two attributes:\n - A letterset of seven distinct letters\n - A single distinguished center letter\n- The **word score** is 1 point for a 4-letter word, or the word length for longer words, plus 7 bonus points for a pangram.\n- The **total score** for a honeycomb is the sum of the word scores for the words that the honeycomb **can make**. \n- A honeycomb **can make** a word if the word contains the honeycomb's center, and every letter in the word is in the honeycomb.",
+      "concepts": [
+        "honeycomb_structure",
+        "word_scoring_spelling_bee",
+        "pangram_spelling_bee",
+        "spelling_bee_puzzle_game_mechanics"
+      ],
+      "chunk_type": "overview",
+      "section": "Honeycombs and Scoring",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Honeycombs and Scoring"
+      ],
+      "markdown_anchor": "honeycombs-and-scoring",
+      "start_line": 103,
+      "end_line": 176
+    },
+    {
+      "chunk_id": "chunk-12-honeycomb-class-and-scoring-functions",
+      "topic": "Honeycomb Class Definition and Scoring Functions",
+      "text": "```python\n@dataclass(frozen=True, order=True)\nclass Honeycomb:\n    \"\"\"A Honeycomb lattice, with 7 letters, 1 of which is the center.\"\"\"\n    letters: Letterset \n    center:  Letter\n        \ndef word_score(word) -> int: \n    \"\"\"The points for this word, including bonus for pangram.\"\"\"\n    return 1 if len(word) == 4 else (len(word) + 7 * is_pangram(word))\n\ndef total_score(honeycomb, wordlist) -> int:\n    \"\"\"The total score for this honeycomb.\"\"\"\n    return sum(word_score(w) for w in wordlist if can_make(honeycomb, w))\n\ndef can_make(honeycomb, word) -> bool:\n    \"\"\"Can the honeycomb make this word?\"\"\"\n    return honeycomb.center in word and all(L in honeycomb.letters for L in word)\n```",
+      "concepts": [
+        "python_dataclasses",
+        "word_scoring_spelling_bee",
+        "honeycomb_structure",
+        "programmatic_word_filtering"
+      ],
+      "chunk_type": "example",
+      "section": "Honeycombs and Scoring",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Honeycombs and Scoring"
+      ],
+      "markdown_anchor": "honeycombs-and-scoring",
+      "start_line": 103,
+      "end_line": 176
+    },
+    {
+      "chunk_id": "chunk-13-example-honeycomb-instantiation",
+      "topic": "Example Honeycomb Instantiation",
+      "text": "Here is the honeycomb from the diagram at the top of the notebook:\n\n\n```python\nhc = Honeycomb(letterset('LAPGEMX'), 'G')\nhc\n```\n\n```\nHoneycomb(letters='AEGLMPX', center='G')\n```",
+      "concepts": [
+        "python_dataclasses",
+        "honeycomb_structure"
+      ],
+      "chunk_type": "example",
+      "section": "Honeycombs and Scoring",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Honeycombs and Scoring"
+      ],
+      "markdown_anchor": "honeycombs-and-scoring",
+      "start_line": 103,
+      "end_line": 176
+    },
+    {
+      "chunk_id": "chunk-14-word-scores-makeable-words-and-total-score-example",
+      "topic": "Word Scores, Makeable Words, and Total Score Example",
+      "text": "The word scores, makeable words, and total score  for this honeycomb on the `mini` word list are as follows:\n\n\n```python\n{w: word_score(w) for w in mini}\n```\n\n```\n{'AMALGAM': 7,\n 'CACCIATORE': 17,\n 'EROTICA': 14,\n 'GAME': 1,\n 'GLAM': 1,\n 'MEGAPLEX': 15}\n```\n\n```python\n{w for w in mini if can_make(hc, w)}\n```\n\n```\n{'AMALGAM', 'GAME', 'GLAM', 'MEGAPLEX'}\n```\n\n```python\ntotal_score(hc, mini) # 7 + 1 + 1 + 15\n```\n\n```\n24\n```",
+      "concepts": [
+        "word_scoring_spelling_bee",
+        "programmatic_word_filtering",
+        "python_dictionaries",
+        "python_set_operations"
+      ],
+      "chunk_type": "example",
+      "section": "Honeycombs and Scoring",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Honeycombs and Scoring"
+      ],
+      "markdown_anchor": "honeycombs-and-scoring",
+      "start_line": 103,
+      "end_line": 176
+    },
+    {
+      "chunk_id": "chunk-15-top-scoring-honeycomb-strategy",
+      "topic": "Strategy for finding the top-scoring honeycomb",
+      "text": "A simple strategy for finding the top (highest total score) honeycomb is:\n - Compile a list of all valid candidate honeycombs.\n - For each honeycomb, compute the total score.\n - Return a (score, honeycomb) tuple for a honeycomb with the maximum score.",
+      "concepts": [
+        "algorithmic_thinking"
+      ],
+      "chunk_type": "overview",
+      "section": "Finding the Top-Scoring Honeycomb",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Finding the Top-Scoring Honeycomb"
+      ],
+      "markdown_anchor": "finding-the-top-scoring-honeycomb",
+      "start_line": 177,
+      "end_line": 241
+    },
+    {
+      "chunk_id": "chunk-16-top-honeycomb-function",
+      "topic": "Python function to find the top honeycomb",
+      "text": "```python\ndef top_honeycomb(wordlist) -> Tuple[int, Honeycomb]: \n    \"\"\"Find a (score, honeycomb) tuple with a highest-scoring honeycomb.\"\"\"\n    return max((total_score(h, wordlist), h) \n               for h in candidate_honeycombs(wordlist))\n```",
+      "concepts": [
+        "python_basic_syntax",
+        "algorithmic_thinking"
+      ],
+      "chunk_type": "example",
+      "section": "Finding the Top-Scoring Honeycomb",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Finding the Top-Scoring Honeycomb"
+      ],
+      "markdown_anchor": "finding-the-top-scoring-honeycomb",
+      "start_line": 177,
+      "end_line": 241
+    },
+    {
+      "chunk_id": "chunk-17-candidate-honeycomb-space-analysis",
+      "topic": "Analyzing the candidate honeycomb space",
+      "text": "What are the possible candidate honeycombs? We could try all letters in all slots, but that's a **lot** of honeycombs:\n- The center can be any valid letter (25 choices, because 'S' is not allowed).\n- The outside can be any six of the remaining 24 letters.\n- All together, that's 25 × (24 choose 6) = 3,364,900 candidate honeycombs.\n\nFortunately, we can use the constraint that  **there must be at least one pangram** in a valid honeycomb.  So the letters of any valid honeycomb must ***be*** the letterset of some pangram (and the center can be any one of the seven letters):",
+      "concepts": [
+        "combinatorial_problem_space",
+        "constraint_based_problem_reduction",
+        "generating_candidate_honeycombs"
+      ],
+      "chunk_type": "explanation",
+      "section": "Finding the Top-Scoring Honeycomb",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Finding the Top-Scoring Honeycomb"
+      ],
+      "markdown_anchor": "finding-the-top-scoring-honeycomb",
+      "start_line": 177,
+      "end_line": 241
+    },
+    {
+      "chunk_id": "chunk-18-candidate-honeycombs-function",
+      "topic": "Python function to generate candidate honeycombs",
+      "text": "```python\ndef candidate_honeycombs(wordlist) -> List[Honeycomb]:\n    \"\"\"Valid honeycombs have pangram letters, with any center.\"\"\"\n    return [Honeycomb(letters, center) \n            for letters in pangram_lettersets(wordlist)\n            for center in letters]\n```",
+      "concepts": [
+        "python_basic_syntax",
+        "python_list_comprehensions",
+        "generating_candidate_honeycombs"
+      ],
+      "chunk_type": "example",
+      "section": "Finding the Top-Scoring Honeycomb",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Finding the Top-Scoring Honeycomb"
+      ],
+      "markdown_anchor": "finding-the-top-scoring-honeycomb",
+      "start_line": 177,
+      "end_line": 241
+    },
+    {
+      "chunk_id": "chunk-19-candidate-honeycombs-example",
+      "topic": "Example usage of the candidate_honeycombs function",
+      "text": "```python\ncandidate_honeycombs(mini) # 7 candidates for each of the 2 pangram lettersets\n```\n\n```\n[Honeycomb(letters='AEGLMPX', center='A'),\n Honeycomb(letters='AEGLMPX', center='E'),\n Honeycomb(letters='AEGLMPX', center='G'),\n Honeycomb(letters='AEGLMPX', center='L'),\n Honeycomb(letters='AEGLMPX', center='M'),\n Honeycomb(letters='AEGLMPX', center='P'),\n Honeycomb(letters='AEGLMPX', center='X'),\n Honeycomb(letters='ACEIORT', center='A'),\n Honeycomb(letters='ACEIORT', center='C'),\n Honeycomb(letters='ACEIORT', center='E'),\n Honeycomb(letters='ACEIORT', center='I'),\n Honeycomb(letters='ACEIORT', center='O'),\n Honeycomb(letters='ACEIORT', center='R'),\n Honeycomb(letters='ACEIORT', center='T')]\n```",
+      "concepts": [
+        "generating_candidate_honeycombs"
+      ],
+      "chunk_type": "example",
+      "section": "Finding the Top-Scoring Honeycomb",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Finding the Top-Scoring Honeycomb"
+      ],
+      "markdown_anchor": "finding-the-top-scoring-honeycomb",
+      "start_line": 177,
+      "end_line": 241
+    },
+    {
+      "chunk_id": "chunk-20-top-honeycomb-example",
+      "topic": "Example usage of the top_honeycomb function",
+      "text": "Now we're ready to find the highest-scoring honeycomb with respect to the `mini` word list:\n\n```python\ntop_honeycomb(mini)\n```\n\n```\n(31, Honeycomb(letters='ACEIORT', center='T'))\n```\n\nThe program appears to work. But that's just the mini word list.",
+      "concepts": [
+        "algorithmic_thinking"
+      ],
+      "chunk_type": "example",
+      "section": "Finding the Top-Scoring Honeycomb",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Finding the Top-Scoring Honeycomb"
+      ],
+      "markdown_anchor": "finding-the-top-scoring-honeycomb",
+      "start_line": 177,
+      "end_line": 241
+    },
+    {
+      "chunk_id": "chunk-21-big-word-list-introduction",
+      "topic": "Introduction to the word list",
+      "text": "# Big Word List\n\nHere's the big word list:",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "Big Word List",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Big Word List"
+      ],
+      "markdown_anchor": "big-word-list",
+      "start_line": 242,
+      "end_line": 319
+    },
+    {
+      "chunk_id": "chunk-22-downloading-and-inspecting-word-list",
+      "topic": "Downloading and inspecting the word list",
+      "text": "```python\n! [ -e  enable1.txt ] || curl -O http://norvig.com/ngrams/enable1.txt\n! head  enable1.txt\n! wc -w enable1.txt\n```\n\n```\naa\naah\nahed\naahing\naahs\naal\naalii\naaliis\naals\naardvark\n  172820 enable1.txt\n\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Big Word List",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Big Word List"
+      ],
+      "markdown_anchor": "big-word-list",
+      "start_line": 242,
+      "end_line": 319
+    },
+    {
+      "chunk_id": "chunk-23-loading-word-list-into-python",
+      "topic": "Loading the word list into a Python variable",
+      "text": "```python\nfile = 'enable1.txt'\nbig  = word_list(open(file).read())\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "Big Word List",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Big Word List"
+      ],
+      "markdown_anchor": "big-word-list",
+      "start_line": 242,
+      "end_line": 319
+    },
+    {
+      "chunk_id": "chunk-24-word-list-statistics-introduction",
+      "topic": "Introduction to word list statistics",
+      "text": "Here are some statistics:",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "Big Word List",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Big Word List"
+      ],
+      "markdown_anchor": "big-word-list",
+      "start_line": 242,
+      "end_line": 319
+    },
+    {
+      "chunk_id": "chunk-25-calculating-and-displaying-statistics",
+      "topic": "Calculating and displaying statistics about the word list",
+      "text": "```python\nprint(f\"\"\"172,820 total words\n{len(big):7,d} valid Spelling Bee words\n{sum(map(is_pangram, big)):7,d} pangram words\n{len(pangram_lettersets(big)):7,d} distinct pangram lettersets\n{len(candidate_honeycombs(big)):7,d} candidate honeycombs\"\"\")\n```\n\n```\n172,820 total words\n 44,585 valid Spelling Bee words\n 14,741 pangram words\n  7,986 distinct pangram lettersets\n 55,902 candidate honeycombs\n\n```",
+      "concepts": [
+        "valid_word_criteria",
+        "pangram_spelling_bee",
+        "generating_candidate_honeycombs"
+      ],
+      "chunk_type": "example",
+      "section": "Big Word List",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Big Word List"
+      ],
+      "markdown_anchor": "big-word-list",
+      "start_line": 242,
+      "end_line": 319
+    },
+    {
+      "chunk_id": "chunk-26-estimating-runtime-of-top-honeycomb",
+      "topic": "Estimating the runtime of the top_honeycomb function",
+      "text": "How long will it take to run `top_honeycomb(big)`? Most of the computation time is in `total_score`, which is called once for each of the 55,902 candidate honeycombs, so let's estimate the total time by first checking how long it takes to compute the total score of a single honeycomb:",
+      "concepts": [
+        "performance_profiling_basic",
+        "algorithmic_thinking"
+      ],
+      "chunk_type": "explanation",
+      "section": "Big Word List",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Big Word List"
+      ],
+      "markdown_anchor": "big-word-list",
+      "start_line": 242,
+      "end_line": 319
+    },
+    {
+      "chunk_id": "chunk-27-measuring-total-score-runtime",
+      "topic": "Measuring the runtime of the total_score function",
+      "text": "```python\n%timeit total_score(hc, big)\n```\n\n```\n8.58 ms ± 28.3 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)\n\n```",
+      "concepts": [
+        "performance_profiling_basic"
+      ],
+      "chunk_type": "example",
+      "section": "Big Word List",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Big Word List"
+      ],
+      "markdown_anchor": "big-word-list",
+      "start_line": 242,
+      "end_line": 319
+    },
+    {
+      "chunk_id": "chunk-28-calculating-total-estimated-runtime",
+      "topic": "Calculating the total estimated runtime",
+      "text": "Roughly 9 milliseconds for one honeycomb. For all 55,902 valid honeycombs:\n\n```python\n.009 * 55902\n```\n\n```\n503.11799999999994\n```\n\nAbout 500 seconds, which is under 9 minutes. I could run `top_honeycomb(big)`, get a coffee, come back, and declare victory. \n\nBut I think that a puzzle like this deserves a more elegant solution.",
+      "concepts": [
+        "algorithmic_thinking"
+      ],
+      "chunk_type": "explanation",
+      "section": "Big Word List",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Big Word List"
+      ],
+      "markdown_anchor": "big-word-list",
+      "start_line": 242,
+      "end_line": 319
+    },
+    {
+      "chunk_id": "chunk-29-faster-scoring-points-table-overview",
+      "topic": "Introduction to using a points table for faster scoring",
+      "text": "# Faster Scoring: Points Table\n\nHere's an idea to make `total_score` faster by doing some precomputation:\n\n1. Do the following computation only once:\n  - Compute the `letterset` and `word_score` for each word in the word list. \n  - Make a table of `{letterset: sum_of_word_scores}` giving the total score for each letterset. \n  - I call this a **points table**.\n2. For each honeycomb, do the following:\n  - Consider every **letter subset** of the honeycomb's 7 letters that includes the center letter.\n  - Sum the points table entries for each of these letter subsets.\n\nThe resulting algorithm, `fast_total_score`, iterates over just 2<sup>6</sup> – 1 = 63 letter subsets; much fewer than 44,585 valid words. The function `top_honeycomb2` creates the points table and calls `fast_total_score`:",
+      "concepts": [
+        "precomputation_for_optimization",
+        "points_table_data_structure",
+        "calculating_letter_subsets",
+        "algorithmic_thinking"
+      ],
+      "chunk_type": "overview",
+      "section": "Faster Scoring: Points Table",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Faster Scoring: Points Table"
+      ],
+      "markdown_anchor": "faster-scoring-points-table",
+      "start_line": 320,
+      "end_line": 402
+    },
+    {
+      "chunk_id": "chunk-30-fast-total-score-implementation",
+      "topic": "Implementation of fast_total_score using PointsTable",
+      "text": "```python\ndef top_honeycomb2(wordlist) -> Tuple[int, Honeycomb]: \n    \"\"\"Find a (score, honeycomb) tuple with a highest-scoring honeycomb.\"\"\"\n    table = PointsTable(wordlist)\n    return max((fast_total_score(h, table), h) \n               for h in candidate_honeycombs(wordlist))\n\nclass PointsTable(dict):\n    \"\"\"A table of {letterset: points} from words.\"\"\"\n    def __init__(self, wordlist):\n        for w in wordlist:\n            self[letterset(w)] += word_score(w)\n    def __missing__(self, key): return 0\n\ndef letter_subsets(honeycomb) -> List[Letterset]:\n    \"\"\"The 63 subsets of the letters in the honeycomb, each including the center letter.\"\"\"\n    return [letters \n            for n in range(2, 8) \n            for letters in map(''.join, combinations(honeycomb.letters, n))\n            if honeycomb.center in letters]\n\ndef fast_total_score(honeycomb, points_table) -> int:\n    \"\"\"The total score for this honeycomb, using a points table.\"\"\"\n    return sum(points_table[s] for s in letter_subsets(honeycomb))\n```",
+      "concepts": [
+        "points_table_data_structure",
+        "calculating_letter_subsets",
+        "python_dictionaries",
+        "python_list_comprehensions",
+        "itertools_combinations",
+        "programmatic_word_filtering",
+        "word_scoring_spelling_bee"
+      ],
+      "chunk_type": "example",
+      "section": "Faster Scoring: Points Table",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Faster Scoring: Points Table"
+      ],
+      "markdown_anchor": "faster-scoring-points-table",
+      "start_line": 320,
+      "end_line": 402
+    },
+    {
+      "chunk_id": "chunk-31-points-table-example",
+      "topic": "Example of a PointsTable for the mini word list",
+      "text": "Here is the points table for the mini word list:\n\n\n```python\ntable = PointsTable(mini)\ntable\n```\n\n```\n{'AGLM': 8, 'ACEIORT': 31, 'AEGM': 1, 'AEGLMPX': 15}\n```\n\nThe letterset `'AGLM'` gets 8 points (7 for AMALGAM and 1 for GLAM).  `'ACEIORT'` gets 31 points (17 for CACCIATORE and 14 for EROTICA). `'AEGM'` gets 1 for GAME and `'AEGLMPX'` gets 15 for MEGAPLEX.",
+      "concepts": [
+        "points_table_data_structure",
+        "representing_lettersets",
+        "word_scoring_spelling_bee"
+      ],
+      "chunk_type": "example",
+      "section": "Faster Scoring: Points Table",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Faster Scoring: Points Table"
+      ],
+      "markdown_anchor": "faster-scoring-points-table",
+      "start_line": 320,
+      "end_line": 402
+    },
+    {
+      "chunk_id": "chunk-32-letter-subsets-example",
+      "topic": "Example of letter subsets for a given honeycomb",
+      "text": "Here is the honeycomb `hc` again, and its 63 letter subsets:\n\n\n```python\nhc\n```\n\n```\nHoneycomb(letters='AEGLMPX', center='G')\n```\n\n```python\nprint(letter_subsets(hc))\n```\n\n```\n['AG', 'EG', 'GL', 'GM', 'GP', 'GX', 'AEG', 'AGL', 'AGM', 'AGP', 'AGX', 'EGL', 'EGM', 'EGP', 'EGX', 'GLM', 'GLP', 'GLX', 'GMP', 'GMX', 'GPX', 'AEGL', 'AEGM', 'AEGP', 'AEGX', 'AGLM', 'AGLP', 'AGLX', 'AGMP', 'AGMX', 'AGPX', 'EGLM', 'EGLP', 'EGLX', 'EGMP', 'EGMX', 'EGPX', 'GLMP', 'GLMX', 'GLPX', 'GMPX', 'AEGLM', 'AEGLP', 'AEGLX', 'AEGMP', 'AEGMX', 'AEGPX', 'AGLMP', 'AGLMX', 'AGLPX', 'AGMPX', 'EGLMP', 'EGLMX', 'EGLPX', 'EGMPX', 'GLMPX', 'AEGLMP', 'AEGLMX', 'AEGLPX', 'AEGMPX', 'AGLMPX', 'EGLMPX', 'AEGLMPX']\n```",
+      "concepts": [
+        "calculating_letter_subsets",
+        "honeycomb_structure",
+        "representing_lettersets"
+      ],
+      "chunk_type": "example",
+      "section": "Faster Scoring: Points Table",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Faster Scoring: Points Table"
+      ],
+      "markdown_anchor": "faster-scoring-points-table",
+      "start_line": 320,
+      "end_line": 402
+    },
+    {
+      "chunk_id": "chunk-33-fast-total-score-assertion",
+      "topic": "Verification of fast_total_score result",
+      "text": "The total from `fast_total_score` is the sum of its letter subsets (only 3 of which are in `PointsTable(mini)`):\n\n\n```python\nassert fast_total_score(hc, table) == 24 == table['AGLM'] + table['AEGM'] + table['AEGLMPX']\n```",
+      "concepts": [
+        "points_table_data_structure",
+        "calculating_letter_subsets",
+        "python_basic_syntax"
+      ],
+      "chunk_type": "example",
+      "section": "Faster Scoring: Points Table",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Faster Scoring: Points Table"
+      ],
+      "markdown_anchor": "faster-scoring-points-table",
+      "start_line": 320,
+      "end_line": 402
+    },
+    {
+      "chunk_id": "chunk-34-finding-top-scoring-honeycomb",
+      "topic": "Finding the top-scoring honeycomb on a large word list",
+      "text": "# Finding the Top-Scoring Honeycomb\n\n\nWe can now solve the puzzle on the big word list:\n\n\n```python\n%time top_honeycomb2(big)\n```\n\n```\nCPU times: user 1.59 s, sys: 3.69 ms, total: 1.59 s\nWall time: 1.59 s\n```\n\n```\n(3898, Honeycomb(letters='AEGINRT', center='R'))\n```\n\n**Wow! 3898 is a high score!** And the whole computation took **less than 2 seconds**!",
+      "concepts": [
+        "performance_profiling_basic",
+        "iterative_refinement_of_algorithms"
+      ],
+      "chunk_type": "example",
+      "section": "Finding the Top-Scoring Honeycomb",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Finding the Top-Scoring Honeycomb"
+      ],
+      "markdown_anchor": "finding-the-top-scoring-honeycomb",
+      "start_line": 403,
+      "end_line": 425
+    },
+    {
+      "chunk_id": "chunk-35-scoring-fewer-honeycombs-branch-and-bound-intro",
+      "topic": "Introduction to Branch and Bound Optimization",
+      "text": "A run time of less than 2 seconds to find the top honeycomb is pretty good! Can we do even better?\n\nThe program would run faster if we scored fewer honeycombs. But if we want to be guaranteed of finding the top-scoring honeycomb, how can we skip any? Consider the pangram **JUKEBOX**. With the unusual letters  **J**, **K**,  and **X**, it scores poorly, regardless of the choice of center:",
+      "concepts": [
+        "iterative_refinement_of_algorithms",
+        "algorithmic_thinking"
+      ],
+      "chunk_type": "overview",
+      "section": "Scoring Fewer Honeycombs: Branch and Bound",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Scoring Fewer Honeycombs: Branch and Bound"
+      ],
+      "markdown_anchor": "scoring-fewer-honeycombs-branch-and-bound",
+      "start_line": 426,
+      "end_line": 493
+    },
+    {
+      "chunk_id": "chunk-36-juke-box-example",
+      "topic": "JUKEBOX Pangram Example",
+      "text": "```python\njk = [Honeycomb(letterset('JUKEBOX'), C) for C in 'JUKEBOX']\n\n{h: total_score(h, big) for h in jk}\n```\n\n```\n{Honeycomb(letters='BEJKOUX', center='J'): 26,\n Honeycomb(letters='BEJKOUX', center='U'): 32,\n Honeycomb(letters='BEJKOUX', center='K'): 26,\n Honeycomb(letters='BEJKOUX', center='E'): 37,\n Honeycomb(letters='BEJKOUX', center='B'): 49,\n Honeycomb(letters='BEJKOUX', center='O'): 39,\n Honeycomb(letters='BEJKOUX', center='X'): 15}\n```",
+      "concepts": [
+        "example",
+        "python_dictionaries"
+      ],
+      "chunk_type": "example",
+      "section": "Scoring Fewer Honeycombs: Branch and Bound",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Scoring Fewer Honeycombs: Branch and Bound"
+      ],
+      "markdown_anchor": "scoring-fewer-honeycombs-branch-and-bound",
+      "start_line": 426,
+      "end_line": 493
+    },
+    {
+      "chunk_id": "chunk-37-branch-and-bound-explanation",
+      "topic": "Branch and Bound Algorithm Explanation",
+      "text": "We might be able to dismiss **JUKEBOX** in one call to `fast_total_score`, rather than seven, with this approach:\n- Keep track of the top score found so far.\n- For each pangram letterset, ask \"if we weren't required to use the center letter, what would this letterset score?\"\n- Check if that score (which is an **upper bound** of the score using any one center letter) is higher than the top score so far.\n  - If yes, then try the pangram letterset with all seven centers; \n  - If not then dismiss it without trying any centers.\n- This is called a [**branch and bound**](https://en.wikipedia.org/wiki/Branch_and_bound) algorithm: prune a  **branch** of 7 honeycombs if an upper **bound** can't beat the top score.\n\n*Note*: To represent a honeycomb with no center, I can just use `Honeycomb(p, '')`. This works because of a quirk of Python:  `letter_subsets` checks if `honeycomb.center in letters`; normally in Python the expression `e in s` means \"*is* `e` *an element of the collection* `s`\", but when `s` is a string it means \"*is* `e` *a substring of* `s`\", and the empty string is a substring of every string.",
+      "concepts": [
+        "branch_and_bound_algorithm",
+        "upper_bound_calculation_optimization",
+        "constraint_based_problem_reduction",
+        "algorithmic_thinking"
+      ],
+      "chunk_type": "explanation",
+      "section": "Scoring Fewer Honeycombs: Branch and Bound",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Scoring Fewer Honeycombs: Branch and Bound"
+      ],
+      "markdown_anchor": "scoring-fewer-honeycombs-branch-and-bound",
+      "start_line": 426,
+      "end_line": 493
+    },
+    {
+      "chunk_id": "chunk-38-top-honeycomb3-implementation",
+      "topic": "Implementation of top_honeycomb3 with Branch and Bound",
+      "text": "I can rewrite `top_honeycomb` as follows:\n\n\n```python\ndef top_honeycomb3(words) -> Tuple[int, Honeycomb]: \n    \"\"\"Find a (score, honeycomb) tuple with a highest-scoring honeycomb.\"\"\"\n    table = PointsTable(words)\n    top_score, top_honeycomb = -1, None\n    pangrams = [s for s in table if len(s) == 7]\n    for p in pangrams:\n        if fast_total_score(Honeycomb(p, ''), table) > top_score:\n            for center in p:\n                honeycomb = Honeycomb(p, center)\n                score = fast_total_score(honeycomb, table)\n                if score > top_score:\n                    top_score, top_honeycomb = score, honeycomb\n    return top_score, top_honeycomb\n```",
+      "concepts": [
+        "branch_and_bound_algorithm",
+        "programmatic_word_filtering",
+        "python_dictionaries",
+        "points_table_data_structure"
+      ],
+      "chunk_type": "example",
+      "section": "Scoring Fewer Honeycombs: Branch and Bound",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Scoring Fewer Honeycombs: Branch and Bound"
+      ],
+      "markdown_anchor": "scoring-fewer-honeycombs-branch-and-bound",
+      "start_line": 426,
+      "end_line": 493
+    },
+    {
+      "chunk_id": "chunk-39-top-honeycomb3-performance",
+      "topic": "Performance of top_honeycomb3",
+      "text": "```python\n%time top_honeycomb3(big)\n```\n\n```\nCPU times: user 350 ms, sys: 1.78 ms, total: 352 ms\nWall time: 351 ms\n\n```\n\n```\n(3898, Honeycomb(letters='AEGINRT', center='R'))\n```\n\nAwesome! We get the correct answer, and it runs four times faster than `top_honeycomb2`.",
+      "concepts": [
+        "branch_and_bound_algorithm",
+        "performance_profiling_basic"
+      ],
+      "chunk_type": "example",
+      "section": "Scoring Fewer Honeycombs: Branch and Bound",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Scoring Fewer Honeycombs: Branch and Bound"
+      ],
+      "markdown_anchor": "scoring-fewer-honeycombs-branch-and-bound",
+      "start_line": 426,
+      "end_line": 493
+    },
+    {
+      "chunk_id": "chunk-40-honeycomb-examination-with-lru-cache",
+      "topic": "Examining Honeycomb instances with lru_cache",
+      "text": "# How many honeycombs does `top_honeycomb3` examine? \n\nWe can use `functools.lru_cache` to make `Honeycomb` keep track:\n\n\n```python\nimport functools\nHoneycomb = functools.lru_cache(None)(Honeycomb)\ntop_honeycomb3(big)\nHoneycomb.cache_info()\n```\n\n```\nCacheInfo(hits=0, misses=8084, maxsize=None, currsize=8084)\n```\n\n`top_honeycomb3`  examined 8,084 honeycombs; a 6.9× reduction from the 55,902 examined by `top_honeycomb2`. Since there are 7,986 pangram lettersets, that means we had to look at all 7 centers for only (8084-7986)/7 = 14 of them.",
+      "concepts": [
+        "functools_lru_cache_memoization",
+        "generating_candidate_honeycombs",
+        "performance_profiling_basic"
+      ],
+      "chunk_type": "explanation",
+      "section": "How many honeycombs does `top_honeycomb3` examine?",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "How many honeycombs does `top_honeycomb3` examine?"
+      ],
+      "markdown_anchor": "how-many-honeycombs-does-top_honeycomb3-examine",
+      "start_line": 494,
+      "end_line": 528
+    },
+    {
+      "chunk_id": "chunk-41-fast-total-score-performance",
+      "topic": "Performance comparison of fast_total_score and total_score",
+      "text": "How much faster is `fast_total_score` than `total_score` (which takes about 9 milliseconds per honeycomb)?\n\n\n```python\ntable = PointsTable(big)\n\n%timeit fast_total_score(hc, table)\n```\n\n```\n26.4 µs ± 144 ns per loop (mean ± std. dev. of 7 runs, 10000 loops each)\n\n```\n\nWe see that `fast_total_score` is about 300 times faster.",
+      "concepts": [
+        "performance_profiling_basic",
+        "points_table_data_structure"
+      ],
+      "chunk_type": "example",
+      "section": "How many honeycombs does `top_honeycomb3` examine?",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "How many honeycombs does `top_honeycomb3` examine?"
+      ],
+      "markdown_anchor": "how-many-honeycombs-does-top_honeycomb3-examine",
+      "start_line": 494,
+      "end_line": 528
+    },
+    {
+      "chunk_id": "chunk-42-fancy-report-introduction",
+      "topic": "Introduction to the Fancy Report Function",
+      "text": "I'd like to see the actual words that each honeycomb can make, and I'm curious about how the words are divided up by letterset. Here's a function to provide such a report. This report turned out to be more complicated than I anticipated. I guess it is difficult to create a practical extraction and reporting tool. I feel you, [Larry Wall](http://www.wall.org/~larry/).",
+      "concepts": [],
+      "chunk_type": "overview",
+      "section": "Fancy Report",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Fancy Report"
+      ],
+      "markdown_anchor": "fancy-report",
+      "start_line": 529,
+      "end_line": 687
+    },
+    {
+      "chunk_id": "chunk-43-report-function-definition",
+      "topic": "Definition of the report function",
+      "text": "```python\nfrom textwrap import fill\n\ndef report(honeycomb=None, words=big):\n    \"\"\"Print stats, words, and word scores for the given honeycomb (or the top\n    honeycomb if no honeycomb is given) over the given word list.\"\"\"\n    bins    = group_by(words, key=letterset)\n    if honeycomb is None:\n        adj = \"Top \"\n        score, honeycomb = top_honeycomb3(words)\n    else:\n        adj = \"\"\n        score = total_score(honeycomb, words)\n    subsets = letter_subsets(honeycomb)\n    nwords  = sum(len(bins[s]) for s in subsets)\n    print(f'{adj}{honeycomb}: {Ns(nwords, \"word\")} {Ns(score, \"point\")}',\n          f'from a {len(words):,d} word list:\\n')\n    for s in sorted(subsets, key=lambda s: (-len(s), s)):\n        if bins[s]:\n            pts = sum(word_score(w) for w in bins[s])\n            wcount = Ns(len(bins[s]), \"pangram\" if is_pangram(s) else \"word\")\n            intro = f'{wcount:>8} {Ns(pts, \"point\"):>9} {{{s}}}: '\n            groups= group_by(bins[s], key=word_score)\n            strs  = [' '.join(w for w in sorted(groups[s])) + f' ({s})'\n                     for s in reversed(sorted(groups))]\n            print(fill(intro + ', '.join(strs), width=114, subsequent_indent=' '*4))\n            \ndef Ns(n: int, noun: str) -> str:\n    \"\"\"A string with the int `n` followed by the plural or singular of noun:\n    Ns(3, 'bear') => '3 bears'; Ns(1, 'world') => '1 world'\"\"\"  \n    return f\"{n:,d} {noun}{' ' if n == 1 else 's'}\"\n\ndef group_by(items, key) -> dict:\n    \"Group items into bins of a dict by key: {key(item): [item, ...], ...}.\"\n    bins = defaultdict(list)\n    for item in items:\n        bins[key(item)].append(item)\n    return bins\n```",
+      "concepts": [
+        "python_basic_syntax",
+        "python_string_operations",
+        "python_dictionaries",
+        "collections_defaultdict"
+      ],
+      "chunk_type": "example",
+      "section": "Fancy Report",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Fancy Report"
+      ],
+      "markdown_anchor": "fancy-report",
+      "start_line": 529,
+      "end_line": 687
+    },
+    {
+      "chunk_id": "chunk-44-report-function-examples",
+      "topic": "Examples of the report function",
+      "text": "Here are reports for the mini and full word lists:\n\n\n```python\nreport(hc, mini)\n```\n\n```\nHoneycomb(letters='AEGLMPX', center='G'): 4 words 24 points from a 6 word list:\n\n1 pangram  15 points {AEGLMPX}: MEGAPLEX (15)\n 1 word   1 point  {AEGM}: GAME (1)\n 2 words  8 points {AGLM}: AMALGAM (7), GLAM (1)\n\n```\n\n```python\nreport(words=mini)\n```\n\n```\nTop Honeycomb(letters='ACEIORT', center='A'): 2 words 31 points from a 6 word list:\n\n2 pangrams 31 points {ACEIORT}: CACCIATORE (17), EROTICA (14)\n\n```\n\n```python\nreport()\n```\n\n```\nTop Honeycomb(letters='AEGINRT', center='R'): 537 words 3,898 points from a 44,585 word list:\n\n50 pangrams 832 points {AEGINRT}: REAGGREGATING REINTEGRATING (20), ENTERTAINING INTENERATING REGENERATING\n    REINITIATING (19), AGGREGATING GRATINEEING INTEGRATING ITINERATING REATTAINING REINTEGRATE REITERATING\n    RETARGETING (18), ENTRAINING ENTREATING GARNIERITE GENERATING GREATENING INGRATIATE INTERREGNA INTREATING\n    REGRANTING RETRAINING RETREATING (17), ARGENTINE ARGENTITE GARTERING INTEGRATE INTERGANG ITERATING NATTERING\n    RATTENING REGRATING RETAINING RETEARING TANGERINE TARGETING TATTERING (16), AERATING GNATTIER\n    GRATINEE INTERAGE TREATING (15), GRANITE GRATINE INGRATE TANGIER TEARING (14)\n35 words 270 points {AEGINR}: REARRANGING (11), ENGRAINING GANGRENING REENGAGING (10), GARNERING GREGARINE\n    REEARNING REGAINING REGEARING (9), AGREEING ANEARING ANGERING ARGININE ENRAGING GRAINIER REGAINER (8), AGINNER\n    ANERGIA ANGRIER EARNING EARRING ENGRAIN GEARING GRAINER GRANNIE NAGGIER NEARING RANGIER REARING REGINAE (7),\n    EARING GAINER REAGIN REGAIN REGINA (6)\n 5 words 34 points {AEGIRT}: AIGRETTE IRRIGATE (8), AIGRET GAITER TRIAGE (6)\n13 words 94 points {AEGNRT}: REGENERATE (10), GENERATE TEENAGER (8), GRANTEE GRANTER GREATEN NEGATER REAGENT\n    REGNANT REGRANT TANAGER (7), ARGENT GARNET (6)\n30 words 232 points {AEINRT}: ENTERTAINER (11), INTENERATE REINITIATE (10), ENTERTAIN ENTRAINER ITINERANT\n    ITINERATE (9), ATTAINER INERRANT INERTIAE REATTAIN RETAINER RETIRANT TRIENNIA (8), ARENITE ENTRAIN INERTIA\n    INTREAT ITERANT NATTIER NITRATE RETINAE RETRAIN TERRAIN TERTIAN TRAINEE TRAINER (7), RATINE RETAIN RETINA (6)\n21 words 167 points {AGINRT}: INGRATIATING (12), IRRIGATING IRRITATING (10), INTRIGANT NARRATING NITRATING\n    TITRATING (9), ATTIRING GRANTING TRAINING TRIAGING (8), AIRTING GRANITA GRATING RANTING RATTING TARRING\n    TARTING (7), GRATIN RATING TARING (6)\n26 words 218 points {EGINRT}: REINTERRING (11), REENTERING REGREETING REGRETTING REIGNITING TRIGGERING (10),\n    GETTERING INTERNING INTERRING RETINTING TEETERING TENTERING TITTERING (9), ENTERING GREETING REIGNITE RETIRING\n    (8), GITTERN IGNITER INTEGER RENTING RETTING RINGENT TIERING TREEING (7), ENGIRT (6)\n18 words 120 points {AEGNR}: GREENGAGE REARRANGE (9), ARRANGER GANGRENE REENGAGE (8), ARRANGE ENGAGER GRANGER (7),\n    ENRAGE GANGER GARNER GENERA GRANGE NAGGER RANGER (6), ANGER RANGE REGNA (5)\n19 words 123 points {AEGRT}: REAGGREGATE (11), AGGREGATE (9), RETARGET (8), ETAGERE GREATER REGATTA REGRATE (7),\n    ERGATE GARGET GARRET GARTER GRATER TAGGER TARGET (6), GRATE GREAT RETAG TARGE TERGA (5)\n 3 words 19 points {AEINR}: RAINIER (7), INANER NARINE (6)\n20 words 135 points {AEIRT}: REITERATE (9), IRRITATE RETIARII TERRARIA (8), ARIETTA ARIETTE ATTRITE ITERATE\n    RATTIER TARRIER TATTIER TEARIER TITRATE (7), ARTIER ATTIRE IRATER RATITE (6), IRATE RETIA TERAI (5)\n19 words 132 points {AENRT}: RETREATANT (10), REENTRANT (9), ANTEATER NARRATER RATTENER (8), ENTRANT ENTREAT\n    NARRATE RATTEEN TERNATE TERRANE (7), ENTERA ERRANT NATTER NEATER RANTER RATTEN TANNER (6), ANTRE (5)\n19 words 138 points {AGINR}: ARRAIGNING INGRAINING (10), ARRANGING (9), AGRARIAN GARAGING GNARRING GRAINING (8),\n    ANGARIA ARRAIGN GARRING INGRAIN RAGGING RAINING RANGING (7), AIRING RAGING RARING (6), GARNI GRAIN (5)\n 1 word   5 points {AGIRT}: TRAGI (5)\n 1 word   5 points {AGNRT}: GRANT (5)\n 9 words 64 points {AINRT}: TRINITARIAN (11), ANTIARIN IRRITANT (8), ANTIAIR INTRANT TITRANT (7), ANTIAR (6),\n    RIANT TRAIN (5)\n24 words 186 points {EGINR}: REENGINEERING (13), ENGINEERING (11), REENGINEER REGREENING (10), GINGERING RENIGGING\n    RERIGGING (9), ENGINEER GREENIER GREENING REIGNING RENEGING (8), GINNIER GREEING GREENIE GRINNER REINING (7),\n    ERRING GINGER GINNER NIGGER RINGER (6), REIGN RENIG (5)\n 4 words 27 points {EGIRT}: GRITTIER (8), TERGITE TRIGGER (7), TIGER (5)\n 2 words 12 points {EGNRT}: GERENT REGENT (6)\n29 words 190 points {EINRT}: INTERNEE INTERTIE RENITENT RETINENE RETINITE (8), INTERNE NETTIER NITERIE NITRITE\n    NITTIER REINTER RENTIER TEENIER TENTIER TERRINE TINNIER (7), ENTIRE INTERN RETINE RETINT TINIER TINNER TINTER\n    TRIENE (6), INERT INTER NITER NITRE TRINE (5)\n 6 words 43 points {GINRT}: GRITTING TRIGGING (8), GIRTING RINGGIT TRINING (7), TIRING (6)\n17 words 84 points {AEGR}: ARREARAGE (9), EAGERER (7), GAGGER GARAGE RAGGEE REGEAR REGGAE (6), AGGER AGREE EAGER\n    EAGRE EGGAR GAGER RAGEE (5), AGER GEAR RAGE (1)\n 4 words 22 points {AEIR}: AERIER AIRIER (6), AERIE AIRER (5)\n 9 words 40 points {AENR}: EARNER NEARER REEARN (6), ANEAR ARENA RANEE RERAN (5), EARN NEAR (1)\n24 words 127 points {AERT}: RETREATER (9), TARTRATE (8), RETREAT TREATER (7), AERATE ERRATA RATTER RETEAR TARTER\n    TATTER TEARER TERRAE (6), ARETE EATER RATER REATA TARRE TATER TERRA TETRA TREAT (5), RATE TARE TEAR (1)\n 2 words  6 points {AGIR}: AGRIA (5), RAGI (1)\n 5 words 13 points {AGNR}: GNARR GRANA (5), GNAR GRAN RANG (1)\n 3 words 13 points {AGRT}: RAGTAG TAGRAG (6), GRAT (1)\n 4 words  8 points {AINR}: NAIRA (5), AIRN RAIN RANI (1)\n 5 words 21 points {AIRT}: ATRIA RIATA TIARA TRAIT (5), AIRT (1)\n10 words 50 points {ANRT}: TANTARA TARTANA (7), ARRANT RATTAN TANTRA TARTAN (6), ANTRA RATAN (5), RANT TARN (1)\n 3 words 17 points {EGIR}: GREIGE RIGGER (6), RERIG (5)\n 6 words 37 points {EGNR}: GREENER REGREEN RENEGER (7), RENEGE (6), GENRE GREEN (5)\n 7 words 45 points {EGRT}: REGRETTER (9), GREETER REGREET (7), GETTER REGRET (6), EGRET GREET (5)\n 4 words 17 points {EINR}: RENNIN (6), INNER RENIN (5), REIN (1)\n17 words 87 points {EIRT}: TITTERER (8), RETIREE RETIRER TERRIER (7), RETIRE RITTER TERRIT TITTER TRITER (6),\n    RETIE TITER TITRE TRIER TRITE (5), RITE TIER TIRE (1)\n19 words 104 points {ENRT}: ENTERER REENTER TERREEN TERRENE (7), ENTREE ETERNE NETTER RENNET RENTER RETENE TEENER\n    TENNER TENTER (6), ENTER RENTE TERNE TREEN (5), RENT TERN (1)\n 9 words 44 points {GINR}: GRINNING (8), GIRNING RIGGING RINGING RINNING (7), IRING (5), GIRN GRIN RING (1)\n 3 words  3 points {GIRT}: GIRT GRIT TRIG (1)\n 7 words 25 points {AER}: ARREAR REARER (6), AREAE RARER (5), AREA RARE REAR (1)\n 2 words  2 points {AGR}: AGAR RAGA (1)\n 2 words  2 points {AIR}: ARIA RAIA (1)\n 5 words 24 points {ART}: RATATAT (7), TARTAR (6), ATTAR TATAR (5), TART (1)\n 4 words 15 points {EGR}: GREEGREE (8), EGGER (5), EGER GREE (1)\n 2 words 11 points {EIR}: EERIER (6), EERIE (5)\n 1 word   1 point  {ENR}: ERNE (1)\n 7 words 27 points {ERT}: TEETER TERETE TERRET TETTER (6), RETE TREE TRET (1)\n 2 words  7 points {GIR}: GRIGRI (6), GRIG (1)\n```",
+      "concepts": [
+        "honeycomb_structure",
+        "word_scoring_spelling_bee",
+        "pangram_spelling_bee",
+        "representing_lettersets"
+      ],
+      "chunk_type": "example",
+      "section": "Fancy Report",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Fancy Report"
+      ],
+      "markdown_anchor": "fancy-report",
+      "start_line": 529,
+      "end_line": 687
+    },
+    {
+      "chunk_id": "chunk-45-s-words-analysis",
+      "topic": "Analysis of Spelling Bee with 'S' allowed",
+      "text": "# 'S' Words\n\nWhat if we allowed honeycombs to have an 'S' in them? I'll make a new word list that doesn't exclude the 'S'-words, and report on it:\n\n```python\nvalid_letters.add('S') # Make 'S' a legal letter\n\nbig_s = word_list(open(file).read())\n\nreport(words=big_s)\n```",
+      "concepts": [],
+      "chunk_type": "example",
+      "section": "'S' Words",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "'S' Words"
+      ],
+      "markdown_anchor": "s-words",
+      "start_line": 688,
+      "end_line": 856
+    },
+    {
+      "chunk_id": "chunk-46-s-words-report",
+      "topic": "Report on Spelling Bee with 'S' allowed",
+      "text": "```\nTop Honeycomb(letters='AEINRST', center='E'): 1,179 words 8,681 points from a 98,141 word list:\n\n86 pangrams 1,381 points {AEINRST}: ENTERTAINERS INTERSTRAINS STRAITNESSES (19), INTENERATES INTERSTATES\n    INTERSTRAIN IRATENESSES ITINERARIES REINITIATES RESTRAINERS TRISTEARINS (18), ANTISTRESS ARTINESSES ENTERTAINS\n    ENTRAINERS ENTREATIES ERRANTRIES INTERSTATE INTRASTATE ITINERANTS ITINERATES REINSTATES RESISTANTS RESTRAINER\n    RESTRAINTS SANITARIES STANNARIES STRAITNESS TANISTRIES TEARSTAINS TENANTRIES TRANSIENTS TRISTEARIN (17),\n    ARSENITES ATTAINERS INSTANTER IRATENESS REATTAINS REINSTATE RESINATES RESISTANT RESTRAINS RESTRAINT RETAINERS\n    RETIRANTS SEATRAINS STEARINES STRAINERS STRAITENS TANNERIES TEARSTAIN TERNARIES TRANSIENT (16), ANTISERA\n    ARENITES ARSENITE ARTINESS ENTRAINS INERTIAS INTREATS NITRATES RAINIEST RATANIES RESINATE RESTRAIN RETRAINS\n    RETSINAS SEATRAIN STAINERS STEARINE STEARINS STRAINER STRAITEN TERRAINS TERTIANS TRAINEES TRAINERS (15),\n    ANESTRI ANTSIER NASTIER RATINES RETAINS RETINAS RETSINA STAINER STEARIN (14)\n16 words 124 points {AEINRS}: AIRINESSES (10), ANSERINES INSNARERS SIRENIANS (9), AIRINESS ANSERINE INSNARER\n    INSNARES SIRENIAN (8), ARSINES INSANER INSNARE SENARII SIERRAN (7), ARISEN ARSINE (6)\n30 words 232 points {AEINRT}: ENTERTAINER (11), INTENERATE REINITIATE (10), ENTERTAIN ENTRAINER ITINERANT\n    ITINERATE (9), ATTAINER INERRANT INERTIAE REATTAIN RETAINER RETIRANT TRIENNIA (8), ARENITE ENTRAIN INERTIA\n    INTREAT ITERANT NATTIER NITRATE RETINAE RETRAIN TERRAIN TERTIAN TRAINEE TRAINER (7), RATINE RETAIN RETINA (6)\n80 words 713 points {AEINST}: INSATIATENESSES INSTANTANEITIES (15), INSATIATENESS INSTANTNESSES (13), ASSASSINATES\n    INNATENESSES INSTANTIATES (12), ASININITIES ASSASSINATE INSTANTIATE INSTANTNESS NASTINESSES NATTINESSES\n    TASTINESSES TATTINESSES (11), INNATENESS INSANITIES INTESTATES SENTENTIAE TITANESSES (10), ANISETTES ANTISENSE\n    ANTISTATE ASTATINES INANITIES INITIATES INSATIATE INSENSATE INTESTATE NASTINESS NATTINESS SANITATES SANITISES\n    SENTENTIA STANNITES TAENIASES TAENIASIS TASTINESS TATTINESS TETANISES TITANATES TITANITES (9), ANISETTE\n    ANTSIEST ASTATINE ENTASIAS ETESIANS INSANEST INSTATES ISATINES NASTIEST NATTIEST SANITATE SANITIES SANITISE\n    SATINETS SESTINAS STANINES STANNITE TENIASES TENIASIS TETANIES TETANISE TITANESS (8), ENTASIA ENTASIS ETESIAN\n    INANEST INSTATE ISATINE NASTIES SATINET SESTINA STANINE TAENIAS TANSIES TISANES (7), TENIAS TINEAS TISANE (6)\n60 words 473 points {AEIRST}: TRAITRESSES (11), ARTISTRIES REITERATES TERTIARIES (10), ARTERITIS ASSISTERS\n    IRRITATES SATIRISES SESTERTIA STARRIEST STRAITEST TRAITRESS TREATISES (9), ARIETTAS ARIETTES ARISTATE ARTERIES\n    ARTISTES ARTSIEST ASSISTER ASTERIAS ATRESIAS EATERIES ITERATES RARITIES RATTIEST SATIRISE SERIATES STARRIER\n    STRAITER STRIATES TARRIERS TARRIEST TARSIERS TEARIEST TITRATES TREATIES TREATISE TRISTATE (8), AERIEST AIRIEST\n    ARISTAE ARTIEST ARTISTE ARTSIER ASTERIA ATRESIA ATTIRES IRATEST RATITES SATIRES SERIATE STRIATE TARRIES\n    TARSIER TASTIER (7), AIREST SATIRE STRIAE TERAIS (6)\n40 words 336 points {AENRST}: EARNESTNESSES (13), EARNESTNESS RETREATANTS (11), ARRESTANTS EASTERNERS REENTRANTS\n    TARANTASES TARTNESSES (10), ANTEATERS ARRESTANT ARSENATES ASSENTERS EASTERNER NARRATERS RATTENERS SARSENETS\n    SERENATAS (9), ARSENATE ASSENTER EARNESTS ENTRANTS ENTREATS NARRATES RATTEENS SARSENET SERENATA SERENATE\n    TARTNESS TERRANES (8), EARNEST EASTERN ERRANTS NATTERS NEAREST RANTERS RATTENS TANNERS (7), ANTRES ASTERN\n    STERNA (6)\n70 words 582 points {EINRST}: SINISTERNESSES (14), ENTIRENESSES SINISTERNESS (12), ENTERITISES INERTNESSES\n    TRITENESSES (11), ENTIRENESS ENTIRETIES ETERNITIES INTERNISTS SERENITIES (10), ENTERITIS ETERNISES INERTNESS\n    INSERTERS INSETTERS INSISTERS INTERESTS INTERNEES INTERNIST INTERTIES REENTRIES REINSERTS RETINENES RETINITES\n    RETINITIS STERNITES TEENTSIER TRINITIES TRITENESS (9), ETERNISE INSERTER INSETTER INSISTER INTENSER INTEREST\n    INTERNES NITERIES NITRITES REINSERT REINTERS RENTIERS SENTRIES SINISTER STERNITE STINTERS TEENSIER TERRINES\n    TRIENTES (8), ENTIRES ENTRIES ESTRINS INSERTS INTERNS RETINES RETINTS SINTERS STINTER TINNERS TINTERS TRIENES\n    (7), ESTRIN INERTS INSERT INTERS NITERS NITRES SINTER TRIENS TRINES (6)\n 3 words  19 points {AEINR}: RAINIER (7), INANER NARINE (6)\n17 words 129 points {AEINS}: INSANENESSES (12), INANENESSES (11), EASINESSES INSANENESS (10), INANENESS (9),\n    EASINESS (8), ASININE NANNIES SANSEIS SIENNAS (7), ANISES INANES INSANE SANIES SANSEI SIENNA (6), ANISE (5)\n10 words  64 points {AEINT}: INITIATE TITANATE TITANITE (8), TAENIAE (7), INNATE TAENIA TENIAE (6), ENTIA TENIA\n    TINEA (5)\n17 words 106 points {AEIRS}: RERAISES (8), ARRISES RAISERS RERAISE SASSIER SIERRAS (7), AERIES AIRERS ARISES\n    EASIER RAISER RAISES SERAIS SIERRA (6), ARISE RAISE SERAI (5)\n20 words 135 points {AEIRT}: REITERATE (9), IRRITATE RETIARII TERRARIA (8), ARIETTA ARIETTE ATTRITE ITERATE\n    RATTIER TARRIER TATTIER TEARIER TITRATE (7), ARTIER ATTIRE IRATER RATITE (6), IRATE RETIA TERAI (5)\n15 words 112 points {AEIST}: SATIETIES STEATITES (9), SASSIEST SATIATES STEATITE TASTIEST TATTIEST (8), EASIEST\n    ETATIST SATIATE SIESTAS TASSIES TATTIES (7), SIESTA TASSIE (6)\n25 words 172 points {AENRS}: NEARNESSES RARENESSES (10), ENSNARERS (9), ENSNARER ENSNARES NEARNESS RARENESS\n    RENNASES (8), EARNERS ENSNARE REEARNS RENNASE SARSENS SNARERS (7), ANEARS ARENAS RANEES SARSEN SNARER SNARES\n    (6), EARNS NARES NEARS SANER SNARE (5)\n19 words 132 points {AENRT}: RETREATANT (10), REENTRANT (9), ANTEATER NARRATER RATTENER (8), ENTRANT ENTREAT\n    NARRATE RATTEEN TERNATE TERRANE (7), ENTERA ERRANT NATTER NEATER RANTER RATTEN TANNER (6), ANTRE (5)\n32 words 217 points {AENST}: NEATNESSES (10), SETENANTS (9), ANATASES ANTENNAS NEATNESS SENSATES SETENANT TANNATES\n    (8), ANATASE ANNATES ASSENTS ENTASES NEATENS NEATEST SATEENS SENATES SENSATE TANNEST TENANTS (7), ANENST\n    ANSATE ASSENT ENATES SANEST SATEEN SENATE STANES (6), ANTES ETNAS NATES NEATS STANE (5)\n85 words 604 points {AERST}: RETREATERS (10), ARRESTEES ARRESTERS ASSERTERS ATTESTERS ESTERASES REARRESTS\n    REASSERTS STEARATES TARTRATES (9), ARRESTEE ARRESTER ASSERTER ATTESTER ESTERASE ESTREATS REARREST REASSERT\n    RESTARTS RESTATES RETASTES RETREATS SERRATES STARTERS STEARATE STRASSES STRETTAS TERRASES TESSERAE TREATERS\n    (8), AERATES ARRESTS ASSERTS EASTERS ERRATAS ESTREAT RASTERS RATTERS RESEATS RESTART RESTATE RETASTE RETEARS\n    SEAREST SEATERS SERRATE STARERS STARETS STARTER STATERS STRETTA TARTEST TASTERS TATTERS TEARERS TEASERS\n    TESSERA TRASSES (7), ARETES ARREST ASSERT ASTERS EASTER EATERS RAREST RASTER RATERS REATAS RESEAT SEATER\n    STARER STARES STATER TARRES TASTER TATERS TEASER TERRAS TETRAS TREATS (6), ASTER RATES STARE TARES TEARS (5)\n29 words 184 points {EINRS}: EERINESSES (10), EERINESS ESERINES (8), ESERINE RENNINS RERISEN RINSERS SEINERS\n    SEREINS SERINES SINNERS (7), INNERS NEREIS RENINS RESINS RINSER RINSES SEINER SEREIN SERINE SERINS SINNER\n    SIRENS (6), REINS RESIN RINSE RISEN SERIN SIREN (5)\n29 words 190 points {EINRT}: INTERNEE INTERTIE RENITENT RETINENE RETINITE (8), INTERNE NETTIER NITERIE NITRITE\n    NITTIER REINTER RENTIER TEENIER TENTIER TERRINE TINNIER (7), ENTIRE INTERN RETINE RETINT TINIER TINNER TINTER\n    TRIENE (6), INERT INTER NITER NITRE TRINE (5)\n58 words 469 points {EINST}: INTENSENESSES (13), INTENTNESSES (12), INTENSENESS INTENSITIES TESTINESSES\n    TINNINESSES (11), INSENTIENT INTENTNESS INTESTINES SENSITISES TEENTSIEST TININESSES (10), EINSTEINS INSISTENT\n    INTENSEST INTESTINE NINETEENS SENSITISE SENTIENTS TEENSIEST TENSITIES TESTINESS TINNINESS (9), EINSTEIN\n    ENTITIES NETTIEST NINETIES NITTIEST SENTIENT SESTINES SIENITES TEENIEST TENNISES TENNISTS TENTIEST TININESS\n    TINNIEST (8), INTENSE INTENTS INTINES SENNITS SESTINE SIENITE TENNIES TENNIST TINIEST (7), INSETS SENITI\n    SENNIT SITTEN STEINS TENNIS (6), INSET NEIST NITES SENTI STEIN TINES (5)\n38 words 262 points {EIRST}: RESISTERS TITTERERS TRESSIEST (9), IRITISES RESISTER RETIREES RETIRERS STIRRERS\n    TERRIERS TRESSIER (8), EERIEST RESISTS RESITES RETIRES RETRIES RITTERS SISTERS SITTERS STIRRER STRETTI TERRIES\n    TERRITS TESTIER TITTERS TRITEST (7), RESIST RESITE RETIES SISTER SITTER TITERS TITRES TRIERS TRISTE (6), RITES\n    TIERS TIRES TRIES (5)\n35 words 246 points {ENRST}: STERNNESSES TERSENESSES (11), STERNNESS TERSENESS (9), ENTERERS REENTERS SERENEST\n    STERNEST TERREENS TERRENES (8), ENTREES NESTERS NETTERS RENESTS RENNETS RENTERS RESENTS RETENES STERNER\n    TEENERS TENNERS TENTERS (7), ENTERS NESTER RENEST RENTES RESENT STERNS TENSER TERNES TREENS (6), NERTS RENTS\n    STERN TERNS (5)\n 2 words  11 points {AEIN}: NANNIE (6), INANE (5)\n 4 words  22 points {AEIR}: AERIER AIRIER (6), AERIE AIRER (5)\n 2 words  13 points {AEIS}: SASSIES (7), EASIES (6)\n 1 word    6 points {AEIT}: TATTIE (6)\n 9 words  40 points {AENR}: EARNER NEARER REEARN (6), ANEAR ARENA RANEE RERAN (5), EARN NEAR (1)\n 9 words  46 points {AENS}: SANENESSES (10), SANENESS (8), SENNAS (6), ANSAE SANES SENNA SENSA (5), ANES SANE (1)\n13 words  63 points {AENT}: ANTENNAE (8), ANTENNA TANNATE (7), ATTENT NEATEN TENANT (6), ANENT ANTAE EATEN ENATE\n    (5), ANTE ETNA NEAT (1)\n26 words 121 points {AERS}: REASSESSES (10), REASSESS (8), ARREARS ERASERS REARERS (7), ERASER ERASES RASERS\n    SAREES SEARER (6), AREAS ARSES ERASE RARES RASER RASES REARS SAREE SEARS (5), ARES ARSE EARS ERAS RASE SEAR\n    SERA (1)\n24 words 127 points {AERT}: RETREATER (9), TARTRATE (8), RETREAT TREATER (7), AERATE ERRATA RATTER RETEAR TARTER\n    TATTER TEARER TERRAE (6), ARETE EATER RATER REATA TARRE TATER TERRA TETRA TREAT (5), RATE TARE TEAR (1)\n35 words 164 points {AEST}: TESTATES (8), ATTESTS ESTATES TASSETS TESTATE (7), ASSETS ATTEST ESTATE STASES STATES\n    TASSES TASSET TASTES TEASES TESTAE (6), ASSET EASTS SATES SEATS SETAE STATE TASSE TASTE TATES TEASE TEATS\n    TESTA (5), ATES EAST EATS ETAS SATE SEAT SETA TEAS (1)\n 4 words  17 points {EINR}: RENNIN (6), INNER RENIN (5), REIN (1)\n10 words  53 points {EINS}: NINNIES SEISINS (7), NISEIS SEINES SEISIN (6), NINES NISEI SEINE SINES (5), SINE (1)\n 6 words  28 points {EINT}: NINETEEN (8), INTENT INTINE TENTIE (6), NITE TINE (1)\n20 words 101 points {EIRS}: RERISES SEISERS SERRIES SIRREES SISSIER (7), IRISES RERISE RISERS SEISER SERIES SIREES\n    SIRREE (6), RISER RISES SIREE SIRES (5), IRES REIS RISE SIRE (1)\n17 words  87 points {EIRT}: TITTERER (8), RETIREE RETIRER TERRIER (7), RETIRE RITTER TERRIT TITTER TRITER (6),\n    RETIE TITER TITRE TRIER TRITE (5), RITE TIER TIRE (1)\n 8 words  41 points {EIST}: SISSIEST TESTIEST (8), TITTIES (7), TESTIS (6), SITES STIES (5), SITE TIES (1)\n12 words  80 points {ENRS}: SERENENESSES (12), SERENENESS (10), SNEERERS (8), SERENER SERENES SNEERER (7), RESEEN\n    SERENE SNEERS (6), ERNES SNEER (5), ERNS (1)\n19 words 104 points {ENRT}: ENTERER REENTER TERREEN TERRENE (7), ENTREE ETERNE NETTER RENNET RENTER RETENE TEENER\n    TENNER TENTER (6), ENTER RENTE TERNE TREEN (5), RENT TERN (1)\n18 words  94 points {ENST}: TENSENESSES (11), TENSENESS (9), ENTENTES (8), SENNETS TENSEST (7), SENNET TENETS\n    TENSES (6), NESTS NETTS SENTE TEENS TENSE TENTS (5), NEST NETS SENT TENS (1)\n44 words 266 points {ERST}: RESTRESSES (10), RESETTERS (9), RESETTER RESTRESS STEERERS STRESSES (8), RESTERS\n    RETESTS SETTERS STEERER STREETS STRETTE TEETERS TERRETS TERSEST TESTERS TETTERS TRESSES (7), ESTERS REESTS\n    RESETS RESTER RETEST SEREST SETTER STEERS STERES STREET STRESS TERSER TESTER (6), ESTER REEST RESET RESTS\n    STEER STERE TERSE TREES TRESS TRETS (5), ERST REST RETS (1)\n 7 words  25 points {AER}: ARREAR REARER (6), AREAE RARER (5), AREA RARE REAR (1)\n 8 words  33 points {AES}: ASSESSES (8), ASSESS SASSES (6), ASSES EASES (5), ASEA EASE SEAS (1)\n 2 words   2 points {AET}: TATE TEAT (1)\n 1 word    1 point  {EIN}: NINE (1)\n 2 words  11 points {EIR}: EERIER (6), EERIE (5)\n 7 words  35 points {EIS}: SISSIES (7), ISSEIS SEISES (6), ISSEI SEISE SISES (5), SEIS (1)\n 1 word    6 points {EIT}: TITTIE (6)\n 1 word    1 point  {ENR}: ERNE (1)\n 6 words  20 points {ENS}: NESSES SENSES (6), SENSE (5), NESS SEEN SENE (1)\n 5 words  15 points {ENT}: ENTENTE (7), TENET (5), NETT TEEN TENT (1)\n13 words  52 points {ERS}: SEERESSES (9), SEERESS (7), RESEES (6), ERSES RESEE SEERS SERER SERES (5), ERRS REES\n    SEER SERE SERS (1)\n 7 words  27 points {ERT}: TEETER TERETE TERRET TETTER (6), RETE TREE TRET (1)\n18 words  79 points {EST}: SESTETS SETTEES TESTEES TSETSES (7), SESTET SETTEE TESTEE TESTES TSETSE (6), SETTS\n    STETS TESTS (5), SETS SETT STET TEES TEST TETS (1)\n 1 word    1 point  {EN}: NENE (1)\n 3 words   7 points {ES}: ESSES (5), ESES SEES (1)\n```",
+      "concepts": [
+        "pangram_spelling_bee",
+        "word_scoring_spelling_bee"
+      ],
+      "chunk_type": "example",
+      "section": "'S' Words",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "'S' Words"
+      ],
+      "markdown_anchor": "s-words",
+      "start_line": 688,
+      "end_line": 856
+    },
+    {
+      "chunk_id": "chunk-47-s-words-conclusion",
+      "topic": "Conclusion on allowing 'S' in Spelling Bee",
+      "text": "Allowing 'S' more than doubles the length of the word list and the score of the top honeycomb!\n\nHere are the highest-scoring honeycombs (with and without an S) with their stats and a pangram to remember them by:\n\n<img src=\"http://norvig.com/honeycombs.png\" width=\"350\">\n<center>\n   537 words &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 1,179 words \n    <br>50 pangrams  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 86 pangrams\n    <br>3,898 points &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 8,681 points\n    <br> &nbsp;  &nbsp; RETAINING &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ENTERTAINERS\n</center>",
+      "concepts": [],
+      "chunk_type": "explanation",
+      "section": "'S' Words",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "'S' Words"
+      ],
+      "markdown_anchor": "s-words",
+      "start_line": 688,
+      "end_line": 856
+    },
+    {
+      "chunk_id": "chunk-48-summary-of-honeycomb-search",
+      "topic": "Summary of the notebook's approach to finding the highest-scoring honeycomb",
+      "text": "# Summary\n\nThis notebook showed how to find the highest-scoring honeycomb, starting from a brute-force baseline approach (which we didn't actually run) and modifying the approach with three key improvements:\n\n1. **Brute Force Enumeration**: Compute total score for every honeycomb; return the highest-scoring.\n2. **Pangram Lettersets**: Compute total score for  honeycombs that are pangram lettersets (with all 7 centers).\n3. **Points Table**: Precompute score for each letterset; for each candidate honeycomb, sum  63 letter subset scores.\n4. **Branch and Bound**: Try all 7 centers only for lettersets that score better than the top score so far.",
+      "concepts": [
+        "iterative_refinement_of_algorithms",
+        "brute_force_algorithm_design",
+        "pangram_spelling_bee",
+        "points_table_data_structure",
+        "branch_and_bound_algorithm",
+        "algorithmic_thinking"
+      ],
+      "chunk_type": "overview",
+      "section": "Summary",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Summary"
+      ],
+      "markdown_anchor": "summary",
+      "start_line": 857,
+      "end_line": 878
+    },
+    {
+      "chunk_id": "chunk-49-efficiency-improvements-table",
+      "topic": "Efficiency improvements achieved through different approaches",
+      "text": "The key ideas paid off in efficiency improvements:\n\n\n|Approach|Honeycombs|Reduction|`total_score` Time|Speedup|Overall  Time|Overall Speedup|\n|--------|----------|--------|----|---|---|---|\n|1. **Brute Force Enumeration**|3,364,900|——|9000 microseconds|——|8.5 hours (est.)|——|\n|2. **Pangram Lettersets**|55,902|60×|9000 microseconds|——|500 sec (est.)|60×|\n|3. **Points Table**|55,902|——|26 microseconds|300×|1.6 seconds|20,000×|\n|4. **Branch and Bound**|8,084 |7×|26 microseconds|——|0.35 seconds|90,000×|",
+      "concepts": [
+        "brute_force_algorithm_design",
+        "pangram_spelling_bee",
+        "points_table_data_structure",
+        "branch_and_bound_algorithm",
+        "performance_profiling_basic",
+        "precomputation_for_optimization",
+        "algorithmic_thinking"
+      ],
+      "chunk_type": "explanation",
+      "section": "Summary",
+      "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+      "heading_path": [
+        "Summary"
+      ],
+      "markdown_anchor": "summary",
+      "start_line": 857,
+      "end_line": 878
+    }
+  ],
+  "metadata": {
+    "total_chunks": 49,
+    "source_file": "/home/danenberg/prg/workshops/learning/markdown/spellingbee/spellingbee.md",
+    "chunked_at": "2025-12-12T16:15:47.160Z"
+  }
+}

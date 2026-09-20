@@ -1,0 +1,430 @@
+{
+  "metadata": {
+    "title": "The Traveling Salesperson Problem",
+    "author": "Peter Norvig",
+    "source": "Markdown document",
+    "video_id": "N/A",
+    "total_duration": 9800,
+    "total_concepts": 26,
+    "extracted_at": "2025-12-12T13:23:04.108Z",
+    "enriched_at": "2024-07-30T12:00:00Z",
+    "enrichment_version": "1.0",
+    "source_file": "/home/danenberg/prg/workshops/learning/public/data/pytudes/tsp.md"
+  },
+  "nodes": [
+    {
+      "id": "traveling_salesperson_problem",
+      "name": "Traveling Salesperson Problem (TSP)",
+      "description": "A classic optimization problem where, given a set of cities and the distances between each pair, the goal is to find the shortest possible tour that visits each city exactly once and returns to the starting city.",
+      "prerequisites": [],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 0,
+          "end": 60
+        }
+      ]
+    },
+    {
+      "id": "euclidean_distance",
+      "name": "Euclidean Distance",
+      "description": "The straight-line distance between two points in a two-dimensional plane, implemented as a function distance(A, B) using complex numbers, and noting its non-negative and symmetric properties.",
+      "prerequisites": [
+        "traveling_salesperson_problem"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 60,
+          "end": 120
+        }
+      ]
+    },
+    {
+      "id": "city_tour_representation",
+      "name": "City and Tour Representation",
+      "description": "Defining City as a complex number (x, y coordinate), Cities as a frozenset for immutability, and Tour as a list of cities in visiting order, along with Link as a tuple of two cities.",
+      "prerequisites": [
+        "euclidean_distance"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 120,
+          "end": 200
+        }
+      ]
+    },
+    {
+      "id": "tour_length_calculation",
+      "name": "Tour Length Calculation",
+      "description": "The process of computing the total distance of a tour by summing the distance between adjacent cities, including the final link back to the starting city, implemented in tour_length(tour).",
+      "prerequisites": [
+        "city_tour_representation",
+        "euclidean_distance"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 200,
+          "end": 250
+        }
+      ]
+    },
+    {
+      "id": "valid_tour_definition",
+      "name": "Valid Tour Definition",
+      "description": "Understanding the criteria for a tour to be valid: it must visit every city exactly once and return to the starting city, which is checked by comparing Counter objects of the tour and cities set.",
+      "prerequisites": [
+        "city_tour_representation"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 250,
+          "end": 300
+        }
+      ]
+    },
+    {
+      "id": "random_test_data_generation",
+      "name": "Random Test Data Generation",
+      "description": "Generating sets of n random cities uniformly distributed over a rectangular area, with an optional seed for reproducibility across different algorithm runs.",
+      "prerequisites": [
+        "city_tour_representation"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 300,
+          "end": 400
+        }
+      ]
+    },
+    {
+      "id": "exhaustive_search_tsp",
+      "name": "Exhaustive Search Algorithm (TSP)",
+      "description": "A brute-force algorithm that finds the shortest tour by generating all possible permutations of cities (tours) and calculating the length of each to find the minimum. Includes optimization to reduce redundant tour representations.",
+      "prerequisites": [
+        "traveling_salesperson_problem",
+        "tour_length_calculation",
+        "valid_tour_definition",
+        "random_test_data_generation"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 400,
+          "end": 700
+        }
+      ]
+    },
+    {
+      "id": "algorithm_evaluation_visualization",
+      "name": "Algorithm Evaluation and Visualization",
+      "description": "Tools and techniques for visually plotting tours (plot_tour) to assess quality, and functions (run, runs) to execute TSP algorithms, measure execution time, and compare tour lengths.",
+      "prerequisites": [
+        "exhaustive_search_tsp",
+        "tour_length_calculation"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 700,
+          "end": 900
+        }
+      ]
+    },
+    {
+      "id": "general_algorithm_design_strategies",
+      "name": "General Algorithm Design Strategies",
+      "description": "An overview of common approaches to algorithm design, including Brute Force, Approximation, Greedy, Improvement, Divide and Conquer, Ensemble, and Stand on the Shoulders of Giants strategies, used to inspire TSP solutions.",
+      "prerequisites": [
+        "traveling_salesperson_problem"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 900,
+          "end": 1000
+        }
+      ]
+    },
+    {
+      "id": "greedy_algorithm_principle",
+      "name": "Greedy Algorithm Design Principle",
+      "description": "A strategy where, at each step of a multi-step problem, the choice that appears best in the short term (locally optimal) is made, without considering long-term consequences, often leading to approximate solutions.",
+      "prerequisites": [
+        "general_algorithm_design_strategies"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 1000,
+          "end": 1050
+        }
+      ]
+    },
+    {
+      "id": "nearest_neighbor_tsp_algorithm",
+      "name": "Nearest Neighbor TSP Algorithm",
+      "description": "A greedy heuristic for TSP that builds a tour by iteratively extending the current partial tour to the nearest unvisited city until all cities are included. It is fast but does not guarantee optimality.",
+      "prerequisites": [
+        "greedy_algorithm_principle",
+        "city_tour_representation",
+        "euclidean_distance"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 1050,
+          "end": 1250
+        }
+      ]
+    },
+    {
+      "id": "ensemble_algorithm_principle",
+      "name": "Ensemble Algorithm Design Principle",
+      "description": "A strategy that applies a set of different algorithms or variations of an algorithm to a problem and then selects the best solution found among them, aiming for improved robustness or performance.",
+      "prerequisites": [
+        "general_algorithm_design_strategies"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 1250,
+          "end": 1300
+        }
+      ]
+    },
+    {
+      "id": "repetitive_nearest_neighbor_algorithm",
+      "name": "Repetitive Nearest Neighbor Algorithm",
+      "description": "An ensemble strategy that improves the basic Nearest Neighbor Algorithm by running it multiple times, each time starting from a different city, and then choosing the shortest tour found across all runs.",
+      "prerequisites": [
+        "nearest_neighbor_tsp_algorithm",
+        "ensemble_algorithm_principle"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 1300,
+          "end": 1500
+        }
+      ]
+    },
+    {
+      "id": "improvement_algorithm_principle",
+      "name": "Improvement Algorithm Design Principle",
+      "description": "A strategy where an initial (possibly suboptimal) solution is generated, and then an additional algorithm iteratively modifies or refines it to achieve a better solution, often by fixing 'mistakes'.",
+      "prerequisites": [
+        "general_algorithm_design_strategies"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 1500,
+          "end": 1600
+        }
+      ]
+    },
+    {
+      "id": "two_opt_optimization_tsp",
+      "name": "2-opt Optimization (TSP)",
+      "description": "A local search heuristic for improving an existing TSP tour. It works by identifying two crossed links, deleting them, and re-adding two new links (effectively reversing a segment) to reduce the total tour length, repeating until no further improvements can be made.",
+      "prerequisites": [
+        "improvement_algorithm_principle",
+        "tour_length_calculation",
+        "euclidean_distance"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 1600,
+          "end": 2100
+        }
+      ]
+    },
+    {
+      "id": "algorithm_benchmarking_statistical_comparison",
+      "name": "Algorithm Benchmarking and Statistical Comparison",
+      "description": "Methodologies for rigorously comparing the performance of different TSP algorithms, including using test_set to create problem instances, benchmark to execute algorithms and record results, and boxplots and rankings for statistical visualization and analysis of tour lengths and run times.",
+      "prerequisites": [
+        "algorithm_evaluation_visualization",
+        "two_opt_optimization_tsp",
+        "repetitive_nearest_neighbor_algorithm"
+      ],
+      "difficulty": "advanced",
+      "time_ranges": [
+        {
+          "start": 2100,
+          "end": 2800
+        }
+      ]
+    },
+    {
+      "id": "greedy_mst_like_tsp_algorithm",
+      "name": "Greedy MST-like TSP Algorithm",
+      "description": "A greedy heuristic that constructs a tour by starting with each city as a single-city segment, then iteratively joining the two segments connected by the shortest available link, ensuring no premature loops are formed, until a single tour is complete.",
+      "prerequisites": [
+        "greedy_algorithm_principle",
+        "city_tour_representation",
+        "euclidean_distance",
+        "tour_length_calculation"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 2800,
+          "end": 3500
+        }
+      ]
+    },
+    {
+      "id": "graph_theory_fundamentals",
+      "name": "Graph Theory Fundamentals for TSP",
+      "description": "Introduction to basic graph theory terminology, including graph, vertex (city), link (edge), directed graph, tree (a specific directed graph structure), root, parent, and child, as a foundation for MST-based algorithms.",
+      "prerequisites": [
+        "traveling_salesperson_problem"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 3500,
+          "end": 3800
+        }
+      ]
+    },
+    {
+      "id": "minimum_spanning_tree",
+      "name": "Minimum Spanning Tree (MST)",
+      "description": "A spanning tree of a set of vertices (cities) where the sum of the lengths of all links is minimized, connecting all vertices without forming cycles.",
+      "prerequisites": [
+        "graph_theory_fundamentals",
+        "euclidean_distance"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 3800,
+          "end": 3900
+        }
+      ]
+    },
+    {
+      "id": "prims_algorithm_for_mst",
+      "name": "Prim's Algorithm for MST",
+      "description": "An algorithm for constructing a Minimum Spanning Tree: starting with a single root city, it iteratively adds the shortest link connecting a city already in the tree to a city not yet in the tree, until all cities are included.",
+      "prerequisites": [
+        "minimum_spanning_tree",
+        "greedy_algorithm_principle",
+        "euclidean_distance"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 3900,
+          "end": 4200
+        }
+      ]
+    },
+    {
+      "id": "preorder_traversal_tree",
+      "name": "Pre-order Traversal (Tree)",
+      "description": "A method for visiting all nodes in a tree, starting at the root, then recursively visiting each of the root's children from left to right, ensuring the root is processed before its subtrees.",
+      "prerequisites": [
+        "graph_theory_fundamentals"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 4200,
+          "end": 4300
+        }
+      ]
+    },
+    {
+      "id": "mst_traversal_tsp_algorithm",
+      "name": "MST Traversal TSP Algorithm",
+      "description": "An approximation algorithm for TSP that involves constructing a Minimum Spanning Tree and then performing a pre-order traversal on it to generate a tour. This approach comes with a theoretical guarantee on tour length.",
+      "prerequisites": [
+        "prims_algorithm_for_mst",
+        "preorder_traversal_tree",
+        "tour_length_calculation"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 4300,
+          "end": 4500
+        }
+      ]
+    },
+    {
+      "id": "guaranteed_approximation_ratios_tsp",
+      "name": "Guaranteed Approximation Ratios (TSP)",
+      "description": "Understanding the theoretical guarantee provided by the MST Traversal TSP algorithm: that its tour length will be no more than twice as long as the optimal tour. This contrasts with heuristics that lack such bounds.",
+      "prerequisites": [
+        "mst_traversal_tsp_algorithm",
+        "traveling_salesperson_problem"
+      ],
+      "difficulty": "advanced",
+      "time_ranges": [
+        {
+          "start": 4500,
+          "end": 4700
+        }
+      ]
+    },
+    {
+      "id": "divide_conquer_strategy_tsp",
+      "name": "Divide and Conquer Strategy (TSP)",
+      "description": "An algorithm design paradigm applied to TSP where a large problem is split into smaller subproblems (e.g., splitting cities by coordinates), each solved recursively, and then their partial solutions (tours) are combined to form a complete solution, including methods for splitting and joining tours.",
+      "prerequisites": [
+        "general_algorithm_design_strategies",
+        "exhaustive_search_tsp",
+        "tour_length_calculation"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 4700,
+          "end": 5400
+        }
+      ]
+    },
+    {
+      "id": "dynamic_programming_principle",
+      "name": "Dynamic Programming Principle",
+      "description": "An optimization technique where complex problems are solved by breaking them into simpler overlapping subproblems, solving each subproblem only once, and storing their solutions (caching) to avoid recomputation, as demonstrated in the Held-Karp algorithm.",
+      "prerequisites": [
+        "general_algorithm_design_strategies"
+      ],
+      "difficulty": "advanced",
+      "time_ranges": [
+        {
+          "start": 5800,
+          "end": 6000
+        }
+      ]
+    },
+    {
+      "id": "held_karp_algorithm_tsp",
+      "name": "Held-Karp Algorithm (Dynamic Programming for TSP)",
+      "description": "An exact algorithm for TSP that uses dynamic programming to efficiently find optimal tours. It leverages the key idea that the shortest segment between two cities through a specific set of intermediate cities needs only be computed once and stored, avoiding redundant calculations of permutations.",
+      "prerequisites": [
+        "dynamic_programming_principle",
+        "traveling_salesperson_problem",
+        "tour_length_calculation"
+      ],
+      "difficulty": "advanced",
+      "time_ranges": [
+        {
+          "start": 6500,
+          "end": 7400
+        }
+      ]
+    }
+  ],
+  "edges": []
+}

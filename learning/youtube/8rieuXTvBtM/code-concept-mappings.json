@@ -1,0 +1,98 @@
+{
+  "unique_snippets": [
+    {
+      "primary_segment": 1,
+      "timestamp": 75.695,
+      "code": "uv -Vuv 0.6.14 (a4cec56dc 2025-04-09)uv init mcp-server-democd mcp-server-demoInitialized project `mcp-server-demo` at `/Users/erictech/Desktop/mcp-server-demo`(base) -> mcp-server-demo git:(main) x",
+      "concepts": [
+        "uv_package_manager",
+        "project_initialization_with_uv"
+      ],
+      "rationale": "This snippet demonstrates checking the `uv` version, initializing a new project using `uv init`, and then navigating into the created project directory with `cd`, showcasing basic project setup with `uv`.",
+      "teaching_context": "This teaches the initial steps of setting up a new Python project using the `uv` package manager, including verifying its installation and creating a dedicated virtual environment for the project.",
+      "duplicate_segments": []
+    },
+    {
+      "primary_segment": 2,
+      "timestamp": 121.73500000000001,
+      "code": "# server.py\nfrom mcp.server.fastmcp import FastMCP\n\n# Create an MCP server\nmcp = FastMCP(\"Demo\")\n\n# Add an addition tool\n@mcp.tool()\ndef add(a: int, b: int) -> int:\n    \"\"\"Add two numbers\"\"\"\n    return a + b\n\n# Add a dynamic greeting resource\n@mcp.resource(\"greeting://{name}\")\ndef get_greeting(name: str) -> str:\n    \"\"\"Get a personalized greeting\"\"\"\n    return f\"Hello, {name}!\"",
+      "concepts": [
+        "basic_mcp_server_structure",
+        "mcp_tools",
+        "mcp_resources"
+      ],
+      "rationale": "This code demonstrates the fundamental structure of an MCP server by importing `FastMCP` from the Python SDK, creating a server instance, and then registering both a basic arithmetic `tool` and a dynamic `resource` using their respective decorators.",
+      "teaching_context": "This snippet introduces how to set up a minimal MCP server in Python, illustrating the core components: server initialization, defining a callable tool using `@mcp.tool()`, and creating a data-providing resource using `@mcp.resource()`.",
+      "duplicate_segments": [
+        3,
+        4
+      ]
+    },
+    {
+      "primary_segment": 5,
+      "timestamp": 273.18,
+      "code": "{\n  \"mcpServers\": {\n    \"Demo\": {\n      \"command\": \"uv\",\n      \"args\": [\n        \"run\",\n        \"--with\",\n        \"mcp[cli]\",\n        \"mcp\",\n        \"run\",\n        \"/Users/erictech/Desktop/mcp-server-demo/main.py\"\n      ]\n    }\n  }\n}",
+      "concepts": [
+        "configuring_claude_desktop_for_mcp",
+        "starting_local_mcp_server"
+      ],
+      "rationale": "This JSON configures how Claude Desktop can discover and launch an MCP server. It explicitly shows the `command` and `args` to execute the `uv run` command, which starts the local MCP server defined in `main.py`.",
+      "teaching_context": "This demonstrates how to integrate a locally developed MCP server with Claude Desktop by adding a server definition to Claude's configuration file, enabling Claude to run and connect to it.",
+      "duplicate_segments": []
+    },
+    {
+      "primary_segment": 7,
+      "timestamp": 393.15999999999997,
+      "code": "from mcp.server.fastmcp import FastMCP\n\n# Create an MCP server for managing a simple in-memory to-do list\nmcp = FastMCP(\"AI To-Do List\")\n\n# In-memory storage for to-do items\ntodo_list = []\n\n@mcp.tool()\ndef add_todo(item: str) -> str:...\n@mcp.tool()\ndef list_todos() -> str:...\n@mcp.tool()\ndef update_todo(index: int, new_item: str) -> str:...\n@mcp.tool()\ndef delete_todo(index: int) -> str:...\n@mcp.resource(\"todos://latest\")\ndef get_latest_todo() -> str:...",
+      "concepts": [
+        "basic_mcp_server_structure",
+        "in_memory_storage_for_mcp",
+        "mcp_tools"
+      ],
+      "rationale": "This snippet reiterates the basic `FastMCP` server setup and introduces `todo_list = []` as an example of `in_memory_storage` for application data. It then defines several stub functions for various `mcp_tools` and an `mcp_resource`.",
+      "teaching_context": "This teaches how to structure an MCP server to manage a simple application (like a to-do list) using in-memory data structures, outlining the various tools needed for data manipulation and retrieval.",
+      "duplicate_segments": []
+    },
+    {
+      "primary_segment": 8,
+      "timestamp": 453.1,
+      "code": "# In-memory storage for to-do items\ntodo_list = []\n\n@mcp.tool()\ndef add_todo(item: str) -> str:\n    \"\"\"\n    Add a new to-do item to the in-memory list.\n\n    - Args:\n        item (str): The task to be added to the list.\n\n    Returns:\n        str: Confirmation message indicating the task was added.\n    \"\"\"\n    todo_list.append(item)\n    return f\"Added to-do: '{item}'\"\n\n@mcp.tool()\ndef list_todos() -> str:",
+      "concepts": [
+        "mcp_tools",
+        "in_memory_storage_for_mcp",
+        "documenting_mcp_functions"
+      ],
+      "rationale": "This code provides the full implementation for the `add_todo` function, which is registered as an `mcp_tool`. It explicitly uses the `todo_list` for `in_memory_storage_for_mcp` and includes a detailed docstring, demonstrating `documenting_mcp_functions`.",
+      "teaching_context": "This teaches the practical implementation of an MCP tool, showing how to interact with in-memory data and how to effectively document the tool for AI understanding and usage.",
+      "duplicate_segments": []
+    },
+    {
+      "primary_segment": 9,
+      "timestamp": 513.04,
+      "code": "def get_latest_todo() -> str:\"\"\"Get the most recently added to-do item.Returns:str: The latest task or a default message if list is empty.\"\"\"return todo_list[-1] if todo_list else \"No to-dos yet.\"@mcp.prompt()def todo_summary_prompt() -> str:\"\"\"Generate a prompt asking the AI to summarize the current to-do list.Returns:str: AI-ready prompt string, or a default message if list is empty.\"\"\"if not todo_list:return \"There are no to-do items.\"return f\"Summarize the following to-do-items: {', '.join(todo_list)}\"",
+      "concepts": [
+        "mcp_resources",
+        "mcp_prompts",
+        "documenting_mcp_functions"
+      ],
+      "rationale": "This snippet implements the `get_latest_todo` as an `mcp_resource` and introduces the definition of an `mcp_prompt` using `@mcp.prompt()`. Both functions include docstrings that serve as examples of `documenting_mcp_functions` for AI consumption.",
+      "teaching_context": "This demonstrates how to implement an MCP resource for fetching data and how to create an MCP prompt to guide the AI in generating specific text, emphasizing the importance of clear documentation for both.",
+      "duplicate_segments": []
+    }
+  ],
+  "rejected_segments": [
+    {
+      "segment_index": 3,
+      "reason": "Duplicate of primary segment 2"
+    },
+    {
+      "segment_index": 4,
+      "reason": "Duplicate of primary segment 2 (partial)"
+    }
+  ],
+  "statistics": {
+    "total_segments_analyzed": 8,
+    "unique_code_snippets": 6,
+    "rejected_segments": 2
+  }
+}

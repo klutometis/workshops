@@ -1,0 +1,259 @@
+{
+  "metadata": {
+    "title": "CHERYL",
+    "author": "Peter Norvig",
+    "source": "Markdown document",
+    "video_id": "N/A",
+    "total_duration": 0,
+    "total_concepts": 25,
+    "extracted_at": "2025-12-12T16:13:38.086Z",
+    "enriched_at": "2024-07-30T12:00:00Z",
+    "enrichment_version": "1.0",
+    "source_file": "/home/danenberg/prg/workshops/learning/markdown/cheryl/cheryl.md"
+  },
+  "nodes": [
+    {
+      "id": "cheryls_birthday_puzzle",
+      "name": "Cheryl's Birthday Puzzle",
+      "description": "An introduction to a classic logic puzzle involving indirect communication and deductive reasoning about dates based on a series of statements made by different individuals.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "belief_state",
+      "name": "Belief State",
+      "description": "A fundamental concept representing an agent's current knowledge or uncertainty about a fact, typically modeled as a set of all currently possible values for that fact.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "knowing_a_value",
+      "name": "Knowing a Value (in a Belief State)",
+      "description": "The condition where an agent's belief state is narrowed down to contain only a single possible value, indicating that the agent has definitively identified the true value.",
+      "prerequisites": [
+        "belief_state"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "python_set_data_structure",
+      "name": "Python Set Data Structure",
+      "description": "A built-in Python collection that stores unique, unordered elements, which is an ideal choice for implementing a 'belief state' due to its mathematical set properties.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "function_definition_python",
+      "name": "Function Definition in Python",
+      "description": "The process of creating reusable blocks of code in Python using the 'def' keyword, allowing for modularity, organization, and abstraction of logic within a program.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "string_splitting",
+      "name": "String Splitting",
+      "description": "A common string manipulation technique using the '.split()' method to divide a string into a list of substrings based on a specified delimiter, useful for parsing structured text data.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "date_component_accessors",
+      "name": "Date Component Accessor Functions",
+      "description": "Custom functions designed to extract specific components, such as the month or day, from a date string, simplifying access and manipulation of date parts.",
+      "prerequisites": [
+        "function_definition_python",
+        "string_splitting"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "information_disclosure",
+      "name": "Information Disclosure Simulation ('told' function)",
+      "description": "A function that simulates the act of one agent (Cheryl) privately telling another agent (Albert or Bernard) a specific piece of information (e.g., month or day), thereby updating their initial belief state to include only possibilities consistent with that information.",
+      "prerequisites": [
+        "belief_state",
+        "date_component_accessors",
+        "python_set_data_structure",
+        "function_definition_python"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "multi_layered_uncertainty",
+      "name": "Multi-layered Uncertainty",
+      "description": "A critical aspect of complex logic puzzles where there are different levels of unknown information: what the characters know, and what the puzzle solver knows about what the characters know. This requires nested reasoning to solve.",
+      "prerequisites": [
+        "belief_state",
+        "knowing_a_value"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "deductive_reasoning_strategy",
+      "name": "Deductive Reasoning Strategy (for Logic Puzzles)",
+      "description": "A systematic problem-solving approach that involves considering all possible initial states, applying a series of logical statements as filters, and progressively eliminating inconsistent options until a single, valid solution is identified.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "statement_as_boolean_function",
+      "name": "Representing Statements as Boolean Functions",
+      "description": "The technique of encoding a logical statement from a puzzle as a Python function that takes a potential solution (e.g., a date) as input and returns 'True' if that solution is consistent with the statement, and 'False' otherwise.",
+      "prerequisites": [
+        "function_definition_python"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "cheryls_birthday_main_function",
+      "name": "Cheryl's Birthday Main Solution Function",
+      "description": "The top-level function that orchestrates the entire solution process, taking the initial set of possible dates and applying each character's statement sequentially to deduce Cheryl's true birthday.",
+      "prerequisites": [
+        "deductive_reasoning_strategy",
+        "statement_as_boolean_function",
+        "python_set_data_structure",
+        "filtering_belief_states_satisfy_function"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "filtering_belief_states_satisfy_function",
+      "name": "Filtering Belief States ('satisfy' function)",
+      "description": "A utility function designed to narrow down a belief state by filtering out values that do not satisfy a given set of logical statements (represented as boolean functions).",
+      "prerequisites": [
+        "belief_state",
+        "statement_as_boolean_function",
+        "python_set_data_structure",
+        "function_definition_python",
+        "iterating_over_collections",
+        "all_builtin_function",
+        "set_comprehensions"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "alberts_first_statement_logic_albert1",
+      "name": "Albert's First Statement Logic ('albert1')",
+      "description": "The specific implementation of Albert's first statement: 'I don't know when Cheryl's birthday is, and I know that Bernard does not know.' This involves complex nested reasoning about what Albert knows and what he infers about Bernard's knowledge.",
+      "prerequisites": [
+        "information_disclosure",
+        "knowing_a_value",
+        "filtering_belief_states_satisfy_function",
+        "multi_layered_uncertainty",
+        "statement_as_boolean_function",
+        "lambda_functions_anonymous_functions"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "lambda_functions_anonymous_functions",
+      "name": "Lambda Functions (Anonymous Functions)",
+      "description": "Small, single-expression Python functions defined using the 'lambda' keyword, often used for concise operations where a full function definition is unnecessary, commonly passed as arguments to higher-order functions.",
+      "prerequisites": [
+        "function_definition_python"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "bernards_first_statement_logic_bernard1",
+      "name": "Bernard's First Statement Logic ('bernard1')",
+      "description": "The specific implementation of Bernard's statement: 'At first I didn't know when Cheryl's birthday is, but I know now.' This logic evaluates Bernard's certainty after hearing Albert's first statement, requiring a sequential application of deductions.",
+      "prerequisites": [
+        "information_disclosure",
+        "knowing_a_value",
+        "filtering_belief_states_satisfy_function",
+        "alberts_first_statement_logic_albert1",
+        "statement_as_boolean_function"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "alberts_second_statement_logic_albert2",
+      "name": "Albert's Second Statement Logic ('albert2')",
+      "description": "The specific implementation of Albert's final statement: 'Then I also know when Cheryl's birthday is.' This logic applies Albert's deduction based on Bernard's updated knowledge after Bernard's statement, further narrowing the possibilities.",
+      "prerequisites": [
+        "information_disclosure",
+        "knowing_a_value",
+        "filtering_belief_states_satisfy_function",
+        "bernards_first_statement_logic_bernard1",
+        "statement_as_boolean_function"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "global_variables",
+      "name": "Global Variables",
+      "description": "Variables declared outside of any function, making them accessible from anywhere within the program. They are often used for constants or shared data that all parts of the program need to access, such as the 'DATES' set.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "conditional_logic_python",
+      "name": "Conditional Logic in Python",
+      "description": "The use of 'if', 'and', 'or', and 'not' keywords to create expressions that evaluate to true or false, enabling programs to make decisions and execute different code paths based on various conditions.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "set_comprehensions",
+      "name": "Set Comprehensions",
+      "description": "A concise and elegant way to create sets in Python, allowing for the construction of a new set by iterating over an existing iterable and applying an expression and optional filter conditions.",
+      "prerequisites": [
+        "python_set_data_structure",
+        "conditional_logic_python",
+        "iterating_over_collections"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "assertion_testing",
+      "name": "Assertion Testing",
+      "description": "The use of the 'assert' statement in Python to declare that a condition must be true. If the condition is false, an 'AssertionError' is raised, which is useful for debugging and validating assumptions during development.",
+      "prerequisites": [
+        "conditional_logic_python"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "iterating_over_collections",
+      "name": "Iterating Over Collections",
+      "description": "The fundamental programming concept of processing each item in a collection (like a set, list, or tuple) one by one, typically using a 'for' loop, to perform operations or checks on individual elements.",
+      "prerequisites": [
+        "python_set_data_structure"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "all_builtin_function",
+      "name": "'all()' Built-in Function",
+      "description": "A Python built-in function that takes an iterable (e.g., a list of booleans) and returns 'True' if all elements within the iterable are true, or if the iterable is empty; otherwise, it returns 'False'.",
+      "prerequisites": [
+        "iterating_over_collections",
+        "conditional_logic_python"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "nested_function_calls",
+      "name": "Nested Function Calls",
+      "description": "The practice of one function invoking another function, which in turn might call yet another. This pattern allows for breaking down complex problems into smaller, manageable, and composable units of logic.",
+      "prerequisites": [
+        "function_definition_python"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "modeling_agents_knowledge",
+      "name": "Modeling Agents' Knowledge",
+      "description": "An abstract concept focusing on how to computationally represent and simulate the mental states and evolving knowledge of different agents within a system, crucial for solving puzzles involving indirect communication and inference.",
+      "prerequisites": [
+        "belief_state",
+        "knowing_a_value",
+        "information_disclosure",
+        "multi_layered_uncertainty",
+        "deductive_reasoning_strategy"
+      ],
+      "difficulty": "advanced"
+    }
+  ]
+}

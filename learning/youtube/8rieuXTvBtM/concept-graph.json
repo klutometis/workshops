@@ -1,0 +1,337 @@
+{
+  "metadata": {
+    "title": "Building an MCP Server with Python",
+    "author": "Andrej Karpathy",
+    "source": "YouTube",
+    "video_id": "8rieuXTvBtM",
+    "total_duration": 612,
+    "total_concepts": 21,
+    "extracted_at": "2025-12-12T05:19:02.774Z",
+    "enriched_at": "2024-07-30T12:00:00Z",
+    "enrichment_version": "1.0"
+  },
+  "nodes": [
+    {
+      "id": "model_context_protocol",
+      "name": "Model Context Protocol (MCP)",
+      "description": "The Model Context Protocol (MCP) is a communication standard that enables AI tools (like large language models) to interact with and utilize custom functions and data provided by external services. It allows AI to access real-world capabilities beyond its inherent knowledge.",
+      "prerequisites": [],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 0,
+          "end": 20
+        }
+      ]
+    },
+    {
+      "id": "mcp_server",
+      "name": "MCP Server",
+      "description": "An MCP server is a software application, typically built with a programming language like Python, that implements the Model Context Protocol. Its purpose is to expose specific functionalities (tools) and data (resources) that AI clients can discover and invoke.",
+      "prerequisites": [
+        "model_context_protocol"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 20,
+          "end": 30
+        }
+      ]
+    },
+    {
+      "id": "python_sdk_for_mcp",
+      "name": "Python SDK for MCP",
+      "description": "The official Python Software Development Kit (SDK) for MCP provides libraries and utilities that simplify the development of MCP servers in Python. It abstracts away the low-level protocol details, allowing developers to focus on defining their tools and resources.",
+      "prerequisites": [
+        "mcp_server"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 30,
+          "end": 40
+        }
+      ]
+    },
+    {
+      "id": "uv_package_manager",
+      "name": "UV Package Manager",
+      "description": "`uv` is a modern Python package manager and installer used to efficiently manage project dependencies and virtual environments. It streamlines the process of adding, removing, and updating packages for Python projects.",
+      "prerequisites": [],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 40,
+          "end": 60
+        }
+      ]
+    },
+    {
+      "id": "project_initialization_with_uv",
+      "name": "Project Initialization with UV",
+      "description": "Initializing a Python project with `uv` involves creating a new project directory and setting up a dedicated virtual environment. This isolates project dependencies, preventing conflicts with other Python projects on the system.",
+      "prerequisites": [
+        "uv_package_manager"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 60,
+          "end": 80
+        }
+      ]
+    },
+    {
+      "id": "adding_project_dependencies_with_uv",
+      "name": "Adding Project Dependencies with UV",
+      "description": "Adding project dependencies using `uv` involves using the `uv add` command to install required Python packages (e.g., `mcp-cli`) into the project's virtual environment, making them available for the server application.",
+      "prerequisites": [
+        "project_initialization_with_uv"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 80,
+          "end": 100
+        }
+      ]
+    },
+    {
+      "id": "basic_mcp_server_structure",
+      "name": "Basic MCP Server Structure (Python)",
+      "description": "The fundamental Python code structure for an MCP server involves importing the `FastAndMTP` class from the SDK to create an MCP server instance. This instance then serves as the entry point for defining and registering tools and resources.",
+      "prerequisites": [
+        "python_sdk_for_mcp",
+        "adding_project_dependencies_with_uv"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 100,
+          "end": 140
+        }
+      ]
+    },
+    {
+      "id": "mcp_resources",
+      "name": "MCP Resources",
+      "description": "MCP Resources are components of an MCP server designed to expose static or dynamic data to AI tools. They function similarly to `GET` endpoints in web APIs, allowing AI to load contextual information into its working memory without executing code.",
+      "prerequisites": [
+        "basic_mcp_server_structure"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 140,
+          "end": 160
+        }
+      ]
+    },
+    {
+      "id": "mcp_tools",
+      "name": "MCP Tools",
+      "description": "MCP Tools are functions exposed by an MCP server that enable AI tools to perform specific actions or execute code. These are akin to `POST` or `PUT` endpoints, allowing AI to interact with external systems, modify data, or trigger operations.",
+      "prerequisites": [
+        "basic_mcp_server_structure"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 160,
+          "end": 180
+        }
+      ]
+    },
+    {
+      "id": "starting_local_mcp_server",
+      "name": "Starting a Local MCP Server",
+      "description": "Starting an MCP server locally involves executing a Python script containing the server definition using the `uv run mcp-cli run <script_name>.py` command. This makes the server accessible for local AI clients or for testing.",
+      "prerequisites": [
+        "basic_mcp_server_structure"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 180,
+          "end": 200
+        }
+      ]
+    },
+    {
+      "id": "claude_desktop_integration",
+      "name": "Claude Desktop Integration",
+      "description": "Integrating an MCP server with Claude Desktop means configuring the Claude AI application to discover and utilize the tools and resources exposed by a locally running MCP server, enhancing Claude's capabilities with custom functions.",
+      "prerequisites": [
+        "starting_local_mcp_server"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 200,
+          "end": 220
+        }
+      ]
+    },
+    {
+      "id": "configuring_claude_desktop_for_mcp",
+      "name": "Configuring Claude Desktop for MCP",
+      "description": "Configuring Claude Desktop for MCP involves manually editing its `configuration.json` file. This includes specifying the command and arguments needed to launch and connect to the local MCP server, ensuring Claude can find and interact with it.",
+      "prerequisites": [
+        "claude_desktop_integration"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 220,
+          "end": 270
+        }
+      ]
+    },
+    {
+      "id": "invoking_mcp_tools_from_claude",
+      "name": "Invoking MCP Tools from Claude Desktop",
+      "description": "Invoking MCP tools from Claude Desktop demonstrates how a user's natural language query to Claude can trigger the execution of a registered MCP tool. Claude acts as an intermediary, interpreting the user's intent and calling the appropriate server-side function.",
+      "prerequisites": [
+        "configuring_claude_desktop_for_mcp",
+        "mcp_tools"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 270,
+          "end": 300
+        }
+      ]
+    },
+    {
+      "id": "in_memory_storage_for_mcp",
+      "name": "In-Memory Storage for MCP Tools",
+      "description": "In-memory storage refers to using simple Python data structures (like lists or dictionaries) within the MCP server to temporarily hold data. This is suitable for demonstrations or simple applications, but typically replaced by persistent databases for production.",
+      "prerequisites": [
+        "mcp_tools"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 300,
+          "end": 320
+        }
+      ]
+    },
+    {
+      "id": "mcp_decorators",
+      "name": "MCP Decorators",
+      "description": "MCP decorators (e.g., `@mcp_tool`, `@mcp_resource`, `@mcp_prompt`) are special Python functions that modify the behavior of other functions. In MCP, they are used to automatically register Python functions as specific types of MCP components that the AI can discover and use.",
+      "prerequisites": [
+        "basic_mcp_server_structure",
+        "mcp_tools",
+        "mcp_resources"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 320,
+          "end": 340
+        }
+      ]
+    },
+    {
+      "id": "documenting_mcp_functions",
+      "name": "Documenting MCP Functions",
+      "description": "Documenting MCP functions involves adding specific comment blocks within the Python code for tools, resources, and prompts. These comments clearly describe the function's purpose, expected inputs, and anticipated outputs, which is crucial for AI models to understand how to use them correctly.",
+      "prerequisites": [
+        "mcp_decorators"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 340,
+          "end": 360
+        }
+      ]
+    },
+    {
+      "id": "mcp_resource_paths_arguments",
+      "name": "MCP Resource Paths and Arguments",
+      "description": "Defining MCP resource paths allows specifying unique URL-like identifiers (e.g., `/todos/latest`) for accessing different data points. Resources can also accept arguments, such as query parameters (`?id=...`), to dynamically filter or retrieve specific data.",
+      "prerequisites": [
+        "mcp_resources",
+        "documenting_mcp_functions"
+      ],
+      "difficulty": "intermediate",
+      "time_ranges": [
+        {
+          "start": 360,
+          "end": 390
+        }
+      ]
+    },
+    {
+      "id": "mcp_prompts",
+      "name": "MCP Prompts",
+      "description": "MCP Prompts are server-defined templates that generate specific text prompts for large language models. They allow the MCP server to inject structured context or instructions directly into the AI's input, guiding its behavior for tasks like summarization.",
+      "prerequisites": [
+        "mcp_decorators",
+        "documenting_mcp_functions"
+      ],
+      "difficulty": "advanced",
+      "time_ranges": [
+        {
+          "start": 390,
+          "end": 420
+        }
+      ]
+    },
+    {
+      "id": "image_manipulation_with_mcp",
+      "name": "Image Manipulation with MCP Tools",
+      "description": "Image manipulation with MCP tools demonstrates extending server capabilities to process visual data. An MCP tool can accept an image path as input, perform operations like resizing or editing using image processing libraries, and then return the modified image or its path.",
+      "prerequisites": [
+        "mcp_tools",
+        "documenting_mcp_functions"
+      ],
+      "difficulty": "advanced",
+      "time_ranges": [
+        {
+          "start": 420,
+          "end": 450
+        }
+      ]
+    },
+    {
+      "id": "database_integration_with_mcp",
+      "name": "Database Integration with MCP",
+      "description": "Integrating a database (like SQLite) with an MCP server allows tools and resources to interact with persistent data storage. MCP tools can execute SQL queries to create, read, update, or delete data, while resources can retrieve database schemas or query results.",
+      "prerequisites": [
+        "mcp_tools",
+        "mcp_resources",
+        "documenting_mcp_functions"
+      ],
+      "difficulty": "advanced",
+      "time_ranges": [
+        {
+          "start": 450,
+          "end": 490
+        }
+      ]
+    },
+    {
+      "id": "mcp_server_primitives_summary",
+      "name": "Three Primitives of MCP Server Creation",
+      "description": "The three fundamental primitives for building an MCP server are Prompts (for generating AI instructions), Resources (for providing contextual data), and Tools (for enabling AI to perform actions and execute code). Understanding these distinct roles is key to effective MCP server design.",
+      "prerequisites": [
+        "mcp_prompts",
+        "mcp_resources",
+        "mcp_tools"
+      ],
+      "difficulty": "basic",
+      "time_ranges": [
+        {
+          "start": 490,
+          "end": 612
+        }
+      ]
+    }
+  ]
+}

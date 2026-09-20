@@ -1,0 +1,99 @@
+{
+  "unique_snippets": [
+    {
+      "primary_segment": 1,
+      "timestamp": 67.955,
+      "code": "item = 'Banana'Item = 'Apple'item_name = 'Orange'print()",
+      "concepts": [
+        "variables_and_assignment",
+        "strings",
+        "case_sensitivity"
+      ],
+      "rationale": "This snippet demonstrates how to declare variables and assign string values. It highlights Python's case sensitivity by showing 'item' and 'Item' as distinct variables. It also implicitly shows the use of `snake_case` in `item_name` and a basic `print()` call.",
+      "teaching_context": "This code introduces students to creating variables to store string data. It specifically teaches about the importance of case sensitivity in Python, showing that 'item' and 'Item' are treated as different identifiers. It also demonstrates variable naming conventions and a basic print statement.",
+      "duplicate_segments": []
+    },
+    {
+      "primary_segment": 4,
+      "timestamp": 226.625,
+      "code": "a = 10b = 5addition = a + bdifference = a - bmultiply = a * bdivide = a/bpower = a**bprint(addition)print(difference)print(multiply)print(divide)print(power)",
+      "concepts": [
+        "variables_and_assignment",
+        "integers",
+        "arithmetic_operators"
+      ],
+      "rationale": "The code assigns integer values to variables and then uses various arithmetic operators (+, -, *, /, **) to perform calculations, printing each result. This clearly illustrates integer data type and mathematical operations.",
+      "teaching_context": "This snippet teaches how to declare integer variables and perform fundamental arithmetic operations in Python, including addition, subtraction, multiplication, division, and exponentiation. It shows how to store and display the results of these calculations.",
+      "duplicate_segments": []
+    },
+    {
+      "primary_segment": 5,
+      "timestamp": 287.17499999999995,
+      "code": "age = 10isHappy = Trueif isHappy:    print('You are happy!')else:    print('You are not happy!')",
+      "concepts": [
+        "variables_and_assignment",
+        "booleans",
+        "conditional_statements"
+      ],
+      "rationale": "This code initializes an integer and a boolean variable. It then uses an `if-else` statement to demonstrate conditional execution based on the boolean variable's value, printing different messages accordingly.",
+      "teaching_context": "This example introduces boolean variables and teaches the basics of conditional statements (`if/else`). It shows how a program can make decisions and execute different blocks of code based on whether a condition (represented by a boolean variable) is true or false.",
+      "duplicate_segments": []
+    },
+    {
+      "primary_segment": 6,
+      "timestamp": 327.53499999999997,
+      "code": "for i in range(3):    print('Hello', i + 1)",
+      "concepts": [
+        "for_loop",
+        "range_function",
+        "zero_based_indexing"
+      ],
+      "rationale": "The code uses a `for` loop with `range(3)` to iterate. The `i + 1` in the `print` statement explicitly addresses the concept of zero-based indexing by adjusting the output to start from 1, aligning with the audio's explanation.",
+      "teaching_context": "This snippet demonstrates how to use a `for` loop with the `range()` function for controlled iteration. It particularly highlights Python's zero-based indexing by showing how to adjust the loop counter (`i + 1`) to produce a user-friendly sequence starting from one.",
+      "duplicate_segments": []
+    },
+    {
+      "primary_segment": 11,
+      "timestamp": 539.7049999999999,
+      "code": "def get_internet():    passdef run_game():    pass",
+      "concepts": [
+        "function_definition",
+        "pass_statement",
+        "code_reusability"
+      ],
+      "rationale": "This snippet defines two empty functions using the `def` keyword, each containing only the `pass` statement. This demonstrates the basic syntax for function creation and the use of `pass` as a placeholder.",
+      "teaching_context": "This code introduces function definition using the `def` keyword, a core concept for code reusability and organization. It also teaches the `pass` statement, showing its utility as a placeholder for functions that are planned but not yet implemented, preventing syntax errors.",
+      "duplicate_segments": []
+    },
+    {
+      "primary_segment": 12,
+      "timestamp": 584.02,
+      "code": "number = input('Please provide a number >> ')try:    print(10 + int(number))except:    print('That is not a valid number!')",
+      "concepts": [
+        "input_function",
+        "data_type_conversion",
+        "error_handling"
+      ],
+      "rationale": "This code takes user input, attempts to convert it to an integer using `int()`, and performs an arithmetic operation. It wraps this logic in a `try-except` block to catch potential `ValueError` during conversion if the input is not a number, demonstrating error handling.",
+      "teaching_context": "This snippet teaches several crucial concepts: how to get user input using `input()`, the necessity of converting string input to the correct data type (e.g., `int()`) for operations, and robust error handling using `try` and `except` blocks to manage invalid input gracefully without crashing the program.",
+      "duplicate_segments": [
+        13
+      ]
+    }
+  ],
+  "rejected_segments": [
+    {
+      "segment_index": 3,
+      "reason": "Code snippet is incomplete/erroneous (`print(na)` will cause an error) and the provided console output is disconnected from the presented code, making it unsuitable for concept mapping."
+    },
+    {
+      "segment_index": 8,
+      "reason": "Code snippet is incomplete (`print('We are |')`) and omits the critical `break` statement described in the audio, leading to an infinite loop and misrepresenting the intended teaching point about loop termination."
+    }
+  ],
+  "statistics": {
+    "total_segments_analyzed": 9,
+    "unique_code_snippets": 6,
+    "rejected_segments": 2
+  }
+}

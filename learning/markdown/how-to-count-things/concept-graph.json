@@ -1,0 +1,289 @@
+{
+  "metadata": {
+    "title": "How to Count Things",
+    "author": "Peter Norvig",
+    "source": "Markdown document",
+    "video_id": "N/A",
+    "total_duration": 0,
+    "total_concepts": 30,
+    "extracted_at": "2025-12-12T16:12:52.260Z",
+    "enriched_at": "2024-07-30T12:00:00Z",
+    "enrichment_version": "1.0",
+    "source_file": "/home/danenberg/prg/workshops/learning/markdown/how-to-count-things/how-to-count-things.md"
+  },
+  "nodes": [
+    {
+      "id": "problem_solving_general",
+      "name": "General Problem Solving",
+      "description": "The overarching process of understanding a problem, devising a plan, carrying out the plan, and looking back to verify and learn from the solution.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "basic_programming_concepts",
+      "name": "Basic Programming Concepts",
+      "description": "Fundamental ideas in programming, including variables, data types, functions, control flow (loops, conditionals), and basic data structures.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "counting_general_concept",
+      "name": "Counting (General Concept)",
+      "description": "The fundamental task of quantifying elements in a set, from simple enumeration to complex combinatorial scenarios, often requiring strategic approaches for large sets.",
+      "prerequisites": [],
+      "difficulty": "basic"
+    },
+    {
+      "id": "brute_force_enumeration",
+      "name": "Brute Force Enumeration",
+      "description": "A straightforward counting strategy that involves generating and individually counting every single item in the set. It is simple but computationally expensive for large sets.",
+      "prerequisites": [
+        "counting_general_concept"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "enumerate_and_test",
+      "name": "Enumerate and Test",
+      "description": "A counting strategy where a larger set of candidate items is generated, and then each candidate is tested against specific criteria to count only the valid ones.",
+      "prerequisites": [
+        "brute_force_enumeration"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "incremental_enumeration",
+      "name": "Incremental Enumeration",
+      "description": "An optimization technique for counting composite items. Instead of generating complete items and then validating them, items are built part by part, checking validity at each step and abandoning invalid branches early to save time.",
+      "prerequisites": [
+        "enumerate_and_test"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "abstract_enumeration",
+      "name": "Abstract Enumeration",
+      "description": "A counting strategy that involves grouping items into equivalence classes and calculating the count for each class, thereby efficiently counting many items simultaneously without individual enumeration.",
+      "prerequisites": [
+        "counting_general_concept"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "divide_and_conquer_counting_strategy",
+      "name": "Divide and Conquer (Counting)",
+      "description": "A problem-solving paradigm that breaks a counting problem into smaller, independent subproblems, solves each subproblem, and then combines their results to solve the original problem.",
+      "prerequisites": [
+        "counting_general_concept",
+        "problem_solving_general"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "recursion",
+      "name": "Recursion",
+      "description": "A programming technique where a function calls itself to solve smaller instances of the same problem, relying on one or more base cases to terminate the calls.",
+      "prerequisites": [
+        "basic_programming_concepts"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "recursive_divide_and_conquer",
+      "name": "Recursive Divide and Conquer",
+      "description": "An application of divide and conquer where subproblems are recursive instances of the same problem, leading to a self-referential solution structure.",
+      "prerequisites": [
+        "divide_and_conquer_counting_strategy",
+        "recursion"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "formula_calculation",
+      "name": "Formula Calculation",
+      "description": "A method of directly computing the number of items using a derived mathematical formula, bypassing explicit enumeration or iterative processes for efficiency.",
+      "prerequisites": [
+        "counting_general_concept"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "memoization_caching",
+      "name": "Memoization / Caching",
+      "description": "An optimization technique that stores the results of expensive function calls and returns the cached result when the same inputs occur again, preventing redundant computations, especially in recursive functions.",
+      "prerequisites": [
+        "recursion",
+        "basic_programming_concepts"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "simulation_counting_strategy",
+      "name": "Simulation (Counting)",
+      "description": "A counting strategy used when exact enumeration is too difficult. It involves performing random experiments and recording the outcomes to estimate the desired count.",
+      "prerequisites": [
+        "counting_general_concept",
+        "basic_programming_concepts"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "visualization_problem_solving",
+      "name": "Visualization (Problem Solving)",
+      "description": "The use of charts, tables, or plots to visually represent data or examples, aiding in the discovery of patterns and insights that can lead to problem solutions.",
+      "prerequisites": [
+        "problem_solving_general"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "checking_validation_problem_solving",
+      "name": "Checking and Validation (Problem Solving)",
+      "description": "The practice of verifying the correctness of a solution, often by testing against small, hand-verified cases or by comparing results from different implementation approaches to build confidence.",
+      "prerequisites": [
+        "problem_solving_general"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "standing_on_shoulders_research",
+      "name": "Standing on Shoulders / Research",
+      "description": "The strategy of leveraging existing knowledge, mathematical sequences (e.g., OEIS), or prior solutions found through research to solve problems efficiently.",
+      "prerequisites": [
+        "problem_solving_general"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "iteration_programming",
+      "name": "Iteration (Programming)",
+      "description": "The repetitive execution of a block of code, typically managed by loops or higher-order functions, common in programming for sequential processing or applying a transformation repeatedly.",
+      "prerequisites": [
+        "basic_programming_concepts"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "combinatorics_general_concept",
+      "name": "Combinatorics (General Concept)",
+      "description": "The branch of mathematics focused on counting, arrangement, and combination of items within a set, without necessarily listing them all.",
+      "prerequisites": [
+        "counting_general_concept"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "permutations",
+      "name": "Permutations",
+      "description": "The mathematical concept of arranging objects in a specific order, where the order of selection or arrangement matters.",
+      "prerequisites": [
+        "combinatorics_general_concept"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "combinations_n_choose_k",
+      "name": "Combinations (n Choose k)",
+      "description": "The mathematical concept of selecting a subset of items from a larger set, where the order of selection does not matter, often denoted as 'n choose k'.",
+      "prerequisites": [
+        "combinatorics_general_concept"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "dynamic_programming",
+      "name": "Dynamic Programming",
+      "description": "A method for solving complex problems by breaking them into overlapping subproblems, solving each subproblem only once, and storing their solutions to avoid recomputation, often achieved through memoization or tabulation.",
+      "prerequisites": [
+        "recursive_divide_and_conquer",
+        "memoization_caching"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "probability_distributions",
+      "name": "Probability Distributions",
+      "description": "A mathematical function that describes all the possible values and likelihoods that a random variable can take within a given range, often represented as a frequency map.",
+      "prerequisites": [
+        "simulation_counting_strategy"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "expected_value",
+      "name": "Expected Value",
+      "description": "The long-run average value of a random variable, calculated as the sum of all possible values each multiplied by its probability of occurrence. It represents the central tendency of a probability distribution.",
+      "prerequisites": [
+        "probability_distributions"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "matrix_multiplication_cost_calculation",
+      "name": "Matrix Multiplication Cost Calculation",
+      "description": "Determining the total number of scalar multiplications required when multiplying two matrices, based on their dimensions (e.g., for an L x M matrix multiplied by an M x N matrix, it's L * M * N scalar multiplications).",
+      "prerequisites": [],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "optimal_matrix_chain_multiplication",
+      "name": "Optimal Matrix Chain Multiplication",
+      "description": "The problem of finding the most efficient parenthesization (bracketing) for multiplying a sequence of matrices to minimize the total number of scalar multiplications, a classic application of dynamic programming.",
+      "prerequisites": [
+        "matrix_multiplication_cost_calculation",
+        "dynamic_programming"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "algorithm_design_general",
+      "name": "Algorithm Design (General)",
+      "description": "The process of developing a step-by-step procedure or set of rules to solve a specific problem or perform a computation, focusing on efficiency and correctness.",
+      "prerequisites": [
+        "problem_solving_general",
+        "basic_programming_concepts"
+      ],
+      "difficulty": "basic"
+    },
+    {
+      "id": "greedy_algorithm",
+      "name": "Greedy Algorithm",
+      "description": "An algorithmic paradigm that makes the locally optimal choice at each step with the hope of finding a global optimum. While often simple, it doesn't always guarantee the best overall solution.",
+      "prerequisites": [
+        "algorithm_design_general"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "optimal_change_making",
+      "name": "Optimal Change Making",
+      "description": "The problem of determining the minimum number of coins (or all possible combinations) required to make a specific amount of change from a given set of coin denominations, typically solved using dynamic programming or memoized recursion.",
+      "prerequisites": [
+        "recursive_divide_and_conquer",
+        "memoization_caching",
+        "dynamic_programming"
+      ],
+      "difficulty": "advanced"
+    },
+    {
+      "id": "canonical_coin_system",
+      "name": "Canonical Coin System",
+      "description": "A specific type of coin system for which the greedy algorithm for making change always produces the optimal (minimum) number of coins for any given amount.",
+      "prerequisites": [
+        "greedy_algorithm",
+        "optimal_change_making"
+      ],
+      "difficulty": "intermediate"
+    },
+    {
+      "id": "data_structures_counter",
+      "name": "Counter Data Structure",
+      "description": "A Python dictionary subclass from the `collections` module used for efficiently counting hashable objects, storing them as dictionary keys with their counts as values. Often used for summaries or 'bags' of items.",
+      "prerequisites": [
+        "basic_programming_concepts"
+      ],
+      "difficulty": "basic"
+    }
+  ],
+  "edges": []
+}
