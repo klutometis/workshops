@@ -73,7 +73,7 @@ async function main() {
     
     console.error('\n💡 Tips:');
     console.error('  - Check that the YouTube URL is valid and accessible');
-    console.error('  - Ensure you have API keys configured (GEMINI_API_KEY)');
+    console.error('  - Ensure you have API keys configured (GOOGLE_API_KEY)');
     console.error('  - Verify database connection is working');
     console.error('  - Check logs above for specific error details');
     

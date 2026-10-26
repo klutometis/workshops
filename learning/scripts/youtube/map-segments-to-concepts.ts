@@ -241,9 +241,9 @@ async function mapSegmentsToConcepts(videoId: string): Promise<void> {
   const conceptList = buildConceptList(conceptGraph);
   
   // 3. Initialize Gemini
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY environment variable not set');
+    throw new Error('GOOGLE_API_KEY (or GEMINI_API_KEY) environment variable not set');
   }
   const genAI = new GoogleGenerativeAI(apiKey);
   

@@ -72,7 +72,7 @@ async function main() {
     console.error('\n💡 Tips:');
     console.error('  - Check that the file path exists and is readable');
     console.error('  - Ensure the file is valid markdown format');
-    console.error('  - Verify API keys are configured (GEMINI_API_KEY)');
+    console.error('  - Verify API keys are configured (GOOGLE_API_KEY)');
     console.error('  - Check database connection is working');
     
     process.exit(1);
